@@ -1,4 +1,4 @@
-# Netzwerke Animationen
+# Networks Animations
 
 ... is a web app that serves the purpose of supporting students via animations that show certain networking topics.
 
