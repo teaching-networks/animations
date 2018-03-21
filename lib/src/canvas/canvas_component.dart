@@ -105,17 +105,14 @@ class CanvasComponent implements OnInit {
 
       // Listen for resize events in case the window gets resized.
       window.onResize.listen((event) {
-        int newWidth = e.clientWidth;
-        int newHeight = e.clientHeight;
-
         bool resized = false;
 
-        if (_resizeX && newWidth != _width) {
+        if (_resizeX) {
           _width = e.clientWidth;
           resized = true;
         }
 
-        if (_resizeY && newHeight != _height) {
+        if (_resizeY) {
           _height = e.clientHeight;
           resized = true;
         }
