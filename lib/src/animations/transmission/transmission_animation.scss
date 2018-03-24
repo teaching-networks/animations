@@ -1,0 +1,34 @@
+@import 'package:angular_components/css/material/material';
+
+material-auto-suggest-input {
+  width: $mat-grid * 10;
+}
+
+material-dropdown-select {
+  width: $mat-grid * 10;
+}
+
+div.split-layout {
+
+  display: flex;
+
+  & .left {
+    text-align: right;
+    flex: 0 0 auto;
+    padding-right: 1em;
+  }
+
+  & .right {
+    flex: 1;
+  }
+
+}
+
+ul.controls {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+
+  li {
+  }
+}

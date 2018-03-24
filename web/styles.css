@@ -11,15 +11,20 @@ html, body {
   font-family: Roboto, Helvetica, Arial, sans-serif;
 }
 
-main {
+main.app-main {
   max-width: 60vw;
   padding: 5vw;
   margin: 0 auto;
 }
 
-.center-parent {
-  display: flex;
+.loading-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
+
+  display: flex;
   justify-content: center;
   align-items: center;
 }

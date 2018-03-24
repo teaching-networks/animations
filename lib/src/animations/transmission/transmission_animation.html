@@ -1,0 +1,52 @@
+<div class="split-layout">
+	<div class="left">
+		<ul class="controls">
+			<li>
+				Length:
+				<material-auto-suggest-input [(inputText)]="lengthValue"
+											 [suggestions]="lengthSuggestions"
+											 [limit]="5">
+				</material-auto-suggest-input>
+				km
+			</li>
+			<li>
+				Rate:
+				<material-auto-suggest-input [(inputText)]="rateValue"
+											 [suggestions]="rateSuggestions"
+											 [limit]="5">
+				</material-auto-suggest-input>
+				<material-dropdown-select
+						[buttonText]="rateLabel"
+						[selection]="rateSelectModel"
+						[options]="rateOptions">
+				</material-dropdown-select>
+			</li>
+			<li>
+				Packet size:
+				<material-auto-suggest-input [(inputText)]="sizeValue"
+											 [suggestions]="sizeSuggestions"
+											 [limit]="5">
+				</material-auto-suggest-input>
+				<material-dropdown-select
+						[buttonText]="sizeLabel"
+						[selection]="sizeSelectModel"
+						[options]="sizeOptions">
+				</material-dropdown-select>
+			</li>
+			<li>
+				<material-button (trigger)="start()">
+					<material-icon icon="play_arrow"></material-icon>
+					Start
+				</material-button>
+
+				<material-button (trigger)="reset()">
+					<material-icon icon="delete_forever"></material-icon>
+					Reset
+				</material-button>
+			</li>
+		</ul>
+	</div>
+	<div class="right">
+		<canvas-comp [height]="400" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+</div>
