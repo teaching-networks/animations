@@ -96,6 +96,12 @@ class CanvasComponent implements OnInit {
    */
   void _initCanvasSize() {
     if (_resizeX || _resizeY) {
+      if (!_resizeY) {
+        onResized.listen((Size size) {
+          canvasWrapper.nativeElement.style.height = "${size.height}px";
+        });
+      }
+
       DivElement e = canvasWrapper.nativeElement as DivElement;
 
       if (_resizeX) {

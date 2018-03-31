@@ -1,0 +1,11 @@
+<ul *ngIf="animations != null" class="animation-list">
+	<li *ngFor="let anim of animations.values" (click)="onAnimationSelected(anim.path)">
+		<div>
+			<img width="200" src="{{anim.previewImagePath}}">
+		</div>
+		<span>{{anim.name}}</span>
+	</li>
+	<li>
+		A lot more to be added...
+	</li>
+</ul>

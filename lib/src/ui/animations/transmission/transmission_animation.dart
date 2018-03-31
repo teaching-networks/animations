@@ -1,9 +1,8 @@
-import "dart:html";
-import 'dart:math';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
-import "package:netzwerke_animationen/src/canvas/animation/canvas_animation.dart";
-import 'package:netzwerke_animationen/src/canvas/canvas_component.dart';
+import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
+import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
+import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
 
 @Component(
   selector: "transmission-animation",
@@ -12,6 +11,8 @@ import 'package:netzwerke_animationen/src/canvas/canvas_component.dart';
   directives: const [CORE_DIRECTIVES, materialDirectives, CanvasComponent]
 )
 class TransmissionAnimation extends CanvasAnimation implements OnInit {
+
+  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "Packet Transmission", "/img/image-preview.png", "transmission");
 
   /*
   LENGTH INPUT CONTROL PROPERTIES

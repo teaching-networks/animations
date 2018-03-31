@@ -1,3 +1,9 @@
-<h1>Networks Animations</h1>
+<header class="header">
+	<span><material-icon icon="dashboard"></material-icon>{{title}}</span>
 
-<transmission-animation></transmission-animation>
+	<nav>
+		<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>Overview</material-button>
+	</nav>
+</header>
+
+<router-outlet></router-outlet>
