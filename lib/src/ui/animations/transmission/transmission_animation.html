@@ -1,5 +1,8 @@
 <div class="split-layout">
 	<div class="left">
+		<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
 		<ul class="controls">
 			<li>
 				Length:
@@ -7,7 +10,11 @@
 											 [suggestions]="lengthSuggestions"
 											 [limit]="5">
 				</material-auto-suggest-input>
-				km
+				<material-dropdown-select
+						[buttonText]="lengthUnitLabel"
+						[selection]="lengthSelectModel"
+						[options]="lengthOptions">
+				</material-dropdown-select>
 			</li>
 			<li>
 				Rate:
@@ -45,8 +52,5 @@
 				</material-button>
 			</li>
 		</ul>
-	</div>
-	<div class="right">
-		<canvas-comp [height]="400" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
 	</div>
 </div>

@@ -30,7 +30,6 @@ class DynamicContentComponent {
    */
   @Input("componentToShow")
   void set showComponent(Type compType) {
-    print("WDjqwdw");
     host.viewContainerRef.clear();
 
     ComponentFactory compFactory = _componentResolver.resolveComponentSync(compType);

@@ -41,10 +41,10 @@ class CanvasComponent implements OnInit {
 
   @override
   ngOnInit() {
-    _initCanvasSize();
-
     // Get canvas rendering context used to draw on the canvas.
     CanvasRenderingContext2D context = (canvas.nativeElement as CanvasElement).getContext("2d");
+
+    _initCanvasSize();
 
     // Send event that the user is able to start drawing.
     _readyController.add(context);
@@ -127,6 +127,10 @@ class CanvasComponent implements OnInit {
           _sizeChangedController.add(_getSize());
         }
       });
+    } else {
+      // Just send one initial size.
+      _sizeChangedController.add(_getSize());
     }
   }
+
 }

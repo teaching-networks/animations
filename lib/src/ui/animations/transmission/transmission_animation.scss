@@ -13,13 +13,13 @@ div.split-layout {
   display: flex;
 
   & .left {
-    text-align: right;
-    flex: 0 0 auto;
-    padding-right: 1em;
+    flex: 1;
   }
 
   & .right {
-    flex: 1;
+    flex: 0 0 auto;
+    padding-left: 1em;
+    text-align: right;
   }
 
 }
