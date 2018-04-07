@@ -1,6 +1,6 @@
 <div class="split-layout">
 	<div class="left">
-		<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+		<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
 	</div>
 	<div class="right">
 		<ul class="controls">
@@ -30,7 +30,7 @@
 			</li>
 			<li>
 				Packet size:
-				<material-auto-suggest-input [(inputText)]="sizeValue"
+				<material-auto-suggest-input [(inputText)]="packetSizeValue"
 											 [suggestions]="sizeSuggestions"
 											 [limit]="5">
 				</material-auto-suggest-input>
@@ -40,7 +40,7 @@
 						[options]="sizeOptions">
 				</material-dropdown-select>
 			</li>
-			<li>
+			<li style="text-align: center">
 				<material-button (trigger)="start()">
 					<material-icon icon="play_arrow"></material-icon>
 					Start
@@ -51,6 +51,17 @@
 					Reset
 				</material-button>
 			</li>
+			<li style="text-align: center">
+				<p><i>1 kByte = 1000 Byte</i></p>
+				<p><i>1 kb/s = 1000 bit/s</i></p>
+			</li>
 		</ul>
 	</div>
+</div>
+<div class="description">
+	<h3>Description:</h3>
+	<p>
+		This simple animation illustrates one of the most fundamental concepts in computer networking: transmission delay versus propagation delay. Although this concept is discussed in detail in Chapter 1, an interactive animation speaks a thousand words. You set the length of the link, the packet size, and the transmission speed; the applet shows the packet being sent from sender to receiver.
+		Note that for many combinations, the head of the packet reaches the receiver  before transmission is finished at the sender.
+	</p>
 </div>

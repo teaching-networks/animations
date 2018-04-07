@@ -6,9 +6,20 @@ import 'package:netzwerke_animationen/src/util/size.dart';
 
 /**
  * Canvas component a component enclosing a canvas which you can draw on.
+ *
  * It provides canvas resizing and access to its canvas.
+ *
+ * Additionally the canvas component is able to resize it self to fit HiDPI
+ * Screens. More over on HiDPI Screens (Like smartphones commonly have) the canvas is resized by the browser
+ * which leads to unsharp graphics. To fix this the canvas component utilizes the window.deviceAspectRatio property
+ * to properly scale the canvas content while setting the width and height css properties to the unscaled width and height.
  */
-@Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [materialDirectives])
+@Component(
+    selector: "canvas-comp",
+    templateUrl: "canvas_component.html",
+    styleUrls: const ["canvas_component.css"],
+    directives: const [CORE_DIRECTIVES]
+)
 class CanvasComponent implements OnInit {
   @ViewChild("canvasWrapper")
   ElementRef canvasWrapper;
@@ -61,6 +72,13 @@ class CanvasComponent implements OnInit {
     return _height;
   }
 
+  /**
+   * Get height with HiDPI support.
+   */
+  int get heightHidpi {
+    return (_height * window.devicePixelRatio).round();
+  }
+
   @Input()
   void set width(int width) {
     _width = width;
@@ -72,10 +90,17 @@ class CanvasComponent implements OnInit {
   }
 
   /**
-   * Get current size of the canvas.
+   * Get width with HiPDI support.
+   */
+  int get widthHidpi {
+    return (_width * window.devicePixelRatio).round();
+  }
+
+  /**
+   * Get current internal size of the canvas.
    */
   Size _getSize() {
-    return new Size(_width, _height);
+    return new Size(widthHidpi, heightHidpi);
   }
 
   /**
@@ -98,7 +123,7 @@ class CanvasComponent implements OnInit {
     if (_resizeX || _resizeY) {
       if (!_resizeY) {
         onResized.listen((Size size) {
-          canvasWrapper.nativeElement.style.height = "${size.height}px";
+          canvasWrapper.nativeElement.style.height = "${_height}px";
         });
       }
 
@@ -131,6 +156,19 @@ class CanvasComponent implements OnInit {
       // Just send one initial size.
       _sizeChangedController.add(_getSize());
     }
+  }
+
+  /**
+   * Set styles for HiDPI Support.
+   * On HiDPI Screens the real canvas size is lower than what would be needed.
+   * To fix this, the css width and height is set to the current width and height
+   * while the real size is multiplied by the factor stored at window.deviceAspectRatio.
+   */
+  Map<String, String> setStyles() {
+    return {
+      "width": "${width}px",
+      "height": "${height}px"
+    };
   }
 
 }

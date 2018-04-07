@@ -35,4 +35,11 @@ class AppComponent {
     _router.navigate([to]);
   }
 
+  /**
+   * Get current year.
+   */
+  int get year {
+    return new DateTime.now().year;
+  }
+
 }

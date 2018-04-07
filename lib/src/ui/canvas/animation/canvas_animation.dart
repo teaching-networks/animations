@@ -12,8 +12,31 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  */
 abstract class CanvasAnimation {
 
+  /**
+   * Whether to show FPS for development.
+   */
+  static const bool SHOW_FPS = true;
+
+  /**
+   * Draw fps every FPS_MILLIS milliseconds.
+   */
+  static const int FPS_MILLIS = 200;
+
+  /**
+   * When the Fps have been drawn last.
+   */
+  num _lastFpsDraw = -1;
+
+  /**
+   * Fps to render.
+   */
+  int _renderFps = 0;
+
   CanvasRenderingContext2D context;
   Size size;
+
+  num _lastTimestamp = -1;
+  int fps = 0;
 
   /**
    * Executed when the canvas component is ready to be drawn at.
@@ -31,7 +54,34 @@ abstract class CanvasAnimation {
   void _renderLoop(num timestamp) {
     render(timestamp);
 
+    if (SHOW_FPS && _lastTimestamp != -1) {
+      timestamp = window.performance.now();
+      double delta = (timestamp - _lastTimestamp) / 1000;
+      fps = (1 / delta).round();
+
+      // Only render fps every few millis to avoid confusion.
+      if (_lastFpsDraw == -1 || timestamp >= (_lastFpsDraw + FPS_MILLIS)) {
+        _lastFpsDraw = timestamp;
+        _renderFps = fps;
+      }
+
+      renderFps(_renderFps);
+    }
+
+    _lastTimestamp = timestamp;
+
     window.requestAnimationFrame(_renderLoop);
+  }
+
+  /**
+   * Render Fps to canvas.
+   */
+  void renderFps(int fps) {
+    context.textBaseline = "bottom";
+    context.font = "2.0em 'Roboto'";
+    context.textAlign = "end";
+    context.setFillColorRgb(255, 102, 102);
+    context.fillText("Fps: $fps", size.width, size.height);
   }
 
   /**
@@ -44,6 +94,14 @@ abstract class CanvasAnimation {
    */
   void onCanvasResize(Size newSize) {
     size = newSize;
+  }
+
+  /**
+   * Visible getter so that the last timestamp cannot be altered
+   * by extending classes.
+   */
+  num get lastTimestamp {
+    return _lastTimestamp;
   }
 
 }

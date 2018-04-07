@@ -1,5 +1,6 @@
 import 'dart:async';
 import "package:angular/angular.dart";
+import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
@@ -12,7 +13,7 @@ import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default
   selector: "overview-component",
   templateUrl: "overview_component.html",
   styleUrls: const ["overview_component.css"],
-  directives: const [ROUTER_DIRECTIVES, CORE_DIRECTIVES]
+  directives: const [ROUTER_DIRECTIVES, CORE_DIRECTIVES, materialDirectives]
 )
 class OverviewComponent implements OnInit {
 

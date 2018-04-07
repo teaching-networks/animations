@@ -19,6 +19,8 @@ div.split-layout {
   & .right {
     flex: 0 0 auto;
     padding-left: 1em;
+    border-left: 1px solid lightgray;
+    margin-left: 1em;
     text-align: right;
   }
 
