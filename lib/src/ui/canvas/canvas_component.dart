@@ -134,28 +134,41 @@ class CanvasComponent implements OnInit {
         _sizeChangedController.add(_getSize());
       }
 
-      // Listen for resize events in case the window gets resized.
-      window.onResize.listen((event) {
-        bool resized = false;
-
-        if (_resizeX) {
-          _width = e.clientWidth;
-          resized = true;
-        }
-
-        if (_resizeY) {
-          _height = e.clientHeight;
-          resized = true;
-        }
-
-        if (resized) {
-          _sizeChangedController.add(_getSize());
-        }
+      // Resize canvas according to parent.
+      window.requestAnimationFrame((timestamp) {
+        _resizeCanvas();
       });
     } else {
       // Just send one initial size.
       _sizeChangedController.add(_getSize());
     }
+  }
+
+  /**
+   * Resize canvas: Fit canvas size to parent element.
+   */
+  void _resizeCanvas() {
+    DivElement e = canvasWrapper.nativeElement as DivElement;
+
+    bool resized = false;
+
+    if (_resizeX && _width != e.clientWidth) {
+      _width = e.clientWidth;
+      resized = true;
+    }
+
+    if (_resizeY && _height != e.clientHeight) {
+      _height = e.clientHeight;
+      resized = true;
+    }
+
+    if (resized) {
+      _sizeChangedController.add(_getSize());
+    }
+
+    window.requestAnimationFrame((timestamp) {
+      _resizeCanvas();
+    });
   }
 
   /**

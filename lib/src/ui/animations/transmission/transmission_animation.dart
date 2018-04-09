@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
@@ -17,7 +18,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /**
    * Descriptor for the animation.
    */
-  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "Packet Transmission", "/img/image-preview.svg", "transmission");
+  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "packet-transmission.name", "/img/packet-transmission-preview.svg", "transmission");
 
   /**
    * Propagation speed on the connection.
@@ -97,7 +98,9 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
   double time = 0.0;
 
-  TransmissionAnimation() {
+  I18nService i18n;
+
+  TransmissionAnimation(this.i18n) {
     reset();
   }
 
@@ -190,8 +193,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     context.setFillColorRgb(0, 0, 0);
     context.textAlign = "center";
-    context.fillText("Sender", inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
-    context.fillText("Receiver", size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(i18n.get("packetTransmission.sender"), inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(i18n.get("packetTransmission.receiver"), size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
 
     // Draw line.
     double lineHeight = hUnit * 3;
@@ -203,7 +206,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     // Draw propagation speed text.
     context.setFillColorRgb(0, 0, 0);
-    context.fillText("Propagation speed: 2.1 x 10^8 m/s", size.width / 2, yOffset + lineHeight + 10);
+    context.fillText("${i18n.get('packetTransmission.propagationSpeed')}: 2.1 x 10^8 m/s", size.width / 2, yOffset + lineHeight + 10);
 
     // Draw packet.
     double progress = ((timestamp - startTimestamp) / 1000) / (totalTime * SLOW_DOWN_SCALE);

@@ -5,7 +5,7 @@
 	<div class="right">
 		<ul class="controls">
 			<li>
-				Length:
+				{{i18n.get("packetTransmission.length")}}:
 				<material-auto-suggest-input [(inputText)]="lengthValue"
 											 [suggestions]="lengthSuggestions"
 											 [limit]="5">
@@ -17,7 +17,7 @@
 				</material-dropdown-select>
 			</li>
 			<li>
-				Rate:
+				{{i18n.get("packetTransmission.rate")}}:
 				<material-auto-suggest-input [(inputText)]="rateValue"
 											 [suggestions]="rateSuggestions"
 											 [limit]="5">
@@ -29,7 +29,7 @@
 				</material-dropdown-select>
 			</li>
 			<li>
-				Packet size:
+				{{i18n.get("packetTransmission.size")}}:
 				<material-auto-suggest-input [(inputText)]="packetSizeValue"
 											 [suggestions]="sizeSuggestions"
 											 [limit]="5">
@@ -43,12 +43,12 @@
 			<li style="text-align: center">
 				<material-button (trigger)="start()">
 					<material-icon icon="play_arrow"></material-icon>
-					Start
+					{{i18n.get("packetTransmission.start")}}
 				</material-button>
 
 				<material-button (trigger)="reset()">
 					<material-icon icon="delete_forever"></material-icon>
-					Reset
+					{{i18n.get("packetTransmission.reset")}}
 				</material-button>
 			</li>
 			<li style="text-align: center">
@@ -59,9 +59,8 @@
 	</div>
 </div>
 <div class="description">
-	<h3>Description:</h3>
+	<h3>{{i18n.get("description")}}:</h3>
 	<p>
-		This simple animation illustrates one of the most fundamental concepts in computer networking: transmission delay versus propagation delay. Although this concept is discussed in detail in Chapter 1, an interactive animation speaks a thousand words. You set the length of the link, the packet size, and the transmission speed; the applet shows the packet being sent from sender to receiver.
-		Note that for many combinations, the head of the packet reaches the receiver  before transmission is finished at the sender.
+		{{i18n.get("packetTransmission.description")}}
 	</p>
 </div>

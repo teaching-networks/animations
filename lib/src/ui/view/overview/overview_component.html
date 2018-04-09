@@ -3,10 +3,10 @@
 		<div>
 			<img width="200" src="{{anim.previewImagePath}}">
 		</div>
-		<span>{{anim.name}}</span>
+		<span>{{getAnimationName(anim.name)}}</span>
 	</li>
 	<li>
 		<material-icon class="custom-size" icon="more_horiz"></material-icon>
-		More animations coming
+		{{ moreAnimationsComingLabel }}
 	</li>
 </ul>

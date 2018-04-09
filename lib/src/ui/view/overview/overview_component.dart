@@ -3,6 +3,7 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
 
@@ -31,7 +32,12 @@ class OverviewComponent implements OnInit {
    */
   Router _router;
 
-  OverviewComponent(this._animationService, this._router);
+  /**
+   * Service used to get translations.
+   */
+  I18nService _i18n;
+
+  OverviewComponent(this._animationService, this._router, this._i18n);
 
   @override
   ngOnInit() {
@@ -58,5 +64,9 @@ class OverviewComponent implements OnInit {
       "id": animationName
     }
   ]);
+
+  String getAnimationName(String key) => _i18n.get(key);
+
+  String get moreAnimationsComingLabel => _i18n.get("moreAnimationsComing");
 
 }

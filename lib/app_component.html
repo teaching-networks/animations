@@ -5,7 +5,7 @@
 	<div class="rest">
 		<span class="title">{{title}}</span>
 		<nav>
-			<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>Overview</material-button>
+			<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>{{ overviewLabel }}</material-button>
 		</nav>
 	</div>
 </header>
@@ -13,5 +13,12 @@
 <router-outlet></router-outlet>
 
 <footer class="footer">
-	<span>Copyright &copy; <b>{{year}}</b> Munich University of Applied Sciences</span>
+	<span>{{copyrightLabel}} &copy; <b>{{year}}</b> {{munichUniversityName}}</span>
+	<span>&nbsp;&bull;&nbsp;</span>
+	<material-dropdown-select
+			[buttonText]="languageSelectionLabel"
+			[selection]="languageSelectionModel"
+			[options]="languageSelectionOptions"
+			[itemRenderer]="languageItemRenderer">
+	</material-dropdown-select>
 </footer>

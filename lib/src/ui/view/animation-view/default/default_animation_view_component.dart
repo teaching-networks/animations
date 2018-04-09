@@ -2,6 +2,7 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/dynamic/dynamic_content_component.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/detail/detail_animation_view_component.dart';
@@ -25,8 +26,9 @@ class DefaultAnimationViewComponent implements OnInit {
   final AnimationService _animationService;
   final RouteParams _routeParams;
   final Router _router;
+  final I18nService i18n;
 
-  DefaultAnimationViewComponent(this._animationService, this._router, this._routeParams);
+  DefaultAnimationViewComponent(this._animationService, this._router, this._routeParams, this.i18n);
 
   @override
   ngOnInit() {

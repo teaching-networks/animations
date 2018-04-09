@@ -11,7 +11,6 @@ dependencies:
   angular: ^4.0.0
   angular_components: ^0.8.0
   angular_router: ^1.0.2
-  # Sass builder which is installed by angular components 0.8.0 is not working. Use 1.1.5 or newer! REMOVE THIS LINE ONCE THIS IS FIXED.
   sass_builder: ^1.1.5
 
 dev_dependencies:

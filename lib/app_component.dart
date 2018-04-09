@@ -1,7 +1,9 @@
+import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/detail/detail_animation_view_component.dart';
 import 'package:netzwerke_animationen/src/ui/view/notfound/notfound_component.dart';
@@ -12,7 +14,7 @@ import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.da
   styleUrls: const ['app_component.css'],
   templateUrl: 'app_component.html',
   directives: const [materialDirectives, ROUTER_DIRECTIVES],
-  providers: const [materialProviders, AnimationService]
+  providers: const [materialProviders, AnimationService],
 )
 @RouteConfig(const [
   const Route(path: "/overview", name: OverviewComponent.NAME, component: OverviewComponent),
@@ -21,25 +23,91 @@ import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.da
   const Redirect(path: "/", redirectTo: const [OverviewComponent.NAME]),
   const Route(path: "/**", name: NotFoundComponent.NAME, component: NotFoundComponent)
 ])
-class AppComponent {
-  final String title = "Networks Animations";
+class AppComponent implements OnInit {
 
   /**
    * Router used to navigate to other routes.
    */
-  Router _router;
+  final Router _router;
 
-  AppComponent(this._router);
+  /**
+   * Service used to get translations.
+   */
+  final I18nService _i18n;
+
+  final ItemRenderer<Language> languageItemRenderer = new CachingItemRenderer<Language>((language) => "${language.name}");
+  SelectionModel<Language> languageSelectionModel;
+  LanguageSelectionOptions languageSelectionOptions;
+
+  AppComponent(this._router, this._i18n);
+
+  @override
+  ngOnInit() {
+    languageSelectionModel = new SelectionModel.withList(selectedValues: [_i18n.getLanguages()[0]]);
+    languageSelectionOptions = new LanguageSelectionOptions(_i18n.getLanguages());
+
+    // Select currently selected locale.
+    _i18n.getLocale().then((locale) {
+      for (Language lang in _i18n.getLanguages()) {
+        if (lang.locale == locale) {
+          languageSelectionModel.select(lang);
+          break;
+        }
+      }
+    });
+
+    languageSelectionModel.selectionChanges.listen((changes) {
+      SelectionChangeRecord<Language> change = changes[0];
+
+      if (change.added.isEmpty) {
+        onLanguageSelected(null);
+      } else {
+        // Select the new language.
+        onLanguageSelected(change.added.first);
+      }
+    });
+  }
 
   void goTo(String to) {
     _router.navigate([to]);
   }
 
   /**
-   * Get current year.
+   * Called when a language has been selected.
    */
-  int get year {
-    return new DateTime.now().year;
+  void onLanguageSelected(Language language) {
+    String currentLocale = _i18n.getCurrentLocale();
+
+    bool languageChanged = false;
+    if (language == null && _i18n.getDefaultLocale() != currentLocale) {
+      _i18n.clearLocale(); // Just use the browsers default locale.
+      languageChanged = true;
+    } else if (language != null && language.locale != currentLocale) {
+      _i18n.setLocale(language.locale);
+      languageChanged = true;
+    }
+
+    if (languageChanged) {
+      // Reload the page.
+      window.location.reload();
+    }
   }
 
+  /**
+   * Get current year.
+   */
+  int get year => new DateTime.now().year;
+  String get title => _i18n.get("title");
+  String get overviewLabel => _i18n.get("overview");
+  String get languageSelectionLabel => _i18n.get("languageSelectionLabel");
+  String get munichUniversityName => _i18n.get("munichUniversityName");
+  String get copyrightLabel => _i18n.get("copyright");
+
+}
+
+class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {
+  LanguageSelectionOptions(List<Language> options) : super(options, toFilterableString: (Language option) => option.toString());
+
+  @override
+  SelectableOption getSelectable(item) => SelectableOption.Selectable;
 }
