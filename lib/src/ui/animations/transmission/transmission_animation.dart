@@ -116,6 +116,9 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   List<String> get rateSuggestions => _rateSuggestions;
   List<String> get sizeSuggestions => _sizeSuggestions;
 
+  Message get senderMessage => i18n.get("packetTransmission.sender");
+  Message get receiverMessage => i18n.get("packetTransmission.receiver");
+
   /**
    * Get set length of the connection (in meter).
    */
@@ -193,8 +196,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     context.setFillColorRgb(0, 0, 0);
     context.textAlign = "center";
-    context.fillText(i18n.get("packetTransmission.sender"), inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
-    context.fillText(i18n.get("packetTransmission.receiver"), size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(senderMessage.toString(), inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(receiverMessage.toString(), size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
 
     // Draw line.
     double lineHeight = hUnit * 3;

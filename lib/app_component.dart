@@ -89,7 +89,7 @@ class AppComponent implements OnInit {
 
     if (languageChanged) {
       // Reload the page.
-      window.location.reload();
+      // window.location.reload();
     }
   }
 
@@ -97,11 +97,11 @@ class AppComponent implements OnInit {
    * Get current year.
    */
   int get year => new DateTime.now().year;
-  String get title => _i18n.get("title");
-  String get overviewLabel => _i18n.get("overview");
-  String get languageSelectionLabel => _i18n.get("languageSelectionLabel");
-  String get munichUniversityName => _i18n.get("munichUniversityName");
-  String get copyrightLabel => _i18n.get("copyright");
+  Message get title => _i18n.get("title");
+  Message get overviewLabel => _i18n.get("overview");
+  String get languageSelectionLabel => _i18n.get("languageSelectionLabel").toString();
+  Message get munichUniversityName => _i18n.get("munichUniversityName");
+  Message get copyrightLabel => _i18n.get("copyright");
 
 }
 

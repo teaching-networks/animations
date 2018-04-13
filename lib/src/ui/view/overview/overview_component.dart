@@ -65,8 +65,8 @@ class OverviewComponent implements OnInit {
     }
   ]);
 
-  String getAnimationName(String key) => _i18n.get(key);
+  Message getAnimationName(String key) => _i18n.get(key);
 
-  String get moreAnimationsComingLabel => _i18n.get("moreAnimationsComing");
+  Message get moreAnimationsComingLabel => _i18n.get("moreAnimationsComing");
 
 }

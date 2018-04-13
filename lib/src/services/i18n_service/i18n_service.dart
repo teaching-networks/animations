@@ -18,18 +18,19 @@ class I18nService {
 
   String _currentLocale;
 
-  Future<Map<String, String>> _future;
-
-  Map<String, String> _lookup;
+  Map<String, Message> _lookup = new Map<String, Message>();
 
   I18nService() {
-    _future = getLocale().then((locale) {
+    // Start locale file lookup.
+    getLocale().then((locale) {
       _currentLocale = locale;
 
-      _loadLangFile(locale).then((map) {
-        _lookup = map;
-      });
+      _reload();
     });
+  }
+
+  void _reload() {
+    _loadLangFile(_currentLocale).then(_initLookup);
   }
 
   Future<Map<String, String>> _loadLangFile(String locale) async {
@@ -46,18 +47,32 @@ class I18nService {
     });
   }
 
-  String get(String key) {
-    if (_lookup != null) {
-      String value = _lookup[key];
+  void _initLookup(Map<String, String> map) {
+    for (String key in map.keys) {
+      Message msg = _lookup[key];
 
-      if (value == null) {
-        return "[$key not found]";
+      if (msg == null) {
+        msg = new Message(key, map[key]);
+        _lookup[key] = msg;
       } else {
-        return value;
+        msg.content = map[key];
       }
-    } else {
-      return "Loading...";
     }
+  }
+
+  /**
+   * Get translated message for the passed key.
+   */
+  Message get(String key) {
+    Message msg = _lookup[key];
+
+    if (msg == null) {
+      // Create new message to be filled later (or not if not translated yet).
+      msg = new Message.empty(key);
+      _lookup[key] = msg;
+    }
+
+    return msg;
   }
 
   String getCurrentLocale() {
@@ -71,6 +86,9 @@ class I18nService {
   void setLocale(String locale) {
     if (_hasLocale(locale)) {
       window.localStorage[LOCAL_STORAGE_LOCALE] = locale;
+      _currentLocale = locale;
+
+      _reload();
     }
   }
 
@@ -116,5 +134,23 @@ class Language {
   final String name;
 
   const Language(this.locale, this.name);
+
+}
+
+class Message {
+
+  String key;
+  String content;
+
+  Message(this.key, this.content);
+
+  Message.empty(this.key) {
+    content = "";
+  }
+
+  @override
+  String toString() {
+    return content;
+  }
 
 }
