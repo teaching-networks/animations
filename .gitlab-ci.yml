@@ -3,5 +3,7 @@ before_script:
   - apt-get install dart
 
 webapp_build:
+  tags:
+    - www
   script:
     - pub build
