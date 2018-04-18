@@ -10,9 +10,8 @@ webapp_build:
   stage: build
   tags:
     - www
-  before-script:
-    - pub get
   script:
+    - pub get
     - pub build
 
 webapp_deploy:
@@ -20,4 +19,6 @@ webapp_deploy:
   tags:
     - www
   script:
-    - echo "DEPLOYMENT NOT YET IMPLEMENTED"
+    # Save branch name in variable for later use
+    - BRANCH_NAME=$(git branch | grep \* | cut -d ' ' -f2)
+    - echo "DEPLOYMENT FOR BRANCH $BRANCH_NAME NOT YET IMPLEMENTED"
