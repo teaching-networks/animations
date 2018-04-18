@@ -3,6 +3,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/detail/detail_animation_view_component.dart';
@@ -15,6 +16,7 @@ import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.da
   templateUrl: 'app_component.html',
   directives: const [materialDirectives, ROUTER_DIRECTIVES],
   providers: const [materialProviders, AnimationService],
+  pipes: const [I18nPipe]
 )
 @RouteConfig(const [
   const Route(path: "/overview", name: OverviewComponent.NAME, component: OverviewComponent),
@@ -68,6 +70,9 @@ class AppComponent implements OnInit {
     });
   }
 
+  /**
+   * Navigate the router to the passed page.
+   */
   void goTo(String to) {
     _router.navigate([to]);
   }
@@ -78,18 +83,10 @@ class AppComponent implements OnInit {
   void onLanguageSelected(Language language) {
     String currentLocale = _i18n.getCurrentLocale();
 
-    bool languageChanged = false;
     if (language == null && _i18n.getDefaultLocale() != currentLocale) {
       _i18n.clearLocale(); // Just use the browsers default locale.
-      languageChanged = true;
     } else if (language != null && language.locale != currentLocale) {
       _i18n.setLocale(language.locale);
-      languageChanged = true;
-    }
-
-    if (languageChanged) {
-      // Reload the page.
-      // window.location.reload();
     }
   }
 
@@ -97,11 +94,7 @@ class AppComponent implements OnInit {
    * Get current year.
    */
   int get year => new DateTime.now().year;
-  Message get title => _i18n.get("title");
-  Message get overviewLabel => _i18n.get("overview");
   String get languageSelectionLabel => _i18n.get("languageSelectionLabel").toString();
-  Message get munichUniversityName => _i18n.get("munichUniversityName");
-  Message get copyrightLabel => _i18n.get("copyright");
 
 }
 

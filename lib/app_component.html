@@ -3,9 +3,9 @@
 		<img src="/img/hm-logo.svg">
 	</div>
 	<div class="rest">
-		<span class="title">{{title}}</span>
+		<span class="title">{{ "title" | i18n }}</span>
 		<nav>
-			<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>{{ overviewLabel }}</material-button>
+			<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>{{ "overview" | i18n }}</material-button>
 		</nav>
 	</div>
 </header>
@@ -13,7 +13,7 @@
 <router-outlet></router-outlet>
 
 <footer class="footer">
-	<span>{{copyrightLabel}} &copy; <b>{{year}}</b> {{munichUniversityName}}</span>
+	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
 	<span>&nbsp;&bull;&nbsp;</span>
 	<material-dropdown-select
 			[buttonText]="languageSelectionLabel"

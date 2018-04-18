@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
@@ -11,7 +12,8 @@ import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
   selector: "transmission-animation",
   templateUrl: "transmission_animation.html",
   styleUrls: const ["transmission_animation.css"],
-  directives: const [CORE_DIRECTIVES, materialDirectives, CanvasComponent]
+  directives: const [CORE_DIRECTIVES, materialDirectives, CanvasComponent],
+  pipes: const [I18nPipe]
 )
 class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
@@ -98,9 +100,9 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
   double time = 0.0;
 
-  I18nService i18n;
+  I18nService _i18n;
 
-  TransmissionAnimation(this.i18n) {
+  TransmissionAnimation(this._i18n) {
     reset();
   }
 
@@ -116,8 +118,9 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   List<String> get rateSuggestions => _rateSuggestions;
   List<String> get sizeSuggestions => _sizeSuggestions;
 
-  Message get senderMessage => i18n.get("packetTransmission.sender");
-  Message get receiverMessage => i18n.get("packetTransmission.receiver");
+  Message _senderMessage;
+  Message _receiverMessage;
+  Message _propagationSpeed;
 
   /**
    * Get set length of the connection (in meter).
@@ -151,6 +154,11 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
   @override
   ngOnInit() {
+    // Get translations used in render method.
+    _senderMessage = _i18n.get("packetTransmission.sender");
+    _receiverMessage = _i18n.get("packetTransmission.receiver");
+    _propagationSpeed = _i18n.get("packetTransmission.propagationSpeed");
+
     // Do not allow deselects in selection dropdowns.
     ignoreDeselect(rateSelectModel);
     ignoreDeselect(sizeSelectModel);
@@ -196,8 +204,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     context.setFillColorRgb(0, 0, 0);
     context.textAlign = "center";
-    context.fillText(senderMessage.toString(), inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
-    context.fillText(receiverMessage.toString(), size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(_senderMessage.toString(), inset + boxSize / 2, yOffset + computerHeight, boxSize - inset);
+    context.fillText(_receiverMessage.toString(), size.width - inset - boxSize / 2, yOffset + computerHeight, boxSize - inset);
 
     // Draw line.
     double lineHeight = hUnit * 3;
@@ -209,7 +217,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     // Draw propagation speed text.
     context.setFillColorRgb(0, 0, 0);
-    context.fillText("${i18n.get('packetTransmission.propagationSpeed')}: 2.1 x 10^8 m/s", size.width / 2, yOffset + lineHeight + 10);
+    context.fillText("${_propagationSpeed.toString()}: 2.1 x 10^8 m/s", size.width / 2, yOffset + lineHeight + 10);
 
     // Draw packet.
     double progress = ((timestamp - startTimestamp) / 1000) / (totalTime * SLOW_DOWN_SCALE);

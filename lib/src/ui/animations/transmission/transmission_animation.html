@@ -1,11 +1,12 @@
 <div class="split-layout">
 	<div class="left">
-		<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+		<canvas-comp [height]="300" (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"></canvas-comp>
 	</div>
 	<div class="right">
 		<ul class="controls">
 			<li>
-				{{i18n.get("packetTransmission.length")}}:
+				{{ "packetTransmission.length" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="lengthValue"
 											 [suggestions]="lengthSuggestions"
 											 [limit]="5">
@@ -17,7 +18,7 @@
 				</material-dropdown-select>
 			</li>
 			<li>
-				{{i18n.get("packetTransmission.rate")}}:
+				{{ "packetTransmission.rate" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="rateValue"
 											 [suggestions]="rateSuggestions"
 											 [limit]="5">
@@ -29,7 +30,7 @@
 				</material-dropdown-select>
 			</li>
 			<li>
-				{{i18n.get("packetTransmission.size")}}:
+				{{ "packetTransmission.size" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="packetSizeValue"
 											 [suggestions]="sizeSuggestions"
 											 [limit]="5">
@@ -43,12 +44,12 @@
 			<li style="text-align: center">
 				<material-button (trigger)="start()">
 					<material-icon icon="play_arrow"></material-icon>
-					{{i18n.get("packetTransmission.start")}}
+					{{ "packetTransmission.start" | i18n }}
 				</material-button>
 
 				<material-button (trigger)="reset()">
 					<material-icon icon="delete_forever"></material-icon>
-					{{i18n.get("packetTransmission.reset")}}
+					{{ "packetTransmission.reset" | i18n }}
 				</material-button>
 			</li>
 			<li style="text-align: center">
@@ -59,8 +60,8 @@
 	</div>
 </div>
 <div class="description">
-	<h3>{{i18n.get("description")}}:</h3>
+	<h3>{{ "description" | i18n }}:</h3>
 	<p>
-		{{i18n.get("packetTransmission.description")}}
+		{{ "packetTransmission.description" | i18n }}
 	</p>
 </div>

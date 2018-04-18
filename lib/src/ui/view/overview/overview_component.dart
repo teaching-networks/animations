@@ -3,6 +3,7 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
@@ -14,7 +15,8 @@ import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default
   selector: "overview-component",
   templateUrl: "overview_component.html",
   styleUrls: const ["overview_component.css"],
-  directives: const [ROUTER_DIRECTIVES, CORE_DIRECTIVES, materialDirectives]
+  directives: const [ROUTER_DIRECTIVES, CORE_DIRECTIVES, materialDirectives],
+  pipes: const [I18nPipe]
 )
 class OverviewComponent implements OnInit {
 
@@ -66,7 +68,5 @@ class OverviewComponent implements OnInit {
   ]);
 
   Message getAnimationName(String key) => _i18n.get(key);
-
-  Message get moreAnimationsComingLabel => _i18n.get("moreAnimationsComing");
 
 }
