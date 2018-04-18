@@ -1,0 +1,7 @@
+before_install:
+  - apt-get update
+  - apt-get install dart
+
+webapp_build:
+  script:
+    - pub build
