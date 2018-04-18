@@ -2,9 +2,22 @@ before_script:
   - sudo apt-get update
   - sudo apt-get install dart
 
+stages:
+  - build
+  - deploy
+
 webapp_build:
+  stage: build
+  tags:
+    - www
+  before-script:
+    - pub get
+  script:
+    - pub build
+
+webapp_deploy:
+  stage: deploy
   tags:
     - www
   script:
-    - pub get
-    - pub build
+    - echo "DEPLOYMENT NOT YET IMPLEMENTED"
