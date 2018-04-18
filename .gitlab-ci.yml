@@ -6,4 +6,4 @@ webapp_build:
   tags:
     - www
   script:
-    - pub build
+    - /usr/lib/dart/bin/pub build
