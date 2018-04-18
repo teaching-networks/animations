@@ -1,6 +1,6 @@
 before_script:
-  - apt-get update
-  - apt-get install dart
+  - sudo apt-get update
+  - sudo apt-get install dart
 
 webapp_build:
   tags:
