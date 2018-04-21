@@ -4,7 +4,6 @@ before_script:
 
 stages:
   - build
-  - deploy
 
 webapp_build:
   stage: build
@@ -13,15 +12,10 @@ webapp_build:
   script:
     - pub get
     - pub build
-
-webapp_deploy:
-  stage: deploy
-  tags:
-    - www
-  script:
-    # Save branch name in variable for later use
-    - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-    - echo "DEPLOYMENT FOR BRANCH ${BRANCH_NAME}" && pwd
+    # Deploy
+    - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_NAME}" && pwd
+    - echo ${CI_COMMIT_REF_NAME}
+    - echo ${CI_COMMIT_REF_SLUG}
     - ls
-    - mkdir -p /var/www/html/${BRANCH_NAME}
-    - cp -r build/web/* /var/www/html/${BRANCH_NAME}
+    #- mkdir -p /var/www/html/${BRANCH_NAME}
+    #- cp -r build/web/* /var/www/html/${BRANCH_NAME}
