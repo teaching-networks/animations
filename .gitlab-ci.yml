@@ -14,5 +14,5 @@ webapp_build:
     - pub build
     # Deploy
     - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
-    - mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
-    - cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
+    - sudo mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
+    - sudo cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
