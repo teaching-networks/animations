@@ -13,9 +13,6 @@ webapp_build:
     - pub get
     - pub build
     # Deploy
-    - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_NAME}" && pwd
-    - echo ${CI_COMMIT_REF_NAME}
-    - echo ${CI_COMMIT_REF_SLUG}
-    - ls
-    #- mkdir -p /var/www/html/${BRANCH_NAME}
-    #- cp -r build/web/* /var/www/html/${BRANCH_NAME}
+    - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
+    - mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
+    - cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
