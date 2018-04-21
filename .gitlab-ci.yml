@@ -20,6 +20,8 @@ webapp_deploy:
     - www
   script:
     # Save branch name in variable for later use
-    - pwd
-    - BRANCH_NAME=$(git branch | grep \* | cut -d ' ' -f2)
-    - echo "DEPLOYMENT FOR BRANCH $BRANCH_NAME"
+    - BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+    - echo "DEPLOYMENT FOR BRANCH ${BRANCH_NAME}" && pwd
+    - ls
+    - mkdir -p /var/www/html/${BRANCH_NAME}
+    - cp -r build/web/* /var/www/html/${BRANCH_NAME}
