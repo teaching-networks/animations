@@ -17,5 +17,6 @@
 	"packetTransmission.length": "Packet Länge",
 	"packetTransmission.size": "Packet Größe",
 	"packetTransmission.rate": "Rate",
-	"packetTransmission.description": "Diese einfache Animation zeigt eines der fundamentalsten Konzepte von Netzwerke I: Übertragungsverzögerung im Verhältnis zur Ausbreitungsverzögerung. Das Konzept wird in Kapitel I genauer beleuchtet. Setzen Sie die Länge der Verbindung zwischen Sender und Empfänger, die Packet Größe und die Übertragungsgeschwindigkeit. Bei Druck auf Start können Sie das Packet beobachten, wie es von Sender zu Empfänger gesendet wird."
+	"packetTransmission.description": "Diese einfache Animation zeigt eines der fundamentalsten Konzepte von Netzwerke I: Übertragungsverzögerung im Verhältnis zur Ausbreitungsverzögerung. Das Konzept wird in Kapitel I genauer beleuchtet. Setzen Sie die Länge der Verbindung zwischen Sender und Empfänger, die Packet Größe und die Übertragungsgeschwindigkeit. Bei Druck auf Start können Sie das Packet beobachten, wie es von Sender zu Empfänger gesendet wird.",
+	"send-and-wait-animation.name": "Zuverlässige Übertragung: Send And Wait Protokoll"
 }

@@ -14,12 +14,14 @@ ul.animation-list {
 
   & li {
     cursor: pointer;
-    padding: 1em;
+    padding: 2.5%;
     border-radius: 0.4em;
     text-align: center;
+    width: 20%;
     flex: 0 1 auto;
 
     display: flex;
+
     flex-direction: column;
     justify-content: center;
     align-items: center;
