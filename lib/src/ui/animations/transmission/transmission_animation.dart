@@ -20,7 +20,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /**
    * Descriptor for the animation.
    */
-  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "packet-transmission.name", "/img/packet-transmission-preview.svg", "transmission");
+  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission");
 
   /**
    * Propagation speed on the connection.
@@ -76,7 +76,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  ImageElement computer = new ImageElement(src: "/img/computer.svg", width: 415, height: 290);
+  ImageElement computer = new ImageElement(src: "img/computer.svg", width: 415, height: 290);
 
   /**
    * Whether to send a packet (Do the animation).

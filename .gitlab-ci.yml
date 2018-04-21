@@ -16,3 +16,5 @@ webapp_build:
     - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
     - sudo mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
     - sudo cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
+    # Replace base href because the base path is no more /
+    - sed 's:<base href="/">:<base href="/' ${CI_COMMIT_REF_SLUG} '/":g' /var/www/html/${CI_COMMIT_REF_SLUG}/index.html

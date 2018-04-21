@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
 import 'package:angular/angular.dart';
+import 'package:angular_router/angular_router.dart';
 import "package:intl/intl_browser.dart";
 
 /**
@@ -27,7 +28,7 @@ class I18nService {
   /**
    * URL where the translation files lie.
    */
-  static const String URL = "/i18n/";
+  static const String URL = "i18n/";
 
   /**
    * File ending of the translation files.
@@ -45,9 +46,14 @@ class I18nService {
   Map<String, Message> _lookup = new Map<String, Message>();
 
   /**
+   * Used to get the base url of the application.
+   */
+  PlatformLocation _platformLocation;
+
+  /**
    * I18n Service constructor.
    */
-  I18nService() {
+  I18nService(this._platformLocation) {
     // Start locale file lookup.
     getLocale().then((locale) {
       _currentLocale = locale;
@@ -71,7 +77,7 @@ class I18nService {
       locale = DEFAULT_LOCALE;
     }
 
-    return HttpRequest.getString(URL + locale + FILE_ENDING).then((value) {
+    return HttpRequest.getString(_platformLocation.getBaseHrefFromDOM() + URL + locale + FILE_ENDING).then((value) {
       try {
         return JSON.decode(value);
       } catch (e) {
