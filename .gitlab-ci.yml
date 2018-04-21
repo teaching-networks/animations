@@ -20,5 +20,6 @@ webapp_deploy:
     - www
   script:
     # Save branch name in variable for later use
+    - pwd
     - BRANCH_NAME=$(git branch | grep \* | cut -d ' ' -f2)
-    - echo "DEPLOYMENT FOR BRANCH $BRANCH_NAME NOT YET IMPLEMENTED"
+    - echo "DEPLOYMENT FOR BRANCH $BRANCH_NAME"
