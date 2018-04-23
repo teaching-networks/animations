@@ -55,6 +55,8 @@ class CanvasComponent implements OnInit {
     // Get canvas rendering context used to draw on the canvas.
     CanvasRenderingContext2D context = (canvas.nativeElement as CanvasElement).getContext("2d");
 
+    _initCanvasContext(context);
+
     _initCanvasSize();
 
     // Send event that the user is able to start drawing.
@@ -114,6 +116,14 @@ class CanvasComponent implements OnInit {
    */
   @Output()
   Stream get onReady => _readyController.stream;
+
+  /**
+   * Make adjustments to the canvas context.
+   */
+  void _initCanvasContext(CanvasRenderingContext2D context) {
+    // Set font size in correlation to devicePixelRatio
+    context.font = "${window.devicePixelRatio}em 'Roboto'";
+  }
 
   /**
    * Initialize the canvas size and append window resize listeners

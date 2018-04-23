@@ -184,7 +184,6 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
     context.clearRect(0, 0, size.width, size.height);
 
     context.textBaseline = "top";
-    context.font = "2.0em 'Roboto'";
 
     int inset = 10;
 
