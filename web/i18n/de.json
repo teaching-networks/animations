@@ -18,5 +18,6 @@
 	"packetTransmission.size": "Packetgröße",
 	"packetTransmission.rate": "Rate",
 	"packetTransmission.description": "Diese einfache Animation zeigt eines der fundamentalsten Konzepte von Netzwerke I: Übertragungsverzögerung im Verhältnis zur Ausbreitungsverzögerung. Das Konzept wird in Kapitel I genauer beleuchtet. Setzen Sie die Länge der Verbindung zwischen Sender und Empfänger, die Packet Größe und die Übertragungsgeschwindigkeit. Bei Druck auf Start können Sie das Packet beobachten, wie es von Sender zu Empfänger gesendet wird.",
-	"send-and-wait-animation.name": "Zuverlässige Übertragung: Send And Wait Protokoll"
+	"send-and-wait-animation.name": "Zuverlässige Übertragung: Send And Wait Protokoll",
+	"send-and-wait-animation.description": "In dieser Animation sehen Sie ein Sender und ein Empfänger Fenster, welche für ein Maximum von 5 ausstehenden Paketen limitiert sind. Sie können Packete vom Sender zum Empfänger schicken. Klicken Sie auf ein Paket, um es zu löschen und Paketverlust zu simulieren."
 }
