@@ -104,4 +104,11 @@ abstract class CanvasAnimation {
     return _lastTimestamp;
   }
 
+  /**
+   * Get rectangle.
+   */
+  Rectangle<double> toRect(double left, double top, Size size) {
+    return new Rectangle(left, top, size.width, size.height);
+  }
+
 }

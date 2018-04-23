@@ -5,6 +5,7 @@ import 'package:angular_components/angular_components.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/transmission_window.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
 
@@ -26,6 +27,9 @@ class SendAndWaitAnimation extends CanvasAnimation implements OnInit {
 
   SendAndWaitAnimation(this._i18n);
 
+  TransmissionWindow senderWindow = new TransmissionWindow();
+  TransmissionWindow receiverWindow = new TransmissionWindow();
+
   @override
   ngOnInit() {
 
@@ -36,10 +40,12 @@ class SendAndWaitAnimation extends CanvasAnimation implements OnInit {
     context.clearRect(0, 0, size.width, size.height);
 
     context.textBaseline = "center";
-    context.font = "5.0em 'Roboto'";
     context.textAlign = "center";
 
     context.fillText("Yet to be implemented.", size.width / 2, size.height / 2);
+
+    senderWindow.render(context, toRect(0.0, 0.0, size), timestamp);
+    receiverWindow.render(context, toRect(0.0, 200.0, size), timestamp);
   }
 
 }
