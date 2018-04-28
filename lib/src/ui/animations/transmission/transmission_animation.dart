@@ -185,8 +185,6 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     context.textBaseline = "top";
 
-    print(context.font);
-
     int inset = 10;
 
     // Percent of the canvas height (For responsive display).
@@ -256,8 +254,6 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
     int size = this.packetSize; // bit
 
     totalTime = size / rate + length / PROPAGATION_SPEED;
-
-    print(totalTime);
 
     // Init packet properties.
     packetW = ((size / rate) * PROPAGATION_SPEED) / length; // Packet width in percent of the connection length.

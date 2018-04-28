@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'package:angular/angular.dart';
 import 'package:netzwerke_animationen/src/util/size.dart';
 
 /**
@@ -10,7 +11,7 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  * Bind in your component to make it work:
  * <canvas-comp (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
  */
-abstract class CanvasAnimation {
+abstract class CanvasAnimation implements OnDestroy {
 
   /**
    * Default font size - will be scaled using window.devicePixelRatio.
@@ -42,6 +43,11 @@ abstract class CanvasAnimation {
 
   num _lastTimestamp = -1;
   int fps = 0;
+
+  /**
+   * Set this to true when the rendering loop should be killed.
+   */
+  bool _killLoop = false;
 
   /**
    * Executed when the canvas component is ready to be drawn at.
@@ -79,7 +85,9 @@ abstract class CanvasAnimation {
 
     _lastTimestamp = timestamp;
 
-    window.requestAnimationFrame(_renderLoop);
+    if (!_killLoop) {
+      window.requestAnimationFrame(_renderLoop);
+    }
   }
 
   /**
@@ -125,6 +133,12 @@ abstract class CanvasAnimation {
    */
   void _initContextForIteration(CanvasRenderingContext2D context) {
     context.font = "${window.devicePixelRatio * DEFAULT_FONT_SIZE_PX}px 'Roboto'";
+  }
+
+  @override
+  ngOnDestroy() {
+    // Stop rendering loop.
+    _killLoop = true;
   }
 
 }
