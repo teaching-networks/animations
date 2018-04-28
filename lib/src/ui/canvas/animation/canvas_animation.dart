@@ -13,6 +13,11 @@ import 'package:netzwerke_animationen/src/util/size.dart';
 abstract class CanvasAnimation {
 
   /**
+   * Default font size - will be scaled using window.devicePixelRatio.
+   */
+  static const DEFAULT_FONT_SIZE_PX = 16;
+
+  /**
    * Whether to show FPS for development.
    */
   static const bool SHOW_FPS = true;
@@ -48,10 +53,14 @@ abstract class CanvasAnimation {
     window.requestAnimationFrame(_renderLoop);
   }
 
+  int i = 0;
+
   /**
    * Simple rendering loop which renders and starts over again.
    */
   void _renderLoop(num timestamp) {
+    _initContextForIteration(context);
+
     render(timestamp);
 
     if (SHOW_FPS && _lastTimestamp != -1) {
@@ -78,7 +87,6 @@ abstract class CanvasAnimation {
    */
   void renderFps(int fps) {
     context.textBaseline = "bottom";
-    context.font = "2.0em 'Roboto'";
     context.textAlign = "end";
     context.setFillColorRgb(255, 102, 102);
     context.fillText("Fps: $fps", size.width, size.height);
@@ -109,6 +117,14 @@ abstract class CanvasAnimation {
    */
   Rectangle<double> toRect(double left, double top, Size size) {
     return new Rectangle(left, top, size.width, size.height);
+  }
+
+  /**
+   * Initialize context for each iteration.
+   * You can make adjustments here in case they can only be made before each render cyclus.
+   */
+  void _initContextForIteration(CanvasRenderingContext2D context) {
+    context.font = "${window.devicePixelRatio * DEFAULT_FONT_SIZE_PX}px 'Roboto'";
   }
 
 }

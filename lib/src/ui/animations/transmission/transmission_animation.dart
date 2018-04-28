@@ -185,6 +185,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
 
     context.textBaseline = "top";
 
+    print(context.font);
+
     int inset = 10;
 
     // Percent of the canvas height (For responsive display).
