@@ -1,21 +1,11 @@
-# Networks Animations
-
-... is a web app that serves the purpose of supporting students via animations that show certain networking topics.
-
-## Technology
-
-### Framework
-
-The web app uses Googles Angular with Dart ([See here](https://webdev.dartlang.org/angular/)). To build and develop the app you will need the Dart SDK. Just check by the afore mentioned site and get started!
-
-### Animations
-
-All animations (of which there are none at the moment), shall be realized with (HTML5) [Canvas](https://www.w3schools.com/html/html5_canvas.asp) which is the only way to **directly** draw in a web browser. This offers the maximum performance one might get when dealing with web technology (For example compared with the browsers DOM which would also have been an alternative). Further more we are not limited in our creativity.
+# Animations Web Application
+... serves the purpose of supporting students via providing animations that clarify lecture content.
 
 ## Getting Started
-
 Follow the Angular Dart instructions [here](https://webdev.dartlang.org/angular/) to install the Dart SDK, etc. Then just clone the repository and call `pub get` followed by `pub serve` to start the application.
 
-## Building Pipeline and Continous Integration
+## Build the Application
+Once you set up your environment (See Getting started), you can call `pub build` in your working directory. You'll find the result in the `build/web` folder. If you want to deploy the application you just need to adjust the built index.html: Change the `<base href="/">` to your base url so that navigation within the angular app is working correctly.
 
-At the moment the application is in early state so there is no real content at the moment and the app will rarely have content yet. Once the application is reaching a state which we could consider "usable" the building pipeline will be established.
+## Continous Deployment
+All branches get automatically built & deployed [here](https://www.sam.cs.hm.edu).
