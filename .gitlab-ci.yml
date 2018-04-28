@@ -16,7 +16,7 @@ webapp_build:
     - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
     - sudo mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
     # Clean output folder
-    - sudo rm -r /var/www/html/${CI_COMMIT_REF_SLUG}/*
+    - sudo rm -rf /var/www/html/${CI_COMMIT_REF_SLUG}/*
     # Copy build app to output folder
     - sudo cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
     # Replace base href because the base path is no more /
