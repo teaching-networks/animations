@@ -3,38 +3,36 @@ import 'package:angular_router/angular_router.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/dynamic/dynamic_content_component.dart';
+import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
 
 /**
  * Detail component showing an animation in detail (Fullscreen).
  */
 @Component(
-  selector: "detail-animation-view-component",
-  templateUrl: "detail_animation_view_component.html",
-  styleUrls: const ["detail_animation_view_component.css"],
-  directives: const [CORE_DIRECTIVES, DynamicContentComponent]
-)
-class DetailAnimationViewComponent implements OnInit {
-
-  static const String NAME = "Detail";
-
-  Type componentToShow;
+    selector: "detail-animation-view-component",
+    templateUrl: "detail_animation_view_component.html",
+    styleUrls: const ["detail_animation_view_component.css"],
+    directives: const [coreDirectives, DynamicContentComponent],
+    providers: const [const ClassProvider(AnimationService)])
+class DetailAnimationViewComponent implements OnActivate {
+  dynamic componentToShow;
 
   final AnimationService _animationService;
-  final RouteParams _routeParams;
 
-  DetailAnimationViewComponent(this._animationService, this._routeParams);
+  DetailAnimationViewComponent(this._animationService);
 
   @override
-  ngOnInit() {
-    String id = _routeParams.get("id");
+  void onActivate(RouterState previous, RouterState current) {
+    final String id = paths.getId(current.parameters);
 
-    _animationService.getAnimationDescriptors().then((animations) {
-      AnimationDescriptor descriptor = animations[id];
+    if (id != null) {
+      _animationService.getAnimationDescriptors().then((animations) {
+        AnimationDescriptor descriptor = animations[id];
 
-      if (descriptor != null) {
-        componentToShow = descriptor.type;
-      }
-    });
+        if (descriptor != null) {
+          componentToShow = descriptor.typeFactory;
+        }
+      });
+    }
   }
-
 }

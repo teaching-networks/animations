@@ -1,50 +1,38 @@
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
+import 'package:netzwerke_animationen/src/router/routes.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
-import 'package:netzwerke_animationen/src/ui/view/animation-view/detail/detail_animation_view_component.dart';
-import 'package:netzwerke_animationen/src/ui/view/notfound/notfound_component.dart';
-import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.dart';
 
 @Component(
-  selector: 'net-app',
-  styleUrls: const ['app_component.css'],
-  templateUrl: 'app_component.html',
-  directives: const [materialDirectives, ROUTER_DIRECTIVES],
-  providers: const [materialProviders, AnimationService],
-  pipes: const [I18nPipe]
-)
-@RouteConfig(const [
-  const Route(path: "/overview", name: OverviewComponent.NAME, component: OverviewComponent),
-  const Route(path: "/animation/:id", name: DefaultAnimationViewComponent.NAME, component: DefaultAnimationViewComponent),
-  const Route(path: "/detail/:id", name: DetailAnimationViewComponent.NAME, component: DetailAnimationViewComponent),
-  const Redirect(path: "/", redirectTo: const [OverviewComponent.NAME]),
-  const Route(path: "/**", name: NotFoundComponent.NAME, component: NotFoundComponent)
-])
+    selector: 'net-app',
+    styleUrls: const ['app_component.css'],
+    templateUrl: 'app_component.html',
+    directives: const [materialDirectives, routerDirectives],
+    providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
+    pipes: const [I18nPipe])
 class AppComponent implements OnInit {
 
   /**
-   * Router used to navigate to other routes.
+   * All routes we can navigate to.
    */
-  final Router _router;
+  final Routes routes;
 
   /**
    * Service used to get translations.
    */
   final I18nService _i18n;
 
-  final ItemRenderer<Language> languageItemRenderer = new CachingItemRenderer<Language>((language) => "${language.name}");
   SelectionModel<Language> languageSelectionModel;
   LanguageSelectionOptions languageSelectionOptions;
 
-  AppComponent(this._router, this._i18n);
+  AppComponent(this._i18n, this.routes);
 
   @override
   ngOnInit() {
-    languageSelectionModel = new SelectionModel.withList(selectedValues: [_i18n.getLanguages()[0]]);
+    languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
     languageSelectionOptions = new LanguageSelectionOptions(_i18n.getLanguages());
 
     // Select currently selected locale.
@@ -70,13 +58,6 @@ class AppComponent implements OnInit {
   }
 
   /**
-   * Navigate the router to the passed page.
-   */
-  void goTo(String to) {
-    _router.navigate([to]);
-  }
-
-  /**
    * Called when a language has been selected.
    */
   void onLanguageSelected(Language language) {
@@ -93,8 +74,8 @@ class AppComponent implements OnInit {
    * Get current year.
    */
   int get year => new DateTime.now().year;
-  String get languageSelectionLabel => _i18n.get("languageSelectionLabel").toString();
 
+  String get languageSelectionLabel => _i18n.get("languageSelectionLabel").toString();
 }
 
 class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {

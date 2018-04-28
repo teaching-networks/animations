@@ -1,11 +1,11 @@
 <dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
 
 <div>
-	<material-button (trigger)="back()">
+	<material-button [routerLink]="routes.overview.toUrl()">
 		<material-icon icon="arrow_back"></material-icon>
 		{{ "back" | i18n }}
 	</material-button>
-	<material-button (trigger)="detail()">
+	<material-button [routerLink]="detailUrl">
 		<material-icon icon="zoom_out_map"></material-icon>
 		{{ "fullscreen" | i18n }}
 	</material-button>

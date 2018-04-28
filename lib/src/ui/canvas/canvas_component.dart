@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:html';
 import "package:angular/angular.dart";
-import 'package:angular_components/angular_components.dart';
 import 'package:netzwerke_animationen/src/util/size.dart';
 
 /**
@@ -18,15 +17,15 @@ import 'package:netzwerke_animationen/src/util/size.dart';
     selector: "canvas-comp",
     templateUrl: "canvas_component.html",
     styleUrls: const ["canvas_component.css"],
-    directives: const [CORE_DIRECTIVES]
+    directives: const [coreDirectives]
 )
 class CanvasComponent implements OnInit {
 
   @ViewChild("canvasWrapper")
-  ElementRef canvasWrapper;
+  HtmlElement canvasWrapper;
 
   @ViewChild("canvas")
-  ElementRef canvas;
+  HtmlElement canvas;
 
   /**
    * Stream controller emitting events when the canvas is resized.
@@ -54,7 +53,7 @@ class CanvasComponent implements OnInit {
   @override
   ngOnInit() {
     // Get canvas rendering context used to draw on the canvas.
-    CanvasRenderingContext2D context = (canvas.nativeElement as CanvasElement).getContext("2d");
+    CanvasRenderingContext2D context = (canvas as CanvasElement).getContext("2d");
 
     _initCanvasSize();
 
@@ -123,12 +122,12 @@ class CanvasComponent implements OnInit {
   void _initCanvasSize() {
     if (_resizeX || _resizeY) {
       if (!_resizeY) {
-        onResized.listen((Size size) {
-          canvasWrapper.nativeElement.style.height = "${_height}px";
+        onResized.listen((size) {
+          canvasWrapper.style.height = "${_height}px";
         });
       }
 
-      DivElement e = canvasWrapper.nativeElement as DivElement;
+      DivElement e = canvasWrapper as DivElement;
 
       if (_resizeX) {
         _width = e.clientWidth;
@@ -149,7 +148,7 @@ class CanvasComponent implements OnInit {
    * Resize canvas: Fit canvas size to parent element.
    */
   void _resizeCanvas() {
-    DivElement e = canvasWrapper.nativeElement as DivElement;
+    DivElement e = canvasWrapper as DivElement;
 
     bool resized = false;
 

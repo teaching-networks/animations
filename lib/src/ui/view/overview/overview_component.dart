@@ -6,22 +6,19 @@ import 'package:netzwerke_animationen/src/services/animation_service/animation_s
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.dart';
+import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
 
 /**
  * Overview component should give an overview over all available animations.
  */
 @Component(
-  selector: "overview-component",
-  templateUrl: "overview_component.html",
-  styleUrls: const ["overview_component.css"],
-  directives: const [ROUTER_DIRECTIVES, CORE_DIRECTIVES, materialDirectives],
-  pipes: const [I18nPipe]
-)
+    selector: "overview-component",
+    templateUrl: "overview_component.html",
+    styleUrls: const ["overview_component.css"],
+    directives: const [routerDirectives, coreDirectives, materialDirectives],
+    providers: const [const ClassProvider(AnimationService)],
+    pipes: const [I18nPipe])
 class OverviewComponent implements OnInit {
-
-  static const String NAME = "Overview";
-
   Map<String, AnimationDescriptor> animations;
 
   /**
@@ -30,16 +27,11 @@ class OverviewComponent implements OnInit {
   AnimationService _animationService;
 
   /**
-   * Router used to navigate to other routes.
-   */
-  Router _router;
-
-  /**
    * Service used to get translations.
    */
   I18nService _i18n;
 
-  OverviewComponent(this._animationService, this._router, this._i18n);
+  OverviewComponent(this._animationService, this._i18n);
 
   @override
   ngOnInit() {
@@ -51,21 +43,11 @@ class OverviewComponent implements OnInit {
   }
 
   /**
-   * Called when an animation has been selected.
+   * Get animation url to navigate to.
    */
-  void onAnimationSelected(String animationName) {
-    goToAnimationView(animationName);
+  String animationUrl(String animationPath) {
+    return paths.animation.toUrl(parameters: {paths.idParam: animationPath});
   }
-
-  /**
-   * Go to animation view and show the passed animation.
-   */
-  Future goToAnimationView(String animationName) => _router.navigate([
-    DefaultAnimationViewComponent.NAME,
-    {
-      "id": animationName
-    }
-  ]);
 
   Message getAnimationName(String key) => _i18n.get(key);
 

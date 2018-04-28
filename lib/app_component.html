@@ -5,12 +5,12 @@
 	<div class="rest">
 		<span class="title">{{ "title" | i18n }}</span>
 		<nav>
-			<material-button (trigger)="goTo('Overview')"><material-icon icon="home"></material-icon>{{ "overview" | i18n }}</material-button>
+			<material-button [routerLink]="routes.overview.toUrl()"><material-icon icon="home"></material-icon>{{ "overview" | i18n }}</material-button>
 		</nav>
 	</div>
 </header>
 
-<router-outlet></router-outlet>
+<router-outlet [routes]="routes.all"></router-outlet>
 
 <footer class="footer">
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
@@ -19,6 +19,6 @@
 			[buttonText]="languageSelectionLabel"
 			[selection]="languageSelectionModel"
 			[options]="languageSelectionOptions"
-			[itemRenderer]="languageItemRenderer">
+			[deselectOnActivate]="false">
 	</material-dropdown-select>
 </footer>

@@ -72,14 +72,14 @@ class I18nService {
   /**
    * Load language file with the passed locale.
    */
-  Future<Map<String, String>> _loadLangFile(String locale) async {
+  Future<dynamic> _loadLangFile(String locale) async {
     if (!_hasLocale(locale)) {
       locale = DEFAULT_LOCALE;
     }
 
     return HttpRequest.getString(_platformLocation.getBaseHrefFromDOM() + URL + locale + FILE_ENDING).then((value) {
       try {
-        return JSON.decode(value);
+        return json.decode(value);
       } catch (e) {
         print("Language resource file could not be loaded for locale: $locale");
       }
@@ -89,7 +89,9 @@ class I18nService {
   /**
    * Initialize key to message lookup.
    */
-  void _initLookup(Map<String, String> map) {
+  void _initLookup(dynamic jsonMap) {
+    Map<String, String> map = (jsonMap as Map).cast<String, String>();
+
     for (String key in map.keys) {
       Message msg = _lookup[key];
 
@@ -208,6 +210,11 @@ class Language {
    * Create new language.
    */
   const Language(this.locale, this.name);
+
+  @override
+  String toString() {
+    return name;
+  }
 }
 
 /**

@@ -1,5 +1,4 @@
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/ui/dynamic/dynamic_content_directive.dart';
 
 /**
  * Component
@@ -7,33 +6,29 @@ import 'package:netzwerke_animationen/src/ui/dynamic/dynamic_content_directive.d
 @Component(
   selector: "dynamic-content",
   templateUrl: "dynamic_content_component.html",
-  styleUrls: const ["dynamic_content_component.css"],
-  directives: const [DynamicContentDirective]
+  styleUrls: const ["dynamic_content_component.css"]
 )
 class DynamicContentComponent {
 
-  @ViewChild(DynamicContentDirective)
-  DynamicContentDirective host;
+  @ViewChild("placeholder", read: ViewContainerRef)
+  ViewContainerRef placeholder;
 
   /**
    * Resolver resolves components.
    */
-  ComponentResolver _componentResolver;
+  final ComponentLoader _componentLoader;
 
   /**
    * Create new dynamic content component instance.
    */
-  DynamicContentComponent(this._componentResolver);
+  DynamicContentComponent(this._componentLoader);
 
   /**
    * Called when the component to show changes.
    */
   @Input("componentToShow")
-  void set showComponent(Type compType) {
-    host.viewContainerRef.clear();
-
-    ComponentFactory compFactory = _componentResolver.resolveComponentSync(compType);
-    host.viewContainerRef.createComponent(compFactory);
+  void set showComponent(dynamic factory) {
+    _componentLoader.loadNextToLocation(factory, placeholder);
   }
 
 }

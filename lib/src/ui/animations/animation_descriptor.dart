@@ -3,7 +3,7 @@ class AnimationDescriptor {
   /**
    * Type of the animation (e. g. the Animation components class).
    */
-  final Type type;
+  final dynamic typeFactory;
 
   /**
    * Name of the animation.
@@ -20,6 +20,6 @@ class AnimationDescriptor {
    */
   final String path;
 
-  const AnimationDescriptor(this.type, this.name, this.previewImagePath, this.path);
+  const AnimationDescriptor(this.typeFactory, this.name, this.previewImagePath, this.path);
 
 }

@@ -4,23 +4,16 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
 
 @Component(
-  selector: "transmission-animation",
-  templateUrl: "transmission_animation.html",
-  styleUrls: const ["transmission_animation.css"],
-  directives: const [CORE_DIRECTIVES, materialDirectives, CanvasComponent],
-  pipes: const [I18nPipe]
-)
+    selector: "transmission-animation",
+    templateUrl: "transmission_animation.html",
+    styleUrls: const ["transmission_animation.css"],
+    directives: const [coreDirectives, materialDirectives, CanvasComponent],
+    pipes: const [I18nPipe])
 class TransmissionAnimation extends CanvasAnimation implements OnInit {
-
-  /**
-   * Descriptor for the animation.
-   */
-  static const AnimationDescriptor DESCRIPTOR = const AnimationDescriptor(TransmissionAnimation, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission");
 
   /**
    * Propagation speed on the connection.
@@ -35,11 +28,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /*
   LENGTH INPUT CONTROL PROPERTIES
    */
-  static const Map<String, int> _lengthUnits = const <String, int> {
-    "km": 1000,
-    "m": 1
-  };
-  SelectionModel<String> lengthSelectModel = new SelectionModel.withList(selectedValues: [_lengthUnits.keys.first]);
+  static const Map<String, int> _lengthUnits = const <String, int>{"km": 1000, "m": 1};
+  SelectionModel<String> lengthSelectModel = new SelectionModel.single(selected: _lengthUnits.keys.first, keyProvider: (unit) => unit);
   SelectionOptions<String> lengthOptions = new SelectionOptions.fromList(_lengthUnits.keys.toList(), label: "Length Units");
 
   static const List<String> _lengthSuggestions = const <String>["10", "100", "1000"];
@@ -48,11 +38,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /*
   RATE INPUT CONTROL PROPERTIES
    */
-  static const Map<String, int> _rateUnits = const <String, int> {
-    "Mb/s": 1000 * 1000,
-    "kb/s": 1000
-  };
-  SelectionModel<String> rateSelectModel = new SelectionModel.withList(selectedValues: [_rateUnits.keys.first]);
+  static const Map<String, int> _rateUnits = const <String, int>{"Mb/s": 1000 * 1000, "kb/s": 1000};
+  SelectionModel<String> rateSelectModel = new SelectionModel.single(selected: _rateUnits.keys.first, keyProvider: (unit) => unit);
   SelectionOptions<String> rateOptions = new SelectionOptions.fromList(_rateUnits.keys.toList(), label: "Speed Units");
 
   static const List<String> _rateSuggestions = const <String>["1", "10", "32", "64", "100", "128", "256", "512", "1024"];
@@ -61,13 +48,8 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /*
   PACKET SIZE INPUT CONTROL PROPERTIES
    */
-  static const Map<String, int> _sizeUnits = const <String, int> {
-    "Byte": 1,
-    "kByte": 1000,
-    "MByte": 1000 * 1000,
-    "GByte": 1000 * 1000 * 1000
-  };
-  SelectionModel<String> sizeSelectModel = new SelectionModel.withList(selectedValues: [_sizeUnits.keys.first]);
+  static const Map<String, int> _sizeUnits = const <String, int>{"Byte": 1, "kByte": 1000, "MByte": 1000 * 1000, "GByte": 1000 * 1000 * 1000};
+  SelectionModel<String> sizeSelectModel = new SelectionModel.single(selected: _sizeUnits.keys.first, keyProvider: (unit) => unit);
   SelectionOptions<String> sizeOptions = new SelectionOptions.fromList(_sizeUnits.keys.toList(), label: "Size Units");
 
   static const List<String> _sizeSuggestions = const <String>["1", "10", "32", "64", "100", "128", "256", "512", "1024"];
@@ -107,15 +89,21 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   }
 
   String get defaultPacketSize => _sizeSuggestions[4];
+
   String get defaultRate => _rateSuggestions[0];
+
   String get defaultLength => _lengthSuggestions[2];
 
   String get rateLabel => rateSelectModel.selectedValues.first;
+
   String get sizeLabel => sizeSelectModel.selectedValues.first;
+
   String get lengthUnitLabel => lengthSelectModel.selectedValues.first;
 
   List<String> get lengthSuggestions => _lengthSuggestions;
+
   List<String> get rateSuggestions => _rateSuggestions;
+
   List<String> get sizeSuggestions => _sizeSuggestions;
 
   Message _senderMessage;
@@ -125,32 +113,26 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /**
    * Get set length of the connection (in meter).
    */
-  int get length => int.parse(lengthValue, onError: (source) {
-    // Set lengthValue to the default value.
-    lengthValue = _lengthSuggestions[1];
-
-    return int.parse(lengthValue);
-  }) * _lengthUnits[lengthUnitLabel];
+  int get length {
+    int len = int.tryParse(lengthValue) ?? _lengthSuggestions[1];
+    return len * _lengthUnits[lengthUnitLabel];
+  }
 
   /**
    * Get rate of the transmission (in bit per second).
    */
-  int get rate => int.parse(rateValue, onError: (source) {
-    // Set rateValue to default value.
-    rateValue = _rateSuggestions[1];
-
-    return int.parse(rateValue);
-  }) * _rateUnits[rateLabel];
+  int get rate {
+    int r = int.tryParse(rateValue) ?? _rateSuggestions[1];
+    return r * _rateUnits[rateLabel];
+  }
 
   /**
    * Get packet size (in bit).
    */
-  int get packetSize => int.parse(packetSizeValue, onError: (source) {
-    // Set sizeValue to default value.
-    packetSizeValue = _sizeSuggestions[4];
-
-    return int.parse(packetSizeValue);
-  }) * _sizeUnits[sizeLabel] * 8;
+  int get packetSize {
+    int s = int.tryParse(packetSizeValue) ?? _sizeSuggestions[4];
+    return s * _sizeUnits[sizeLabel] * 8;
+  }
 
   @override
   ngOnInit() {
@@ -158,25 +140,6 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
     _senderMessage = _i18n.get("packetTransmission.sender");
     _receiverMessage = _i18n.get("packetTransmission.receiver");
     _propagationSpeed = _i18n.get("packetTransmission.propagationSpeed");
-
-    // Do not allow deselects in selection dropdowns.
-    ignoreDeselect(rateSelectModel);
-    ignoreDeselect(sizeSelectModel);
-  }
-
-  /**
-   * Ignore the deselect event of the passed selection model.
-   * NOTE: This is replaceable as a component setting in Angular Dart 5.
-   */
-  void ignoreDeselect<T>(SelectionModel<T> model) {
-    model.selectionChanges.listen((changes) {
-      SelectionChangeRecord<T> change = changes[0];
-
-      if (change.added.isEmpty) {
-        // Entry has been deselected (We do not allow this) -> Undo this.
-        model.select(change.removed.first);
-      }
-    });
   }
 
   @override
@@ -273,5 +236,4 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
     rateValue = defaultRate;
     packetSizeValue = defaultPacketSize;
   }
-
 }

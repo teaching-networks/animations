@@ -7,6 +7,4 @@ import 'package:angular/angular.dart';
 )
 class NotFoundComponent {
 
-  static const String NAME = "NotFound";
-
 }
