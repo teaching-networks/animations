@@ -5,6 +5,8 @@ import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import "package:intl/intl_browser.dart";
 
+typedef void LanguageChangedListener(String newLocale);
+
 /**
  * I18n service is a service where you can fetch translations for a specific locale.
  */
@@ -51,6 +53,11 @@ class I18nService {
   PlatformLocation _platformLocation;
 
   /**
+   * List of listeners which want to be notified when the language changes.
+   */
+  List<LanguageChangedListener> _languageChangedListener;
+
+  /**
    * I18n Service constructor.
    */
   I18nService(this._platformLocation) {
@@ -64,9 +71,13 @@ class I18nService {
 
   /**
    * Reload language file.
+   * @param notifyListener whether to notify the langauge changed listeners that the language has changed
    */
   void _reload() {
-    _loadLangFile(_currentLocale).then(_initLookup);
+    _loadLangFile(_currentLocale).then((jsonMap) {
+      _initLookup(jsonMap);
+      _notifyLanguageChanged(_currentLocale);
+    });
   }
 
   /**
@@ -194,6 +205,40 @@ class I18nService {
 
     return false;
   }
+
+  /**
+   * Add a listener which should be notified when the language changes.
+   */
+  void addLanguageChangedListener(LanguageChangedListener listener) {
+    if (_languageChangedListener == null) {
+      _languageChangedListener = new List<LanguageChangedListener>();
+    }
+
+    _languageChangedListener.add(listener);
+  }
+
+  /**
+   * Remove a listener which should be notified when the language changes.
+   * Returns whether the listener could be removed.
+   */
+  bool removeLanguageChangedListener(LanguageChangedListener listener) {
+    if (_languageChangedListener != null) {
+      return _languageChangedListener.remove(listener);
+    }
+
+    return false;
+  }
+
+  /**
+   * Notify all language changed listeners that the language has changed.
+   */
+  void _notifyLanguageChanged(String newLocale) {
+    if (_languageChangedListener != null) {
+      for (LanguageChangedListener listener in _languageChangedListener) {
+        listener.call(newLocale);
+      }
+    }
+  }
 }
 
 /**
@@ -214,6 +259,11 @@ class Language {
    * Create new language.
    */
   const Language(this.locale, this.name);
+
+  /**
+   * Get path to the languages flag image.
+   */
+  String get flagImagePath => "img/languages/$locale.svg";
 
   @override
   String toString() {

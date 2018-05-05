@@ -13,4 +13,6 @@ class Colors {
   static const Color GREY = const Color.hex(0xFF999999);
   static const Color LIGHTGREY = const Color.hex(0xFFDDDDDD);
 
+  static const Color CORAL = const Color.rgb(255, 102, 102);
+
 }

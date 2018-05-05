@@ -1,6 +1,7 @@
 import 'dart:html';
 
 import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
+import 'package:netzwerke_animationen/src/util/size.dart';
 
 /**
  * Defines a object which is drawable on a canvas.
@@ -28,6 +29,13 @@ abstract class CanvasDrawable {
    */
   void setStrokeColor(CanvasRenderingContext2D context, Color color) {
     context.setStrokeColorRgb(color.red, color.green, color.blue, color.alpha);
+  }
+
+  /**
+   * Get rectangle.
+   */
+  Rectangle<double> toRect(double left, double top, Size size) {
+    return new Rectangle(left, top, size.width, size.height);
   }
 
 }

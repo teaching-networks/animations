@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:angular/angular.dart';
 import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/send_and_wait/send_and_wait_animation.template.dart' as sendAndWait;
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/stop_and_wait/stop_and_wait_animation.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/stop_and_wait/stop_and_wait_animation.template.dart' as stopAndWait;
+import 'package:netzwerke_animationen/src/ui/animations/transmission/transmission_animation.dart';
 import 'package:netzwerke_animationen/src/ui/animations/transmission/transmission_animation.template.dart' as transmission;
 
 /**
@@ -11,8 +13,8 @@ import 'package:netzwerke_animationen/src/ui/animations/transmission/transmissio
 class AnimationService {
 
   Future<Map<String, AnimationDescriptor>> getAnimationDescriptors() async => {
-    "transmission": new AnimationDescriptor(transmission.TransmissionAnimationNgFactory, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission"),
-    "send-and-wait": new AnimationDescriptor(sendAndWait.SendAndWaitAnimationNgFactory, "send-and-wait-animation.name", "img/image-preview.svg", "send-and-wait")
+    "transmission": new AnimationDescriptor<TransmissionAnimation>(transmission.TransmissionAnimationNgFactory, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission"),
+    "stop-and-wait": new AnimationDescriptor<StopAndWaitAnimation>(stopAndWait.StopAndWaitAnimationNgFactory, "stop-and-wait-animation.name", "img/stop-and-wait-preview.svg", "stop-and-wait")
   };
 
 }

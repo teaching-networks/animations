@@ -30,7 +30,7 @@ class DetailAnimationViewComponent implements OnActivate {
         AnimationDescriptor descriptor = animations[id];
 
         if (descriptor != null) {
-          componentToShow = descriptor.typeFactory;
+          componentToShow = descriptor.componentFactory;
         }
       });
     }

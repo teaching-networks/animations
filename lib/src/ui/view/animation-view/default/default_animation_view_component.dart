@@ -38,7 +38,7 @@ class DefaultAnimationViewComponent implements OnActivate {
         AnimationDescriptor descriptor = animations[_id];
 
         if (descriptor != null) {
-          componentToShow = descriptor.typeFactory;
+          componentToShow = descriptor.componentFactory;
         }
       });
     }
