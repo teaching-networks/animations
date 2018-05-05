@@ -153,6 +153,10 @@ class I18nService {
 
     if (l == null) {
       return findSystemLocale().then((locale) {
+        if (locale != null && locale.length >= 2) {
+          locale = locale.substring(0, 2); // We only need the first two letters.
+        }
+
         if (!_hasLocale(locale)) {
           locale = DEFAULT_LOCALE;
         }
