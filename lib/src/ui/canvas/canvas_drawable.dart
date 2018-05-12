@@ -15,7 +15,7 @@ abstract class CanvasDrawable {
    * @param rect which defines the offset and size of the drawable
    * @param timestamp of the rendering process
    */
-  void render(CanvasRenderingContext2D context, Rectangle<double> rect, num timestamp);
+  void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]);
 
   /**
    * Convenience method to set a color as fill color of a context.

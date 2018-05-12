@@ -18,8 +18,12 @@
 	"packetTransmission.size": "Packet size",
 	"packetTransmission.rate": "Rate",
 	"packetTransmission.description": "This simple animation illustrates one of the most fundamental concepts in computer networking: transmission delay versus propagation delay. Although this concept is discussed in detail in Chapter 1, an interactive animation speaks a thousand words. You set the length of the link, the packet size, and the transmission speed; the applet shows the packet being sent from sender to receiver. Note that for many combinations, the head of the packet reaches the receiver before transmission is finished at the sender.",
-	"stop-and-wait-animation.name": "Reliable transmission: Send And Wait Protocol",
-	"stop-and-wait-animation.description": "In this animation, the sending window limits the sender to a maximum of five outstanding, unacknowledged packets. Send a new packet -> this will create a packet and begin the simulation of data moving between sender and receiver. To simulate the loss of a packet or acknowledgment, click on the packet (or acknowledgement).",
-	"stop-and-wait-animation.sender": "Sender",
-	"stop-and-wait-animation.receiver": "Receiver"
+	"reliable-transmission-animation.name": "Reliable transmission",
+	"reliable-transmission-animation.description": "In this animation, the sending window limits the sender to a maximum of five outstanding, unacknowledged packets. Send a new packet -> this will create a packet and begin the simulation of data moving between sender and receiver. To simulate the loss of a packet or acknowledgment, click on the packet (or acknowledgement).",
+	"reliable-transmission-animation.sender": "Sender",
+	"reliable-transmission-animation.receiver": "Receiver",
+	"reliable-transmission-animation.send-next-packet": "Send next packet",
+	"reliable-transmission-animation.protocol.stop-and-wait": "Stop-And-Wait",
+	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
+	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N"
 }

@@ -37,6 +37,11 @@ class CanvasComponent implements OnInit {
    */
   final _readyController = new StreamController<CanvasRenderingContext2D>.broadcast();
 
+  /**
+   * Stream controller emitting mouse click events on the canvas.
+   */
+  final _clickController = new StreamController<Point<double>>.broadcast();
+
   /*
   Width and height of the canvas.
    */
@@ -52,8 +57,16 @@ class CanvasComponent implements OnInit {
 
   @override
   ngOnInit() {
+    CanvasElement canvasElement = canvas as CanvasElement;
+    
     // Get canvas rendering context used to draw on the canvas.
-    CanvasRenderingContext2D context = (canvas as CanvasElement).getContext("2d");
+    CanvasRenderingContext2D context = canvasElement.getContext("2d");
+
+    canvasElement.onClick.listen((event) {
+      var rect = canvas.getBoundingClientRect();
+
+      _clickController.add(new Point(event.client.x - rect.left, event.client.y - rect.top));
+    });
 
     _initCanvasSize();
 
@@ -114,6 +127,12 @@ class CanvasComponent implements OnInit {
    */
   @Output()
   Stream get onReady => _readyController.stream;
+
+  /**
+   * Register on mouse click events on the canvas.
+   */
+  @Output()
+  Stream get onClick => _clickController.stream;
 
   /**
    * Initialize the canvas size and append window resize listeners

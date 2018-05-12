@@ -5,7 +5,6 @@ import 'package:netzwerke_animationen/src/router/routes.dart';
 import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/misc/language/language_item_component.dart';
 import 'package:netzwerke_animationen/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:netzwerke_animationen/src/util/component.dart';
 

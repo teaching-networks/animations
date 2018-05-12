@@ -15,4 +15,6 @@ class Colors {
 
   static const Color CORAL = const Color.rgb(255, 102, 102);
 
+  static const Color LIME = const Color.hex(0xFFCCFF33);
+
 }

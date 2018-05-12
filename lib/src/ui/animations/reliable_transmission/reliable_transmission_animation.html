@@ -1,0 +1,24 @@
+<div class="controls">
+	<material-button raised [disabled]="!transmissionWindow.canEmitPacket()" (trigger)="transmissionWindow.emitPacket()">
+		<material-icon icon="play_arrow"></material-icon>
+		{{ "reliable-transmission-animation.send-next-packet" | i18n }}
+	</material-button>
+	<material-dropdown-select
+			[buttonText]="protocolSelectLabel"
+			[selection]="protocolSelectModel"
+			[options]="protocolSelectOptions"
+			[itemRenderer]="protocolSelectItemRenderer"
+			[deselectOnActivate]="false">
+	</material-dropdown-select>
+</div>
+
+<div class="drawing-area">
+	<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)" (onClick)="onCanvasClick($event)"></canvas-comp>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		{{ "reliable-transmission-animation.description" | i18n }}
+	</p>
+</div>

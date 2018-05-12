@@ -56,7 +56,7 @@ class RoundRectangle extends CanvasDrawable {
         this.strokeWidth = strokeWidth;
 
   @override
-  void render(CanvasRenderingContext2D context, Rectangle<double> rect, num timestamp) {
+  void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     Edges r = radius;
     double lineWidth = strokeWidth;
     if (_sizeType == SizeType.PERCENT) {

@@ -114,6 +114,8 @@ abstract class CanvasAnimation implements OnDestroy {
    * Render Fps to canvas.
    */
   void renderFps(int fps) {
+    context.save();
+
     context.textBaseline = "middle";
     context.textAlign = "center";
 
@@ -123,13 +125,15 @@ abstract class CanvasAnimation implements OnDestroy {
 
     double width = textMetrics.width * 1.5;
     double height = defaultFontSize * 1.3;
-    double left = size.width - width;
-    double top = size.height - height;
 
-    _fpsBackgroundRectangle.render(context, new Rectangle<double>(left, top, width, height), 0);
+    context.translate(size.width - width, size.height - height);
+
+    _fpsBackgroundRectangle.render(context, new Rectangle<double>(0.0, 0.0, width, height));
 
     context.setFillColorRgb(FPS_FONT_COLOR.red, FPS_FONT_COLOR.green, FPS_FONT_COLOR.blue);
-    context.fillText("Fps: $fps", left + width / 2, top + height / 2);
+    context.fillText("Fps: $fps", width / 2, height / 2);
+
+    context.restore();
   }
 
   /**
