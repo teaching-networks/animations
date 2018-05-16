@@ -63,8 +63,16 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     _i18n.addLanguageChangedListener(_languageChangedListener);
 
     protocolSelectItemRenderer = (protocol) => _protocolNameLookup[protocol.nameKey];
+    protocolSelectModel.selectionChanges.listen((selectionChanges) {
+      // Protocol changed.
+      _initTransmissionWindow();
+    });
 
-    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel);
+    _initTransmissionWindow();
+  }
+
+  void _initTransmissionWindow() {
+    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: protocolSelectModel.selectedValues.first);
   }
 
   void _initTranslations() {
@@ -82,7 +90,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     _i18n.removeLanguageChangedListener(_languageChangedListener);
   }
 
-  void onCanvasClick(Point<num> pos) {
+  void onCanvasClick(Point<double> pos) {
     transmissionWindow.onClick(pos);
   }
 

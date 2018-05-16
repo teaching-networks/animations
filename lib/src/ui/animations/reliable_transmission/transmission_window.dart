@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
@@ -52,6 +53,11 @@ class TransmissionWindow extends CanvasDrawable {
   final Message receiverLabel;
 
   /**
+   * Protocol to use.
+   */
+  final ReliableTransmissionProtocol protocol;
+
+  /**
    * Place of a packet.
    */
   final RoundRectangle _packetPlaceRect = new RoundRectangle(radius: new Edges.all(0.2), radiusSizeType: SizeType.PERCENT, paintMode: PaintMode.FILL, color: Colors.LIGHTGREY);
@@ -67,6 +73,7 @@ class TransmissionWindow extends CanvasDrawable {
   TransmissionWindow({
     int length = DEFAULT_LENGTH,
     int windowSize = DEFAULT_WINDOW_SIZE,
+    this.protocol,
     this.senderLabel,
     this.receiverLabel
   }) : _length = length,
@@ -111,7 +118,7 @@ class TransmissionWindow extends CanvasDrawable {
       context.save();
       context.translate(i * slotWidth + SLOT_PADDING, 0.0);
 
-      pair.first.setActualOffset(i * slotWidth + SLOT_PADDING, 0.0);
+      pair.first.setActualOffset(maxLabelWidth + i * slotWidth + SLOT_PADDING, 0.0);
 
       pair.second?.render(context, toRect(target.x, target.y, packetSize));
       pair.first.draw(context, packetSize, target, timestamp);
@@ -150,8 +157,15 @@ class TransmissionWindow extends CanvasDrawable {
 
   bool canEmitPacket() => _packets.where((packet) => packet.first.inProgress).length < _windowSize;
 
-  void onClick(Point<num> pos) {
-    print(pos);
+  void onClick(Point<double> pos) {
+    for (var pair in _packets) {
+      var bounds = pair.first.getActualBounds();
+
+      if (bounds.containsPoint(pos)) {
+        pair.first.onClick();
+        break;
+      }
+    }
   }
 
 }

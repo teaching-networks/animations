@@ -18,7 +18,7 @@ class Packet extends CanvasDrawable {
   /**
    * Default duration until the packet reaches its destination.
    */
-  static const Duration DEFAULT_DURATION = const Duration(seconds: 4);
+  static const Duration DEFAULT_DURATION = const Duration(seconds: 6);
 
   String text = "PKT";
   int number;
@@ -147,6 +147,14 @@ class Packet extends CanvasDrawable {
    */
   Rectangle<double> getActualBounds() {
     return new Rectangle(_actualOffset.x + _lastPos.x, _actualOffset.y + _lastPos.y, _actualSize.width, _actualSize.height);
+  }
+
+  /**
+   * What should happen when the packet is clicked.
+   */
+  void onClick() {
+    print("Packet $number has been clicked.");
+    rectangle.color = Colors.LIGHTGREY;
   }
 
 }

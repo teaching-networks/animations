@@ -63,9 +63,7 @@ class CanvasComponent implements OnInit {
     CanvasRenderingContext2D context = canvasElement.getContext("2d");
 
     canvasElement.onClick.listen((event) {
-      var rect = canvas.getBoundingClientRect();
-
-      _clickController.add(new Point(event.client.x - rect.left, event.client.y - rect.top));
+      _clickController.add(_mouseEventToPoint(event));
     });
 
     _initCanvasSize();
@@ -201,6 +199,17 @@ class CanvasComponent implements OnInit {
       "width": "${width}px",
       "height": "${height}px"
     };
+  }
+
+  /**
+   * Get point from mouse event.
+   */
+  Point<double> _mouseEventToPoint(MouseEvent event) {
+    var rect = canvas.getBoundingClientRect();
+
+    Point<double> point = new Point<double>(event.client.x - rect.left, event.client.y - rect.top) * window.devicePixelRatio;
+
+    return point;
   }
 
 }
