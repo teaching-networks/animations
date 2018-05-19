@@ -14,7 +14,8 @@ import 'package:netzwerke_animationen/src/util/component.dart';
     templateUrl: 'app_component.html',
     directives: const [materialDirectives, routerDirectives],
     providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
-    pipes: const [I18nPipe])
+    pipes: const [I18nPipe]
+)
 class AppComponent implements OnInit {
 
   /**

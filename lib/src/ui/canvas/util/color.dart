@@ -30,4 +30,8 @@ class Color {
    */
   const Color.rgba(this.red, this.green, this.blue, this.alpha);
 
+  static Color opacity(Color color, double alpha) {
+    return new Color.rgba(color.red, color.green, color.blue, alpha);
+  }
+
 }

@@ -48,6 +48,8 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   LanguageChangedListener _languageChangedListener;
 
+  bool _isPaused = false;
+
   ReliableTransmissionAnimation(this._i18n);
 
   @override

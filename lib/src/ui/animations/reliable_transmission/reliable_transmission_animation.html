@@ -3,6 +3,12 @@
 		<material-icon icon="play_arrow"></material-icon>
 		{{ "reliable-transmission-animation.send-next-packet" | i18n }}
 	</material-button>
+	<material-button raised *ngIf="transmissionWindow.isPaused" (trigger)="transmissionWindow.switchPause()">
+		<material-icon icon="play_circle_outline"></material-icon>
+	</material-button>
+	<material-button raised *ngIf="!transmissionWindow.isPaused" (trigger)="transmissionWindow.switchPause()">
+		<material-icon icon="pause_circle_outline"></material-icon>
+	</material-button>
 	<material-dropdown-select
 			[buttonText]="protocolSelectLabel"
 			[selection]="protocolSelectModel"
