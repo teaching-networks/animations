@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
@@ -27,7 +28,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Default window size for the window.
    */
-  static const int DEFAULT_WINDOW_SIZE = 1;
+  static const int DEFAULT_WINDOW_SIZE = 3;
 
   /**
    * Padding between window slots.
@@ -72,22 +73,12 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * List of packets currently in the window.
    */
-  final List<List<Packet>> _packetSlots = new List<List<Packet>>();
-
-  /**
-   * Timers of the transmission.
-   */
-  final List<num> _timeouts = new List<num>();
+  final List<PacketSlot> _packetSlots = new List<PacketSlot>();
 
   /**
    * Last timeout countdowns are saved here (used to display the old countdown while animation is paused).
    */
   final Map<int, int> _timeoutLabelCache = new Map<int, int>();
-
-  /**
-   * Packets currently being sent.
-   */
-  int _packetsInProgress = 0;
 
   /**
    * Create new transmission window.
@@ -126,8 +117,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
       if (isPaused && _timeoutLabelCache[index] != null) {
         timeout = _timeoutLabelCache[index];
-      } else if (_timeouts.length > index) {
-        timeout = ((_timeouts[index] - timestamp) / 1000).round();
+      } else if (_packetSlots.length > index) {
+        timeout = ((_packetSlots[index].timeout - timestamp) / 1000).round();
         _timeoutLabelCache[index] = timeout;
       }
 
@@ -156,7 +147,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     Point<double> target = new Point(0.0, rect.height - windowSize.height);
 
     for (int i = 0; i < _packetSlots.length; i++) {
-      List<Packet> packets = _packetSlots[i];
+      PacketSlot slot = _packetSlots[i];
 
       context.save();
       {
@@ -165,7 +156,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
         double actualOffsetX = maxLabelWidth + i * slotWidth + SLOT_PADDING;
         double actualOffsetY = 0.0;
 
-        for (Packet p in packets) {
+        slot.packets.first?.setActualOffset(actualOffsetX, actualOffsetY);
+        slot.packets.first?.draw(context, packetSize, target, timestamp);
+
+        slot.packets.second?.setActualOffset(actualOffsetX, actualOffsetY);
+        slot.packets.second?.draw(context, packetSize, target, timestamp);
+
+        for (Packet p in slot.activePackets) {
           p.setActualOffset(actualOffsetX, actualOffsetY);
           p.draw(context, packetSize, target, timestamp);
         }
@@ -220,59 +217,41 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   }
 
   void _emitPacket(int index) {
-    List<Packet> packets;
+    PacketSlot slot;
     if (_packetSlots.length <= index) {
-      packets = new List<Packet>();
-      _packetSlots.add(packets);
+      slot = new PacketSlot();
+      _packetSlots.add(slot);
     } else {
-      packets = _packetSlots[index];
+      slot = _packetSlots[index];
     }
 
     Packet p = new Packet(number: index);
-
-    _packetsInProgress++;
-
-    p.addStateChangeListener((newState) {
-      if (newState == PacketState.AT_RECEIVER && !_receiverReceivedPKT(index)) {
-        packets.add(new Packet(number: p.number, startState: PacketState.END_AT_RECEIVER));
-      } else if (newState == PacketState.END) {
-        _packetsInProgress--;
-      }
-    });
-
-    packets.add(p);
-
-    num timeout = window.performance.now() + p.duration.inMilliseconds * 2;
-    if (_timeouts.length <= index) {
-      _timeouts.add(timeout);
-    } else {
-      _timeouts[index] = timeout;
-    }
+    slot.addPacket(p);
   }
 
   /**
    * Whether window is able to transmit another packet.
    */
-  bool canEmitPacket() => _packetsInProgress < _windowSize;
+  bool canEmitPacket() => _packetSlots.where((slot) => !slot.isFinished).length < _windowSize;
 
   /**
    * On click on the transmission window.
    */
   void onClick(Point<double> pos) {
-    for (var pair in _packetSlots) {
-      var bounds = pair.first.getActualBounds();
-
-      if (bounds.containsPoint(pos)) {
-        pair.first.destroy();
-        break;
+    for (var slot in _packetSlots) {
+      for (var p in slot.activePackets) {
+        if (p.getActualBounds().containsPoint(pos)) {
+          p.destroy();
+          break;
+        }
       }
     }
   }
 
   @override
   void switchPauseSubAnimations() {
-    for (var packets in _packetSlots) {
-      for (var packet in packets) {
+    for (var slot in _packetSlots) {
+      for (var packet in slot.activePackets) {
         packet.switchPause();
       }
     }
@@ -281,35 +260,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   @override
   void unpaused(num timestampDifference) {
     // Recalculate timestamps.
-    for (int i = 0; i < _timeouts.length; i++) {
-      _timeouts[i] += timestampDifference;
+    for (var slot in _packetSlots) {
+      slot.timeout += timestampDifference;
     }
-  }
-
-  /**
-   * Check is sender received ack for the passed packet slot index.
-   */
-  bool _senderReceivedACK(index) {
-    for (Packet p in _packetSlots[index]) {
-      if (p.state == PacketState.END) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Check whether receiver received packet from sender in the passed slot index.
-   */
-  bool _receiverReceivedPKT(index) {
-    for (Packet p in _packetSlots[index]) {
-      if (p.state == PacketState.END_AT_RECEIVER) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /**
@@ -317,19 +270,14 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    * Index of the timeout in the timeouts list is passed.
    */
   void _timeoutHitZero(int index) {
-    _timeouts[index] = TIMEOUT_FINISHED;
+    PacketSlot slot = _packetSlots[index];
 
-    if (!_senderReceivedACK(index)) {
+    slot.timeout = TIMEOUT_FINISHED;
+
+    if (!slot.isFinished) {
       // Resend the packet.
-      _resendPacket(index);
+      _emitPacket(index);
     }
-  }
-
-  /**
-   * Resend packet with the passed index.
-   */
-  void _resendPacket(int index) {
-    _emitPacket(index);
   }
 
 }
