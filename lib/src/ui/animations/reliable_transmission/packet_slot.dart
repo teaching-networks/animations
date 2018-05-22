@@ -39,6 +39,27 @@ class PacketSlot {
    */
   List<Packet> get activePackets => _activePackets;
 
+  /**
+   * Packets which are waiting for removal are stored in here.
+   */
+  List<Packet> _obsolete = new List<Packet>();
+
+  /**
+   * Clean obsolete objects.
+   * NOTE: Only call this if you know that no other threads are currently using this, otherwise
+   * you might get a concurrent modification error.
+   */
+  void cleanup() {
+    for (Packet p in _obsolete) {
+      _activePackets.remove(p);
+    }
+
+    _obsolete.clear();
+  }
+
+  /**
+   * Add packet to the slot.
+   */
   void addPacket(Packet p) {
     _activePackets.add(p);
 
@@ -46,8 +67,12 @@ class PacketSlot {
       if (newState == PacketState.AT_RECEIVER && _packets.second == null) {
         _packets.second = new Packet(number: p.number, startState: PacketState.END_AT_RECEIVER);
       } else if (newState == PacketState.END && _packets.first == null) {
-        _packets.first = p;
-        _activePackets.remove(p);
+        if (_packets.first == null) {
+          _packets.first = p;
+        }
+
+        // Schedule for cleanup.
+        _obsolete.add(p);
       }
     });
 

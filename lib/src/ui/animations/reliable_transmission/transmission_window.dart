@@ -148,6 +148,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
     for (int i = 0; i < _packetSlots.length; i++) {
       PacketSlot slot = _packetSlots[i];
+      slot.cleanup(); // Cleanup not used packets which are obsolete in slot first.
 
       context.save();
       {
