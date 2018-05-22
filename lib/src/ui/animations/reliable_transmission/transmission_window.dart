@@ -4,6 +4,7 @@ import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dar
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window_space.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
@@ -28,7 +29,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Default window size for the window.
    */
-  static const int DEFAULT_WINDOW_SIZE = 3;
+  static const int DEFAULT_WINDOW_SIZE = 5;
 
   /**
    * Padding between window slots.
@@ -80,6 +81,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    */
   final Map<int, int> _timeoutLabelCache = new Map<int, int>();
 
+  WindowSpaceDrawable _senderSpace;
+  WindowSpaceDrawable _receiverSpace;
+
   /**
    * Create new transmission window.
    */
@@ -90,12 +94,19 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     this.senderLabel,
     this.receiverLabel
   }) : _length = length,
-        _windowSize = windowSize;
+        _windowSize = windowSize {
+    _senderSpace = new WindowSpaceDrawable(_windowSize);
+    _receiverSpace = new WindowSpaceDrawable(_windowSize);
+  }
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
+    double padding = 25.0;
+    double h = rect.height - padding * 2;
+    double w = rect.width;
+
     context.save();
-    context.translate(rect.left, rect.top);
+    context.translate(rect.left, rect.top + padding);
 
     context.textBaseline = "middle";
     context.textAlign = "right";
@@ -104,15 +115,15 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
     context.translate(maxLabelWidth, 0.0);
 
-    Size windowSize = new Size(rect.width - maxLabelWidth, rect.height / 10);
+    Size windowSize = new Size(w - maxLabelWidth, h / 10);
 
     // Draw sender and receiver labels
     context.setFillColorRgb(0, 0, 0);
     context.fillText(senderLabel.toString(), 0.0, windowSize.height / 2);
-    context.fillText(receiverLabel.toString(), 0.0, rect.height - windowSize.height / 2);
+    context.fillText(receiverLabel.toString(), 0.0, h - windowSize.height / 2);
 
     // Draw sender window array
-    _drawWindowArray(context, windowSize, (index) {
+    _drawWindowArray(context, windowSize, _senderSpace, timestamp, (index) {
       int timeout = null;
 
       if (isPaused && _timeoutLabelCache[index] != null) {
@@ -135,16 +146,16 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
     context.save();
     {
-      context.translate(0.0, rect.height - windowSize.height);
+      context.translate(0.0, h - windowSize.height);
       // Draw receiver window array
-      _drawWindowArray(context, windowSize);
+      _drawWindowArray(context, windowSize, _receiverSpace, timestamp);
     }
     context.restore();
 
     // Draw packets (if any)
     double slotWidth = windowSize.width / _length;
     Size packetSize = new Size(windowSize.width / _length - SLOT_PADDING * 2, windowSize.height);
-    Point<double> target = new Point(0.0, rect.height - windowSize.height);
+    Point<double> target = new Point(0.0, h - windowSize.height);
 
     for (int i = 0; i < _packetSlots.length; i++) {
       PacketSlot slot = _packetSlots[i];
@@ -177,16 +188,17 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Draw window array.
    */
-  void _drawWindowArray(CanvasRenderingContext2D context, Size size, [LabelSupplier labelSupplier]) {
+  void _drawWindowArray(CanvasRenderingContext2D context, Size size, WindowSpaceDrawable windowSpace, num timestamp, [LabelSupplier labelSupplier]) {
     double width = size.width / _length;
     double height = size.height;
+    double slotWidth = width - SLOT_PADDING * 2;
 
     context.setFillColorRgb(0, 0, 0);
     for (int i = 0; i < _length; i++) {
       context.save();
       {
         context.translate(i * width + SLOT_PADDING, 0.0);
-        Rectangle<double> r = new Rectangle(0.0, 0.0, width - SLOT_PADDING * 2, height);
+        Rectangle<double> r = new Rectangle(0.0, 0.0, slotWidth, height);
 
         _packetPlaceRect.render(context, r, 0);
 
@@ -208,6 +220,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       }
       context.restore();
     }
+
+    // Draw window space indicator.
+    windowSpace.draw(context, width, height, SLOT_PADDING, timestamp);
   }
 
   /**
@@ -221,6 +236,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     PacketSlot slot;
     if (_packetSlots.length <= index) {
       slot = new PacketSlot();
+      slot.addArrivalListener((isAtSender) {
+        if (isAtSender) {
+          _onSenderReceivedACK();
+        } else {
+          _onReceiverReceivedPKT();
+        }
+      });
       _packetSlots.add(slot);
     } else {
       slot = _packetSlots[index];
@@ -233,7 +255,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Whether window is able to transmit another packet.
    */
-  bool canEmitPacket() => _packetSlots.where((slot) => !slot.isFinished).length < _windowSize;
+  bool canEmitPacket() => _packetSlots.where((slot) => !slot.isFinished).length < _windowSize && !isPaused;
 
   /**
    * On click on the transmission window.
@@ -279,6 +301,38 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       // Resend the packet.
       _emitPacket(index);
     }
+  }
+
+  /**
+   * Called when the sender received an ACK.
+   */
+  void _onSenderReceivedACK() {
+    int count = 0;
+    for (PacketSlot slot in _packetSlots) {
+      if (slot.isFinished) {
+        count++;
+      } else {
+        break;
+      }
+    }
+
+    _senderSpace.setOffset(count);
+  }
+
+  /**
+   * Called when the receiver received a PKT.
+   */
+  void _onReceiverReceivedPKT() {
+    int count = 0;
+    for (PacketSlot slot in _packetSlots) {
+      if (slot.atReceiver) {
+        count++;
+      } else {
+        break;
+      }
+    }
+
+    _receiverSpace.setOffset(count);
   }
 
 }
