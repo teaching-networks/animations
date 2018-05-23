@@ -1,10 +1,10 @@
 import 'dart:html';
 import 'dart:math';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_slot.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window_space.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
@@ -20,6 +20,11 @@ typedef int LabelSupplier(int index);
  * Receive or Send window for reliable transmission.
  */
 class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
+
+  /**
+   * Default speed for the packet animation (in milliseconds).
+   */
+  static const int DEFAULT_PACKET_ANIMATION_SPEED = 6000;
 
   /**
    * Default length for the window array.
@@ -83,6 +88,11 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
   WindowSpaceDrawable _senderSpace;
   WindowSpaceDrawable _receiverSpace;
+
+  /**
+   * Speed in milliseconds for the packet animation.
+   */
+  int speed = DEFAULT_PACKET_ANIMATION_SPEED;
 
   /**
    * Create new transmission window.
@@ -248,7 +258,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       slot = _packetSlots[index];
     }
 
-    Packet p = new Packet(number: index);
+    Packet p = new Packet(number: index, durationSupplier: () => this.speed);
     slot.addPacket(p);
   }
 
@@ -333,6 +343,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     }
 
     _receiverSpace.setOffset(count);
+  }
+
+  void reset() {
+    _packetSlots.clear();
+    _timeoutLabelCache.clear();
+    _senderSpace = new WindowSpaceDrawable(_windowSize);
+    _receiverSpace = new WindowSpaceDrawable(_windowSize);
   }
 
 }

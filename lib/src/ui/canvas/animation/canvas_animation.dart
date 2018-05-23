@@ -2,7 +2,6 @@ import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
 import 'package:netzwerke_animationen/src/util/size.dart';

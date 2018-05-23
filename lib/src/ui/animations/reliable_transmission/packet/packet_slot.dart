@@ -1,6 +1,6 @@
 import 'dart:html';
 
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/util/pair.dart';
 
 typedef void ArrivalListener(bool isAtSender);

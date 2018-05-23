@@ -22,7 +22,7 @@
 	"reliable-transmission-animation.description": "In dieser Animation sehen Sie ein Sender und ein Empfänger Fenster, welche für ein Maximum von 5 ausstehenden Paketen limitiert sind. Sie können Packete vom Sender zum Empfänger schicken. Klicken Sie auf ein Paket, um es zu löschen und Paketverlust zu simulieren.",
 	"reliable-transmission-animation.sender": "Sender",
 	"reliable-transmission-animation.receiver": "Empfänger",
-	"reliable-transmission-animation.send-next-packet": "Nächstes Packet versenden",
+	"reliable-transmission-animation.send-next-packet": "Paket senden",
 	"reliable-transmission-animation.protocol.stop-and-wait": "Stop-And-Wait",
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
 	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N"

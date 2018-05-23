@@ -4,6 +4,16 @@
   padding: 1em 0;
 }
 
-.controls > * {
-  padding: 0 1em;
+.controls {
+  display: flex;
+  align-items: center;
+
+  & > * {
+    padding: 0 0.5em;
+  }
+}
+
+.slider-panel {
+  display: inline-block;
+  width: 200px;
 }

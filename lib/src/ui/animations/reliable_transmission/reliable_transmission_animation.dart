@@ -8,7 +8,7 @@ import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/pr
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/selective_repeat_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/stop_and_wait_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/transmission_window.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
 
@@ -47,8 +47,6 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   String get protocolSelectLabel => protocolSelectItemRenderer(protocolSelectModel.selectedValues.first);
 
   LanguageChangedListener _languageChangedListener;
-
-  bool _isPaused = false;
 
   ReliableTransmissionAnimation(this._i18n);
 

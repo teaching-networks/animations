@@ -18,6 +18,11 @@ import 'package:netzwerke_animationen/src/util/size.dart';
 typedef void StateChangeListener(PacketState newState);
 
 /**
+ * Supplier for the packet animation duration.
+ */
+typedef int DurationSupplier();
+
+/**
  * A packet drawable on a canvas.
  */
 class Packet extends CanvasDrawable with CanvasPausableMixin {
@@ -77,6 +82,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    */
   List<StateChangeListener> _stateListeners;
 
+  /**
+   * Supplier for the packet animation duration.
+   */
+  final DurationSupplier durationSupplier;
+
   /*
   Attributes needed to determine the actual bounds of the packet.
    */
@@ -87,7 +97,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Create new packet instance.
    */
-  Packet({this.number, this.duration = DEFAULT_DURATION, PacketState startState = PacketState.START}) : _state = startState;
+  Packet({this.number, this.duration = DEFAULT_DURATION, this.durationSupplier, PacketState startState = PacketState.START}) : _state = startState;
 
   /**
    * Draw the packet.
@@ -149,7 +159,9 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    * Pass timeDifference (The difference between the animation start and end).
    */
   double _getCurrentProgress(num timeDifference) {
-    double progress = min(1 / duration.inMilliseconds * timeDifference, 1.0);
+    int time = durationSupplier != null ? durationSupplier.call() : duration.inMilliseconds;
+
+    double progress = min(1 / time * timeDifference, 1.0);
 
     if (_state == PacketState.MOVING_FROM_SENDER) {
       if (progress == 1.0) {
