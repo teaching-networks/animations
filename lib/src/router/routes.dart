@@ -8,36 +8,20 @@ import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.te
 
 @Injectable()
 class Routes {
-  static final RouteDefinition _overview = new RouteDefinition(
-    routePath: paths.overview,
-    component: overviewComp.OverviewComponentNgFactory,
-    useAsDefault: true
-  );
+  static final RouteDefinition _overview =
+      new RouteDefinition(routePath: paths.overview, component: overviewComp.OverviewComponentNgFactory, useAsDefault: true);
 
-  static final RouteDefinition _animation = new RouteDefinition(
-    routePath: paths.animation,
-    component: defaultAnimationComp.DefaultAnimationViewComponentNgFactory
-  );
+  static final RouteDefinition _animation =
+      new RouteDefinition(routePath: paths.animation, component: defaultAnimationComp.DefaultAnimationViewComponentNgFactory);
 
-  static final RouteDefinition _detail = new RouteDefinition(
-      routePath: paths.detail,
-      component: detailAnimationComp.DetailAnimationViewComponentNgFactory
-  );
+  static final RouteDefinition _detail = new RouteDefinition(routePath: paths.detail, component: detailAnimationComp.DetailAnimationViewComponentNgFactory);
 
-  static final RouteDefinition _notFound = new RouteDefinition(
-      routePath: paths.notFound,
-      component: notFoundComp.NotFoundComponentNgFactory
-  );
+  static final RouteDefinition _notFound = new RouteDefinition(routePath: paths.notFound, component: notFoundComp.NotFoundComponentNgFactory);
 
   RouteDefinition get overview => _overview;
   RouteDefinition get animation => _animation;
   RouteDefinition get detail => _detail;
   RouteDefinition get notFound => _notFound;
 
-  final List<RouteDefinition> all = [
-    _overview,
-    _animation,
-    _detail,
-    _notFound
-  ];
+  final List<RouteDefinition> all = [_overview, _animation, _detail, _notFound];
 }

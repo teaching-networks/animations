@@ -11,16 +11,10 @@ import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/util/curves.dart';
 
 class WindowSpaceDrawable extends CanvasDrawable {
-
   static const Duration MOVE_ANIMATION_DURATION = const Duration(milliseconds: 500);
 
-  final RoundRectangle rectangle = new RoundRectangle(
-      radiusSizeType: SizeType.PERCENT,
-      radius: new Edges.all(0.2),
-      color: Colors.CORAL,
-      paintMode: PaintMode.STROKE,
-      strokeWidth: 0.03
-  );
+  final RoundRectangle rectangle =
+      new RoundRectangle(radiusSizeType: SizeType.PERCENT, radius: new Edges.all(0.2), color: Colors.CORAL, paintMode: PaintMode.STROKE, strokeWidth: 0.03);
 
   int _offset = 0;
   int _windowSize = 0;
@@ -79,4 +73,7 @@ class WindowSpaceDrawable extends CanvasDrawable {
     }
   }
 
+  void set windowSize(int newSize) {
+    _windowSize = newSize;
+  }
 }

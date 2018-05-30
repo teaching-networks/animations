@@ -13,14 +13,8 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  * which leads to unsharp graphics. To fix this the canvas component utilizes the window.deviceAspectRatio property
  * to properly scale the canvas content while setting the width and height css properties to the unscaled width and height.
  */
-@Component(
-    selector: "canvas-comp",
-    templateUrl: "canvas_component.html",
-    styleUrls: const ["canvas_component.css"],
-    directives: const [coreDirectives]
-)
+@Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [coreDirectives])
 class CanvasComponent implements OnInit {
-
   @ViewChild("canvasWrapper")
   HtmlElement canvasWrapper;
 
@@ -58,7 +52,7 @@ class CanvasComponent implements OnInit {
   @override
   ngOnInit() {
     CanvasElement canvasElement = canvas as CanvasElement;
-    
+
     // Get canvas rendering context used to draw on the canvas.
     CanvasRenderingContext2D context = canvasElement.getContext("2d");
 
@@ -195,10 +189,7 @@ class CanvasComponent implements OnInit {
    * while the real size is multiplied by the factor stored at window.deviceAspectRatio.
    */
   Map<String, String> setStyles() {
-    return {
-      "width": "${width}px",
-      "height": "${height}px"
-    };
+    return {"width": "${width}px", "height": "${height}px"};
   }
 
   /**
@@ -211,5 +202,4 @@ class CanvasComponent implements OnInit {
 
     return point;
   }
-
 }

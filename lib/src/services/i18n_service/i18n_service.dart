@@ -303,5 +303,4 @@ class Message {
   String toString() {
     return content;
   }
-
 }

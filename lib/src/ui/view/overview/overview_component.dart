@@ -50,5 +50,4 @@ class OverviewComponent implements OnInit {
   }
 
   Message getAnimationName(String key) => _i18n.get(key);
-
 }

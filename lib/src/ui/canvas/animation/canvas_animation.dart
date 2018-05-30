@@ -16,7 +16,6 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  * <canvas-comp (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
  */
 abstract class CanvasAnimation implements OnDestroy {
-
   /**
    * Default font size - will be scaled using window.devicePixelRatio.
    */
@@ -180,5 +179,4 @@ abstract class CanvasAnimation implements OnDestroy {
     // Stop rendering loop.
     _killLoop = true;
   }
-
 }

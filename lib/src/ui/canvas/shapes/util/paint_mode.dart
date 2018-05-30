@@ -1,7 +1,4 @@
 /**
  * Different paint modes.
  */
-enum PaintMode {
-  FILL,
-  STROKE
-}
+enum PaintMode { FILL, STROKE }

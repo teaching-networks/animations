@@ -4,7 +4,6 @@ import 'dart:html';
  * Pausable canvas.
  */
 abstract class CanvasPausableMixin {
-
   /**
    * Whether the animation is paused.
    */
@@ -47,5 +46,4 @@ abstract class CanvasPausableMixin {
    * The time the animation has been paused is passed.
    */
   void unpaused(num timestampDifference);
-
 }

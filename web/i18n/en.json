@@ -7,6 +7,7 @@
 	"munichUniversityName": "Munich University of Applied Sciences",
 	"copyright": "Copyright",
 	"description": "Description",
+	"settings": "Settings",
 	"back": "Back",
 	"fullscreen": "Fullscreen",
 	"packetTransmission.start": "Start",
@@ -25,5 +26,7 @@
 	"reliable-transmission-animation.send-next-packet": "Send packet",
 	"reliable-transmission-animation.protocol.stop-and-wait": "Stop-And-Wait",
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
-	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N"
+	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N",
+	"reliable-transmission-animation.transmission-duration": "Transmission duration",
+	"reliable-transmission-animation.window-size": "Window size"
 }

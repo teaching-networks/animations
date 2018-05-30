@@ -3,13 +3,8 @@ import 'package:angular/angular.dart';
 /**
  * Component
  */
-@Component(
-  selector: "dynamic-content",
-  templateUrl: "dynamic_content_component.html",
-  styleUrls: const ["dynamic_content_component.css"]
-)
+@Component(selector: "dynamic-content", templateUrl: "dynamic_content_component.html", styleUrls: const ["dynamic_content_component.css"])
 class DynamicContentComponent {
-
   @ViewChild("placeholder", read: ViewContainerRef)
   ViewContainerRef placeholder;
 
@@ -30,5 +25,4 @@ class DynamicContentComponent {
   void set showComponent(dynamic factory) {
     _componentLoader.loadNextToLocation(factory, placeholder);
   }
-
 }

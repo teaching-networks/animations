@@ -11,10 +11,10 @@ import 'package:netzwerke_animationen/src/ui/animations/transmission/transmissio
  */
 @Injectable()
 class AnimationService {
-
   Future<Map<String, AnimationDescriptor>> getAnimationDescriptors() async => {
-    "transmission": new AnimationDescriptor<TransmissionAnimation>(transmission.TransmissionAnimationNgFactory, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission"),
-    "reliable-transmission": new AnimationDescriptor<ReliableTransmissionAnimation>(reliableTransmission.ReliableTransmissionAnimationNgFactory, "reliable-transmission-animation.name", "img/reliable-transmission-preview.svg", "reliable-transmission")
-  };
-
+        "transmission": new AnimationDescriptor<TransmissionAnimation>(
+            transmission.TransmissionAnimationNgFactory, "packet-transmission.name", "img/packet-transmission-preview.svg", "transmission"),
+        "reliable-transmission": new AnimationDescriptor<ReliableTransmissionAnimation>(reliableTransmission.ReliableTransmissionAnimationNgFactory,
+            "reliable-transmission-animation.name", "img/reliable-transmission-preview.svg", "reliable-transmission")
+      };
 }

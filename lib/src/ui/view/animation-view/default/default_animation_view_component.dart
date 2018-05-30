@@ -17,8 +17,7 @@ import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
     styleUrls: const ["default_animation_view_component.css"],
     directives: const [coreDirectives, materialDirectives, routerDirectives, DynamicContentComponent],
     providers: const [const ClassProvider(Routes)],
-    pipes: const [I18nPipe]
-)
+    pipes: const [I18nPipe])
 class DefaultAnimationViewComponent implements OnActivate {
   String _id = "";
 
@@ -31,7 +30,7 @@ class DefaultAnimationViewComponent implements OnActivate {
 
   @override
   void onActivate(RouterState previous, RouterState current) {
-   _id = paths.getId(current.parameters);
+    _id = paths.getId(current.parameters);
 
     if (_id != null) {
       _animationService.getAnimationDescriptors().then((animations) {
@@ -44,8 +43,5 @@ class DefaultAnimationViewComponent implements OnActivate {
     }
   }
 
-  String get detailUrl => paths.detail.toUrl(parameters: {
-    paths.idParam: _id
-  });
-
+  String get detailUrl => paths.detail.toUrl(parameters: {paths.idParam: _id});
 }

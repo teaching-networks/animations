@@ -26,7 +26,6 @@ typedef int DurationSupplier();
  * A packet drawable on a canvas.
  */
 class Packet extends CanvasDrawable with CanvasPausableMixin {
-
   /**
    * Default duration until the packet reaches its destination.
    */
@@ -46,11 +45,6 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    * Packet number.
    */
   int number;
-
-  /**
-   * Duration of the animation.
-   */
-  Duration duration;
 
   /**
    * Current state of the packet.
@@ -85,7 +79,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Supplier for the packet animation duration.
    */
-  final DurationSupplier durationSupplier;
+  DurationSupplier durationSupplier = () => DEFAULT_DURATION.inMilliseconds;
 
   /*
   Attributes needed to determine the actual bounds of the packet.
@@ -97,7 +91,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Create new packet instance.
    */
-  Packet({this.number, this.duration = DEFAULT_DURATION, this.durationSupplier, PacketState startState = PacketState.START}) : _state = startState;
+  Packet({this.number, this.durationSupplier, PacketState startState = PacketState.START}) : _state = startState;
 
   /**
    * Draw the packet.
@@ -159,7 +153,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    * Pass timeDifference (The difference between the animation start and end).
    */
   double _getCurrentProgress(num timeDifference) {
-    int time = durationSupplier != null ? durationSupplier.call() : duration.inMilliseconds;
+    int time = durationSupplier.call();
 
     double progress = min(1 / time * timeDifference, 1.0);
 
@@ -174,7 +168,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
         changeState(PacketState.END);
       }
     }
-    
+
     return progress;
   }
 
@@ -290,20 +284,9 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
       startTimestamp += timestampDifference;
     }
   }
-
 }
 
 /**
  * All state a packet can be in.
  */
-enum PacketState {
-  START,
-  END,
-  MOVING_FROM_SENDER,
-  AT_RECEIVER,
-  END_AT_RECEIVER,
-  MOVING_FROM_RECEIVER,
-  DESTROY_START,
-  DESTROYING,
-  DESTROYED
-}
+enum PacketState { START, END, MOVING_FROM_SENDER, AT_RECEIVER, END_AT_RECEIVER, MOVING_FROM_RECEIVER, DESTROY_START, DESTROYING, DESTROYED }

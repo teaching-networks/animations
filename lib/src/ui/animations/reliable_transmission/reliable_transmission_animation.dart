@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:html';
 
 import "package:angular/angular.dart";
@@ -13,22 +14,16 @@ import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.d
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
 
 @Component(
-  selector: "reliable-transmission-animation",
-  templateUrl: "reliable_transmission_animation.html",
-  styleUrls: const ["reliable_transmission_animation.css"],
-  directives: const [coreDirectives, materialDirectives, CanvasComponent],
-  pipes: const [I18nPipe]
-)
+    selector: "reliable-transmission-animation",
+    templateUrl: "reliable_transmission_animation.html",
+    styleUrls: const ["reliable_transmission_animation.css"],
+    directives: const [coreDirectives, materialDirectives, CanvasComponent],
+    pipes: const [I18nPipe])
 class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
-
   /**
    * List of protocols for reliable transmission.
    */
-  static const List<ReliableTransmissionProtocol> PROTOCOLS = const <ReliableTransmissionProtocol>[
-    const StopAndWaitProtocol("reliable-transmission-animation.protocol.stop-and-wait"),
-    const GoBackNProtocol("reliable-transmission-animation.protocol.go-back-n"),
-    const SelectiveRepeatProtocol("reliable-transmission-animation.protocol.selective-repeat")
-  ];
+  static List<ReliableTransmissionProtocol> PROTOCOLS = <ReliableTransmissionProtocol>[StopAndWaitProtocol(), GoBackNProtocol(), SelectiveRepeatProtocol()];
 
   /**
    * Sender and Receiver window for transmission.
@@ -48,6 +43,9 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   LanguageChangedListener _languageChangedListener;
 
+  /// Currently selected protocol.
+  ReliableTransmissionProtocol protocol = PROTOCOLS.first;
+
   ReliableTransmissionAnimation(this._i18n);
 
   @override
@@ -65,14 +63,13 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     protocolSelectItemRenderer = (protocol) => _protocolNameLookup[protocol.nameKey];
     protocolSelectModel.selectionChanges.listen((selectionChanges) {
       // Protocol changed.
-      _initTransmissionWindow();
+      protocol = selectionChanges.first.added.first;
+
+      transmissionWindow.reset();
+      transmissionWindow.setProtocol(protocol);
     });
 
-    _initTransmissionWindow();
-  }
-
-  void _initTransmissionWindow() {
-    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: protocolSelectModel.selectedValues.first);
+    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: protocol);
   }
 
   void _initTranslations() {
@@ -101,4 +98,6 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     transmissionWindow.render(context, toRect(0.0, 0.0, size), timestamp);
   }
 
+  /// Check whether the current protocol is able to change the window size.
+  bool get isWindowSizeChangeable => protocol.canChangeWindowSize();
 }

@@ -7,6 +7,7 @@
 	"munichUniversityName": "Hochschule München",
 	"copyright": "Copyright",
 	"description": "Beschreibung",
+	"settings": "Einstellungen",
 	"back": "Zurück",
 	"fullscreen": "Vollbild",
 	"packetTransmission.start": "Start",
@@ -25,5 +26,7 @@
 	"reliable-transmission-animation.send-next-packet": "Paket senden",
 	"reliable-transmission-animation.protocol.stop-and-wait": "Stop-And-Wait",
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
-	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N"
+	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N",
+	"reliable-transmission-animation.transmission-duration": "Übertragungs Dauer",
+	"reliable-transmission-animation.window-size": "Fenster Größe"
 }

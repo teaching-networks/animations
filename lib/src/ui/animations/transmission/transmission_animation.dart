@@ -14,7 +14,6 @@ import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
     directives: const [coreDirectives, materialDirectives, CanvasComponent],
     pipes: const [I18nPipe])
 class TransmissionAnimation extends CanvasAnimation implements OnInit {
-
   /**
    * Propagation speed on the connection.
    */

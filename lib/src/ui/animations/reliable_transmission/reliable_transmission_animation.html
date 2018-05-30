@@ -1,15 +1,9 @@
 <div class="controls">
-	<material-button raised [disabled]="!transmissionWindow.canEmitPacket()" (trigger)="transmissionWindow.emitPacket()">
+	<material-button raised [disabled]="!transmissionWindow.canEmitPacket()"
+					 (trigger)="transmissionWindow.emitPacket()">
 		<material-icon icon="play_arrow"></material-icon>
 		{{ "reliable-transmission-animation.send-next-packet" | i18n }}
 	</material-button>
-	<span class="slider-panel">
-		<material-slider [min]="2000"
-						 [max]="12000"
-						 [step]="100"
-						 [(value)]="transmissionWindow.speed">
-		</material-slider>
-	</span>
 	<material-button raised *ngIf="transmissionWindow.isPaused" (trigger)="transmissionWindow.switchPause()">
 		<material-icon icon="play_circle_outline"></material-icon>
 	</material-button>
@@ -19,17 +13,61 @@
 	<material-button raised (trigger)="transmissionWindow.reset()">
 		<material-icon icon="delete_forever"></material-icon>
 	</material-button>
-	<material-dropdown-select
-			[buttonText]="protocolSelectLabel"
-			[selection]="protocolSelectModel"
-			[options]="protocolSelectOptions"
-			[itemRenderer]="protocolSelectItemRenderer"
-			[deselectOnActivate]="false">
-	</material-dropdown-select>
 </div>
 
 <div class="drawing-area">
-	<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)" (onClick)="onCanvasClick($event)"></canvas-comp>
+	<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"
+				 (onClick)="onCanvasClick($event)"></canvas-comp>
+</div>
+
+<div>
+	<h3>{{ "settings" | i18n }}</h3>
+
+	<div class="controls">
+
+		<span>
+			Protocol:&nbsp;
+			<material-dropdown-select
+					[buttonText]="protocolSelectLabel"
+					[selection]="protocolSelectModel"
+					[options]="protocolSelectOptions"
+					[itemRenderer]="protocolSelectItemRenderer"
+					[deselectOnActivate]="false">
+			</material-dropdown-select>
+		</span>
+
+		<span>
+			<span class="slider-panel">
+				<div>
+					{{ "reliable-transmission-animation.transmission-duration" | i18n }}
+				</div>
+				<material-slider [min]="2000"
+								 [max]="12000"
+								 [step]="100"
+								 [(value)]="transmissionWindow.speed">
+				</material-slider>
+				<div>
+					{{(transmissionWindow.speed / 1000).toStringAsFixed(1)}}s
+				</div>
+			</span>
+		</span>
+
+		<span *ngIf="protocol != null && isWindowSizeChangeable">
+			<span class="slider-panel">
+				<div>
+					{{ "reliable-transmission-animation.window-size" | i18n }}
+				</div>
+				<material-slider [min]="1"
+								 [max]="10"
+								 [step]="1"
+								 [(value)]="protocol.windowSize">
+				</material-slider>
+				<div>
+					{{protocol.windowSize}}
+				</div>
+			</span>
+		</span>
+	</div>
 </div>
 
 <div class="description">

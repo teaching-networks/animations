@@ -2,7 +2,6 @@ import 'package:angular/angular.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 
 class AnimationDescriptor<T extends CanvasAnimation> {
-
   /**
    * Type of the animation (e. g. the Animation components class).
    */
@@ -24,5 +23,4 @@ class AnimationDescriptor<T extends CanvasAnimation> {
   final String path;
 
   const AnimationDescriptor(this.componentFactory, this.name, this.previewImagePath, this.path);
-
 }

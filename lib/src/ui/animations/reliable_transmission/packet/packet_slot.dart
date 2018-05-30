@@ -3,13 +3,12 @@ import 'dart:html';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/util/pair.dart';
 
-typedef void ArrivalListener(bool isAtSender);
+typedef void ArrivalListener(bool isAtSender, Packet packet);
 
 /**
  * Slot for packets is a representation of a connection from sender to receiver.
  */
 class PacketSlot {
-
   /**
    * Packet pair, one for sender, one for receiver.
    * Once this is filled, the transmission was successful.
@@ -76,13 +75,19 @@ class PacketSlot {
     _activePackets.add(p);
 
     p.addStateChangeListener((newState) {
-      if (newState == PacketState.AT_RECEIVER && _packets.second == null) {
-        _packets.second = new Packet(number: p.number, startState: PacketState.END_AT_RECEIVER);
-        _notifyArrivalListeners(false);
-      } else if (newState == PacketState.END && _packets.first == null) {
+      if (newState == PacketState.AT_RECEIVER) {
+        if (_packets.second == null) {
+          _packets.second = new Packet(number: p.number, startState: PacketState.END_AT_RECEIVER);
+          _notifyArrivalListeners(false, _packets.second);
+        } else {
+          _notifyArrivalListeners(false, null);
+        }
+      } else if (newState == PacketState.END) {
         if (_packets.first == null) {
           _packets.first = p;
-          _notifyArrivalListeners(true);
+          _notifyArrivalListeners(true, _packets.first);
+        } else {
+          _notifyArrivalListeners(true, null);
         }
 
         // Schedule for cleanup.
@@ -90,7 +95,7 @@ class PacketSlot {
       }
     });
 
-    timeout = window.performance.now() + p.duration.inMilliseconds * 2;
+    timeout = window.performance.now() + p.durationSupplier.call() * 4;
   }
 
   void addArrivalListener(ArrivalListener l) {
@@ -107,10 +112,10 @@ class PacketSlot {
     }
   }
 
-  void _notifyArrivalListeners(bool arrivedAtSender) {
+  void _notifyArrivalListeners(bool arrivedAtSender, Packet packet) {
     if (_arrivalListener != null) {
       for (var l in _arrivalListener) {
-        l.call(arrivedAtSender);
+        l.call(arrivedAtSender, packet);
       }
     }
   }

@@ -10,7 +10,6 @@ import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dar
  */
 @Pipe("i18n")
 class I18nPipe extends PipeTransform {
-
   /**
    * Translation service.
    */
@@ -22,5 +21,4 @@ class I18nPipe extends PipeTransform {
    * Transform method is called by the pipe.
    */
   Message transform(String key) => _i18n.get(key);
-
 }

@@ -7,7 +7,6 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  * Defines a object which is drawable on a canvas.
  */
 abstract class CanvasDrawable {
-
   /**
    * Render your graphics on the canvas.
    *
@@ -37,5 +36,4 @@ abstract class CanvasDrawable {
   Rectangle<double> toRect(double left, double top, Size size) {
     return new Rectangle(left, top, size.width, size.height);
   }
-
 }

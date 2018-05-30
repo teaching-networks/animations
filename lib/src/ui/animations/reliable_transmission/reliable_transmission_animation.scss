@@ -16,4 +16,8 @@
 .slider-panel {
   display: inline-block;
   width: 200px;
+
+  & > div {
+    text-align: center;
+  }
 }
