@@ -21,3 +21,22 @@
     text-align: center;
   }
 }
+
+.log-area {
+  max-height: 100px;
+  overflow: auto;
+
+  & > ul {
+    margin: 0;
+    padding: 0;
+
+    & > li {
+      list-style-type: none;
+      padding: 0.1em 0.2em;
+
+      &:nth-child(even) {
+        background-color: #EAEAEA;
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:html';
 
 import "package:angular/angular.dart";
@@ -18,7 +19,7 @@ import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
     styleUrls: const ["reliable_transmission_animation.css"],
     directives: const [coreDirectives, materialDirectives, CanvasComponent],
     pipes: const [I18nPipe])
-class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy, AfterViewChecked {
   /**
    * List of protocols for reliable transmission.
    */
@@ -28,6 +29,9 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
    * Sender and Receiver window for transmission.
    */
   TransmissionWindow transmissionWindow;
+
+  @ViewChild("logContainer")
+  HtmlElement logContainer;
 
   Message _senderLabel;
   Message _receiverLabel;
@@ -44,6 +48,10 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   /// Currently selected protocol.
   ReliableTransmissionProtocol protocol = PROTOCOLS.first;
+
+  List<String> logMessages = new List<String>();
+  bool logChanged = false;
+  StreamSubscription<String> _messageStreamSub;
 
   ReliableTransmissionAnimation(this._i18n);
 
@@ -63,12 +71,26 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     protocolSelectModel.selectionChanges.listen((selectionChanges) {
       // Protocol changed.
       protocol = selectionChanges.first.added.first;
+      _listenToProtocolMessages(protocol);
 
       transmissionWindow.reset();
       transmissionWindow.setProtocol(protocol);
     });
 
+    _listenToProtocolMessages(protocol);
+
     transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: protocol);
+  }
+
+  void _listenToProtocolMessages(ReliableTransmissionProtocol p) {
+    if (_messageStreamSub != null) {
+      _messageStreamSub.cancel();
+    }
+
+    _messageStreamSub = p.messageStream.listen((message) {
+      logChanged = true;
+      logMessages.add(message);
+    });
   }
 
   void _initTranslations() {
@@ -99,4 +121,13 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   /// Check whether the current protocol is able to change the window size.
   bool get isWindowSizeChangeable => protocol.canChangeWindowSize();
+
+  @override
+  void ngAfterViewChecked() {
+    if (logChanged) {
+      logChanged = false;
+      // Scroll log container to bottom.
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+  }
 }

@@ -88,9 +88,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /// Stream used to listen to window size changes.
   StreamSubscription<int> _windowSizeSubscription;
 
-  /// Stream used to listen to special protocol logging messages.
-  StreamSubscription<String> _protocolLogSubscription;
-
   /**
    * Create new transmission window.
    */
@@ -108,10 +105,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       _windowSizeSubscription.cancel();
       _windowSizeSubscription = null;
     }
-    if (_protocolLogSubscription != null) {
-      _protocolLogSubscription.cancel();
-      _protocolLogSubscription = null;
-    }
 
     this._protocol = protocol;
 
@@ -122,10 +115,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       _windowSizeSubscription = this._protocol.windowSizeStream.listen((newWindowSize) {
         _senderSpace.windowSize = newWindowSize;
         _receiverSpace.windowSize = newWindowSize;
-      });
-
-      _protocolLogSubscription = this._protocol.messageStream.listen((nextMessage) {
-        print("PROTOCOL SAYS: $nextMessage");
       });
     }
   }

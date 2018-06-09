@@ -20,6 +20,12 @@
 				 (onClick)="onCanvasClick($event)"></canvas-comp>
 </div>
 
+<div class="log-area" #logContainer>
+	<ul>
+		<li *ngFor="let log of logMessages">{{ log }}</li>
+	</ul>
+</div>
+
 <div>
 	<h3>{{ "settings" | i18n }}</h3>
 

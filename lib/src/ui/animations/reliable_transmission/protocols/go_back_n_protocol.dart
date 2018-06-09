@@ -28,6 +28,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
       // Resend all outstanding packets.
       int maxIndex = index + _outstanding;
 
+      messageStreamController.add("Sender retransmitts $_outstanding packets after timeout");
+
       _outstanding--; // For the current packet.
 
       for (int i = index + 1; i < maxIndex; i++) {
@@ -52,6 +54,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
         // Special case, no packets yet received -> send no acumulated ACK.
         return true;
       }
+    } else {
+      messageStreamController.add("PKT_${packet.number} received in order. Sending ACK");
     }
 
     return false;
