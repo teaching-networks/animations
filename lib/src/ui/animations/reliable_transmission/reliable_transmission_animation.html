@@ -10,7 +10,7 @@
 	<material-button raised *ngIf="!transmissionWindow.isPaused" (trigger)="transmissionWindow.switchPause()">
 		<material-icon icon="pause_circle_outline"></material-icon>
 	</material-button>
-	<material-button raised (trigger)="transmissionWindow.reset()">
+	<material-button raised (trigger)="reset()">
 		<material-icon icon="delete_forever"></material-icon>
 	</material-button>
 </div>

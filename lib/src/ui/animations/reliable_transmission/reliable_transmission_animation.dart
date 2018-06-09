@@ -73,7 +73,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
       protocol = selectionChanges.first.added.first;
       _listenToProtocolMessages(protocol);
 
-      transmissionWindow.reset();
+      reset();
       transmissionWindow.setProtocol(protocol);
     });
 
@@ -121,6 +121,14 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   /// Check whether the current protocol is able to change the window size.
   bool get isWindowSizeChangeable => protocol.canChangeWindowSize();
+
+  /// Reset the animation.
+  void reset() {
+    transmissionWindow.reset();
+
+    // Reset log messages.
+    logMessages.clear();
+  }
 
   @override
   void ngAfterViewChecked() {
