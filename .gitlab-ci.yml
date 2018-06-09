@@ -11,7 +11,7 @@ webapp_build:
     - www
   script:
     - pub upgrade
-    - webdev --release --output build
+    - pub run build_runner build --release --output build
     # Deploy
     - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
     - sudo mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}

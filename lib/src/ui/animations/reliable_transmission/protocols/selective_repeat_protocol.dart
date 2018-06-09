@@ -1,5 +1,8 @@
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
 
 /// Commonly used protocol for reliable transmission.
 class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
@@ -12,37 +15,47 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   SelectiveRepeatProtocol() : super(NAME_KEY, INITIAL_WINDOW_SIZE);
 
   @override
-  bool canEmitPacket() {
+  bool canEmitPacket(List<PacketSlot> packetSlots) {
     return false;
   }
 
   @override
-  Packet senderSendPacket(int index) {
+  Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
     return new Packet(number: index);
   }
 
   @override
-  Packet receiverReceivedPacket(Packet packet) {
+  bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet != null) {
       messageStreamController.add("Receiver received packet");
     } else {
       messageStreamController.add("Receiver received packet which has already been received");
     }
 
-    return null;
+    return false;
   }
 
   @override
-  void senderReceivedPacket(Packet packet) {
+  bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet != null) {
       messageStreamController.add("Sender received packet");
     } else {
       messageStreamController.add("Sender received packet which has already been received");
     }
+
+    return false;
   }
 
   @override
   bool canChangeWindowSize() {
     return true;
   }
+
+  @override
+  void reset() {
+    // TODO: implement reset
+  }
+
+  @override
+  bool showTimeoutForAllSlots() => true;
 }

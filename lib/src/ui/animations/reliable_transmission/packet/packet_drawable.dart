@@ -114,8 +114,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
       rectangle.color = Colors.CORAL;
       _initAnimationWithState(PacketState.MOVING_FROM_SENDER, timestamp);
     } else if (_state == PacketState.AT_RECEIVER) {
-      text = "ACK";
-      rectangle.color = Colors.LIME;
+      changeToAck();
       _initAnimationWithState(PacketState.MOVING_FROM_RECEIVER, timestamp);
     } else if (_state == PacketState.DESTROY_START) {
       _initAnimationWithState(PacketState.DESTROYING, timestamp);
@@ -138,6 +137,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
 
     // Draw packet
     render(context, toRect(_lastPos.x, _lastPos.y, size));
+  }
+
+  void changeToAck() {
+    text = "ACK";
+    rectangle.color = Colors.LIME;
   }
 
   /**
@@ -268,7 +272,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Check whether packet is destroyable.
    */
-  bool isDestroyable() => _state == PacketState.MOVING_FROM_SENDER || _state == PacketState.MOVING_FROM_RECEIVER;
+  bool isDestroyable() => _state == PacketState.MOVING_FROM_SENDER || _state == PacketState.MOVING_FROM_RECEIVER || _state == PacketState.AT_RECEIVER;
 
   /**
    * Get current packet state.

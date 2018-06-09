@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
 
 /// Protocol for reliable transmission.
 abstract class ReliableTransmissionProtocol {
@@ -22,20 +25,28 @@ abstract class ReliableTransmissionProtocol {
 
   /// Called when the sender should send a packet.
   /// Returns a packet to be sent.
-  Packet senderSendPacket(int index);
+  /// [timeout] is true when the packet should be send due to a timeout
+  Packet senderSendPacket(int index, bool timeout, TransmissionWindow window);
 
   /// Receiver received [packet], can be null if the packet has already been received. This handles what should happen next.
-  /// The method should return the answer packet or null if no packet will be sent.
-  Packet receiverReceivedPacket(Packet packet);
+  /// The method returns whether to discard the packet.
+  bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window);
 
   /// Sender received [packet] can be null if the packet has already been received. This handles the following behaviour.
-  void senderReceivedPacket(Packet packet);
+  /// Returns whether to discard the packet.
+  bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window);
 
   /// Whether a new packet can be emitted.
-  bool canEmitPacket();
+  bool canEmitPacket(List<PacketSlot> packetSlots);
 
   /// Whether window size can be changed.
   bool canChangeWindowSize();
+
+  /// Reset protocol state.
+  void reset();
+
+  /// Whether to show timeout for all slots or just for the first active.
+  bool showTimeoutForAllSlots();
 
   /// Set window size to [newSize].
   void set windowSize(int newSize) {
@@ -59,4 +70,5 @@ abstract class ReliableTransmissionProtocol {
   /// Important events of the protocol are provided as messages through this stream.
   /// You can use these for example for logging.
   Stream<String> get messageStream => messageStreamController.stream;
+
 }

@@ -32,11 +32,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   static const int DEFAULT_LENGTH = 20;
 
   /**
-   * Default window size for the window.
-   */
-  static const int DEFAULT_WINDOW_SIZE = 5;
-
-  /**
    * Padding between window slots.
    */
   static const double SLOT_PADDING = 5.0;
@@ -50,11 +45,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    * Actual length of the window array.
    */
   final int _length;
-
-  /**
-   * Actual size of the window.
-   */
-  int _windowSize;
 
   /**
    * Sender label.
@@ -105,11 +95,10 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    * Create new transmission window.
    */
   TransmissionWindow(
-      {int length = DEFAULT_LENGTH, int windowSize = DEFAULT_WINDOW_SIZE, ReliableTransmissionProtocol protocol, this.senderLabel, this.receiverLabel})
-      : _length = length,
-        _windowSize = windowSize {
-    _senderSpace = new WindowSpaceDrawable(_windowSize);
-    _receiverSpace = new WindowSpaceDrawable(_windowSize);
+      {int length = DEFAULT_LENGTH, ReliableTransmissionProtocol protocol, this.senderLabel, this.receiverLabel})
+      : _length = length {
+    _senderSpace = new WindowSpaceDrawable(1);
+    _receiverSpace = new WindowSpaceDrawable(1);
 
     setProtocol(protocol);
   }
@@ -131,7 +120,6 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       _receiverSpace.windowSize = protocol.windowSize;
 
       _windowSizeSubscription = this._protocol.windowSizeStream.listen((newWindowSize) {
-        _windowSize = newWindowSize;
         _senderSpace.windowSize = newWindowSize;
         _receiverSpace.windowSize = newWindowSize;
       });
@@ -246,7 +234,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
         _packetPlaceRect.render(context, r, 0);
 
         // Draw label if any
-        if (labelSupplier != null) {
+        if (labelSupplier != null && (_protocol.showTimeoutForAllSlots() || i == windowSpace.getOffset())) {
           int label = labelSupplier.call(i);
 
           if (label != null) {
@@ -269,21 +257,21 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   }
 
   /**
-   * Emit packet from sender to receiver.
+   * Emit new packet from sender to receiver.
    */
   void emitPacket() {
-    _emitPacket(_packetSlots.length);
+    emitPacketByIndex(_packetSlots.length, false);
   }
 
-  void _emitPacket(int index) {
+  void emitPacketByIndex(int index, bool timeout) {
     PacketSlot slot;
     if (_packetSlots.length <= index) {
-      slot = new PacketSlot();
-      slot.addArrivalListener((isAtSender, packet) {
+      slot = new PacketSlot(index);
+      slot.addArrivalListener((isAtSender, packet, movingPacket) {
         if (isAtSender) {
-          _onSenderReceivedACK(packet);
+          _onSenderReceivedACK(packet, movingPacket, slot);
         } else {
-          _onReceiverReceivedPKT(packet);
+          _onReceiverReceivedPKT(packet, movingPacket, slot);
         }
       });
       _packetSlots.add(slot);
@@ -291,16 +279,19 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       slot = _packetSlots[index];
     }
 
-    Packet p = _protocol.senderSendPacket(index);
-    p.durationSupplier = () => this.speed;
+    Packet p = _protocol.senderSendPacket(index, timeout, this);
 
-    slot.addPacket(p);
+    if (p != null) {
+      p.durationSupplier = () => this.speed;
+
+      slot.addPacket(p);
+    }
   }
 
   /**
    * Whether window is able to transmit another packet.
    */
-  bool canEmitPacket() => _packetSlots.where((slot) => !slot.isFinished).length < _windowSize && !isPaused;
+  bool canEmitPacket() => _protocol.canEmitPacket(_packetSlots) && !isPaused;
 
   /**
    * On click on the transmission window.
@@ -344,14 +335,20 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
     if (!slot.isFinished) {
       // Resend the packet.
-      _emitPacket(index);
+      emitPacketByIndex(index, true);
     }
   }
 
   /**
    * Called when the sender received an ACK.
    */
-  void _onSenderReceivedACK(Packet packet) {
+  void _onSenderReceivedACK(Packet packet, Packet movingPacket, PacketSlot slot) {
+    if (_protocol.senderReceivedPacket(packet, movingPacket, slot, _senderSpace, this)) {
+      slot.packets.first = null;
+      movingPacket.destroy();
+      return;
+    }
+
     if (packet != null) {
       int count = 0;
       for (PacketSlot slot in _packetSlots) {
@@ -364,14 +361,18 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
       _senderSpace.setOffset(count);
     }
-
-    _protocol.senderReceivedPacket(packet);
   }
 
   /**
    * Called when the receiver received a PKT.
    */
-  void _onReceiverReceivedPKT(Packet packet) {
+  void _onReceiverReceivedPKT(Packet packet, Packet movingPacket, PacketSlot slot) {
+    if (_protocol.receiverReceivedPacket(packet, movingPacket, slot, _receiverSpace, this)) {
+      slot.packets.second = null;
+      movingPacket.destroy();
+      return;
+    }
+
     if (packet != null) {
       int count = 0;
       for (PacketSlot slot in _packetSlots) {
@@ -384,14 +385,16 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
       _receiverSpace.setOffset(count);
     }
-
-    _protocol.receiverReceivedPacket(packet);
   }
 
   void reset() {
     _packetSlots.clear();
     _timeoutLabelCache.clear();
-    _senderSpace = new WindowSpaceDrawable(_windowSize);
-    _receiverSpace = new WindowSpaceDrawable(_windowSize);
+    _protocol.reset();
+    _senderSpace = new WindowSpaceDrawable(_protocol.windowSize);
+    _receiverSpace = new WindowSpaceDrawable(_protocol.windowSize);
   }
+
+  List<PacketSlot> get packetSlots => _packetSlots;
+
 }

@@ -3,7 +3,7 @@ import 'dart:html';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/util/pair.dart';
 
-typedef void ArrivalListener(bool isAtSender, Packet packet);
+typedef void ArrivalListener(bool isAtSender, Packet packet, Packet movingPacket);
 
 /**
  * Slot for packets is a representation of a connection from sender to receiver.
@@ -24,6 +24,11 @@ class PacketSlot {
    * When the packet slot times out and sends a new packet.
    */
   num timeout;
+
+  /**
+   * Index of the slot.
+   */
+  num index;
 
   /**
    * List of arrival listeners being notified when a pkt arrives at sender or receiver.
@@ -55,6 +60,8 @@ class PacketSlot {
    */
   List<Packet> _obsolete = new List<Packet>();
 
+  PacketSlot(this.index);
+
   /**
    * Clean obsolete objects.
    * NOTE: Only call this if you know that no other threads are currently using this, otherwise
@@ -78,16 +85,16 @@ class PacketSlot {
       if (newState == PacketState.AT_RECEIVER) {
         if (_packets.second == null) {
           _packets.second = new Packet(number: p.number, startState: PacketState.END_AT_RECEIVER);
-          _notifyArrivalListeners(false, _packets.second);
+          _notifyArrivalListeners(false, _packets.second, p);
         } else {
-          _notifyArrivalListeners(false, null);
+          _notifyArrivalListeners(false, null, p);
         }
       } else if (newState == PacketState.END) {
         if (_packets.first == null) {
           _packets.first = p;
-          _notifyArrivalListeners(true, _packets.first);
+          _notifyArrivalListeners(true, _packets.first, p);
         } else {
-          _notifyArrivalListeners(true, null);
+          _notifyArrivalListeners(true, null, p);
         }
 
         // Schedule for cleanup.
@@ -95,6 +102,10 @@ class PacketSlot {
       }
     });
 
+    timeout = window.performance.now() + p.durationSupplier.call() * 4;
+  }
+
+  void resetTimeout(Packet p) {
     timeout = window.performance.now() + p.durationSupplier.call() * 4;
   }
 
@@ -112,10 +123,10 @@ class PacketSlot {
     }
   }
 
-  void _notifyArrivalListeners(bool arrivedAtSender, Packet packet) {
+  void _notifyArrivalListeners(bool arrivedAtSender, Packet packet, Packet movingPacket) {
     if (_arrivalListener != null) {
       for (var l in _arrivalListener) {
-        l.call(arrivedAtSender, packet);
+        l.call(arrivedAtSender, packet, movingPacket);
       }
     }
   }

@@ -76,4 +76,7 @@ class WindowSpaceDrawable extends CanvasDrawable {
   void set windowSize(int newSize) {
     _windowSize = newSize;
   }
+
+  num getOffset() => _offset;
+
 }
