@@ -29,5 +29,11 @@
 	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N",
 	"reliable-transmission-animation.transmission-duration": "Transmission duration",
 	"reliable-transmission-animation.window-size": "Window size",
-	"reliable-transmission-animation.protocol-messages": "Protocol log"
+	"reliable-transmission-animation.protocol-messages": "Protocol log",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.send-packet": "Sender sends PKT_%i",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.resend-packet": "Sender resends PKT_%i",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-packet": "Receiver received PKT_%i",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-dup-packet": "Receiver received PKT_%i which has already been received",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack": "Sender received ACK_%i",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup": "Sender received ACK_%i which has already been received"
 }

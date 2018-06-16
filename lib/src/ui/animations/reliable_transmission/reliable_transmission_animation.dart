@@ -45,12 +45,6 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   ngOnInit() {
     _initTranslations();
 
-    _languageChangedListener = (newLocale) {
-      _initTranslations();
-    };
-
-    _i18n.addLanguageChangedListener(_languageChangedListener);
-
     _listenToProtocolMessages(_protocol);
 
     transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: _protocol);
@@ -70,11 +64,6 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   void _initTranslations() {
     _senderLabel = _i18n.get("reliable-transmission-animation.sender");
     _receiverLabel = _i18n.get("reliable-transmission-animation.receiver");
-
-    if (transmissionWindow != null) {
-      transmissionWindow.senderLabel = _senderLabel;
-      transmissionWindow.receiverLabel = _receiverLabel;
-    }
   }
 
   @override
