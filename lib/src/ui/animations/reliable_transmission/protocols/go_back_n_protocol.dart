@@ -46,7 +46,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (slot.index > windowSpace.getOffset()) {
-      messageStreamController.add("PKT_${packet.number} received out of order. Sending cumulative ACK");
+      messageStreamController.add("PKT_${movingPacket.number} received out of order. Sending cumulative ACK");
 
       movingPacket.number = windowSpace.getOffset() % windowSize;
 
@@ -55,7 +55,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
         return true;
       }
     } else {
-      messageStreamController.add("PKT_${packet.number} received in order. Sending ACK");
+      messageStreamController.add("PKT_${movingPacket.number} received in order. Sending ACK");
     }
 
     return false;
