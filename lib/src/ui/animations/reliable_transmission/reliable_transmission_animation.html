@@ -20,27 +20,20 @@
 				 (onClick)="onCanvasClick($event)"></canvas-comp>
 </div>
 
-<div class="log-area" #logContainer>
-	<ul>
-		<li *ngFor="let log of logMessages">{{ log }}</li>
-	</ul>
+<div>
+	<h3>{{ "reliable-transmission-animation.protocol-messages" | i18n }}</h3>
+
+	<div class="log-area" #logContainer>
+		<ul>
+			<li *ngFor="let log of logMessages">{{ log }}</li>
+		</ul>
+	</div>
 </div>
 
 <div>
 	<h3>{{ "settings" | i18n }}</h3>
 
 	<div class="controls">
-
-		<span>
-			Protocol:&nbsp;
-			<material-dropdown-select
-					[buttonText]="protocolSelectLabel"
-					[selection]="protocolSelectModel"
-					[options]="protocolSelectOptions"
-					[itemRenderer]="protocolSelectItemRenderer"
-					[deselectOnActivate]="false">
-			</material-dropdown-select>
-		</span>
 
 		<span>
 			<span class="slider-panel">

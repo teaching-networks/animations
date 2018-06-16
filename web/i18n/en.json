@@ -28,5 +28,6 @@
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
 	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N",
 	"reliable-transmission-animation.transmission-duration": "Transmission duration",
-	"reliable-transmission-animation.window-size": "Window size"
+	"reliable-transmission-animation.window-size": "Window size",
+	"reliable-transmission-animation.protocol-messages": "Protocol log"
 }

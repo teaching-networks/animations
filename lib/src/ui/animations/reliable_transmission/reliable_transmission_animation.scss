@@ -24,6 +24,8 @@
 
 .log-area {
   max-height: 100px;
+  min-height: 100px;
+  border: 1px solid lightgray;
   overflow: auto;
 
   & > ul {
@@ -35,7 +37,7 @@
       padding: 0.1em 0.2em;
 
       &:nth-child(even) {
-        background-color: #EAEAEA;
+        background-color: #F9F9F9;
       }
     }
   }

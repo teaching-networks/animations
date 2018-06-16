@@ -1,8 +1,10 @@
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:sprintf/sprintf.dart';
 
 /// Slow but reliable protocol for the reliable transmission.
 class StopAndWaitProtocol extends ReliableTransmissionProtocol {
@@ -15,7 +17,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   int _lastPacketSequenceNumber = 1;
   bool _received = true;
 
-  StopAndWaitProtocol() : super(NAME_KEY, INITIAL_WINDOW_SIZE);
+  StopAndWaitProtocol(I18nService i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE);
 
   @override
   bool canEmitPacket(List<PacketSlot> packetSlots) {
@@ -28,9 +30,9 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
       _received = false;
       _lastPacketSequenceNumber = _lastPacketSequenceNumber == 0 ? 1 : 0;
 
-      messageStreamController.add("Sender sends PKT_$_lastPacketSequenceNumber");
+      messageStreamController.add(sprintf("Sender sends PKT_%i", [_lastPacketSequenceNumber]));
     } else {
-      messageStreamController.add("Sender resends PKT_$_lastPacketSequenceNumber");
+      messageStreamController.add(sprintf("Sender resends PKT_%i", [_lastPacketSequenceNumber]));
     }
 
     Packet packet = new Packet(number: _lastPacketSequenceNumber);

@@ -49,12 +49,12 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Sender label.
    */
-  final Message senderLabel;
+  Message senderLabel;
 
   /**
    * Receiver label.
    */
-  final Message receiverLabel;
+  Message receiverLabel;
 
   /**
    * Protocol to use.

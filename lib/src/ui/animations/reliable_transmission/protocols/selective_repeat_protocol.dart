@@ -1,3 +1,4 @@
+import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
@@ -14,7 +15,7 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   int _outstanding = 0;
 
-  SelectiveRepeatProtocol() : super(NAME_KEY, INITIAL_WINDOW_SIZE);
+  SelectiveRepeatProtocol(I18nService i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE);
 
   @override
   bool canEmitPacket(List<PacketSlot> packetSlots) {

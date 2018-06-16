@@ -10,6 +10,7 @@ dependencies:
   angular: ^5.0.0-alpha
   angular_components: ^0.9.0-alpha
   angular_router: ^2.0.0-alpha
+  sprintf: ^3.0.0
 
 dev_dependencies:
   angular_test: ^2.0.0-alpha

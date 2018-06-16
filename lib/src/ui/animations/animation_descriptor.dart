@@ -1,7 +1,6 @@
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 
-class AnimationDescriptor<T extends CanvasAnimation> {
+class AnimationDescriptor<T> {
   /**
    * Type of the animation (e. g. the Animation components class).
    */

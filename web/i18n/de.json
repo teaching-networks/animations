@@ -28,5 +28,8 @@
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",
 	"reliable-transmission-animation.protocol.go-back-n": "Go-Back-N",
 	"reliable-transmission-animation.transmission-duration": "Übertragungs Dauer",
-	"reliable-transmission-animation.window-size": "Fenster Größe"
+	"reliable-transmission-animation.window-size": "Fenster Größe",
+	"reliable-transmission-animation.protocol-messages": "Protokoll Log",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.send-packet": "Sender sends PKT_%i",
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.resend-packet": "Sender resends PKT_%i"
 }

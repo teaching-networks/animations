@@ -5,10 +5,7 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
 import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/go_back_n_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/selective_repeat_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/stop_and_wait_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
@@ -20,11 +17,6 @@ import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
     directives: const [coreDirectives, materialDirectives, CanvasComponent],
     pipes: const [I18nPipe])
 class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy, AfterViewChecked {
-  /**
-   * List of protocols for reliable transmission.
-   */
-  static List<ReliableTransmissionProtocol> PROTOCOLS = <ReliableTransmissionProtocol>[StopAndWaitProtocol(), GoBackNProtocol(), SelectiveRepeatProtocol()];
-
   /**
    * Sender and Receiver window for transmission.
    */
@@ -38,16 +30,10 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   I18nService _i18n;
 
-  SelectionModel<ReliableTransmissionProtocol> protocolSelectModel = new SelectionModel.single(selected: PROTOCOLS.first);
-  SelectionOptions<ReliableTransmissionProtocol> protocolSelectOptions = new SelectionOptions.fromList(PROTOCOLS);
-  Map<String, String> _protocolNameLookup = new Map<String, String>();
-  ItemRenderer<ReliableTransmissionProtocol> protocolSelectItemRenderer;
-  String get protocolSelectLabel => protocolSelectItemRenderer(protocolSelectModel.selectedValues.first);
-
   LanguageChangedListener _languageChangedListener;
 
-  /// Currently selected protocol.
-  ReliableTransmissionProtocol protocol = PROTOCOLS.first;
+  /// Protocol to use
+  ReliableTransmissionProtocol _protocol;
 
   List<String> logMessages = new List<String>();
   bool logChanged = false;
@@ -60,26 +46,14 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     _initTranslations();
 
     _languageChangedListener = (newLocale) {
-      _protocolNameLookup.clear();
-
       _initTranslations();
     };
 
     _i18n.addLanguageChangedListener(_languageChangedListener);
 
-    protocolSelectItemRenderer = (protocol) => _protocolNameLookup[protocol.nameKey];
-    protocolSelectModel.selectionChanges.listen((selectionChanges) {
-      // Protocol changed.
-      protocol = selectionChanges.first.added.first;
-      _listenToProtocolMessages(protocol);
+    _listenToProtocolMessages(_protocol);
 
-      reset();
-      transmissionWindow.setProtocol(protocol);
-    });
-
-    _listenToProtocolMessages(protocol);
-
-    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: protocol);
+    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: _protocol);
   }
 
   void _listenToProtocolMessages(ReliableTransmissionProtocol p) {
@@ -97,8 +71,9 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
     _senderLabel = _i18n.get("reliable-transmission-animation.sender");
     _receiverLabel = _i18n.get("reliable-transmission-animation.receiver");
 
-    for (var protocol in PROTOCOLS) {
-      _protocolNameLookup[protocol.nameKey] = _i18n.get(protocol.nameKey).toString();
+    if (transmissionWindow != null) {
+      transmissionWindow.senderLabel = _senderLabel;
+      transmissionWindow.receiverLabel = _receiverLabel;
     }
   }
 
@@ -120,7 +95,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   }
 
   /// Check whether the current protocol is able to change the window size.
-  bool get isWindowSizeChangeable => protocol.canChangeWindowSize();
+  bool get isWindowSizeChangeable => _protocol.canChangeWindowSize();
 
   /// Reset the animation.
   void reset() {
@@ -138,4 +113,12 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
       logContainer.scrollTop = logContainer.scrollHeight;
     }
   }
+
+  @Input()
+  void set protocol(ReliableTransmissionProtocol protocol) {
+    _protocol = protocol;
+  }
+
+  ReliableTransmissionProtocol get protocol => _protocol;
+
 }
