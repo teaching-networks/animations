@@ -41,7 +41,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet != null) {
-      messageStreamController.add("Receiver received PKT_${packet.number}");
+      messageStreamController.add("Receiver received PKT_${movingPacket.number}");
     } else {
       messageStreamController.add("Receiver received PKT_$_lastPacketSequenceNumber which has already been received");
     }
@@ -54,7 +54,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
     _received = true;
 
     if (packet != null) {
-      messageStreamController.add("Sender received ACK_${packet.number}");
+      messageStreamController.add("Sender received ACK_${movingPacket.number}");
     } else {
       messageStreamController.add("Sender received ACK_$_lastPacketSequenceNumber which has already been received");
     }

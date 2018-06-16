@@ -12,24 +12,30 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   /// Initial window size of the protocol.
   static const int INITIAL_WINDOW_SIZE = 5;
 
+  int _outstanding = 0;
+
   SelectiveRepeatProtocol() : super(NAME_KEY, INITIAL_WINDOW_SIZE);
 
   @override
   bool canEmitPacket(List<PacketSlot> packetSlots) {
-    return false;
+    return _outstanding < windowSize;
   }
 
   @override
   Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
-    return new Packet(number: index);
+    if (!timeout) {
+      _outstanding++;
+    }
+
+    return new Packet(number: index % windowSize);
   }
 
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
-    if (packet != null) {
-      messageStreamController.add("Receiver received packet");
+    if (packet == null) {
+      messageStreamController.add("PKT_${movingPacket.number} has already been received. Resending ACK");
     } else {
-      messageStreamController.add("Receiver received packet which has already been received");
+      messageStreamController.add("PKT_${movingPacket.number} has been received. Sending ACK");
     }
 
     return false;
@@ -37,10 +43,11 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   @override
   bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
-    if (packet != null) {
-      messageStreamController.add("Sender received packet");
+    if (packet == null) {
+      messageStreamController.add("Sender received ACK_${movingPacket.number} which it already received");
     } else {
-      messageStreamController.add("Sender received packet which has already been received");
+      _outstanding--;
+      messageStreamController.add("Sender received ACK_${movingPacket.number}");
     }
 
     return false;
@@ -53,7 +60,7 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   @override
   void reset() {
-    // TODO: implement reset
+    _outstanding = 0;
   }
 
   @override

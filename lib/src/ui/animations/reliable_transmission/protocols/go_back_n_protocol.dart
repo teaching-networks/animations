@@ -10,7 +10,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
   static const String NAME_KEY = "reliable-transmission-animation.protocol.go-back-n";
 
   /// Initial window size of the protocol.
-  static const int INITIAL_WINDOW_SIZE = 3;
+  static const int INITIAL_WINDOW_SIZE = 5;
 
   List<int> _received = new List<int>();
   int _outstanding = 0;
