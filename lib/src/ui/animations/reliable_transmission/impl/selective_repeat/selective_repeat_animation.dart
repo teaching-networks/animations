@@ -14,9 +14,11 @@ class SelectiveRepeatAnimation {
 
   I18nService _i18n;
   ReliableTransmissionProtocol protocol;
+  Message description;
 
   SelectiveRepeatAnimation(this._i18n) {
     protocol = new SelectiveRepeatProtocol(_i18n);
+    description = _i18n.get("reliable-transmission-animation.protocol.selective-repeat.description");
   }
 
 }

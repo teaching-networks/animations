@@ -35,6 +35,9 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   /// Protocol to use
   ReliableTransmissionProtocol _protocol;
 
+  @Input()
+  Message description;
+
   List<String> logMessages = new List<String>();
   bool logChanged = false;
   StreamSubscription<String> _messageStreamSub;

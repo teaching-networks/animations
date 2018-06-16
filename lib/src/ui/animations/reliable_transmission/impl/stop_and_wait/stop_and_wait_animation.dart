@@ -14,9 +14,11 @@ class StopAndWaitAnimation {
 
   I18nService _i18n;
   ReliableTransmissionProtocol protocol;
+  Message description;
 
   StopAndWaitAnimation(this._i18n) {
     protocol = new StopAndWaitProtocol(_i18n);
+    description = _i18n.get("reliable-transmission-animation.protocol.stop-and-wait.description");
   }
 
 }

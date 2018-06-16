@@ -14,9 +14,11 @@ class GoBackNAnimation {
 
   I18nService _i18n;
   ReliableTransmissionProtocol protocol;
+  Message description;
 
   GoBackNAnimation(this._i18n) {
     protocol = new GoBackNProtocol(_i18n);
+    description = _i18n.get("reliable-transmission-animation.protocol.go-back-n.description");
   }
 
 }
