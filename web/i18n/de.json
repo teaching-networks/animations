@@ -41,5 +41,9 @@
 	"reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt": "Sender sendet alle %i ausstehenden Pakete erneut nach einem Timeout",
 	"reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order": "PKT_%i wurde außerhalb der Reihenfolge empfangen. Kumulatives ACK für das letzte in Reihenfolge empfangene Paket gesendet",
 	"reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order": "PKT_%i in Reihenfolge empfangen. ACK gesendet",
-	"reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout": "Timeout zurückgesetzt, da ACK_%i empfangen"
+	"reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout": "Timeout zurückgesetzt, da ACK_%i empfangen",
+	"reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup": "PKT_%i wurde bereits empfangen. ACK erneut senden",
+	"reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt": "PKT_%i wurde empfangen. ACK senden",
+	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup": "Sender empfängt ACK_%i welches bereits empfangen wurde",
+	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender empfängt ACK_%i"
 }

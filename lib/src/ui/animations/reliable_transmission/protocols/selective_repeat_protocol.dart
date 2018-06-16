@@ -4,6 +4,7 @@ import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/pa
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:sprintf/sprintf.dart';
 
 /// Commonly used protocol for reliable transmission.
 class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
@@ -15,7 +16,23 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   int _outstanding = 0;
 
-  SelectiveRepeatProtocol(I18nService i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE);
+  I18nService _i18n;
+
+  Message _receiverReceivedPktDup;
+  Message _receiverReceivedPkt;
+  Message _senderReceivedAckDup;
+  Message _senderReceivedAck;
+
+  SelectiveRepeatProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
+    _initTranslations();
+  }
+
+  void _initTranslations() {
+    _receiverReceivedPktDup = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup");
+    _receiverReceivedPkt = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt");
+    _senderReceivedAckDup = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup");
+    _senderReceivedAck = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack");
+  }
 
   @override
   bool canEmitPacket(List<PacketSlot> packetSlots) {
@@ -34,9 +51,9 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet == null) {
-      messageStreamController.add("PKT_${movingPacket.number} has already been received. Resending ACK");
+      messageStreamController.add(sprintf(_receiverReceivedPktDup.toString(), [movingPacket.number]));
     } else {
-      messageStreamController.add("PKT_${movingPacket.number} has been received. Sending ACK");
+      messageStreamController.add(sprintf(_receiverReceivedPkt.toString(), [movingPacket.number]));
     }
 
     return false;
@@ -45,10 +62,10 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   @override
   bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet == null) {
-      messageStreamController.add("Sender received ACK_${movingPacket.number} which it already received");
+      messageStreamController.add(sprintf(_senderReceivedAckDup.toString(), [movingPacket.number]));
     } else {
       _outstanding--;
-      messageStreamController.add("Sender received ACK_${movingPacket.number}");
+      messageStreamController.add(sprintf(_senderReceivedAck.toString(), [movingPacket.number]));
     }
 
     return false;
