@@ -37,5 +37,9 @@
 	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-packet": "Receiver received PKT_%i",
 	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-dup-packet": "Receiver received PKT_%i which has already been received",
 	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack": "Sender received ACK_%i",
-	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup": "Sender received ACK_%i which has already been received"
+	"reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup": "Sender received ACK_%i which has already been received",
+	"reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt": "Sender retransmitts %i outstanding packets after timeout",
+	"reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order": "PKT_%i received out of order. Sending cumulative ACK",
+	"reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order": "PKT_%i received in order. Sending ACK",
+	"reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout": "Reset timeout for PKT_%i because sender received ACK"
 }
