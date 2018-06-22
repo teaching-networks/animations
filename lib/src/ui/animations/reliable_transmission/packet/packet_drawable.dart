@@ -4,6 +4,8 @@ import 'dart:math';
 
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
+import 'package:netzwerke_animationen/src/ui/canvas/particles/generator/burst_particle_generator.dart';
+import 'package:netzwerke_animationen/src/ui/canvas/particles/generator/particle_generator.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
 import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
@@ -88,6 +90,8 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   Size _actualSize;
   Point<double> _lastPos;
 
+  ParticleGenerator _particleGenerator;
+
   /**
    * Create new packet instance.
    */
@@ -117,6 +121,9 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
       changeToAck();
       _initAnimationWithState(PacketState.MOVING_FROM_RECEIVER, timestamp);
     } else if (_state == PacketState.DESTROY_START) {
+      _particleGenerator = new BurstParticleGenerator(color: rectangle.color, opacity: 0.1, minRadius: size.width / 5, maxRadius: size.width / 3, count: 100);
+      _particleGenerator.start();
+
       _initAnimationWithState(PacketState.DESTROYING, timestamp);
     }
 
@@ -136,7 +143,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
     }
 
     // Draw packet
-    render(context, toRect(_lastPos.x, _lastPos.y, size));
+    render(context, toRect(_lastPos.x, _lastPos.y, size), timestamp);
   }
 
   void changeToAck() {
@@ -198,6 +205,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
     // Draw text
     context.save();
     context.translate(rect.width / 2, rect.height / 2);
+
+    if (_particleGenerator != null) {
+      _particleGenerator.draw(context, timestamp);
+    }
+
     context.rotate(pi / 2);
 
     context.textBaseline = "middle";
