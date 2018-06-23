@@ -49,6 +49,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
   int number;
 
   /**
+   * Set this when you want to show this number instead of [number].
+   */
+  int overlayNumber;
+
+  /**
    * Current state of the packet.
    */
   PacketState _state;
@@ -215,7 +220,12 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
     context.textBaseline = "middle";
     context.textAlign = "center";
     setFillColor(context, Color.opacity(Colors.BLACK, _currentOpacity));
-    context.fillText("${text}_$number", 0.0, 0.0, rect.height);
+    if (overlayNumber == null) {
+      context.fillText("${text}_$number", 0.0, 0.0, rect.height);
+    } else {
+      context.fillText("${text}_$overlayNumber", 0.0, 0.0, rect.height);
+    }
+
 
     context.restore();
 

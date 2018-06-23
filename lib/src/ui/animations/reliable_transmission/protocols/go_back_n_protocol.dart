@@ -67,6 +67,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
       messageStreamController.add(sprintf(_receiverReceivedOutOfOrder.toString(), [movingPacket.number]));
 
       movingPacket.number = windowSpace.getOffset() % windowSize;
+      movingPacket.overlayNumber = (movingPacket.number - 1) % windowSize;
 
       if (windowSpace.getOffset() == 0) {
         // Special case, no packets yet received -> send no acumulated ACK.
@@ -113,7 +114,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (_outstanding > 0 && window.packetSlots.length > windowSpace.getOffset()) {
       // Reset timer because there are still missing acks.
       window.packetSlots[windowSpace.getOffset()].resetTimeout(packet);
-      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [windowSpace.getOffset() % windowSize]));
+      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [packet.overlayNumber != null ? packet.overlayNumber : packet.number]));
     }
 
     return destroyPacket;
