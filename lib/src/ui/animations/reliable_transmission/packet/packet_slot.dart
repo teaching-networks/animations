@@ -4,6 +4,7 @@ import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/pa
 import 'package:netzwerke_animationen/src/util/pair.dart';
 
 typedef void ArrivalListener(bool isAtSender, Packet packet, Packet movingPacket);
+typedef num TimeoutSupplier(Packet packet);
 
 /**
  * Slot for packets is a representation of a connection from sender to receiver.
@@ -60,7 +61,10 @@ class PacketSlot {
    */
   List<Packet> _obsolete = new List<Packet>();
 
-  PacketSlot(this.index);
+  /// Supplier for timeouts.
+  TimeoutSupplier timeoutSupplier;
+
+  PacketSlot(this.index, this.timeoutSupplier);
 
   /**
    * Clean obsolete objects.
@@ -102,11 +106,11 @@ class PacketSlot {
       }
     });
 
-    timeout = window.performance.now() + p.durationSupplier.call() * 4;
+    timeout = window.performance.now() + timeoutSupplier(p);
   }
 
   void resetTimeout(Packet p) {
-    timeout = window.performance.now() + p.durationSupplier.call() * 4;
+    timeout = window.performance.now() + timeoutSupplier(p);
   }
 
   void addArrivalListener(ArrivalListener l) {

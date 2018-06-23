@@ -23,6 +23,8 @@
 	"reliable-transmission-animation.sender": "Sender",
 	"reliable-transmission-animation.receiver": "Empfänger",
 	"reliable-transmission-animation.send-next-packet": "Paket senden",
+	"reliable-transmission-animation.timer": "Timer",
+	"reliable-transmission-animation.enable-custom-timer": "Anderer Timer?",
 	"reliable-transmission-animation.protocol.stop-and-wait": "Stop-And-Wait",
 	"reliable-transmission-animation.protocol.stop-and-wait.description": "Das Stop-And-Wait stellt das einfachste ARQ-Protokoll (Automatic Repeat Request) dar. Bei dieser Art der zuverlässigen Datenübertragung wird immer nur jeweils ein Paket gesendet und auf die Bestätigung (Acknowledgement, ACK Paket) des Empfängers gewartet. Kommt innerhalb eines bestimmten Zeitintevalls (Timeout) keine Antwort vom Empfänger, wird das letzte Paket erneut gesendet. Dadurch ist eine zuverlässige Datenübertragung gewährleistet.",
 	"reliable-transmission-animation.protocol.selective-repeat": "Selective Repeat",

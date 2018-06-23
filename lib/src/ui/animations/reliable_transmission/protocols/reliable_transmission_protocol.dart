@@ -13,6 +13,12 @@ abstract class ReliableTransmissionProtocol {
   /// Window size.
   int _windowSize;
 
+  /// Is custom timeout enabled
+  bool isCustomTimeoutEnabled = false;
+
+  /// Custom timeout
+  num customTimeout = 12;
+
   /// Stream controller for the window size.
   StreamController<int> _windowSizeStream = new StreamController<int>.broadcast();
 

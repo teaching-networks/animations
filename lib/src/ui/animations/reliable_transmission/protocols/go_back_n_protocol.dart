@@ -73,7 +73,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
         // Special case, no packets yet received -> send no acumulated ACK.
         return true;
       }
-    } else {
+    } else if (slot.index == windowSpace.getOffset()) {
       messageStreamController.add(sprintf(_receiverReceivedInOrder.toString(), [movingPacket.number]));
     }
 
@@ -82,6 +82,11 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   @override
   bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
+    if (windowSpace.getOffset() > slot.index) {
+      movingPacket.destroy();
+      return false;
+    }
+
     // Cumulative ACK will accept all pending packet acks until the received one.
     for (int i = windowSpace.getOffset(); i < windowSpace.getOffset() + windowSize; i++) {
       if (i % windowSize == packet.number) {

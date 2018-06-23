@@ -13,6 +13,25 @@
 	<material-button raised (trigger)="reset()">
 		<material-icon icon="delete_forever"></material-icon>
 	</material-button>
+	<span *ngIf="protocol != null">
+		<material-toggle [(checked)]="protocol.isCustomTimeoutEnabled" label="{{ 'reliable-transmission-animation.enable-custom-timer' | i18n }}"></material-toggle>
+	</span>
+	<span *ngIf="protocol != null">
+		<span class="slider-panel">
+			<div>
+				{{ "reliable-transmission-animation.timer" | i18n }}
+			</div>
+			<material-slider [min]="1"
+							 [max]="60"
+							 [step]="1"
+							 [disabled]="!protocol.isCustomTimeoutEnabled"
+							 [(value)]="protocol.customTimeout">
+			</material-slider>
+			<div>
+				{{ protocol.customTimeout }}s
+			</div>
+		</span>
+	</span>
 </div>
 
 <div class="drawing-area">

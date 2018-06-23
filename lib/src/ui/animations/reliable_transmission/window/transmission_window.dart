@@ -255,7 +255,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   void emitPacketByIndex(int index, bool timeout) {
     PacketSlot slot;
     if (_packetSlots.length <= index) {
-      slot = new PacketSlot(index);
+      slot = new PacketSlot(index, (p) {
+        if (_protocol.isCustomTimeoutEnabled) {
+          return _protocol.customTimeout * 1000;
+        } else {
+          return p.durationSupplier.call() * 4;
+        }
+      });
       slot.addArrivalListener((isAtSender, packet, movingPacket) {
         if (isAtSender) {
           _onSenderReceivedACK(packet, movingPacket, slot);
