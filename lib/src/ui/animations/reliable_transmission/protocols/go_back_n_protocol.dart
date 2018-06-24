@@ -73,6 +73,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
         // Special case, no packets yet received -> send no acumulated ACK.
         return true;
       }
+
+      slot.packets.second = null;
     } else if (slot.index == windowSpace.getOffset()) {
       messageStreamController.add(sprintf(_receiverReceivedInOrder.toString(), [movingPacket.number]));
     }
@@ -119,7 +121,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (_outstanding > 0 && window.packetSlots.length > windowSpace.getOffset()) {
       // Reset timer because there are still missing acks.
       window.packetSlots[windowSpace.getOffset()].resetTimeout(packet);
-      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [packet.overlayNumber != null ? packet.overlayNumber : packet.number]));
+      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [packet.number]));
     }
 
     return destroyPacket;
@@ -151,4 +153,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   @override
   bool showTimeoutForAllSlots() => false;
+
+  @override
+  int getReceiverWindowSize() => 1;
+
 }

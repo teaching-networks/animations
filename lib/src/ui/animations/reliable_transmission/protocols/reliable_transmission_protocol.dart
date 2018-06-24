@@ -48,6 +48,9 @@ abstract class ReliableTransmissionProtocol {
   /// Whether window size can be changed.
   bool canChangeWindowSize();
 
+  int getSenderWindowSize() => _windowSize;
+  int getReceiverWindowSize() => _windowSize;
+
   /// Reset protocol state.
   void reset();
 

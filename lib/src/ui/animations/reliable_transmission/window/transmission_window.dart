@@ -109,12 +109,12 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     this._protocol = protocol;
 
     if (protocol != null) {
-      _senderSpace.windowSize = protocol.windowSize;
-      _receiverSpace.windowSize = protocol.windowSize;
+      _senderSpace.windowSize = protocol.getSenderWindowSize();
+      _receiverSpace.windowSize = protocol.getReceiverWindowSize();
 
       _windowSizeSubscription = this._protocol.windowSizeStream.listen((newWindowSize) {
-        _senderSpace.windowSize = newWindowSize;
-        _receiverSpace.windowSize = newWindowSize;
+        _senderSpace.windowSize = _protocol.getSenderWindowSize();
+        _receiverSpace.windowSize = _protocol.getReceiverWindowSize();
       });
     }
   }
@@ -386,8 +386,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     _packetSlots.clear();
     _timeoutLabelCache.clear();
     _protocol.reset();
-    _senderSpace = new WindowSpaceDrawable(_protocol.windowSize);
-    _receiverSpace = new WindowSpaceDrawable(_protocol.windowSize);
+    _senderSpace = new WindowSpaceDrawable(_protocol.getSenderWindowSize());
+    _receiverSpace = new WindowSpaceDrawable(_protocol.getReceiverWindowSize());
   }
 
   List<PacketSlot> get packetSlots => _packetSlots;
