@@ -7,6 +7,8 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_ba
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.template.dart' as goBackN;
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.template.dart' as selectiveRepeat;
+import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.dart';
+import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.template.dart' as queueSimulation;
 
 class Animations {
 
@@ -36,6 +38,12 @@ class Animations {
         "reliable-transmission-animation.protocol.selective-repeat",
         "img/selective-repeat-preview.png",
         "selective-repeat"
+    ),
+    new AnimationDescriptor<QueueSimulationAnimation>(
+        queueSimulation.QueueSimulationAnimationNgFactory,
+        "queue-simulation-animation.name",
+        "img/image-preview.svg",
+        "queue-simulation"
     )
   ];
 

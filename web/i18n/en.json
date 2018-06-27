@@ -47,5 +47,6 @@
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup": "PKT_%i has already been received. Resending ACK",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt": "PKT_%i has been received. Sending ACK",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup": "Sender received ACK_%i which has already been received",
-	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender received ACK_%i"
+	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender received ACK_%i",
+	"queue-simulation-animation.name": "Queue simulation"
 }
