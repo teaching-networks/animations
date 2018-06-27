@@ -10,21 +10,38 @@ ul.animation-list {
   margin: 0;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
+  justify-content: space-around;
 
   & li {
     cursor: pointer;
     padding: 2.5%;
+    margin-bottom: 0.5em;
     border-radius: 0.4em;
     text-align: center;
-    width: 20%;
+    min-width: 10.0em;
     flex: 0 1 auto;
 
     display: flex;
 
+    flex-wrap: nowrap;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+
+    border: 0.2em solid #F9F9F9;
+
+    &:hover {
+      background-color: #F6F6F6;
+    }
+
+    & > div {
+      width: 200px;
+    }
+
+    & > h3 {
+      margin: 0;
+    }
   }
 
 }

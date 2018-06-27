@@ -2,9 +2,15 @@
     /* This is equivalent of the 'body' selector of a page. */
 }
 
+section.main-section {
+  padding: 2.0em 3.0em;
+}
+
 header.header {
-  border-bottom: 1px solid lightgray;
+  border-bottom: 0.2em solid #F6F6F6;
   margin-bottom: 1em;
+
+  padding: 0 2.0em;
 
   display: flex;
   flex-direction: row;
@@ -25,7 +31,7 @@ header.header {
 
     & span.title {
       font-size: 2.0em;
-      font-weight: lighter;
+      font-family: Raleway, Roboto, Helvetica, Arial, sans-serif;
       margin-right: 1em;
       flex: 0 0 auto;
     }
@@ -38,7 +44,7 @@ header.header {
 
 footer.footer {
   padding: 1em;
-  border-top: 1px solid lightgray;
+  border-top: 0.2em solid #F6F6F6;
   margin-top: 1em;
 
   text-align: center;

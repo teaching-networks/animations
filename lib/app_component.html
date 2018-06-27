@@ -10,7 +10,9 @@
 	</div>
 </header>
 
-<router-outlet [routes]="routes.all"></router-outlet>
+<section class="main-section">
+	<router-outlet [routes]="routes.all"></router-outlet>
+</section>
 
 <footer class="footer">
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
