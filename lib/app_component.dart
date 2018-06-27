@@ -16,8 +16,6 @@ import 'package:hm_animations/src/util/component.dart';
     providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
     pipes: const [I18nPipe])
 class AppComponent implements OnInit {
-  static const int MAX_SAFE_INT = 0x1FFFFFFFFFFFFF; // (2^53 - 1) bit
-  static const int MAX_UNSF_INT = 0x20000000000000; // 2^53 bit
 
   /**
    * All routes we can navigate to.
