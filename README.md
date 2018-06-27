@@ -1,3 +1,5 @@
+> NOTICE: Currently not building successfully with recent dart versions (>= 2.0.0-dev.65.0) due to issue in dart package `sprintf`, created an issue [see here](https://github.com/Naddiseo/dart-sprintf/issues/13). You will not be able to use the currently deployed site on [www.sam.cs.hm.edu/develop](https://www.sam.cs.hm.edu/develop).
+
 # Animations Web Application
 ... serves the purpose of supporting students via providing animations that clarify lecture content.
 
