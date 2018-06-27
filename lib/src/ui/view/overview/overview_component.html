@@ -1,12 +1,10 @@
 <ul *ngIf="animations != null" class="animation-list">
 	<li *ngFor="let anim of animations.values" [routerLink]="animationUrl(anim.path)">
 		<div>
-			<div>
-				<img width="100%" src="{{anim.previewImagePath}}">
-			</div>
-			<h3>
-				{{getAnimationName(anim.name)}}
-			</h3>
+			<img width="100%" src="{{anim.previewImagePath}}">
 		</div>
+		<h3>
+			{{getAnimationName(anim.name)}}
+		</h3>
 	</li>
 </ul>

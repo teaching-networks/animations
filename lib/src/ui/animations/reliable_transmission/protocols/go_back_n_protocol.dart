@@ -45,7 +45,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (timeout) {
       // Resend all outstanding packets.
       int maxIndex = index + _outstanding;
-
+      
       messageStreamController.add(sprintf(_senderRetransmitts.toString(), [_outstanding]));
 
       _outstanding--; // For the current packet.
