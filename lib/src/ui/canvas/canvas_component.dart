@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:html';
 import "package:angular/angular.dart";
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Canvas component a component enclosing a canvas which you can draw on.

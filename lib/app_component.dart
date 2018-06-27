@@ -1,12 +1,12 @@
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/router/routes.dart';
-import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
-import 'package:netzwerke_animationen/src/util/component.dart';
+import 'package:hm_animations/src/router/routes.dart';
+import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
+import 'package:hm_animations/src/util/component.dart';
 
 @Component(
     selector: 'net-app',

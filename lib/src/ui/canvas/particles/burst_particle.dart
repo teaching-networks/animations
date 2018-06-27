@@ -1,9 +1,9 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:netzwerke_animationen/src/ui/canvas/particles/particle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/particles/particle.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 class BurstParticle extends Particle {
   static Random rng = new Random();

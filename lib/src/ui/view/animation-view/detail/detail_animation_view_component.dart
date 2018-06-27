@@ -1,9 +1,9 @@
 import "package:angular/angular.dart";
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/ui/dynamic/dynamic_content_component.dart';
-import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
+import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
 
 /**
  * Detail component showing an animation in detail (Fullscreen).

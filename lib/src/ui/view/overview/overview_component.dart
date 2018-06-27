@@ -2,11 +2,11 @@ import 'dart:async';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
+import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
 
 /**
  * Overview component should give an overview over all available animations.

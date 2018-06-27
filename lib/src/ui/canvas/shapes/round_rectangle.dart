@@ -1,12 +1,12 @@
 import 'dart:html';
 import 'dart:math';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/size_type.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Rounded Rectangle shape.

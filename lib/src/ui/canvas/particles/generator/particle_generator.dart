@@ -1,6 +1,6 @@
 import 'dart:html';
 
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 
 abstract class ParticleGenerator extends CanvasDrawable {
 

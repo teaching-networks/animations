@@ -2,10 +2,10 @@ import 'dart:html';
 import 'dart:math';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 
 @Component(
     selector: "transmission-animation",

@@ -1,10 +1,10 @@
 import 'dart:html';
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Abstract class for animations using the canvas component.

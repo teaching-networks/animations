@@ -2,13 +2,13 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/size_type.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/curves.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 
 class WindowSpaceDrawable extends CanvasDrawable {
   static const Duration MOVE_ANIMATION_DURATION = const Duration(milliseconds: 500);

@@ -1,9 +1,9 @@
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
 import 'package:sprintf/sprintf.dart';
 
 /// Popular implementation of a reliable transmission protocol, the Go-Back-N Protocol.

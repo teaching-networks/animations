@@ -1,10 +1,10 @@
 import 'dart:html';
 
-import 'package:netzwerke_animationen/src/ui/canvas/particles/burst_particle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/particles/generator/particle_generator.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/particles/particle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/particles/burst_particle.dart';
+import 'package:hm_animations/src/ui/canvas/particles/generator/particle_generator.dart';
+import 'package:hm_animations/src/ui/canvas/particles/particle.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 class BurstParticleGenerator extends ParticleGenerator {
   int count;

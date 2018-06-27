@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/ui/animations/transmission/transmission_animation.dart';
-import 'package:netzwerke_animationen/src/ui/animations/transmission/transmission_animation.template.dart' as transmission;
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/stop_and_wait/stop_and_wait_animation.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/stop_and_wait/stop_and_wait_animation.template.dart' as stopAndWait;
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.template.dart' as goBackN;
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.template.dart' as selectiveRepeat;
+import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/ui/animations/transmission/transmission_animation.dart';
+import 'package:hm_animations/src/ui/animations/transmission/transmission_animation.template.dart' as transmission;
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/stop_and_wait/stop_and_wait_animation.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/stop_and_wait/stop_and_wait_animation.template.dart' as stopAndWait;
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.template.dart' as goBackN;
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.template.dart' as selectiveRepeat;
 
 /**
  * Service holding all animations.

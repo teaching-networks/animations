@@ -1,10 +1,10 @@
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
-import 'package:netzwerke_animationen/src/ui/view/animation-view/default/default_animation_view_component.template.dart' as defaultAnimationComp;
-import 'package:netzwerke_animationen/src/ui/view/animation-view/detail/detail_animation_view_component.template.dart' as detailAnimationComp;
-import 'package:netzwerke_animationen/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
-import 'package:netzwerke_animationen/src/ui/view/overview/overview_component.template.dart' as overviewComp;
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
+import 'package:hm_animations/src/ui/view/animation-view/default/default_animation_view_component.template.dart' as defaultAnimationComp;
+import 'package:hm_animations/src/ui/view/animation-view/detail/detail_animation_view_component.template.dart' as detailAnimationComp;
+import 'package:hm_animations/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
+import 'package:hm_animations/src/ui/view/overview/overview_component.template.dart' as overviewComp;
 
 @Injectable()
 class Routes {

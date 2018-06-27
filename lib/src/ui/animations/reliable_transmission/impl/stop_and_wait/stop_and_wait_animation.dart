@@ -1,8 +1,8 @@
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/stop_and_wait_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/reliable_transmission_animation.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/stop_and_wait_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/reliable_transmission_animation.dart';
 
 @Component(
     selector: "stop-and-wait-animation",

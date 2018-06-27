@@ -1,4 +1,4 @@
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 /**
  * Set of colors for easy access.

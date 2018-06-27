@@ -1,7 +1,7 @@
 import 'dart:html';
 
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Defines a object which is drawable on a canvas.
