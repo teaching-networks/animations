@@ -85,3 +85,25 @@ main.app-main {
 .description {
     text-align: justify;
 }
+
+.slider-panel {
+    display: inline-block;
+    width: 200px;
+
+    & > div {
+        text-align: center;
+    }
+}
+
+.drawing-area {
+    padding: 1em 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+
+  & > * {
+    padding: 0 0.5em;
+  }
+}

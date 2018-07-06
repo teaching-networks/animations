@@ -126,7 +126,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
       changeToAck();
       _initAnimationWithState(PacketState.MOVING_FROM_RECEIVER, timestamp);
     } else if (_state == PacketState.DESTROY_START) {
-      _particleGenerator = new BurstParticleGenerator(color: rectangle.color, opacity: 0.1, minRadius: size.width / 5, maxRadius: size.width / 3, count: 100);
+      _particleGenerator = new BurstParticleGenerator(color: rectangle.color, opacity: 0.1, minRadius: size.width / 8, maxRadius: size.width / 5, count: 50, gravity: 5.0);
       _particleGenerator.start();
 
       _initAnimationWithState(PacketState.DESTROYING, timestamp);

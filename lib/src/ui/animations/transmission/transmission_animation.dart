@@ -13,7 +13,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     styleUrls: const ["transmission_animation.css"],
     directives: const [coreDirectives, materialDirectives, CanvasComponent],
     pipes: const [I18nPipe])
-class TransmissionAnimation extends CanvasAnimation implements OnInit {
+class TransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   /**
    * Propagation speed on the connection.
    */

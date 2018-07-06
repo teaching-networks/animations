@@ -4,9 +4,10 @@ import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/shared/packet_line/packet_line_packet.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
-typedef void PacketArrivalListener(int packetId);
+typedef void PacketArrivalListener(int packetId, Color packetColor);
 
 /// A packet line is a representation for a connection between two points. Packets
 /// are sent between the two points, always from A to B.
@@ -22,6 +23,7 @@ class PacketLine extends CanvasDrawable {
 
   /// Packets currently in the line.
   List<PacketLinePacket> _packets = new List<PacketLinePacket>();
+  Map<int, StreamSubscription> _arrivalSubscriptions = new Map<int, StreamSubscription>();
 
   /// Duration the packet is on the line.
   final Duration duration;
@@ -48,12 +50,9 @@ class PacketLine extends CanvasDrawable {
     context.save();
 
     {
-      setFillColor(context, Colors.WHITE);
-      setStrokeColor(context, Colors.BLACK);
-      context.lineWidth = 1;
+      setFillColor(context, Colors.LIGHTER_GRAY);
 
       context.fillRect(0.0, 0.0, rect.width, rect.height);
-      context.strokeRect(0.0, 0.0, rect.width, rect.height);
     }
 
     context.restore();
@@ -71,7 +70,15 @@ class PacketLine extends CanvasDrawable {
         // Transform progress interval [0.0; 1.0] to real interval [0.0 - packetWidth; width]
         double offset = -packetWidth + (rect.width + packetWidth) * progress;
 
-        packet.render(context, new Rectangle(offset, 0.0, packetWidth, rect.height));
+        double pW = packetWidth;
+        if (rect.width < offset + packetWidth) {
+          pW = rect.width - offset;
+        } else if (offset < 0) {
+          pW += offset;
+          offset = 0.0;
+        }
+
+        packet.render(context, new Rectangle(offset, 0.0, pW, rect.height));
       } else {
         if (packetsScheduledForRemoval == null) {
           packetsScheduledForRemoval = new Set<int>();
@@ -89,22 +96,30 @@ class PacketLine extends CanvasDrawable {
   /// Emit a packet on the line.
   /// Returns id of the new packet.
   /// The Id can be used to later determine which packet arrived using the arrival callback.
-  int emit() {
+  int emit({Color color = Colors.BLACK}) {
     var id = _packetIdGenerator++;
 
-    PacketLinePacket packet = new PacketLinePacket(id);
+    PacketLinePacket packet = new PacketLinePacket(id, color);
     _packets.add(packet);
 
-    new Future.delayed(duration, () {
-      print("Packet ${packet.id} arrived.");
-
+    _arrivalSubscriptions[packet.id] = new Future.delayed(duration).asStream().listen((_) {
       packet.kill();
 
-      onArrival?.call(packet.id);
+      _arrivalSubscriptions.remove(packet.id);
+      onArrival?.call(packet.id, packet.color);
     });
 
-    print("Emitted packet ${packet.id}");
-
     return id;
+  }
+
+  /// Clear the packet line of packets.
+  void clear() {
+    _packets.clear();
+
+    _arrivalSubscriptions.forEach((key, subscription) {
+      subscription.cancel();
+    });
+
+    _arrivalSubscriptions.clear();
   }
 }

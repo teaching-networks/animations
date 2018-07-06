@@ -2,11 +2,15 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 /// Packet on a packet line.
 class PacketLinePacket extends CanvasDrawable {
   /// Id of the packet.
   final int id;
+
+  /// Color of the packet.
+  final Color color;
 
   /// Timestamp of the birth of the packet.
   num _birthTimestamp;
@@ -15,7 +19,7 @@ class PacketLinePacket extends CanvasDrawable {
   bool _alive = true;
 
   /// Create new packet line packet.
-  PacketLinePacket(this.id) {
+  PacketLinePacket(this.id, this.color) {
     _birthTimestamp = window.performance.now();
   }
 
@@ -36,7 +40,7 @@ class PacketLinePacket extends CanvasDrawable {
     context.save();
 
     {
-      context.setFillColorRgb(0, 0, 0);
+      setFillColor(context, color);
       context.fillRect(rect.left, rect.top, rect.width, rect.height);
     }
 

@@ -1,1 +1,56 @@
-<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+<div class="controls">
+	<material-button raised (trigger)="reset()">
+		<material-icon icon="delete_forever"></material-icon>
+	</material-button>
+	<span class="slider-panel">
+		<div>
+			Emission rate
+		</div>
+		<material-slider [min]="25"
+						 [max]="1000"
+						 [step]="25"
+						 [(value)]="emissionRate">
+		</material-slider>
+		<div>
+			{{ emissionRate }} packets / s
+		</div>
+	</span>
+	<span class="slider-panel">
+		<div>
+			Transmission rate
+		</div>
+		<material-slider [min]="25"
+						 [max]="1000"
+						 [step]="25"
+						 [(value)]="transmissionRate">
+		</material-slider>
+		<div>
+			{{ transmissionRate }} packets / s
+		</div>
+	</span>
+	<span class="slider-panel">
+		<div>
+			Queue length
+		</div>
+		<material-slider [min]="1"
+						 [max]="50"
+						 [step]="1"
+						 [value]="queueLength"
+						 (valueChange)="onQueueLengthChange($event)">
+		</material-slider>
+		<div>
+			{{ queueLength }}
+		</div>
+	</span>
+</div>
+
+<div class="drawing-area">
+	<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		No description yet
+	</p>
+</div>
