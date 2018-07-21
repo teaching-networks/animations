@@ -18,31 +18,31 @@ class Animations {
     new AnimationDescriptor<TransmissionAnimation>(
         transmission.TransmissionAnimationNgFactory,
         "packet-transmission.name",
-        "img/packet-transmission-preview.png",
+        "img/animation/preview/packet-transmission-preview.png",
         "transmission"
     ),
     new AnimationDescriptor<StopAndWaitAnimation>(
         stopAndWait.StopAndWaitAnimationNgFactory,
         "reliable-transmission-animation.protocol.stop-and-wait",
-        "img/stop-and-wait-preview.png",
+        "img/animation/preview/stop-and-wait-preview.png",
         "stop-and-wait"
     ),
     new AnimationDescriptor<GoBackNAnimation>(
         goBackN.GoBackNAnimationNgFactory,
         "reliable-transmission-animation.protocol.go-back-n",
-        "img/go-back-n-preview.png",
+        "img/animation/preview/go-back-n-preview.png",
         "go-back-n"
     ),
     new AnimationDescriptor<SelectiveRepeatAnimation>(
         selectiveRepeat.SelectiveRepeatAnimationNgFactory,
         "reliable-transmission-animation.protocol.selective-repeat",
-        "img/selective-repeat-preview.png",
+        "img/animation/preview/selective-repeat-preview.png",
         "selective-repeat"
     ),
     new AnimationDescriptor<QueueSimulationAnimation>(
         queueSimulation.QueueSimulationAnimationNgFactory,
         "queue-simulation-animation.name",
-        "img/image-preview.svg",
+        "img/animation/preview/queue-simulation-preview.png",
         "queue-simulation"
     )
   ];

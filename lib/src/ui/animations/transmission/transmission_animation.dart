@@ -57,7 +57,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  ImageElement computer = new ImageElement(src: "img/computer.svg", width: 415, height: 290);
+  ImageElement computer = new ImageElement(src: "img/animation/computer.svg", width: 415, height: 290);
 
   /**
    * Whether to send a packet (Do the animation).

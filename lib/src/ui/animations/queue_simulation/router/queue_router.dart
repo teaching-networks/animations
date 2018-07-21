@@ -15,7 +15,7 @@ class QueueRouter extends CanvasDrawable {
 
   Queue<QueuePacket> _queue = new Queue<QueuePacket>();
 
-  ImageElement router = new ImageElement(src: "img/router.svg", width: 536, height: 221);
+  ImageElement router = new ImageElement(src: "img/animation/router.svg", width: 536, height: 221);
 
   BurstParticleGenerator _particleGenerator = new BurstParticleGenerator(opacity: 0.1, minRadius: 3.0, maxRadius: 30.0, count: 50, gravity: 1.0);
 
