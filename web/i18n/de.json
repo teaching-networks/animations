@@ -58,5 +58,15 @@
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.1": "Sender empfängt ACK_",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.2": " welches bereits empfangen wurde",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender empfängt ACK_",
-	"queue-simulation-animation.name": "Warteschlangen Simulation"
+	"queue-simulation-animation.name": "Warteschlangen Simulation",
+	"queue-simulation-animation.packet-per-second": "Packete / s",
+	"queue-simulation-animation.emission-rate": "Emissions Rate",
+	"queue-simulation-animation.transmission-rate": "Verarbeitungs Rate",
+	"queue-simulation-animation.queue-length": "Warteschlangen Länge",
+	"queue-simulation-animation.description": "Ein Packet in einem Router zu verarbeiten braucht seine Zeit, die Warteschlangen Verzögerung (queueing delay). Das Problem ist, dass der Router nicht darüber entscheiden kann wie häufig und wie viele Packete ankommen. Es wird also eine Möglichkeit gebraucht die ankommenden Pakete zu puffern bis sie verarbeitet werden können: Die Warteschlange des Routers. Falls die Warteschlange voll ist werden ankommende Pakete einfach ignoriert.",
+	"queue-simulation-animation.incoming": "Eingehend",
+	"queue-simulation-animation.outgoing": "Ausgehend",
+	"queue-simulation-animation.queue-of-router": "Warteschlange des Routers",
+	"queue-simulation-animation.dropped-packets": "Ignorierte Packete",
+	"queue-simulation-animation.time-passed": "Vergangene Zeit"
 }

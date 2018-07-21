@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/router/queue_router.dart';
 import 'package:hm_animations/src/ui/animations/shared/packet_line/packet_line.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
@@ -51,8 +52,27 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
   StreamSubscription _emitSubscription;
   StreamSubscription _processSubscription;
 
-  QueueSimulationAnimation() {
+  I18nService _i18n;
+
+  /// Translations.
+  Message _incomingLabel;
+  Message _queueOfRouterLabel;
+  Message _droppedPacketsLabel;
+  Message _timePassedLabel;
+  Message _outgoingLabel;
+
+  QueueSimulationAnimation(this._i18n) {
     reset();
+
+    _loadTranslations();
+  }
+
+  void _loadTranslations() {
+    _incomingLabel = _i18n.get("queue-simulation-animation.incoming");
+    _queueOfRouterLabel = _i18n.get("queue-simulation-animation.queue-of-router");
+    _droppedPacketsLabel = _i18n.get("queue-simulation-animation.dropped-packets");
+    _timePassedLabel = _i18n.get("queue-simulation-animation.time-passed");
+    _outgoingLabel = _i18n.get("queue-simulation-animation.outgoing");
   }
 
   void _emitLoop() {
@@ -139,7 +159,7 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
       context.textAlign = "center";
 
       double width = size.width * COMPONENT_SIZE_PROPORTIONS[0];
-      context.fillText("Incoming", width / 2, lineY - (textPadding));
+      context.fillText(_incomingLabel.toString(), width / 2, lineY - (textPadding));
       _preRouterLine.render(context, new Rectangle<double>(0.0, lineY, width, lineHeight), timestamp);
 
       context.translate(width, 0.0);
@@ -148,12 +168,12 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
       context.save();
       {
         context.textAlign = "left";
-        context.fillText("Queue of Router", 0.0, routerY - (textPadding));
+        context.fillText(_queueOfRouterLabel.toString(), 0.0, routerY - (textPadding));
 
         context.textBaseline = "top";
-        context.fillText("Dropped packets: $_droppedPackets", 0.0, routerY + routerHeight + textPadding);
+        context.fillText("${_droppedPacketsLabel}: $_droppedPackets", 0.0, routerY + routerHeight + textPadding);
 
-        context.fillText("Time passed: ${((timestamp - _startTimestamp) / _secondScale).floor()} ms", 0.0, routerY + routerHeight + textPadding * 2 + defaultFontSize);
+        context.fillText("${_timePassedLabel}: ${((timestamp - _startTimestamp) / _secondScale).floor()} ms", 0.0, routerY + routerHeight + textPadding * 2 + defaultFontSize);
       }
       context.restore();
 
@@ -161,7 +181,7 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
 
       context.translate(width, 0.0);
       width = size.width * COMPONENT_SIZE_PROPORTIONS[2];
-      context.fillText("Outgoing", width / 2, lineY - (textPadding));
+      context.fillText(_outgoingLabel.toString(), width / 2, lineY - (textPadding));
       _postRouterLine.render(context, new Rectangle<double>(0.0, lineY, width, lineHeight), timestamp);
     }
 

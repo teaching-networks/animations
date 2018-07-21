@@ -4,7 +4,7 @@
 	</material-button>
 	<span class="slider-panel">
 		<div>
-			Emission rate
+			{{ "queue-simulation-animation.emission-rate" | i18n }}
 		</div>
 		<material-slider [min]="25"
 						 [max]="1000"
@@ -12,12 +12,12 @@
 						 [(value)]="emissionRate">
 		</material-slider>
 		<div>
-			{{ emissionRate }} packets / s
+			{{ emissionRate }} {{ "queue-simulation-animation.packet-per-second" | i18n }}
 		</div>
 	</span>
 	<span class="slider-panel">
 		<div>
-			Transmission rate
+			{{ "queue-simulation-animation.transmission-rate" | i18n }}
 		</div>
 		<material-slider [min]="25"
 						 [max]="1000"
@@ -25,12 +25,12 @@
 						 [(value)]="transmissionRate">
 		</material-slider>
 		<div>
-			{{ transmissionRate }} packets / s
+			{{ transmissionRate }} {{ "queue-simulation-animation.packet-per-second" | i18n }}
 		</div>
 	</span>
 	<span class="slider-panel">
 		<div>
-			Queue length
+			{{ "queue-simulation-animation.queue-length" | i18n }}
 		</div>
 		<material-slider [min]="1"
 						 [max]="50"
@@ -51,6 +51,6 @@
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>
 	<p>
-		No description yet
+		{{ "queue-simulation-animation.description" | i18n }}
 	</p>
 </div>

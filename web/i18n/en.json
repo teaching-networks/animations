@@ -58,5 +58,15 @@
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.1": "Sender received ACK_",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.2": " which has already been received",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender received ACK_",
-	"queue-simulation-animation.name": "Queue simulation"
+	"queue-simulation-animation.name": "Queue simulation",
+	"queue-simulation-animation.packet-per-second": "packets / s",
+	"queue-simulation-animation.emission-rate": "Emission rate",
+	"queue-simulation-animation.transmission-rate": "Transmission rate",
+	"queue-simulation-animation.queue-length": "Queue length",
+	"queue-simulation-animation.description": "Processing a packet in a router consumes time. This is called the queueing delay. Since the router cannot control the amount and frequency of incoming packets it needs some kind of buffer where the packets will be kept until the router is able to process them: The routers queue. In case the queue is full, arriving packets will be dropped.",
+	"queue-simulation-animation.incoming": "Incoming",
+	"queue-simulation-animation.outgoing": "Outgoing",
+	"queue-simulation-animation.queue-of-router": "Queue of Router",
+	"queue-simulation-animation.dropped-packets": "Dropped packets",
+	"queue-simulation-animation.time-passed": "Time passed"
 }
