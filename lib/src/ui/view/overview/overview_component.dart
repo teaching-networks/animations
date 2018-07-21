@@ -1,6 +1,5 @@
 import 'dart:async';
 import "package:angular/angular.dart";
-import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
@@ -15,7 +14,7 @@ import 'package:hm_animations/src/router/route_paths.dart' as paths;
     selector: "overview-component",
     templateUrl: "overview_component.html",
     styleUrls: const ["overview_component.css"],
-    directives: const [routerDirectives, coreDirectives, materialDirectives],
+    directives: const [routerDirectives, coreDirectives],
     providers: const [const ClassProvider(AnimationService)],
     pipes: const [I18nPipe])
 class OverviewComponent implements OnInit {

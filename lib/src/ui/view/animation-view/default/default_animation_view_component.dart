@@ -15,7 +15,7 @@ import 'package:hm_animations/src/router/route_paths.dart' as paths;
     selector: "default-animation-view-component",
     templateUrl: "default_animation_view_component.html",
     styleUrls: const ["default_animation_view_component.css"],
-    directives: const [coreDirectives, materialDirectives, routerDirectives, DynamicContentComponent],
+    directives: const [coreDirectives, MaterialButtonComponent, MaterialIconComponent, routerDirectives, DynamicContentComponent],
     providers: const [const ClassProvider(Routes)],
     pipes: const [I18nPipe])
 class DefaultAnimationViewComponent implements OnActivate {

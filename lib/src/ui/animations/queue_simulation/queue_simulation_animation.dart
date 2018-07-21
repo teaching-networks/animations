@@ -15,7 +15,7 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
   selector: "queue-simulation-animation",
   styleUrls: const ["queue_simulation_animation.css"],
   templateUrl: "queue_simulation_animation.html",
-  directives: const [coreDirectives, materialDirectives, CanvasComponent],
+  directives: const [coreDirectives, MaterialButtonComponent, MaterialSliderComponent, MaterialIconComponent, CanvasComponent],
   pipes: const [I18nPipe]
 )
 class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {

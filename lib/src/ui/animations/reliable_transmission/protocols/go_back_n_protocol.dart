@@ -4,7 +4,6 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/pac
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
-import 'package:sprintf/sprintf.dart';
 
 /// Popular implementation of a reliable transmission protocol, the Go-Back-N Protocol.
 class GoBackNProtocol extends ReliableTransmissionProtocol {
@@ -19,20 +18,28 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _senderRetransmitts;
-  Message _receiverReceivedOutOfOrder;
-  Message _receiverReceivedInOrder;
-  Message _senderReceivedResetTimeout;
+  Message _senderRetransmitts1;
+  Message _senderRetransmitts2;
+  Message _receiverReceivedOutOfOrder1;
+  Message _receiverReceivedOutOfOrder2;
+  Message _receiverReceivedInOrder1;
+  Message _receiverReceivedInOrder2;
+  Message _senderReceivedResetTimeout1;
+  Message _senderReceivedResetTimeout2;
 
   GoBackNProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _loadTranslations();
   }
 
   void _loadTranslations() {
-    _senderRetransmitts = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt");
-    _receiverReceivedOutOfOrder = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order");
-    _receiverReceivedInOrder = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order");
-    _senderReceivedResetTimeout = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout");
+    _senderRetransmitts1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt.1");
+    _senderRetransmitts2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt.2");
+    _receiverReceivedOutOfOrder1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order.1");
+    _receiverReceivedOutOfOrder2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order.2");
+    _receiverReceivedInOrder1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order.1");
+    _receiverReceivedInOrder2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order.2");
+    _senderReceivedResetTimeout1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout.1");
+    _senderReceivedResetTimeout2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout.2");
   }
 
   @override
@@ -46,7 +53,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
       // Resend all outstanding packets.
       int maxIndex = index + _outstanding;
       
-      messageStreamController.add(sprintf(_senderRetransmitts.toString(), [_outstanding]));
+      messageStreamController.add("$_senderRetransmitts1 $_outstanding $_senderRetransmitts2");
 
       _outstanding--; // For the current packet.
 
@@ -64,7 +71,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (slot.index > windowSpace.getOffset()) {
-      messageStreamController.add(sprintf(_receiverReceivedOutOfOrder.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedOutOfOrder1 ${movingPacket.number} $_receiverReceivedOutOfOrder2");
 
       movingPacket.number = windowSpace.getOffset() % windowSize;
       movingPacket.overlayNumber = (movingPacket.number - 1) % windowSize;
@@ -76,7 +83,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
       slot.packets.second = null;
     } else if (slot.index == windowSpace.getOffset()) {
-      messageStreamController.add(sprintf(_receiverReceivedInOrder.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedInOrder1 ${movingPacket.number} $_receiverReceivedInOrder2");
     }
 
     return false;
@@ -121,7 +128,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (_outstanding > 0 && window.packetSlots.length > windowSpace.getOffset()) {
       // Reset timer because there are still missing acks.
       window.packetSlots[windowSpace.getOffset()].resetTimeout(packet);
-      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [packet.number]));
+      messageStreamController.add("$_senderReceivedResetTimeout1 ${packet.number} $_senderReceivedResetTimeout2");
     }
 
     return destroyPacket;

@@ -14,7 +14,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     selector: "reliable-transmission-animation",
     templateUrl: "reliable_transmission_animation.html",
     styleUrls: const ["reliable_transmission_animation.css"],
-    directives: const [coreDirectives, materialDirectives, CanvasComponent],
+    directives: const [coreDirectives, MaterialButtonComponent, MaterialIconComponent, MaterialToggleComponent, MaterialSliderComponent, CanvasComponent],
     pipes: const [I18nPipe])
 class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy, AfterViewChecked {
   /**
@@ -22,7 +22,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
    */
   TransmissionWindow transmissionWindow;
 
-  @ViewChild("logContainer")
+  @ViewChild("logcontainer", read: HtmlElement)
   HtmlElement logContainer;
 
   Message _senderLabel;

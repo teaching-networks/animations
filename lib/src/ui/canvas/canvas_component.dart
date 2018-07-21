@@ -15,10 +15,10 @@ import 'package:hm_animations/src/util/size.dart';
  */
 @Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [coreDirectives])
 class CanvasComponent implements OnInit {
-  @ViewChild("canvasWrapper")
+  @ViewChild("canvasWrapper", read: HtmlElement)
   HtmlElement canvasWrapper;
 
-  @ViewChild("canvas")
+  @ViewChild("canvas", read: HtmlElement)
   HtmlElement canvas;
 
   /**

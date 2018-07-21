@@ -4,7 +4,6 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/pac
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
-import 'package:sprintf/sprintf.dart';
 
 /// Slow but reliable protocol for the reliable transmission.
 class StopAndWaitProtocol extends ReliableTransmissionProtocol {
@@ -20,11 +19,14 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   I18nService _i18n;
 
   Message _senderSendsPktLabel;
-  Message _senderResendsPktLabel;
+  Message _senderResendsPktLabel1;
+  Message _senderResendsPktLabel2;
   Message _receiverReceivedPktLabel;
-  Message _receiverReceivedPktDupLabel;
+  Message _receiverReceivedPktDupLabel1;
+  Message _receiverReceivedPktDupLabel2;
   Message _senderReceivedAckLabel;
-  Message _senderReceivedAckDupLabel;
+  Message _senderReceivedAckDupLabel1;
+  Message _senderReceivedAckDupLabel2;
 
   StopAndWaitProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _loadTranslations();
@@ -32,11 +34,14 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
 
   void _loadTranslations() {
     _senderSendsPktLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.send-packet");
-    _senderResendsPktLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.resend-packet");
+    _senderResendsPktLabel1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.resend-packet.1");
+    _senderResendsPktLabel2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.resend-packet.2");
     _receiverReceivedPktLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-packet");
-    _receiverReceivedPktDupLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-dup-packet");
+    _receiverReceivedPktDupLabel1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-dup-packet.1");
+    _receiverReceivedPktDupLabel2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.receiver-received-dup-packet.2");
     _senderReceivedAckLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack");
-    _senderReceivedAckDupLabel = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup");
+    _senderReceivedAckDupLabel1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup.1");
+    _senderReceivedAckDupLabel2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.stop-and-wait.received-ack-dup.2");
   }
 
   @override
@@ -50,9 +55,9 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
       _received = false;
       _lastPacketSequenceNumber = _lastPacketSequenceNumber == 0 ? 1 : 0;
 
-      messageStreamController.add(sprintf(_senderSendsPktLabel.toString(), [_lastPacketSequenceNumber]));
+      messageStreamController.add("$_senderSendsPktLabel $_lastPacketSequenceNumber");
     } else {
-      messageStreamController.add(sprintf(_senderResendsPktLabel.toString(), [_lastPacketSequenceNumber]));
+      messageStreamController.add("$_senderResendsPktLabel1 $_lastPacketSequenceNumber $_senderResendsPktLabel2");
     }
 
     Packet packet = new Packet(number: _lastPacketSequenceNumber);
@@ -63,9 +68,9 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet != null) {
-      messageStreamController.add(sprintf(_receiverReceivedPktLabel.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedPktLabel ${movingPacket.number}");
     } else {
-      messageStreamController.add(sprintf(_receiverReceivedPktDupLabel.toString(), [_lastPacketSequenceNumber]));
+      messageStreamController.add("$_receiverReceivedPktDupLabel1 $_lastPacketSequenceNumber $_receiverReceivedPktDupLabel2");
     }
 
     return false;
@@ -76,9 +81,9 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
     _received = true;
 
     if (packet != null) {
-      messageStreamController.add(sprintf(_senderReceivedAckLabel.toString(), [movingPacket.number]));
+      messageStreamController.add("$_senderReceivedAckLabel ${movingPacket.number}");
     } else {
-      messageStreamController.add(sprintf(_senderReceivedAckDupLabel.toString(), [_lastPacketSequenceNumber]));
+      messageStreamController.add("$_senderReceivedAckDupLabel1 $_lastPacketSequenceNumber $_senderReceivedAckDupLabel2");
     }
 
     return false;

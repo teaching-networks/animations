@@ -12,7 +12,7 @@ import 'package:hm_animations/src/util/component.dart';
     selector: 'net-app',
     styleUrls: const ['app_component.css'],
     templateUrl: 'app_component.html',
-    directives: const [materialDirectives, routerDirectives],
+    directives: const [MaterialButtonComponent, MaterialIconComponent, MaterialDropdownSelectComponent, routerDirectives],
     providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
     pipes: const [I18nPipe])
 class AppComponent implements OnInit {

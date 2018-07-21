@@ -11,7 +11,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     selector: "transmission-animation",
     templateUrl: "transmission_animation.html",
     styleUrls: const ["transmission_animation.css"],
-    directives: const [coreDirectives, materialDirectives, CanvasComponent],
+    directives: const [coreDirectives, MaterialAutoSuggestInputComponent, MaterialButtonComponent, MaterialDropdownSelectComponent, MaterialDropdownSelectComponent, MaterialIconComponent, CanvasComponent],
     pipes: const [I18nPipe])
 class TransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   /**
