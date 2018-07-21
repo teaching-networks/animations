@@ -50,7 +50,7 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
       _outstanding++;
     }
 
-    return new Packet(number: index % windowSize);
+    return new Packet(number: index % (windowSize * 2));
   }
 
   @override

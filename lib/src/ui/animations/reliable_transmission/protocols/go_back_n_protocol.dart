@@ -65,7 +65,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
     _outstanding++;
 
-    return new Packet(number: index % windowSize);
+    return new Packet(number: index % _getMaxSequenceNum());
   }
 
   @override
@@ -73,8 +73,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (slot.index > windowSpace.getOffset()) {
       messageStreamController.add("$_receiverReceivedOutOfOrder1 ${movingPacket.number} $_receiverReceivedOutOfOrder2");
 
-      movingPacket.number = windowSpace.getOffset() % windowSize;
-      movingPacket.overlayNumber = (movingPacket.number - 1) % windowSize;
+      movingPacket.number = windowSpace.getOffset() % _getMaxSequenceNum();
+      movingPacket.overlayNumber = (movingPacket.number - 1) % _getMaxSequenceNum();
 
       if (windowSpace.getOffset() == 0) {
         // Special case, no packets yet received -> send no acumulated ACK.
@@ -98,14 +98,14 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
     // Cumulative ACK will accept all pending packet acks until the received one.
     for (int i = windowSpace.getOffset(); i < windowSpace.getOffset() + windowSize; i++) {
-      if (i % windowSize == packet.number) {
+      if (i % _getMaxSequenceNum() == packet.number) {
         break;
       }
 
       PacketSlot s = window.packetSlots[i];
 
       if (s.packets.first == null) {
-        s.packets.first = new Packet(number: i % windowSize, startState: PacketState.END);
+        s.packets.first = new Packet(number: i % _getMaxSequenceNum(), startState: PacketState.END);
         s.packets.first.changeToAck();
         _outstanding--;
         _received.add(s.index);
@@ -146,6 +146,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
     windowSpace.setOffset(count);
   }
+
+  int _getMaxSequenceNum() => windowSize + 1;
 
   @override
   bool canChangeWindowSize() {
