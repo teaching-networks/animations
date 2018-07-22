@@ -1,0 +1,14 @@
+<div class="controls">
+	No controls yet.
+</div>
+
+<div class="drawing-area">
+	<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		No description yet.
+	</p>
+</div>

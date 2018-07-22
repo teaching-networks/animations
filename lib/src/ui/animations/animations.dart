@@ -1,4 +1,6 @@
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.dart';
+import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.template.dart' as httpDelay;
 import 'package:hm_animations/src/ui/animations/transmission/transmission_animation.dart';
 import 'package:hm_animations/src/ui/animations/transmission/transmission_animation.template.dart' as transmission;
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/stop_and_wait/stop_and_wait_animation.dart';
@@ -44,6 +46,12 @@ class Animations {
         "queue-simulation-animation.name",
         "img/animation/preview/queue-simulation-preview.png",
         "queue-simulation"
+    ),
+    new AnimationDescriptor<HttpDelayAnimation>(
+        httpDelay.HttpDelayAnimationNgFactory,
+        "http-delay-animation.name",
+        "img/animation/preview/image-preview.svg",
+        "http-delay"
     )
   ];
 

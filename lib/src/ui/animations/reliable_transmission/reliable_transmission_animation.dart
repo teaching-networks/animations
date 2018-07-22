@@ -5,7 +5,6 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
-import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/go_back_n_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';

@@ -70,5 +70,6 @@
 	"queue-simulation-animation.outgoing": "Outgoing",
 	"queue-simulation-animation.queue-of-router": "Queue of Router",
 	"queue-simulation-animation.dropped-packets": "Dropped packets",
-	"queue-simulation-animation.time-passed": "Time passed"
+	"queue-simulation-animation.time-passed": "Time passed",
+	"http-delay-animation.name": "Http delay"
 }

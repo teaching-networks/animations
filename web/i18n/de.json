@@ -70,5 +70,6 @@
 	"queue-simulation-animation.outgoing": "Ausgehend",
 	"queue-simulation-animation.queue-of-router": "Warteschlange des Routers",
 	"queue-simulation-animation.dropped-packets": "Ignorierte Packete",
-	"queue-simulation-animation.time-passed": "Vergangene Zeit"
+	"queue-simulation-animation.time-passed": "Vergangene Zeit",
+	"http-delay-animation.name": "Http Verzögerung"
 }

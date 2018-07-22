@@ -1,0 +1,4 @@
+enum GeometricLocation {
+  VERTICAL,
+  HORIZONTAL
+}
