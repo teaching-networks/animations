@@ -97,6 +97,9 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
 
   ParticleGenerator _particleGenerator;
 
+  /// References to all packets which are sent concurrently.
+  List<Packet> sentConcurrently;
+
   /**
    * Create new packet instance.
    */
@@ -236,6 +239,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    * Whether the packet is still transmitting.
    */
   bool get inProgress => _state != PacketState.END;
+
+  /**
+   * Whether the packet is destroyed or destroying.
+   */
+  bool get isDestroyed => _state == PacketState.DESTROY_START || _state == PacketState.DESTROYING || _state == PacketState.DESTROYED;
 
   /**
    * Add a state change listener to the listener list.

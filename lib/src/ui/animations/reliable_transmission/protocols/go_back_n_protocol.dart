@@ -49,7 +49,10 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   @override
   Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
+    List<Packet> sentConcurrently;
     if (timeout) {
+      sentConcurrently = List<Packet>();
+
       // Resend all outstanding packets.
       int maxIndex = index + _outstanding;
       
@@ -59,13 +62,24 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
       for (int i = index + 1; i < maxIndex; i++) {
         _outstanding--;
-        window.emitPacketByIndex(i, false);
+        Packet newPacket = window.emitPacketByIndex(i, false, true);
+        sentConcurrently.add(newPacket);
       }
     }
 
     _outstanding++;
 
-    return new Packet(number: index % _getMaxSequenceNum());
+    Packet p = new Packet(number: index % _getMaxSequenceNum());
+
+    if (timeout) {
+      sentConcurrently.insert(0, p);
+
+      for (Packet packet in sentConcurrently) {
+        packet.sentConcurrently = sentConcurrently;
+      }
+    }
+
+    return p;
   }
 
   @override
@@ -82,8 +96,22 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
       }
 
       slot.packets.second = null;
-    } else if (slot.index == windowSpace.getOffset()) {
-      messageStreamController.add("$_receiverReceivedInOrder1 ${movingPacket.number} $_receiverReceivedInOrder2");
+    } else {
+      if (slot.index == windowSpace.getOffset()) {
+        messageStreamController.add("$_receiverReceivedInOrder1 ${movingPacket.number} $_receiverReceivedInOrder2");
+      }
+
+      if (movingPacket.sentConcurrently != null) {
+        int overlayNumber = movingPacket.number;
+        for (Packet packet in movingPacket.sentConcurrently) {
+          if (packet.isDestroyed) {
+            break;
+          } else {
+            overlayNumber = packet.number;
+          }
+        }
+        movingPacket.overlayNumber = overlayNumber;
+      }
     }
 
     return false;

@@ -252,7 +252,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     emitPacketByIndex(_packetSlots.length, false);
   }
 
-  void emitPacketByIndex(int index, bool timeout) {
+  Packet emitPacketByIndex(int index, bool timeout, [bool sentConcurrently = false]) {
     PacketSlot slot;
     if (_packetSlots.length <= index) {
       slot = new PacketSlot(index, (p) {
@@ -281,6 +281,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
       slot.addPacket(p);
     }
+
+    return p;
   }
 
   /**
