@@ -4,8 +4,8 @@
 	</div>
 	<div class="rest">
 		<span class="title">{{ "title" | i18n }}</span>
-		<nav>
-			<material-button [routerLink]="routes.overview.toUrl()"><material-icon icon="home"></material-icon> {{ "overview" | i18n }}</material-button>
+		<nav class="toolbar">
+			<a [routerLink]="routes.overview.toUrl()"><material-icon icon="home" class="animated"></material-icon> {{ "overview" | i18n }}</a>
 		</nav>
 	</div>
 </header>
