@@ -27,6 +27,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
   Message _senderReceivedResetTimeout1;
   Message _senderReceivedResetTimeout2;
 
+  bool isCumulativeACKEnabled = true;
+
   GoBackNProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _loadTranslations();
   }
@@ -101,7 +103,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
         messageStreamController.add("$_receiverReceivedInOrder1 ${movingPacket.number} $_receiverReceivedInOrder2");
       }
 
-      if (movingPacket.sentConcurrently != null) {
+      if (isCumulativeACKEnabled && movingPacket.sentConcurrently != null) {
         int overlayNumber = movingPacket.number;
         for (Packet packet in movingPacket.sentConcurrently) {
           if (packet.isDestroyed) {
