@@ -18,7 +18,7 @@
 	"packetTransmission.length": "Line length",
 	"packetTransmission.size": "Packet size",
 	"packetTransmission.rate": "Rate",
-	"packetTransmission.description": "This simple animation illustrates one of the most fundamental concepts in computer networking: transmission delay versus propagation delay. Although this concept is discussed in detail in Chapter 1, an interactive animation speaks a thousand words. You set the length of the link, the packet size, and the transmission speed; the applet shows the packet being sent from sender to receiver. Note that for many combinations, the head of the packet reaches the receiver before transmission is finished at the sender.",
+	"packetTransmission.description": "This simple animation illustrates two basic characteristics in computer networking: transmission delay versus propagation delay. Although this concept is discussed in detail in Chapter 1 of the lecture, a picture (or animation) is worth a thousand words. You set the length of the link, the packet size, and the transmission speed; the animation shows the packet being sent from sender to receiver. Note that for many combinations, the head of the packet reaches the receiver before transmission is finished at the sender.",
 	"reliable-transmission-animation.name": "Reliable transmission",
 	"reliable-transmission-animation.sender": "Sender",
 	"reliable-transmission-animation.receiver": "Receiver",
