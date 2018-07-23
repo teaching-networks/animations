@@ -65,7 +65,7 @@
 	"queue-simulation-animation.emission-rate": "Emission rate",
 	"queue-simulation-animation.transmission-rate": "Transmission rate",
 	"queue-simulation-animation.queue-length": "Queue length",
-	"queue-simulation-animation.description": "Processing a packet in a router consumes time. This is called the queueing delay. Since the router cannot control the amount and frequency of incoming packets it needs some kind of buffer where the packets will be kept until the router is able to process them: The routers queue. In case the queue is full, arriving packets will be dropped.",
+	"queue-simulation-animation.description": "A packet is processed in a router (e.g. the headers are evaluated and modified, if necessary) and then forwarded on one of the ports. The times required for this are called processing delay and transmission delay. The router cannot control the rate at which packets are received. As a result, it may not be able to process an incoming packet immediately because it is still processing a previous packet. It therefore requires a queue in which packages can be temporarily stored. This waiting time in the queue is the so-called queueing delay. If the queue is full, incoming packets are discarded - this is allowed because the Internet works according to the best effort principle.",
 	"queue-simulation-animation.incoming": "Incoming",
 	"queue-simulation-animation.outgoing": "Outgoing",
 	"queue-simulation-animation.queue-of-router": "Queue of Router",
