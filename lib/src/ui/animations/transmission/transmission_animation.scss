@@ -7,30 +7,3 @@ material-auto-suggest-input {
 material-dropdown-select {
   width: $mat-grid * 10;
 }
-
-div.split-layout {
-
-  display: flex;
-
-  & .left {
-    flex: 1;
-  }
-
-  & .right {
-    flex: 0 0 auto;
-    padding-left: 1em;
-    border-left: 1px solid lightgray;
-    margin-left: 1em;
-    text-align: right;
-  }
-
-}
-
-ul.vertical-controls {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-
-  li {
-  }
-}

@@ -71,5 +71,19 @@
 	"queue-simulation-animation.queue-of-router": "Queue of Router",
 	"queue-simulation-animation.dropped-packets": "Dropped packets",
 	"queue-simulation-animation.time-passed": "Time passed",
-	"http-delay-animation.name": "Http delay"
+	"http-delay-animation.name": "Http delay",
+	"http-delay-animation.connection-step.0": "TCP connection establishment",
+	"http-delay-animation.connection-step.1": "HTML page request",
+	"http-delay-animation.connection-step.2": "Object request",
+	"http-delay-animation.description": "This is an illustration for HTTP delays, especially when requesting a website (like this one!) with your browser. You can set the number of objects transmitted, the number of parallel connections whether the connections are persistent and if pipelining should be used.",
+	"http-delay-animation.info": "Adjust the settings and click \"Start\" to start the animation",
+	"http-delay-animation.persistent-connection": "Persistent connection",
+	"http-delay-animation.pipelining": "Pipelining",
+	"http-delay-animation.objects-being-transmitted": "Objects being transmitted",
+	"http-delay-animation.parallel-connections": "Parallel connections",
+	"http-delay-animation.transmission-delay": "Transmission delay",
+	"http-delay-animation.enable-animation": "Enable animation",
+	"http-delay-animation.animation-speed": "Animation speed (RTT)",
+	"http-delay-animation.start": "Start",
+	"http-delay-animation.rtt-help": "Round trip time of the animation after you clicked \"Start\""
 }

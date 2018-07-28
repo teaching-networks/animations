@@ -1,14 +1,102 @@
-<div class="controls">
-	No controls yet.
-</div>
-
-<div class="drawing-area">
-	<canvas-comp [height]="300" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp [height]="canvasHeight" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li>
+				<div>
+					<material-checkbox [(checked)]="isPersistentConnection" label="{{ 'http-delay-animation.persistent-connection' | i18n }}"></material-checkbox>
+				</div>
+				<div>
+					<material-checkbox [disabled]="!isPersistentConnection" [(checked)]="usePipelining" label="{{ 'http-delay-animation.pipelining' | i18n }}"></material-checkbox>
+				</div>
+			</li>
+			<li>
+				<span class="slider-panel">
+					<div>
+						{{ "http-delay-animation.objects-being-transmitted" | i18n }}
+					</div>
+					<material-slider [min]="1"
+									 [max]="6"
+									 [step]="1"
+									 [(value)]="numberOfObjects">
+					</material-slider>
+					<div>
+						{{ numberOfObjects }}
+					</div>
+				</span>
+			</li>
+			<li>
+				<span class="slider-panel">
+					<div>
+						{{ "http-delay-animation.parallel-connections" | i18n }}
+					</div>
+					<material-slider [min]="1"
+									 [max]="3"
+									 [step]="1"
+									 [(value)]="parallelConnections">
+					</material-slider>
+					<div>
+						{{ parallelConnections }}
+					</div>
+				</span>
+			</li>
+			<li>
+				<span class="slider-panel">
+					<div>
+						{{ "http-delay-animation.transmission-delay" | i18n }}
+					</div>
+					<material-slider [min]="0"
+									 [max]="3"
+									 [step]="0.25"
+									 [(value)]="transmissionDelay">
+					</material-slider>
+					<div>
+						{{ transmissionDelay.toStringAsFixed(2) }} RTT
+					</div>
+				</span>
+			</li>
+			<li class="exception">
+				<hr>
+			</li>
+			<li>
+				<material-toggle [(checked)]="enableAnimation" label="{{ 'http-delay-animation.enable-animation' | i18n }}"></material-toggle>
+			</li>
+			<li>
+				<span class="slider-panel">
+					<div>
+						{{ "http-delay-animation.animation-speed" | i18n }}
+					</div>
+					<material-slider [min]="100"
+									 [max]="2000"
+									 [step]="100"
+									 [(value)]="roundTripTime">
+					</material-slider>
+					<div>
+						{{ (roundTripTime / 1000).toStringAsFixed(2) }}s
+					</div>
+				</span>
+			</li>
+			<li style="display: flex; align-items: center; justify-content: space-evenly;">
+				<material-button raised (trigger)="build()">
+					<material-icon icon="play_arrow"></material-icon>
+					{{ "http-delay-animation.start" | i18n }}
+				</material-button>
+				<span *ngIf="rttCount != null">
+					RTT: {{rttCount}}
+					<material-icon-tooltip type="info">
+              			{{ "http-delay-animation.rtt-help" | i18n }}
+            		</material-icon-tooltip>
+				</span>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>
 	<p>
-		No description yet.
+		{{ "http-delay-animation.description" | i18n }}
 	</p>
 </div>

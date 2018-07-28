@@ -174,6 +174,19 @@ abstract class CanvasAnimation implements OnDestroy {
    */
   double get defaultFontSize => window.devicePixelRatio * DEFAULT_FONT_SIZE_PX;
 
+  /// Set the font for the canvas.
+  /// Font size is set using [sizeFactor] where 1.0 is the [defaultFontSize].
+  /// Font Family is set using [fontFamily] where "sans-serif" is the default font family.
+  void setFont({
+    double sizeFactor = 1.0,
+    String fontFamily = "sans-serif"
+  }) {
+    context.font = "${defaultFontSize * sizeFactor}px $fontFamily";
+  }
+
+  /// Get the windows height.
+  int get windowHeight => window.innerHeight;
+
   @override
   ngOnDestroy() {
     // Stop rendering loop.

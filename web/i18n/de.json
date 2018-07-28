@@ -71,5 +71,19 @@
 	"queue-simulation-animation.queue-of-router": "Warteschlange des Routers",
 	"queue-simulation-animation.dropped-packets": "Ignorierte Packete",
 	"queue-simulation-animation.time-passed": "Vergangene Zeit",
-	"http-delay-animation.name": "Http Verzögerung"
+	"http-delay-animation.name": "Http Verzögerung",
+	"http-delay-animation.connection-step.0": "TCP Verbindungsaufbau",
+	"http-delay-animation.connection-step.1": "HTML Seiten Anfrage",
+	"http-delay-animation.connection-step.2": "Objekt Anfrage",
+	"http-delay-animation.description": "Diese Animation zeigt die HTTP Verzögerung, welche zum Beispiel beim Aufruf dieser Webseite stattfindet. Sie können die Anzahl der Objekte, die die Seite anfrägt setzen, wie auch die Anzahl der parallelen Verbindungen, ob die Verbindung persistent ist und ob Pipelining benutzt werden soll.",
+	"http-delay-animation.info": "Ändern Sie die Einstellungen, danach klicken Sie auf \"Start\"",
+	"http-delay-animation.persistent-connection": "Persistente Verbindung",
+	"http-delay-animation.pipelining": "Pipelining",
+	"http-delay-animation.objects-being-transmitted": "Zu übertragende Objekte",
+	"http-delay-animation.parallel-connections": "Parallele Verbindungen",
+	"http-delay-animation.transmission-delay": "Übertragungs Verzögerung",
+	"http-delay-animation.enable-animation": "Animieren?",
+	"http-delay-animation.animation-speed": "Animations Geschwindigkeit (RTT)",
+	"http-delay-animation.start": "Start",
+	"http-delay-animation.rtt-help": "Round trip time der Animation nachdem Sie auf \"Start\" geklickt haben"
 }

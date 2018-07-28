@@ -50,7 +50,7 @@ class Animations {
     new AnimationDescriptor<HttpDelayAnimation>(
         httpDelay.HttpDelayAnimationNgFactory,
         "http-delay-animation.name",
-        "img/animation/preview/image-preview.svg",
+        "img/animation/preview/http-delay-preview.png",
         "http-delay"
     )
   ];

@@ -3,7 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
-import 'package:hm_animations/src/ui/canvas/progress/progress_rect.dart';
+import 'package:hm_animations/src/ui/canvas/progress/bar/progress_rect.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/direction.dart';
