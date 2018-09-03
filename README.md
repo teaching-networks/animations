@@ -7,7 +7,7 @@
 Follow the Angular Dart instructions [here](https://webdev.dartlang.org/angular/) to install the Dart SDK, etc. Then just clone the repository and call `pub get` (or `pub upgrade`) followed by `pub run build_runner serve` to start the application.
 
 ### Debugging (JetBrains IDE)
-- Launch the debugging server with `pub run build_runner serve`
+- Launch the debugging server with `pub run build_runner serve --live-reload` (Actually you can omit the --live-reload flag, but it is eases development a lot as you do not need to manually reload every time you change code)
 - Set up a launch configuration of type `JavaScript Debug` and set the URL to `http://localhost:8080`, set the Browser to Chrome
 - Launch the launch configuration in debug mode
 
