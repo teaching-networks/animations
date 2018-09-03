@@ -61,7 +61,7 @@
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.1": "Sender received ACK_",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.2": " which has already been received",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender received ACK_",
-	"reliable-transmission-animation.credits": "No credits",
+	"reliable-transmission-animation.credits": "This animation was inspired by a Java Applet originally developed by M. Shatley & C. Hoffman (advisor: Prof. P. Amer), Univ. of Delaware. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available.",
 	"queue-simulation-animation.name": "Queue simulation",
 	"queue-simulation-animation.packet-per-second": "packets / s",
 	"queue-simulation-animation.emission-rate": "Emission rate",
@@ -73,7 +73,7 @@
 	"queue-simulation-animation.queue-of-router": "Queue of Router",
 	"queue-simulation-animation.dropped-packets": "Dropped packets",
 	"queue-simulation-animation.time-passed": "Time passed",
-	"queue-simulation-animation.credits": "No credits",
+	"queue-simulation-animation.credits": "This animation was inspired by a Java Applet originally developed by David Grangier, Institut Eurecom, France. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available.",
 	"http-delay-animation.name": "Http delay",
 	"http-delay-animation.connection-step.0": "TCP connection establishment",
 	"http-delay-animation.connection-step.1": "HTML page request",
@@ -89,5 +89,5 @@
 	"http-delay-animation.animation-speed": "Animation speed (Total delay)",
 	"http-delay-animation.start": "Start",
 	"http-delay-animation.rtt-help": "Round trip time of the animation after you clicked \"Start\"",
-	"http-delay-animation.credits": "No credits"
+	"http-delay-animation.credits": "This animation was inspired by a Java Applet originally developed by Pratima Akkunoor/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available."
 }
