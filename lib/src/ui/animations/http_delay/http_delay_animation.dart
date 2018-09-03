@@ -64,7 +64,7 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   int numberOfObjects = 1;
   int parallelConnections = 1;
   bool usePipelining = false;
-  int roundTripTime = 1000;
+  int durationInMs = 1000;
 
   double rttCount;
 
@@ -111,7 +111,10 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
 
       if (currentStepIndex != -1 && enableAnimation) {
         double rtt = isStepWithTransmission(steps[currentStepIndex]) ? 1 + config.objectTransmissionDelay : 1;
-        progress.progressSave = (timestamp - startTimestamp) / (rtt * roundTripTime);
+
+        double stepDuration = durationInMs / rttCount * rtt;
+
+        progress.progressSave = (timestamp - startTimestamp) / stepDuration;
       }
 
       double heightCounter = 0.0;

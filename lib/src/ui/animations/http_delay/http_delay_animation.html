@@ -71,10 +71,10 @@
 					<material-slider [min]="100"
 									 [max]="6000"
 									 [step]="100"
-									 [(value)]="roundTripTime">
+									 [(value)]="durationInMs">
 					</material-slider>
 					<div>
-						{{ (roundTripTime / 1000).toStringAsFixed(2) }}s
+						{{ (durationInMs / 1000).toStringAsFixed(2) }}s
 					</div>
 				</span>
 			</li>

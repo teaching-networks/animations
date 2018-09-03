@@ -83,7 +83,7 @@
 	"http-delay-animation.parallel-connections": "Parallele Verbindungen",
 	"http-delay-animation.transmission-delay": "Übertragungs Verzögerung",
 	"http-delay-animation.enable-animation": "Animieren?",
-	"http-delay-animation.animation-speed": "Animations Geschwindigkeit (RTT)",
+	"http-delay-animation.animation-speed": "Animations Geschwindigkeit (Gesamtverzögerung)",
 	"http-delay-animation.start": "Start",
 	"http-delay-animation.rtt-help": "Round trip time der Animation nachdem Sie auf \"Start\" geklickt haben"
 }
