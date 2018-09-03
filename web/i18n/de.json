@@ -19,6 +19,7 @@
 	"packetTransmission.size": "Packetgröße",
 	"packetTransmission.rate": "Rate",
 	"packetTransmission.description": "Diese einfache Animation zeigt eines der fundamentalsten Konzepte von Netzwerke I: Übertragungsverzögerung im Verhältnis zur Ausbreitungsverzögerung. Das Konzept wird in Kapitel I genauer beleuchtet. Setzen Sie die Länge der Verbindung zwischen Sender und Empfänger, die Packet Größe und die Übertragungsgeschwindigkeit. Bei Druck auf Start können Sie das Packet beobachten, wie es von Sender zu Empfänger gesendet wird.",
+	"packetTransmission.credits": "Keine Credits",
 	"reliable-transmission-animation.name": "Zuverlässige Übertragung",
 	"reliable-transmission-animation.sender": "Sender",
 	"reliable-transmission-animation.receiver": "Empfänger",
@@ -60,6 +61,7 @@
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.1": "Sender empfängt ACK_",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.2": " welches bereits empfangen wurde",
 	"reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack": "Sender empfängt ACK_",
+	"reliable-transmission-animation.credits": "Keine Credits",
 	"queue-simulation-animation.name": "Warteschlangen Simulation",
 	"queue-simulation-animation.packet-per-second": "Packete / s",
 	"queue-simulation-animation.emission-rate": "Emissions Rate",
@@ -71,6 +73,7 @@
 	"queue-simulation-animation.queue-of-router": "Warteschlange des Routers",
 	"queue-simulation-animation.dropped-packets": "Ignorierte Packete",
 	"queue-simulation-animation.time-passed": "Vergangene Zeit",
+	"queue-simulation-animation.credits": "Keine Credits",
 	"http-delay-animation.name": "Http Verzögerung",
 	"http-delay-animation.connection-step.0": "TCP Verbindungsaufbau",
 	"http-delay-animation.connection-step.1": "HTML Seiten Anfrage",
@@ -85,5 +88,6 @@
 	"http-delay-animation.enable-animation": "Animieren?",
 	"http-delay-animation.animation-speed": "Animations Geschwindigkeit (Gesamtverzögerung)",
 	"http-delay-animation.start": "Start",
-	"http-delay-animation.rtt-help": "Round trip time der Animation nachdem Sie auf \"Start\" geklickt haben"
+	"http-delay-animation.rtt-help": "Round trip time der Animation nachdem Sie auf \"Start\" geklickt haben",
+	"http-delay-animation.credits": "Keine Credits"
 }

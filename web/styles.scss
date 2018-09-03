@@ -155,3 +155,22 @@ ul.highlighted-fields {
     }
   }
 }
+
+.animation-credits {
+  margin-top: 2.0em;
+
+  & > p {
+    font-size: 0.8em;
+    color: slategrey;
+    font-style: italic;
+    text-align: center;
+  }
+
+  & > hr {
+    border-width: 1px 0 0 0;
+    border-color: slategray;
+    border-style: solid;
+    margin: 0 40%;
+  }
+
+}
