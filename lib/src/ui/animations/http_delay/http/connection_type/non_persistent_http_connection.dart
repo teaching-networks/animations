@@ -14,7 +14,7 @@ class NonPersistentHttpConnection implements HttpConnectionType {
 
     for (int i = 0; i < (configuration.objectCount.toDouble() / configuration.parallelConnectionCount).ceil(); i++) {
       steps.add(ConnectionStep.TCP_CONNECTION_ESTABLISHMENT);
-      steps.add(ConnectionStep.OBJECT_REQUEST);
+      steps.add(ObjectRequestStep(configuration.objectTransmissionDelay));
     }
 
     return steps;

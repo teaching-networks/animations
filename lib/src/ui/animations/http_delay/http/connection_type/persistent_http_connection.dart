@@ -12,12 +12,13 @@ class PersistentHttpConnection implements HttpConnectionType {
     steps.add(ConnectionStep.TCP_CONNECTION_ESTABLISHMENT);
     steps.add(ConnectionStep.HTML_PAGE_REQUEST);
 
+    int realObjectCount = (configuration.objectCount.toDouble() / configuration.parallelConnectionCount).ceil();
     if (!configuration.withPipelining) {
-      for (int i = 0; i < (configuration.objectCount.toDouble() / configuration.parallelConnectionCount).ceil(); i++) {
-        steps.add(ConnectionStep.OBJECT_REQUEST);
+      for (int i = 0; i < realObjectCount; i++) {
+        steps.add(ObjectRequestStep(configuration.objectTransmissionDelay));
       }
     } else {
-      steps.add(ConnectionStep.OBJECT_REQUEST);
+      steps.add(ObjectRequestStep(realObjectCount * configuration.objectTransmissionDelay));
     }
 
     return steps;

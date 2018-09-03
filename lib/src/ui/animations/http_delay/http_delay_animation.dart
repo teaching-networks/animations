@@ -64,7 +64,7 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   int numberOfObjects = 1;
   int parallelConnections = 1;
   bool usePipelining = false;
-  int durationInMs = 1000;
+  int durationInMs = 3000;
 
   double rttCount;
 
@@ -79,7 +79,7 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   void initTranslations() {
     _connectionStepLabels = new List<Message>();
     
-    for (int i = 0; i < ConnectionStep.values.length; i++) {
+    for (int i = 0; i < ConnectionStepType.values.length; i++) {
       _connectionStepLabels.add(_i18n.get("http-delay-animation.connection-step.$i"));
     }
 
@@ -104,15 +104,11 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
       }
 
       double rttHeight = size.height / rttCount;
-
       double stepWidth = size.width - maxLabelWidth - (2 * TEXT_PADDING * window.devicePixelRatio);
 
-      double bigStepHeight = (config.objectTransmissionDelay + 1) * rttHeight;
-
       if (currentStepIndex != -1 && enableAnimation) {
-        double rtt = isStepWithTransmission(steps[currentStepIndex]) ? 1 + config.objectTransmissionDelay : 1;
-
-        double stepDuration = durationInMs / rttCount * rtt;
+        double rtts = getRTTsForStep(steps[currentStepIndex]);
+        double stepDuration = durationInMs / rttCount * rtts;
 
         progress.progressSave = (timestamp - startTimestamp) / stepDuration;
       }
@@ -121,12 +117,15 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
       for (int i = 0; i < roundTrips.length; i++) {
         ClientServerRoundTrip roundTrip = roundTrips[i];
 
-        double height = isStepWithTransmission(steps[i]) ? bigStepHeight : rttHeight;
+        ConnectionStep step = steps[i];
+        double rtts = getRTTsForStep(step);
 
-        roundTrip.render(context, Rectangle(0.0, heightCounter, stepWidth, height));
-        context.fillText(_connectionStepLabels[steps[i].index].toString(), stepWidth + (TEXT_PADDING * window.devicePixelRatio), heightCounter + height / 2);
+        double stepHeight = rtts * rttHeight;
 
-        heightCounter += height;
+        roundTrip.render(context, Rectangle(0.0, heightCounter, stepWidth, stepHeight));
+        context.fillText(_connectionStepLabels[steps[i].type.index].toString(), stepWidth + (TEXT_PADDING * window.devicePixelRatio), heightCounter + stepHeight / 2);
+
+        heightCounter += stepHeight;
       }
     } else {
       context.textAlign = "center";
@@ -140,17 +139,12 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   }
 
   double getRTTCount() {
-    int smallSteps = 0;
-    int bigSteps = 0;
+    double rtts = 0.0;
     for (ConnectionStep step in steps) {
-      if (isStepWithTransmission(step)) {
-        bigSteps++;
-      } else {
-        smallSteps++;
-      }
+      rtts += getRTTsForStep(step);
     }
 
-    return (config.objectTransmissionDelay + 1) * bigSteps + smallSteps;
+    return rtts;
   }
 
   void calcMaxLabelWidth(CanvasRenderingContext2D context) {
@@ -215,19 +209,31 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
 
   /// Get a round trip object for the passed [step].
   ClientServerRoundTrip getRoundTripForStep(ConnectionStep step, Progress p) {
-    switch (step) {
-      case ConnectionStep.TCP_CONNECTION_ESTABLISHMENT:
+    switch (step.type) {
+      case ConnectionStepType.TCP_CONNECTION_ESTABLISHMENT:
         return new ClientServerRoundTrip(p, Colors.TEAL, 0.0);
-      case ConnectionStep.HTML_PAGE_REQUEST:
+      case ConnectionStepType.HTML_PAGE_REQUEST:
         return new ClientServerRoundTrip(p, Colors.LIME, config.objectTransmissionDelay);
-      case ConnectionStep.OBJECT_REQUEST:
-        return new ClientServerRoundTrip(p, Colors.CORAL, config.objectTransmissionDelay);
+      case ConnectionStepType.OBJECT_REQUEST:
+        return new ClientServerRoundTrip(p, Colors.CORAL, (step as ObjectRequestStep).rtts);
       default:
         throw new Exception("Step type not available: $step");
     }
   }
 
-  bool isStepWithTransmission(ConnectionStep step) => step != ConnectionStep.TCP_CONNECTION_ESTABLISHMENT;
+  /// Get count of RTTs for a [step].
+  double getRTTsForStep(ConnectionStep step) {
+    switch (step.type) {
+      case ConnectionStepType.TCP_CONNECTION_ESTABLISHMENT:
+        return 1.0;
+      case ConnectionStepType.HTML_PAGE_REQUEST:
+        return 1.0 + config.objectTransmissionDelay;
+      case ConnectionStepType.OBJECT_REQUEST:
+        return 1.0 + (step as ObjectRequestStep).rtts;
+      default:
+        throw new Exception("Step type not available: $step");
+    }
+  }
 
   int get canvasHeight => (windowHeight * 0.8).round();
 
