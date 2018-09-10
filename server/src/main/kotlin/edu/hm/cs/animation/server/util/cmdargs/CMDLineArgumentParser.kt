@@ -10,4 +10,6 @@ class CMDLineArgumentParser(parser: ArgParser) {
 
     val jwtSalt by parser.storing("-S", "--jwt-salt", help = "Salt used for generating/validating JSON Web Tokens")
 
+    val corsEnabledOrigin by parser.storing("-C", "--cors-enabled-origin", help = "Origin for which CORS is enabled")
+
 }
