@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
 
             if (debug) {
                 enableCorsForAllOrigins()
-            } else {
+            } else if (corsEnabledOrigin.isNotEmpty()) {
                 enableCorsForOrigin(corsEnabledOrigin)
             }
         }.start()

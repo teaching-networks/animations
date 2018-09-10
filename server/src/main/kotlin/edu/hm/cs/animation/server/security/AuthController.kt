@@ -8,10 +8,16 @@ import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.profile.JwtGenerator
 import java.util.*
 
+/**
+ * REST Controller handling authentication matters.
+ */
 object AuthController {
 
     const val PATH = "/api/auth"
 
+    /**
+     * Generate and retrieve a JSON Web Token.
+     */
     fun generateJWT(ctx: Context, jwtSalt: String) {
         val context: Pac4jContext = Pac4jContext(ctx)
         val profileManager = ProfileManager<CommonProfile>(context)

@@ -8,10 +8,13 @@ import org.pac4j.core.config.ConfigFactory
 import org.pac4j.http.client.direct.DirectBasicAuthClient
 import org.pac4j.http.client.direct.HeaderClient
 import org.pac4j.javalin.DefaultHttpActionAdapter
-import org.pac4j.jwt.config.encryption.EncryptionConfiguration
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
 import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
 
+/**
+ * All authorization/authentication matters are defined here.
+ * See Pac4j documentation for more details.
+ */
 class SecurityConfigFactory(private val jwtSalt: String) : ConfigFactory {
 
     override fun build(vararg parameters: Any?): Config {
@@ -22,7 +25,9 @@ class SecurityConfigFactory(private val jwtSalt: String) : ConfigFactory {
 
         val headerClient = HeaderClient("Authorization", JwtAuthenticator(SecretSignatureConfiguration(jwtSalt)))
 
+        // List of clients that can be used within the application.
         val clients = Clients(directBasicAuthenticationClient, headerClient)
+
         val config = Config(clients)
         config.addAuthorizer("admin", AdminAuthorizer())
         config.httpActionAdapter = DefaultHttpActionAdapter()

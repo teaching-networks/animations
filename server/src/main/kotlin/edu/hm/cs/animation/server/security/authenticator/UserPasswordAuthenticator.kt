@@ -6,6 +6,9 @@ import org.pac4j.core.credentials.authenticator.Authenticator
 import org.pac4j.core.exception.CredentialsException
 import org.pac4j.core.profile.CommonProfile
 
+/**
+ * Simple authenticator which works with comparing username and password to a given pair.
+ */
 class UserPasswordAuthenticator(private val username: String, private val password: String) : Authenticator<UsernamePasswordCredentials> {
 
     override fun validate(credentials: UsernamePasswordCredentials, context: WebContext) {
