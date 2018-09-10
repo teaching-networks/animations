@@ -32,6 +32,7 @@ fun main(args: Array<String>) {
         }.start()
 
         app.routes {
+            // The above 2 items are used to test the authentication using JSON Web Tokens
             before("/api/hello", SecurityHandler(securityConfig, "HeaderClient"))
             get("/api/hello") { ctx -> ctx.result("Hello World") }
 
