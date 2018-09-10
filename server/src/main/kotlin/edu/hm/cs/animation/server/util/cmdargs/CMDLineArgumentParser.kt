@@ -8,6 +8,6 @@ class CMDLineArgumentParser(parser: ArgParser) {
 
     val port by parser.storing("-p", "--port", help = "Port the server should run on") { toInt() }
 
-    val jwtSecret by parser.storing("-js", "--jwt-secret", help = "Secret used for generating/validating JSON Web Tokens")
+    val jwtSalt by parser.storing("-S", "--jwt-salt", help = "Salt used for generating/validating JSON Web Tokens")
 
 }

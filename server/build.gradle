@@ -4,6 +4,13 @@ plugins {
 
 group 'edu.hm.cs.animation.server'
 version '0.1'
+
+ext {
+    javaVersion = '1.8'
+    javalinVersion = '2.1.1'
+    pac4jVersion = '3.0.0'
+}
+
 jar {
     manifest {
         attributes 'Implementation-Title': 'HM Animations Server',
@@ -11,19 +18,21 @@ jar {
     }
 }
 
-sourceCompatibility = 1.8
+sourceCompatibility = "${javaVersion}"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    compile 'io.javalin:javalin:2.1.1'
-    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.4'
-    compile 'org.slf4j:slf4j-simple:1.7.25'
-    compile 'org.pac4j:javalin-pac4j:1.0.0'
-    compile 'org.pac4j:pac4j-jwt:3.0.0'
-    compile 'com.xenomachina:kotlin-argparser:2.0.7'
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compile "io.javalin:javalin:${javalinVersion}"
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.4"
+    compile "org.slf4j:slf4j-simple:1.7.25"
+    compile "org.pac4j:pac4j-core:${pac4jVersion}"
+    compile "org.pac4j:pac4j-http:${pac4jVersion}"
+    compile "org.pac4j:pac4j-jwt:${pac4jVersion}"
+    compile "org.pac4j:javalin-pac4j:1.0.0.RC0"
+    compile "com.xenomachina:kotlin-argparser:2.0.7"
+    testCompile group: "junit", name: "junit", version: "4.12"
 }
