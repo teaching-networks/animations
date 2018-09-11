@@ -3,10 +3,13 @@ package edu.hm.cs.animation.server
 import com.xenomachina.argparser.ArgParser
 import edu.hm.cs.animation.server.security.AuthController
 import edu.hm.cs.animation.server.security.SecurityConfigFactory
+import edu.hm.cs.animation.server.user.UserController
 import edu.hm.cs.animation.server.util.cmdargs.CMDLineArgumentParser
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
+import io.javalin.json.JavalinJackson
 import org.pac4j.javalin.SecurityHandler
+import javax.persistence.Persistence
 
 /**
  * Entry point for the server.
@@ -15,6 +18,7 @@ import org.pac4j.javalin.SecurityHandler
  */
 fun main(args: Array<String>) {
     ArgParser(args).parseInto(::CMDLineArgumentParser).run {
+        // Set up security configuration of pac4j
         val securityConfig = SecurityConfigFactory(jwtSalt).build()
 
         // Create the Javalin server
@@ -30,12 +34,22 @@ fun main(args: Array<String>) {
 
         // Here go all routes!
         app.routes {
-            // The above 2 items are used to test the authentication using JSON Web Tokens
-            before("/api/hello", SecurityHandler(securityConfig, "HeaderClient"))
+            // Security via JWT for all paths starting with /api
+            before("/api/*", SecurityHandler(securityConfig, "HeaderClient"))
+
+            // The below item is used to test the authentication using JSON Web Tokens
             get("/api/hello") { ctx -> ctx.result("Hello World") }
 
-            before(AuthController.PATH, SecurityHandler(securityConfig, "DirectBasicAuthClient"))
+            // AuthController
+            before(AuthController.PATH, SecurityHandler(securityConfig, "DirectBasicAuthClient")) // Use basic authentication for fetching a JSON Web Token
             get(AuthController.PATH) { ctx -> AuthController.generateJWT(ctx, jwtSalt) }
+
+            // UserController
+            post(UserController.PATH, UserController::create)
+            get(UserController.PATH, UserController::readAll)
+            get(UserController.PATH + "/:id", UserController::read)
+            patch(UserController.PATH, UserController::update)
+            delete(UserController.PATH + "/:id", UserController::delete)
         }
     }
 }

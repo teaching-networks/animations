@@ -8,7 +8,9 @@ import javax.crypto.spec.PBEKeySpec
 /**
  * Password utility is handling password encryption and validation.
  */
-class PasswordUtil {
+object PasswordUtil {
+
+    const val DEFAULT_SALT_LENGTH = 32
 
     private val RAND = SecureRandom()
     private val SALT_CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
