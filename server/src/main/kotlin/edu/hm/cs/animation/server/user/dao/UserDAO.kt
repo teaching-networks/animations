@@ -1,6 +1,6 @@
 package edu.hm.cs.animation.server.user.dao
 
-import edu.hm.cs.animation.server.user.model.ApiUser
+import edu.hm.cs.animation.server.user.model.User
 import edu.hm.cs.animation.server.util.PersistenceUtil
 
 /**
@@ -8,43 +8,55 @@ import edu.hm.cs.animation.server.util.PersistenceUtil
  */
 class UserDAO {
 
-    fun findAllUsers(): List<ApiUser> {
+    fun findAllUsers(): List<User> {
         val em = PersistenceUtil.createEntityManager();
         val transaction = em.transaction;
         transaction.begin()
 
-        val users: List<ApiUser> = em.createQuery("SELECT e FROM ApiUser e").resultList as List<ApiUser>
+        val users: List<User> = em.createQuery("SELECT e FROM User e", User::class.java).resultList!!
 
         transaction.commit()
 
         return users
     }
 
-    fun findUser(id: Long): ApiUser? {
+    fun findUser(id: Long): User? {
         val em = PersistenceUtil.createEntityManager()
         val transaction = em.transaction
         transaction.begin()
 
-        val user: ApiUser? = em.find(ApiUser::class.java, id)
+        val user: User? = em.find(User::class.java, id)
 
         transaction.commit()
 
         return user
     }
 
-    fun findUserByName(name: String): ApiUser? {
+    fun getUserCount(): Long {
         val em = PersistenceUtil.createEntityManager()
         val transaction = em.transaction
         transaction.begin()
 
-        val user: ApiUser? = em.createQuery("SELECT u from ApiUser u WHERE u.name = :name", ApiUser::class.java).setParameter("name", name).singleResult
+        val count: Long = (em.createQuery("SELECT COUNT(u) FROM User u").singleResult as Long?)!!
+
+        transaction.commit()
+
+        return count
+    }
+
+    fun findUserByName(name: String): User? {
+        val em = PersistenceUtil.createEntityManager()
+        val transaction = em.transaction
+        transaction.begin()
+
+        val user: User? = em.createQuery("SELECT u from User u WHERE u.name = :name", User::class.java).setParameter("name", name).singleResult
 
         transaction.commit()
 
         return user
     }
 
-    fun createUser(user: ApiUser) {
+    fun createUser(user: User) {
         val em = PersistenceUtil.createEntityManager();
         val transaction = em.transaction;
         transaction.begin()
@@ -59,8 +71,8 @@ class UserDAO {
         }
     }
 
-    fun updateUser(user: ApiUser) {
-        val dbUser = findUser(user.id) ?: throw Exception("User to update could not be found in the database")
+    fun updateUser(user: User) {
+        val dbUser = findUser(user.id!!) ?: throw Exception("User to update could not be found in the database")
 
         dbUser.name = user.name
         dbUser.password = user.password

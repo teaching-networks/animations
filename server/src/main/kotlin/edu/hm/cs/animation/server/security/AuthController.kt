@@ -13,7 +13,7 @@ import java.util.*
  */
 object AuthController {
 
-    const val PATH = "/api/auth"
+    const val PATH = "/auth"
 
     /**
      * Generate and retrieve a JSON Web Token.

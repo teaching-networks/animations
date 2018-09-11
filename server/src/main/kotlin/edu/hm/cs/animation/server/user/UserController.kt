@@ -2,7 +2,7 @@ package edu.hm.cs.animation.server.user
 
 import edu.hm.cs.animation.server.security.util.PasswordUtil
 import edu.hm.cs.animation.server.user.dao.UserDAO
-import edu.hm.cs.animation.server.user.model.ApiUser
+import edu.hm.cs.animation.server.user.model.User
 import io.javalin.Context
 
 /**
@@ -24,13 +24,13 @@ object UserController {
      * Create a user.
      */
     fun create(ctx: Context) {
-        val user = ctx.body<ApiUser>()
+        val user = ctx.body<User>()
 
-        user.id = -1 // For safety reasons
+        user.id = null // For safety reasons
 
         // Encode password
-        user.passwordSalt = PasswordUtil.getSalt(PasswordUtil.DEFAULT_SALT_LENGTH);
-        user.password = PasswordUtil.securePassword(user.password, user.passwordSalt)
+        user.passwordSalt = PasswordUtil.getSalt(PasswordUtil.DEFAULT_SALT_LENGTH)
+        user.password = PasswordUtil.securePassword(user.password, user.passwordSalt!!)
 
         userDAO.createUser(user)
     }
@@ -55,7 +55,7 @@ object UserController {
      * Update a user.
      */
     fun update(ctx: Context) {
-        val user = ctx.body<ApiUser>()
+        val user = ctx.body<User>()
 
         userDAO.updateUser(user)
     }

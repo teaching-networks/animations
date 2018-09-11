@@ -10,24 +10,39 @@ import org.pac4j.core.profile.CommonProfile
 
 /**
  * Simple authenticator which works with comparing username and password to a given pair.
+ * Set the default username and password in case you have no users yet. This default user can only be used until the first user has been created.
  */
-class UserPasswordAuthenticator : Authenticator<UsernamePasswordCredentials> {
+class UserPasswordAuthenticator(val defaultUsername: String, val defaultPassword: String) : Authenticator<UsernamePasswordCredentials> {
 
     private val userDAO = UserDAO()
 
     override fun validate(credentials: UsernamePasswordCredentials, context: WebContext) {
-        val user = userDAO.findUserByName(credentials.username) ?: throw CredentialsException("Invalid credentials")
+        val userCount = userDAO.getUserCount()
 
-        if (PasswordUtil.verifyPassword(credentials.password, user.password, user.passwordSalt)) {
-            val profile = CommonProfile()
-
-            profile.id = credentials.username
-            profile.addAttribute("username", credentials.username)
-
-            credentials.userProfile = profile
+        if (userCount == 0L) {
+            if (credentials.username == defaultUsername && credentials.password == defaultPassword) {
+                onUserVerified(credentials)
+            } else {
+                throw CredentialsException("Invalid credentials")
+            }
         } else {
-            throw CredentialsException("Invalid credentials")
+            val user = userDAO.findUserByName(credentials.username) ?: throw CredentialsException("Invalid credentials")
+
+            if (PasswordUtil.verifyPassword(credentials.password, user.password, user.passwordSalt!!)) {
+                onUserVerified(credentials)
+            } else {
+                throw CredentialsException("Invalid credentials")
+            }
         }
+    }
+
+    private fun onUserVerified(credentials: UsernamePasswordCredentials) {
+        val profile = CommonProfile()
+
+        profile.id = credentials.username
+        profile.addAttribute("username", credentials.username)
+
+        credentials.userProfile = profile
     }
 
 }

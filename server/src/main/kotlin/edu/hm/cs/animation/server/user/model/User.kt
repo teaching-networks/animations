@@ -5,18 +5,19 @@ import net.minidev.json.annotate.JsonIgnore
 import javax.persistence.*
 
 /**
- * ApiUser of the API.
+ * User of the API.
  */
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class ApiUser(
+@Table(name = "Users")
+data class User(
 
         /**
          * The users id.
          */
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
-        var id: Long,
+        var id: Long?,
 
         /**
          * Name of the user.
@@ -36,6 +37,6 @@ data class ApiUser(
          */
         @Column(nullable = false)
         @JsonIgnore
-        var passwordSalt: String
+        var passwordSalt: String?
 
 )

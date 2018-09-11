@@ -5,7 +5,8 @@
     <persistence-unit name="default">
         <description>Persistence XML</description>
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <exclude-unlisted-classes>false</exclude-unlisted-classes>
+        <class>edu.hm.cs.animation.server.user.model.User</class>
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
 
             <!-- Hibernate Config -->
