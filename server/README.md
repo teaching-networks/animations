@@ -16,7 +16,7 @@ Since the REST API is primarily though of as a management tool for the web appli
 This is done via JSON Web Tokens and Basic HTTP Authentication. The first step is to login via Basic Authentication. As an result to the login you'll get your JSON Web Token which you can use to authenticate to every API call.
 
 ### How do I get my JSON Web Token?
-Well you basically just do a GET Request to `http://localhost:4200/api/auth` where you attach the `Authorization` HTTP header with `Basic YYY` as content. You may ask what is `YYY`: It is username and password of your user in the form `username:password` encoded in Base64.
+Well you basically just do a GET Request to `http://localhost:4200/auth` where you attach the `Authorization` HTTP header with `Basic YYY` as content. You may ask what is `YYY`: It is username and password of your user in the form `username:password` encoded in Base64.
 You may say "I don't even have a user yet!" because you just created the database for the server. That is no problem as you can login in this case with username "admin" and password "admin" (Note that this will just work in case you have no user in the database).
 As result you should get your JSON Web Token.
 
