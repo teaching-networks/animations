@@ -14,7 +14,7 @@ object UserController : CRUDController {
     /**
      * Path the user controller is reachable under.
      */
-    const val PATH = "/api/user"
+    const val PATH = "user"
 
     /**
      * CRUDController to get users from.

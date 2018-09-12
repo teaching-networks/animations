@@ -13,7 +13,7 @@ object AnimationController : CRUDController {
     /**
      * Path the user controller is reachable under.
      */
-    const val PATH = "/api/animation"
+    const val PATH = "animation"
 
     /**
      * DAO to get animations from.
