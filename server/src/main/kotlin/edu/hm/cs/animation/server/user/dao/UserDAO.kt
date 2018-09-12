@@ -20,12 +20,12 @@ class UserDAO {
         return users
     }
 
-    fun findUser(id: Long): User? {
+    fun findUser(id: Long): User {
         val em = PersistenceUtil.createEntityManager()
         val transaction = em.transaction
         transaction.begin()
 
-        val user: User? = em.find(User::class.java, id)
+        val user: User = em.find(User::class.java, id)
 
         transaction.commit()
 

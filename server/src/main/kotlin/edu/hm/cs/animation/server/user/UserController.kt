@@ -3,12 +3,13 @@ package edu.hm.cs.animation.server.user
 import edu.hm.cs.animation.server.security.util.PasswordUtil
 import edu.hm.cs.animation.server.user.dao.UserDAO
 import edu.hm.cs.animation.server.user.model.User
+import edu.hm.cs.animation.server.util.rest.CRUDController
 import io.javalin.Context
 
 /**
  * REST Controller handling user matters.
  */
-object UserController {
+object UserController : CRUDController {
 
     /**
      * Path the user controller is reachable under.
@@ -16,14 +17,14 @@ object UserController {
     const val PATH = "/api/user"
 
     /**
-     * DAO to get users from.
+     * CRUDController to get users from.
      */
-    val userDAO = UserDAO()
+    private val userDAO = UserDAO()
 
     /**
      * Create a user.
      */
-    fun create(ctx: Context) {
+    override fun create(ctx: Context) {
         val user = ctx.body<User>()
 
         user.id = null // For safety reasons
@@ -38,23 +39,23 @@ object UserController {
     /**
      * Read a user.
      */
-    fun read(ctx: Context) {
+    override fun read(ctx: Context) {
         val id = ctx.pathParam("id").toLong()
 
-        ctx.json(userDAO.findUser(id)!!)
+        ctx.json(userDAO.findUser(id))
     }
 
     /**
      * Reads all users.
      */
-    fun readAll(ctx: Context) {
+    override fun readAll(ctx: Context) {
         ctx.json(userDAO.findAllUsers())
     }
 
     /**
      * Update a user.
      */
-    fun update(ctx: Context) {
+    override fun update(ctx: Context) {
         val user = ctx.body<User>()
 
         userDAO.updateUser(user)
@@ -63,7 +64,7 @@ object UserController {
     /**
      * Delete a user.
      */
-    fun delete(ctx: Context) {
+    override fun delete(ctx: Context) {
         val id = ctx.pathParam("id").toLong()
 
         userDAO.removeUser(id)
