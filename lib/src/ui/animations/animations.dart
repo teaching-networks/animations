@@ -18,36 +18,42 @@ class Animations {
   /// Add a new animation to this list in order to make it available to the application.
   static List<AnimationDescriptor> ANIMATIONS = <AnimationDescriptor>[
     new AnimationDescriptor<TransmissionAnimation>(
+        1,
         transmission.TransmissionAnimationNgFactory,
         "packet-transmission.name",
         "img/animation/preview/packet-transmission-preview.png",
         "transmission"
     ),
     new AnimationDescriptor<StopAndWaitAnimation>(
+        2,
         stopAndWait.StopAndWaitAnimationNgFactory,
         "reliable-transmission-animation.protocol.stop-and-wait",
         "img/animation/preview/stop-and-wait-preview.png",
         "stop-and-wait"
     ),
     new AnimationDescriptor<GoBackNAnimation>(
+        3,
         goBackN.GoBackNAnimationNgFactory,
         "reliable-transmission-animation.protocol.go-back-n",
         "img/animation/preview/go-back-n-preview.png",
         "go-back-n"
     ),
     new AnimationDescriptor<SelectiveRepeatAnimation>(
+        4,
         selectiveRepeat.SelectiveRepeatAnimationNgFactory,
         "reliable-transmission-animation.protocol.selective-repeat",
         "img/animation/preview/selective-repeat-preview.png",
         "selective-repeat"
     ),
     new AnimationDescriptor<QueueSimulationAnimation>(
+        5,
         queueSimulation.QueueSimulationAnimationNgFactory,
         "queue-simulation-animation.name",
         "img/animation/preview/queue-simulation-preview.png",
         "queue-simulation"
     ),
     new AnimationDescriptor<HttpDelayAnimation>(
+        6,
         httpDelay.HttpDelayAnimationNgFactory,
         "http-delay-animation.name",
         "img/animation/preview/http-delay-preview.png",

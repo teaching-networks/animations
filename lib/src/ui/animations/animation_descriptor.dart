@@ -2,6 +2,10 @@ import 'package:angular/angular.dart';
 
 class AnimationDescriptor<T> {
   /**
+   * Id of the animation.
+   */
+  final int id;
+  /**
    * Type of the animation (e. g. the Animation components class).
    */
   final ComponentFactory<T> componentFactory;
@@ -21,5 +25,5 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
-  const AnimationDescriptor(this.componentFactory, this.name, this.previewImagePath, this.path);
+  const AnimationDescriptor(this.id, this.componentFactory, this.name, this.previewImagePath, this.path);
 }

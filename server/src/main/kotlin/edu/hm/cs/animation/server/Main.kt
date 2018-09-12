@@ -29,6 +29,7 @@ fun main(args: Array<String>) {
 
             if (debug) {
                 enableCorsForAllOrigins()
+                enableDebugLogging()
             } else if (corsEnabledOrigin.isNotEmpty()) {
                 enableCorsForOrigin(corsEnabledOrigin)
             }

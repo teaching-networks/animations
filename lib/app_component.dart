@@ -1,5 +1,6 @@
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
+import 'package:angular_forms/angular_forms.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/router/routes.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
@@ -12,11 +13,19 @@ import 'package:hm_animations/src/util/component.dart';
     selector: 'net-app',
     styleUrls: const ['app_component.css'],
     templateUrl: 'app_component.html',
-    directives: const [MaterialButtonComponent, MaterialIconComponent, MaterialDropdownSelectComponent, routerDirectives],
+    directives: const [
+      MaterialButtonComponent,
+      MaterialIconComponent,
+      MaterialDropdownSelectComponent,
+      MaterialDialogComponent,
+      ModalComponent,
+      materialInputDirectives,
+      routerDirectives,
+      formDirectives
+    ],
     providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
     pipes: const [I18nPipe])
 class AppComponent implements OnInit {
-
   /**
    * All routes we can navigate to.
    */
@@ -27,10 +36,16 @@ class AppComponent implements OnInit {
    */
   final I18nService _i18n;
 
+  final AnimationService _animationService;
+
   SelectionModel<Language> languageSelectionModel;
   LanguageSelectionOptions languageSelectionOptions;
 
-  AppComponent(this._i18n, this.routes);
+  bool showLoginDialog = false;
+  String username = "";
+  String password = "";
+
+  AppComponent(this._i18n, this.routes, this._animationService);
 
   @override
   ngOnInit() {
@@ -70,6 +85,20 @@ class AppComponent implements OnInit {
     } else if (language != null && language.locale != currentLocale) {
       _i18n.setLocale(language.locale);
     }
+  }
+
+  /**
+   * Enter login form.
+   */
+  void openLoginForm() {
+    showLoginDialog = true;
+  }
+
+  /**
+   * Login process entry.
+   */
+  void login() {
+    _animationService.login(username, password);
   }
 
   /**

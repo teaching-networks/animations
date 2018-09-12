@@ -66,5 +66,10 @@ footer.footer {
   border-top: 0.2em solid #F6F6F6;
   margin-top: 1em;
 
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+
   text-align: center;
 }

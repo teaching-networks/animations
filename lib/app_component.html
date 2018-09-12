@@ -5,7 +5,9 @@
 	<div class="rest">
 		<span class="title">{{ "title" | i18n }}</span>
 		<nav class="toolbar">
-			<a [routerLink]="routes.overview.toUrl()"><material-icon icon="home" class="animated"></material-icon> {{ "overview" | i18n }}</a>
+			<a [routerLink]="routes.overview.toUrl()">
+				<material-icon icon="home" class="animated"></material-icon>
+				{{ "overview" | i18n }}</a>
 		</nav>
 	</div>
 </header>
@@ -15,8 +17,6 @@
 </section>
 
 <footer class="footer">
-	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
-	<span>&nbsp;|&nbsp;</span>
 	<material-dropdown-select
 			[buttonText]="languageSelectionLabel"
 			[selection]="languageSelectionModel"
@@ -24,4 +24,42 @@
 			[factoryRenderer]="componentLabelFactory"
 			[deselectOnActivate]="false">
 	</material-dropdown-select>
+
+	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
+
+	<material-button (click)="openLoginForm()">
+		<material-icon icon="lock_open"></material-icon>
+	</material-button>
 </footer>
+
+<modal [(visible)]="showLoginDialog">
+	<material-dialog headered>
+
+		<div header>
+			<h1>Anmeldung</h1>
+			<p>... zur Administration.</p>
+		</div>
+
+		<div>
+			<form>
+				<div>
+					<material-input [(ngModel)]="username" autoFocus hintText="Benutzername" name="username"></material-input>
+				</div>
+				<div>
+					<material-input [(ngModel)]="password" type="password" hintText="Passwort" name="password"></material-input>
+				</div>
+			</form>
+		</div>
+
+		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
+			<material-button clear-size (trigger)="showLoginDialog = false">
+				<material-icon icon="close"></material-icon> Close
+			</material-button>
+
+			<material-button clear-size (click)="login()">
+				<material-icon icon="check_circle"></material-icon> Login
+			</material-button>
+		</div>
+
+	</material-dialog>
+</modal>
