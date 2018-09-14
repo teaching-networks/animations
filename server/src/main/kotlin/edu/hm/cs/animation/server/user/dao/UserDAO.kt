@@ -2,6 +2,7 @@ package edu.hm.cs.animation.server.user.dao
 
 import edu.hm.cs.animation.server.user.model.User
 import edu.hm.cs.animation.server.util.PersistenceUtil
+import javax.persistence.NoResultException
 
 /**
  * Data access object dealing with users.
@@ -49,7 +50,12 @@ class UserDAO {
         val transaction = em.transaction
         transaction.begin()
 
-        val user: User? = em.createQuery("SELECT u from User u WHERE u.name = :name", User::class.java).setParameter("name", name).singleResult
+        var user: User? = null;
+        try {
+            user = em.createQuery("SELECT u from User u WHERE u.name = :name", User::class.java).setParameter("name", name).singleResult
+        } catch (e: NoResultException) {
+            // Do nothing.
+        }
 
         transaction.commit()
 

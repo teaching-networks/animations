@@ -27,8 +27,9 @@
 
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
 
-	<material-button (click)="openLoginForm()">
-		<material-icon icon="lock_open"></material-icon>
+	<material-button (click)="authenticationChange()">
+		<material-icon *ngIf="!isLoggedIn" icon="lock_open"></material-icon>
+		<material-icon *ngIf="isLoggedIn" icon="lock"></material-icon>
 	</material-button>
 </footer>
 
@@ -41,12 +42,20 @@
 		</div>
 
 		<div>
-			<form>
+			<div *ngIf="isCheckingCredentials">
+				<material-progress [indeterminate]="true"></material-progress>
+			</div>
+			<div *ngIf="showLoginError" style="color: coral">
+				<p>Die Anmeldung ist fehlgeschlagen.</p>
+			</div>
+			<form (submit)="login()">
 				<div>
-					<material-input [(ngModel)]="username" autoFocus hintText="Benutzername" name="username"></material-input>
+					<material-input [(ngModel)]="username" hintText="Benutzername"
+									name="username" [disabled]="isCheckingCredentials"></material-input>
 				</div>
 				<div>
-					<material-input [(ngModel)]="password" type="password" hintText="Passwort" name="password"></material-input>
+					<material-input [(ngModel)]="password" type="password" hintText="Passwort"
+									name="password" [disabled]="isCheckingCredentials"></material-input>
 				</div>
 			</form>
 		</div>

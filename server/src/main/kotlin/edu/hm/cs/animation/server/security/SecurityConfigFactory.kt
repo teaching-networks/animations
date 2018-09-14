@@ -2,10 +2,10 @@ package edu.hm.cs.animation.server.security
 
 import edu.hm.cs.animation.server.security.authenticator.UserPasswordAuthenticator
 import edu.hm.cs.animation.server.security.authorizer.AdminAuthorizer
+import edu.hm.cs.animation.server.security.client.NoErrorDirectBasicAuthClient
 import org.pac4j.core.client.Clients
 import org.pac4j.core.config.Config
 import org.pac4j.core.config.ConfigFactory
-import org.pac4j.http.client.direct.DirectBasicAuthClient
 import org.pac4j.http.client.direct.HeaderClient
 import org.pac4j.javalin.DefaultHttpActionAdapter
 import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
@@ -21,7 +21,7 @@ class SecurityConfigFactory(private val jwtSalt: String) : ConfigFactory {
         val authenticator = UserPasswordAuthenticator("admin", "admin")
 
         // Direct basic authentication for initially retrieving JSON Web Token (Login)
-        val directBasicAuthenticationClient = DirectBasicAuthClient(authenticator)
+        val directBasicAuthenticationClient = NoErrorDirectBasicAuthClient(authenticator)
 
         val headerClient = HeaderClient("Authorization", JwtAuthenticator(SecretSignatureConfiguration(jwtSalt)))
 
