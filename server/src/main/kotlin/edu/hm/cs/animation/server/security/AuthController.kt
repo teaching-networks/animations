@@ -1,6 +1,7 @@
 package edu.hm.cs.animation.server.security
 
 import io.javalin.Context
+import org.eclipse.jetty.http.HttpStatus
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.core.profile.ProfileManager
 import org.pac4j.javalin.Pac4jContext
@@ -13,7 +14,7 @@ import java.util.*
  */
 object AuthController {
 
-    const val PATH = "/auth"
+    const val PATH = "auth"
 
     /**
      * Generate and retrieve a JSON Web Token.
@@ -23,13 +24,14 @@ object AuthController {
         val profileManager = ProfileManager<CommonProfile>(context)
         val profile: Optional<CommonProfile> = profileManager.get(true)
 
-        var token = ""
         if (profile.isPresent) {
             val generator = JwtGenerator<CommonProfile>(SecretSignatureConfiguration(jwtSalt))
-            token = generator.generate(profile.get())
-        }
+            var token = generator.generate(profile.get())
 
-        ctx.result(token)
+            ctx.result(token)
+        } else {
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR_500)
+        }
     }
 
 }

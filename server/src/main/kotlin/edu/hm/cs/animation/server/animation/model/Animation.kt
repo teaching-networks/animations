@@ -13,8 +13,7 @@ data class Animation(
          * Id of the animation.
          */
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        var id: Long?,
+        var id: Long,
 
         /**
          * Whether the animation is visible in the web application.

@@ -20,31 +20,34 @@ class AnimationDAO {
         return animations
     }
 
-    fun findAnimation(id: Long): Animation {
+    fun findAnimation(id: Long): Animation? {
         val em = PersistenceUtil.createEntityManager()
         val transaction = em.transaction
         transaction.begin()
 
-        val animation: Animation = em.find(Animation::class.java, id)
+        val animation: Animation? = em.find(Animation::class.java, id)
 
         transaction.commit()
 
         return animation
     }
 
-    fun createAnimation(animation: Animation) {
+    fun createAnimation(animation: Animation): Animation {
         val em = PersistenceUtil.createEntityManager();
         val transaction = em.transaction;
         transaction.begin()
 
         try {
             em.persist(animation)
+
             transaction.commit()
         } catch (e: Exception) {
             transaction.rollback()
 
             throw e // Rethrow exception
         }
+
+        return animation;
     }
 
     fun updateAnimation(animation: Animation) {

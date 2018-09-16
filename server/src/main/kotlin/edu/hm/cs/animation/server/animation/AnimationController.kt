@@ -4,6 +4,8 @@ import edu.hm.cs.animation.server.animation.dao.AnimationDAO
 import edu.hm.cs.animation.server.animation.model.Animation
 import edu.hm.cs.animation.server.util.rest.CRUDController
 import io.javalin.Context
+import org.eclipse.jetty.http.HttpStatus
+import org.eclipse.jetty.websocket.api.StatusCode
 
 /**
  * REST Controller handling animation matters.
@@ -23,15 +25,19 @@ object AnimationController : CRUDController {
     override fun create(ctx: Context) {
         val animation = ctx.body<Animation>()
 
-        animation.id = null
-
-        animationDAO.createAnimation(animation)
+        ctx.json(animationDAO.createAnimation(animation))
     }
 
     override fun read(ctx: Context) {
         val id = ctx.pathParam("id").toLong()
 
-        ctx.json(animationDAO.findAnimation(id))
+        var animation = animationDAO.findAnimation(id);
+
+        if (animation == null) {
+            ctx.status(HttpStatus.NOT_FOUND_404)
+        } else {
+            ctx.json(animation)
+        }
     }
 
     override fun readAll(ctx: Context) {

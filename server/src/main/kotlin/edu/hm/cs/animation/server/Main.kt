@@ -9,6 +9,8 @@ import edu.hm.cs.animation.server.user.UserController
 import edu.hm.cs.animation.server.util.cmdargs.CMDLineArgumentParser
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
+import org.eclipse.jetty.http.HttpMethod
+import org.pac4j.core.context.HttpConstants
 import org.pac4j.javalin.SecurityHandler
 
 /**
@@ -38,20 +40,23 @@ fun main(args: Array<String>) {
 
         // Here go all routes!
         app.routes {
-            // Security via JWT for all paths starting with /api
-            before("/api/*", CORSSecurityHandler(SecurityHandler(securityConfig, "HeaderClient")))
-            before("/api/*") { ctx ->  }
+            before("*") { ctx -> ctx.header(HttpConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, "true") }
 
-            // The below item is used to test the authentication using JSON Web Tokens
-            get("/api/hello") { ctx -> ctx.result("Hello World") }
-
-            // AuthController
-            before(AuthController.PATH, CORSSecurityHandler(SecurityHandler(securityConfig, "NoErrorDirectBasicAuthClient"))) // Use basic authentication for fetching a JSON Web Token
-            get(AuthController.PATH) { ctx -> AuthController.generateJWT(ctx, jwtSalt) }
+            // Authentication controller
+            before(AuthController.PATH, CORSSecurityHandler(SecurityHandler(securityConfig, "NoErrorDirectBasicAuthClient"))) // Basic authentication
+            path(AuthController.PATH) {
+                get { ctx -> AuthController.generateJWT(ctx, jwtSalt) }
+            }
 
             path("api") {
 
+                // API test
+                path("hello") {
+                    get { ctx -> ctx.result("Hello World") }
+                }
+
                 // User controller
+                before(UserController.PATH + "/*", CORSSecurityHandler(SecurityHandler(securityConfig, "HeaderClient")))
                 path(UserController.PATH) {
                     post(UserController::create)
                     get(UserController::readAll)
@@ -63,6 +68,7 @@ fun main(args: Array<String>) {
                 }
 
                 // Animation controller
+                before(AnimationController.PATH + "/*", CORSSecurityHandler(SecurityHandler(securityConfig, "HeaderClient"), HttpMethod.GET))
                 path(AnimationController.PATH) {
                     post(AnimationController::create)
                     get(AnimationController::readAll)

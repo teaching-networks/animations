@@ -1,10 +1,15 @@
-<ul *ngIf="animations != null" class="animation-list">
-	<li *ngFor="let anim of animations.values" [routerLink]="animationUrl(anim.path)">
+<ul *ngIf="animationDescriptors != null" class="animation-list">
+	<li *ngFor="let anim of animationDescriptors.values; let i = index" [routerLink]="animationUrl(anim.path)">
 		<div>
 			<img width="100%" src="{{anim.previewImagePath}}">
 		</div>
 		<h3>
 			{{getAnimationName(anim.name)}}
 		</h3>
+		<material-toggle *restricted
+						 [checked]="isAnimationVisible(anim.id)"
+						 (checkedChange)="onVisibilityChange(anim.id, $event)"
+						 label="Visible?">
+		</material-toggle>
 	</li>
 </ul>

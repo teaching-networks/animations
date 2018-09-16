@@ -9,11 +9,8 @@ import 'package:hm_animations/src/services/animation_service/animation_service.d
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
-import 'package:hm_animations/src/services/network_service/network_service.dart';
-import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
-import 'package:hm_animations/src/util/network/network_client.dart';
 
 @Component(
     selector: 'net-app',
