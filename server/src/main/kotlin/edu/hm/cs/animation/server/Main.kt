@@ -61,6 +61,7 @@ fun main(args: Array<String>) {
                     post(UserController::create)
                     get(UserController::readAll)
                     patch(UserController::update)
+
                     path(":id") {
                         get(UserController::read)
                         delete(UserController::delete)
@@ -73,6 +74,7 @@ fun main(args: Array<String>) {
                     post(AnimationController::create)
                     get(AnimationController::readAll)
                     patch(AnimationController::update)
+
                     path(":id") {
                         get(AnimationController::read)
                         delete(AnimationController::delete)

@@ -21,7 +21,7 @@ class UserPasswordAuthenticator(val defaultUsername: String, val defaultPassword
 
         if (userCount == 0L) {
             if (credentials.username == defaultUsername && credentials.password == defaultPassword) {
-                onUserVerified(credentials)
+                onUserVerified(credentials, -1)
             } else {
                 throw CredentialsException("Invalid credentials")
             }
@@ -29,18 +29,19 @@ class UserPasswordAuthenticator(val defaultUsername: String, val defaultPassword
             val user = userDAO.findUserByName(credentials.username) ?: throw CredentialsException("Invalid credentials")
 
             if (PasswordUtil.verifyPassword(credentials.password, user.password, user.passwordSalt!!)) {
-                onUserVerified(credentials)
+                onUserVerified(credentials, user.id!!)
             } else {
                 throw CredentialsException("Invalid credentials")
             }
         }
     }
 
-    private fun onUserVerified(credentials: UsernamePasswordCredentials) {
+    private fun onUserVerified(credentials: UsernamePasswordCredentials, userId: Long) {
         val profile = CommonProfile()
 
         profile.id = credentials.username
         profile.addAttribute("username", credentials.username)
+        profile.addAttribute("id", userId)
 
         credentials.userProfile = profile
     }

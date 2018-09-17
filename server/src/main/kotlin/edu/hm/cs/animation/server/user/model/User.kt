@@ -1,7 +1,7 @@
 package edu.hm.cs.animation.server.user.model
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
-import net.minidev.json.annotate.JsonIgnore
 import javax.persistence.*
 
 /**
@@ -29,6 +29,7 @@ data class User(
          * Password of the user. Should be encoded and not plain-text.
          */
         @Column(nullable = false)
+        @JsonIgnore
         var password: String,
 
         /**

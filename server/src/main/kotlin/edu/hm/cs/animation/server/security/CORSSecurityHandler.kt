@@ -4,6 +4,7 @@ import io.javalin.Context
 import io.javalin.Handler
 import org.eclipse.jetty.http.HttpMethod
 import org.pac4j.core.context.HttpConstants
+import org.pac4j.javalin.Pac4jContext
 import org.pac4j.javalin.SecurityHandler
 
 /**
