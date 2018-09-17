@@ -1,5 +1,6 @@
 import 'dart:async';
 import "package:angular/angular.dart";
+import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
@@ -18,7 +19,7 @@ import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
     selector: "overview-component",
     templateUrl: "overview_component.html",
     styleUrls: ["overview_component.css"],
-    directives: [routerDirectives, coreDirectives, RestrictedDirective, MaterialToggleComponent],
+    directives: [routerDirectives, coreDirectives, RestrictedDirective, MaterialToggleComponent, MaterialSpinnerComponent],
     pipes: [I18nPipe])
 class OverviewComponent implements OnInit, OnDestroy {
   Map<String, AnimationDescriptor> animationDescriptors;

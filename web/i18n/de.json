@@ -10,6 +10,7 @@
 	"settings": "Einstellungen",
 	"back": "Zurück",
 	"fullscreen": "Vollbild",
+	"animation-not-visible": "Diese Animation ist momentan nicht sichtbar.",
 	"packetTransmission.start": "Start",
 	"packetTransmission.reset": "Zurücksetzen",
 	"packetTransmission.sender": "Sender",

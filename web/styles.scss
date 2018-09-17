@@ -174,3 +174,14 @@ ul.highlighted-fields {
   }
 
 }
+
+.centered-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & > material-spinner {
+    width: 3.0em;
+    height: 3.0em;
+  }
+}

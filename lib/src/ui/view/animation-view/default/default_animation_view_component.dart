@@ -14,17 +14,20 @@ import 'package:hm_animations/src/router/route_paths.dart' as paths;
 @Component(
     selector: "default-animation-view-component",
     templateUrl: "default_animation_view_component.html",
-    styleUrls: const ["default_animation_view_component.css"],
-    directives: const [coreDirectives, MaterialButtonComponent, MaterialIconComponent, routerDirectives, DynamicContentComponent],
-    providers: const [const ClassProvider(Routes)],
-    pipes: const [I18nPipe])
+    styleUrls: ["default_animation_view_component.css"],
+    directives: [coreDirectives, MaterialButtonComponent, MaterialIconComponent, routerDirectives, DynamicContentComponent, MaterialSpinnerComponent],
+    providers: [ClassProvider(Routes)],
+    pipes: [I18nPipe])
 class DefaultAnimationViewComponent implements OnActivate {
+  final AnimationService _animationService;
+  final Routes routes;
+
   String _id = "";
 
   dynamic componentToShow;
 
-  final AnimationService _animationService;
-  final Routes routes;
+  bool isLoading = true;
+  bool notVisible = false;
 
   DefaultAnimationViewComponent(this._animationService, this.routes);
 
@@ -32,14 +35,16 @@ class DefaultAnimationViewComponent implements OnActivate {
   void onActivate(RouterState previous, RouterState current) {
     _id = paths.getId(current.parameters);
 
-    // TODO Animation only accessible if user logged in or visible! Change also in detail_animation_view_component.dart
-
     if (_id != null) {
       _animationService.getAnimationDescriptors().then((animations) {
+        isLoading = false;
+
         AnimationDescriptor descriptor = animations[_id];
 
         if (descriptor != null) {
           componentToShow = descriptor.componentFactory;
+        } else {
+          notVisible = true;
         }
       });
     }

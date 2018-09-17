@@ -6,6 +6,7 @@ import 'package:hm_animations/src/services/authentication_service/authentication
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/network_service/network_service.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
+import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'main.template.dart' as self;
 
 @GenerateInjector([
@@ -13,7 +14,8 @@ import 'main.template.dart' as self;
   ClassProvider(I18nService),
   ClassProvider(StorageService),
   ClassProvider(AuthenticationService),
-  ClassProvider(NetworkService)
+  ClassProvider(NetworkService),
+  ClassProvider(UserService)
 ])
 final InjectorFactory injector = self.injector$Injector;
 

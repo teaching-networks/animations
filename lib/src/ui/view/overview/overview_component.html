@@ -1,3 +1,7 @@
+<div *ngIf="animationDescriptors == null" class="centered-panel">
+	<material-spinner></material-spinner>
+</div>
+
 <ul *ngIf="animationDescriptors != null" class="animation-list">
 	<li *ngFor="let anim of animationDescriptors.values; let i = index" [routerLink]="animationUrl(anim.path)">
 		<div>
@@ -8,8 +12,7 @@
 		</h3>
 		<material-toggle *restricted
 						 [checked]="isAnimationVisible(anim.id)"
-						 (checkedChange)="onVisibilityChange(anim.id, $event)"
-						 label="Visible?">
+						 (checkedChange)="onVisibilityChange(anim.id, $event)">
 		</material-toggle>
 	</li>
 </ul>

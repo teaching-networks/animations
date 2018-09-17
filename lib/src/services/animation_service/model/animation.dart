@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:hm_animations/src/util/serialize/serializable.dart';
 
 class Animation implements Serializable<Animation> {

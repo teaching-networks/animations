@@ -35,7 +35,7 @@ import 'package:hm_animations/src/util/component.dart';
       ClassProvider(Routes)
     ],
     pipes: [I18nPipe])
-class AppComponent implements OnInit {
+class AppComponent implements OnInit, OnDestroy {
   /**
    * All routes we can navigate to.
    */
@@ -54,7 +54,7 @@ class AppComponent implements OnInit {
   bool isCheckingCredentials = false;
   bool showLoginError = false;
   bool isLoggedIn = false;
-  StreamSubscription<bool> loggedInStreamSub;
+  StreamSubscription<bool> _loggedInStreamSub;
   String username = "";
   String password = "";
 
@@ -88,7 +88,7 @@ class AppComponent implements OnInit {
 
     // Initialize login status
     isLoggedIn = _authenticationService.isLoggedIn;
-    loggedInStreamSub = _authenticationService.loggedIn.listen((loggedIn) => this.isLoggedIn = loggedIn);
+    _loggedInStreamSub = _authenticationService.loggedIn.listen((loggedIn) => this.isLoggedIn = loggedIn);
   }
 
   /**
@@ -143,6 +143,12 @@ class AppComponent implements OnInit {
    * Get component factory for components that display the language items in the language selection dropdown.
    */
   ComponentFactorySupplier get componentLabelFactory => (_) => languageItemComponent.LanguageItemComponentNgFactory;
+
+  @override
+  void ngOnDestroy() {
+    _loggedInStreamSub.cancel();
+  }
+
 }
 
 class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {

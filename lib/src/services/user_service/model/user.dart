@@ -31,6 +31,8 @@ class User implements Serializable<User> {
     if (password != null) {
       result["password"] = password;
     }
+
+    return result;
   }
 
 }
