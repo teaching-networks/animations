@@ -4,10 +4,13 @@
 	</div>
 	<div class="rest">
 		<span class="title">{{ "title" | i18n }}</span>
-		<nav class="toolbar">
+		<nav class="main-navigation">
 			<a [routerLink]="routes.overview.toUrl()">
 				<material-icon icon="home" class="animated"></material-icon>
 				{{ "overview" | i18n }}</a>
+			<a *restricted [routerLink]="routes.user.toUrl()">
+				<material-icon icon="person" class="animated"></material-icon>
+				{{ "user-management" | i18n }}</a>
 		</nav>
 	</div>
 </header>
@@ -27,10 +30,13 @@
 
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
 
-	<material-button (click)="authenticationChange()">
-		<material-icon *ngIf="!isLoggedIn" icon="lock_open"></material-icon>
-		<material-icon *ngIf="isLoggedIn" icon="lock"></material-icon>
-	</material-button>
+	<span>
+		<material-button (click)="authenticationChange()">
+			<material-icon *ngIf="!isLoggedIn" icon="lock_open"></material-icon>
+			<material-icon *ngIf="isLoggedIn" icon="lock"></material-icon>
+		</material-button>
+		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }} {{ authenticatedUser.name }}</span>
+	</span>
 </footer>
 
 <modal [(visible)]="showLoginDialog">
@@ -62,11 +68,13 @@
 
 		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
 			<material-button clear-size (trigger)="showLoginDialog = false">
-				<material-icon icon="close"></material-icon> Close
+				<material-icon icon="close"></material-icon>
+				Close
 			</material-button>
 
 			<material-button clear-size (click)="login()">
-				<material-icon icon="check_circle"></material-icon> Login
+				<material-icon icon="check_circle"></material-icon>
+				Login
 			</material-button>
 		</div>
 

@@ -3,7 +3,7 @@
 </div>
 
 <ul *ngIf="animationDescriptors != null" class="animation-list">
-	<li *ngFor="let anim of animationDescriptors.values; let i = index" [routerLink]="animationUrl(anim.path)">
+	<li *ngFor="let anim of animationDescriptors.values" [routerLink]="animationUrl(anim.path)">
 		<div>
 			<img width="100%" src="{{anim.previewImagePath}}">
 		</div>

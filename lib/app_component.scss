@@ -6,14 +6,15 @@ section.main-section {
   padding: 2.0em 3.0em;
 }
 
-nav.toolbar {
+nav.main-navigation {
   a {
     text-decoration: none;
     color: #333;
     font-size: 1.5em;
     font-family: Raleway, Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    margin-right: 1.0em;
 
     -moz-transition: color 0.3s;
     -webkit-transition: color 0.3s;

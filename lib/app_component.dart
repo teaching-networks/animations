@@ -9,6 +9,9 @@ import 'package:hm_animations/src/services/animation_service/animation_service.d
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/user_service/model/user.dart';
+import 'package:hm_animations/src/services/user_service/user_service.dart';
+import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
 
@@ -23,17 +26,14 @@ import 'package:hm_animations/src/util/component.dart';
       MaterialDialogComponent,
       ModalComponent,
       MaterialProgressComponent,
+      RestrictedDirective,
       AutoFocusDirective,
       materialInputDirectives,
       routerDirectives,
       formDirectives,
       coreDirectives,
     ],
-    providers: [
-      materialProviders,
-      ClassProvider(AnimationService),
-      ClassProvider(Routes)
-    ],
+    providers: [materialProviders, ClassProvider(AnimationService), ClassProvider(Routes)],
     pipes: [I18nPipe])
 class AppComponent implements OnInit, OnDestroy {
   /**
@@ -58,7 +58,10 @@ class AppComponent implements OnInit, OnDestroy {
   String username = "";
   String password = "";
 
-  AppComponent(this._i18n, this.routes, this._authenticationService);
+  final UserService _userService;
+  User authenticatedUser;
+
+  AppComponent(this._i18n, this.routes, this._authenticationService, this._userService);
 
   @override
   ngOnInit() {
@@ -88,7 +91,18 @@ class AppComponent implements OnInit, OnDestroy {
 
     // Initialize login status
     isLoggedIn = _authenticationService.isLoggedIn;
-    _loggedInStreamSub = _authenticationService.loggedIn.listen((loggedIn) => this.isLoggedIn = loggedIn);
+
+    if (isLoggedIn) {
+      this._userService.getAuthenticatedUser().then((user) => authenticatedUser = user);
+    }
+
+    _loggedInStreamSub = _authenticationService.loggedIn.listen((loggedIn) {
+      isLoggedIn = loggedIn;
+
+      if (isLoggedIn) {
+        this._userService.getAuthenticatedUser().then((user) => authenticatedUser = user);
+      }
+    });
   }
 
   /**
@@ -148,7 +162,6 @@ class AppComponent implements OnInit, OnDestroy {
   void ngOnDestroy() {
     _loggedInStreamSub.cancel();
   }
-
 }
 
 class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {
