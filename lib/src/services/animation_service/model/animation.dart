@@ -1,24 +1,31 @@
 import 'dart:convert';
 
-class Animation {
+import 'package:hm_animations/src/util/serialize/serializable.dart';
+
+class Animation implements Serializable<Animation> {
 
   int id;
   bool visible;
 
   Animation(this.id, this.visible);
+  Animation.empty();
 
-  Animation.fromJson(Map<String, dynamic> json) {
+  @override
+  Animation fromJson(Map<String, dynamic> json) {
     id = json["id"];
     visible = json["visible"];
+
+    return this;
   }
 
-  static String toJson(Animation animation) {
+  @override
+  Map<String, dynamic> toJson() {
     var result = Map<String, dynamic>();
 
-    result["id"] = animation.id;
-    result["visible"] = animation.visible;
+    result["id"] = id;
+    result["visible"] = visible;
 
-    return jsonEncode(result);
+    return result;
   }
 
 }

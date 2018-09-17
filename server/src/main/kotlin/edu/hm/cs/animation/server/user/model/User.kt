@@ -29,7 +29,7 @@ data class User(
          * Password of the user. Should be encoded and not plain-text.
          */
         @Column(nullable = false)
-        @JsonIgnore
+        @get:JsonIgnore
         var password: String,
 
         /**

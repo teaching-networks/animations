@@ -32,6 +32,8 @@ class DefaultAnimationViewComponent implements OnActivate {
   void onActivate(RouterState previous, RouterState current) {
     _id = paths.getId(current.parameters);
 
+    // TODO Animation only accessible if user logged in or visible! Change also in detail_animation_view_component.dart
+
     if (_id != null) {
       _animationService.getAnimationDescriptors().then((animations) {
         AnimationDescriptor descriptor = animations[_id];

@@ -33,17 +33,17 @@ class AnimationService {
   }
 
   Future<Animation> createAnimation(Animation animation) async {
-    var response = await _http.post(NetworkUtil.getURL("api/animation"), body: Animation.toJson(animation));
+    var response = await _http.post(NetworkUtil.getURL("api/animation"), body: jsonEncode(animation.toJson()));
 
     if (response.statusCode == NetworkStatusCode.OK) {
-      return Animation.fromJson(jsonDecode(response.body));
+      return Animation.empty().fromJson(jsonDecode(response.body));
     }
 
     return null;
   }
 
   Future<bool> updateAnimation(Animation animation) async {
-    var response = await _http.patch(NetworkUtil.getURL("api/animation"), body: Animation.toJson(animation));
+    var response = await _http.patch(NetworkUtil.getURL("api/animation"), body: jsonEncode(animation.toJson()));
 
     return response.statusCode == NetworkStatusCode.OK;
   }
@@ -52,7 +52,7 @@ class AnimationService {
     var response = await _http.get(NetworkUtil.getURL("api/animation/$id"));
 
     if (response.statusCode == NetworkStatusCode.OK) {
-      return Animation.fromJson(jsonDecode(response.body));
+      return Animation.empty().fromJson(jsonDecode(response.body));
     }
 
     return null;
@@ -105,7 +105,7 @@ class AnimationService {
 
     if (decoded.isNotEmpty) {
       for (Map<String, dynamic> map in decoded) {
-        result.add(Animation.fromJson(map));
+        result.add(Animation.empty().fromJson(map));
       }
     }
 
