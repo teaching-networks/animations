@@ -1,7 +1,25 @@
-<div *restricted>
+<section *restricted class="user-management">
 	<h2>User Management</h2>
-	<div *ngFor="let user of users">
-		<span>{{ user.id }}</span>
-		<span>{{ user.name }}</span>
+
+	<material-button raised (click)="createUser()">
+		Add user&nbsp;
+		<material-icon icon="add_circle"></material-icon>
+	</material-button>
+
+	<div class="user-list">
+		<div *ngFor="let user of users" class="user-card">
+			<span class="user-entry">{{ user.id }}</span>
+			<span class="user-entry">{{ user.name }}</span>
+
+			<span class="user-entry">
+				<material-button icon (click)="editUser(user)">
+					<material-icon icon="create"></material-icon>
+				</material-button>
+				<material-button icon (click)="deleteUser(user.id)">
+					<material-icon icon="delete"></material-icon>
+				</material-button>
+			</span>
+		</div>
 	</div>
-</div>
+</section>
+
