@@ -1,5 +1,7 @@
 import 'dart:async';
 import "package:angular/angular.dart";
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:angular_router/angular_router.dart';
@@ -15,12 +17,20 @@ import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 /**
  * Overview component should give an overview over all available animations.
  */
-@Component(
-    selector: "overview-component",
-    templateUrl: "overview_component.html",
-    styleUrls: ["overview_component.css"],
-    directives: [routerDirectives, coreDirectives, RestrictedDirective, MaterialToggleComponent, MaterialSpinnerComponent],
-    pipes: [I18nPipe])
+@Component(selector: "overview-component", templateUrl: "overview_component.html", styleUrls: [
+  "overview_component.css",
+  "package:angular_components/css/mdc_web/card/mdc-card.scss.css"
+], directives: [
+  routerDirectives,
+  coreDirectives,
+  RestrictedDirective,
+  MaterialToggleComponent,
+  MaterialSpinnerComponent,
+  MaterialIconComponent,
+  MaterialButtonComponent
+], pipes: [
+  I18nPipe
+])
 class OverviewComponent implements OnInit, OnDestroy {
   Map<String, AnimationDescriptor> animationDescriptors;
   List<Animation> animations;

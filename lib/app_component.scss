@@ -73,4 +73,14 @@ footer.footer {
   justify-content: space-between;
 
   text-align: center;
+
+  .aligned-footer {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+
+    & > *:not(:last-child) {
+      margin-right: 1.0em;
+    }
+  }
 }

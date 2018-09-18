@@ -2,17 +2,30 @@
 	<material-spinner></material-spinner>
 </div>
 
-<ul *ngIf="animationDescriptors != null" class="animation-list">
-	<li *ngFor="let anim of animationDescriptors.values" [routerLink]="animationUrl(anim.path)">
-		<div>
-			<img width="100%" src="{{anim.previewImagePath}}">
+<div *ngIf="animationDescriptors != null" class="animation-overview">
+	<section *ngFor="let anim of animationDescriptors.values" class="animation-card">
+		<div class="mdc-card mdc-card--outlined animation-card-size">
+			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + ')'}"></div>
+			<div class="animation-card-primary">
+				<h2 class="animation-card-title">{{getAnimationName(anim.name)}}</h2>
+			</div>
+			<!-- <div class="animation-card-secondary">
+				Short animation description?
+			</div> -->
+			<div class="mdc-card__actions">
+				<div class="mdc-card__action-buttons">
+					<material-button [routerLink]="animationUrl(anim.path)">
+						{{ "goto-animation" | i18n }}
+						<material-icon icon="play_arrow"></material-icon>
+					</material-button>
+				</div>
+				<div *restricted class="mdc-card__action-icons">
+					<material-toggle *restricted
+									 [checked]="isAnimationVisible(anim.id)"
+									 (checkedChange)="onVisibilityChange(anim.id, $event)">
+					</material-toggle>
+				</div>
+			</div>
 		</div>
-		<h3>
-			{{getAnimationName(anim.name)}}
-		</h3>
-		<material-toggle *restricted
-						 [checked]="isAnimationVisible(anim.id)"
-						 (checkedChange)="onVisibilityChange(anim.id, $event)">
-		</material-toggle>
-	</li>
-</ul>
+	</section>
+</div>

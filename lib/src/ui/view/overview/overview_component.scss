@@ -1,4 +1,5 @@
 @import 'package:angular_components/material_icon/mixins';
+@import 'package:angular_components/css/material/material';
 
 .custom-size {
   @include material-icon-size(3.0em);
@@ -45,4 +46,42 @@ ul.animation-list {
     }
   }
 
+}
+
+.animation-overview {
+
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+
+  & > section.animation-card {
+
+    display: block;
+    padding: $mat-grid * 2;
+
+    .animation-card-size {
+      width: $mat-grid * 44;
+    }
+
+    .animation-card-image {
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .animation-card-title {
+      @include mat-font-title;
+      line-height: 1em;
+      margin: 0;
+    }
+
+    .animation-card-primary {
+      padding: $mat-grid * 2;
+    }
+
+    .animation-card-secondary {
+      @include mat-font-body;
+      padding: 0 $mat-grid * 2 $mat-grid;
+    }
+
+  }
 }

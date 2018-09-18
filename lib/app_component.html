@@ -20,22 +20,25 @@
 </section>
 
 <footer class="footer">
-	<material-dropdown-select
-			[buttonText]="languageSelectionLabel"
-			[selection]="languageSelectionModel"
-			[options]="languageSelectionOptions"
-			[factoryRenderer]="componentLabelFactory"
-			[deselectOnActivate]="false">
-	</material-dropdown-select>
+	<span class="aligned-footer">
+		<material-icon icon="language"></material-icon>
+		<material-dropdown-select
+				[buttonText]="languageSelectionLabel"
+				[selection]="languageSelectionModel"
+				[options]="languageSelectionOptions"
+				[factoryRenderer]="componentLabelFactory"
+				[deselectOnActivate]="false">
+		</material-dropdown-select>
+	</span>
 
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
 
-	<span>
-		<material-button (click)="authenticationChange()">
+	<span class="aligned-footer">
+		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }}&nbsp;<b>{{ authenticatedUser.name }}</b></span>
+		<material-button (click)="authenticationChange()" icon>
 			<material-icon *ngIf="!isLoggedIn" icon="lock_open"></material-icon>
 			<material-icon *ngIf="isLoggedIn" icon="lock"></material-icon>
 		</material-button>
-		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }} {{ authenticatedUser.name }}</span>
 	</span>
 </footer>
 
@@ -43,8 +46,8 @@
 	<material-dialog headered>
 
 		<div header>
-			<h1>Anmeldung</h1>
-			<p>... zur Administration.</p>
+			<h1>{{ "login.title" | i18n }}</h1>
+			<p>{{ "login.subtitle" | i18n }}</p>
 		</div>
 
 		<div>
@@ -52,15 +55,15 @@
 				<material-progress [indeterminate]="true"></material-progress>
 			</div>
 			<div *ngIf="showLoginError" style="color: coral">
-				<p>Die Anmeldung ist fehlgeschlagen.</p>
+				<p>{{ "login.error" | i18n }}</p>
 			</div>
 			<form (submit)="login()">
 				<div>
-					<material-input [(ngModel)]="username" hintText="Benutzername"
+					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
 									name="username" [disabled]="isCheckingCredentials"></material-input>
 				</div>
 				<div>
-					<material-input [(ngModel)]="password" type="password" hintText="Passwort"
+					<material-input [(ngModel)]="password" type="password" hintText="{{ 'login.password' | i18n }}"
 									name="password" [disabled]="isCheckingCredentials"></material-input>
 				</div>
 			</form>
@@ -69,12 +72,12 @@
 		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
 			<material-button clear-size (trigger)="showLoginDialog = false">
 				<material-icon icon="close"></material-icon>
-				Close
+				{{ "login.close" | i18n }}
 			</material-button>
 
 			<material-button clear-size (click)="login()">
 				<material-icon icon="check_circle"></material-icon>
-				Login
+				{{ "login.submit" | i18n }}
 			</material-button>
 		</div>
 
