@@ -14,6 +14,7 @@
 	"fullscreen": "Fullscreen",
 	"logged-in-as": "Logged in as",
 	"animation-not-visible": "This animation is currently not visible.",
+	"overview.no-animations-available": "Currently there are no animations available.",
 	"login.title": "Login",
 	"login.subtitle": "... for administration",
 	"login.error": "Login using the provided credentials failed.",

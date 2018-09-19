@@ -2,6 +2,7 @@ package edu.hm.cs.animation.server.user.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import javax.persistence.*
 
 /**
@@ -30,6 +31,7 @@ data class User(
          */
         @Column(nullable = false)
         @get:JsonIgnore
+        @set:JsonProperty("password")
         var password: String,
 
         /**

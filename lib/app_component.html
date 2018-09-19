@@ -57,7 +57,7 @@
 			<div *ngIf="showLoginError" style="color: coral">
 				<p>{{ "login.error" | i18n }}</p>
 			</div>
-			<form (submit)="login()">
+			<form>
 				<div>
 					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
 									name="username" [disabled]="isCheckingCredentials"></material-input>
@@ -75,7 +75,7 @@
 				{{ "login.close" | i18n }}
 			</material-button>
 
-			<material-button clear-size (click)="login()">
+			<material-button clear-size type="submit" (click)="login()">
 				<material-icon icon="check_circle"></material-icon>
 				{{ "login.submit" | i18n }}
 			</material-button>

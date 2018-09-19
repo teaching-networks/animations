@@ -62,7 +62,7 @@ class UserDAO {
         return user
     }
 
-    fun createUser(user: User) {
+    fun createUser(user: User): User {
         val em = PersistenceUtil.createEntityManager();
         val transaction = em.transaction;
         transaction.begin()
@@ -75,6 +75,8 @@ class UserDAO {
 
             throw e // Rethrow exception
         }
+
+        return user;
     }
 
     fun updateUser(user: User) {

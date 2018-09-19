@@ -3,6 +3,11 @@
 </div>
 
 <div *ngIf="animationDescriptors != null" class="animation-overview">
+
+	<h3 *ngIf="animationDescriptors.isEmpty">
+		{{ "overview.no-animations-available" | i18n }}
+	</h3>
+
 	<section *ngFor="let anim of animationDescriptors.values" class="animation-card">
 		<div class="mdc-card mdc-card--outlined animation-card-size">
 			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + ')'}"></div>
@@ -28,4 +33,5 @@
 			</div>
 		</div>
 	</section>
+
 </div>

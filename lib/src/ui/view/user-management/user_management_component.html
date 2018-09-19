@@ -1,7 +1,7 @@
 <section *restricted class="user-management">
 	<h2>User Management</h2>
 
-	<material-button raised (click)="createUser()">
+	<material-button raised (click)="openUserCreateDialog()">
 		Add user&nbsp;
 		<material-icon icon="add_circle"></material-icon>
 	</material-button>
@@ -12,7 +12,7 @@
 			<span class="user-entry">{{ user.name }}</span>
 
 			<span class="user-entry">
-				<material-button icon (click)="editUser(user)">
+				<material-button icon (click)="openEditDialog(user)">
 					<material-icon icon="create"></material-icon>
 				</material-button>
 				<material-button icon (click)="deleteUser(user.id)">
@@ -23,3 +23,53 @@
 	</div>
 </section>
 
+<modal [(visible)]="showUserDialog">
+	<material-dialog headered>
+
+		<div header>
+			<h1 *ngIf="dialogType == createType">Create user</h1>
+			<h1 *ngIf="dialogType == editType">Edit user</h1>
+		</div>
+
+		<div>
+
+			<div *ngIf="isDialogLoading">
+				<material-progress [indeterminate]="true"></material-progress>
+			</div>
+
+			<div *ngIf="showDialogError" style="color: coral">
+				<p>An error occurred.</p>
+			</div>
+
+			<form>
+				<div>
+					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
+									name="username" [disabled]="isDialogLoading"></material-input>
+				</div>
+				<div>
+					<material-input [(ngModel)]="password" type="password" hintText="{{ 'login.password' | i18n }}"
+									name="password" [disabled]="isDialogLoading"></material-input>
+				</div>
+			</form>
+
+		</div>
+
+		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
+			<material-button clear-size (trigger)="showUserDialog = false">
+				<material-icon icon="close"></material-icon>
+				Cancel
+			</material-button>
+
+			<material-button *ngIf="dialogType == createType" clear-size type="submit" (click)="createUser(username, password)">
+				<material-icon icon="edit"></material-icon>
+				Create
+			</material-button>
+
+			<material-button *ngIf="dialogType == editType" clear-size type="submit" (click)="editUser(username, password)">
+				<material-icon icon="edit"></material-icon>
+				Update
+			</material-button>
+		</div>
+
+	</material-dialog>
+</modal>

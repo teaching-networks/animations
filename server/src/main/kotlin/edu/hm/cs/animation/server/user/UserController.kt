@@ -40,11 +40,15 @@ object UserController : CRUDController {
 
         user.id = null // For safety reasons
 
+        if (user.name.isEmpty()) {
+            throw Exception("Cannot create user with empty user name.");
+        }
+
         // Encode password
         user.passwordSalt = PasswordUtil.getSalt(PasswordUtil.DEFAULT_SALT_LENGTH)
         user.password = PasswordUtil.securePassword(user.password, user.passwordSalt!!)
 
-        userDAO.createUser(user)
+        ctx.json(userDAO.createUser(user))
     }
 
     /**
