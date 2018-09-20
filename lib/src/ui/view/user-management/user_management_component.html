@@ -1,8 +1,8 @@
 <section *restricted class="user-management">
-	<h2>User Management</h2>
+	<h2>{{ "user-management.title" | i18n }}</h2>
 
 	<material-button raised (click)="openUserCreateDialog()">
-		Add user&nbsp;
+		{{ "user-management.add-user" | i18n }}&nbsp;
 		<material-icon icon="add_circle"></material-icon>
 	</material-button>
 
@@ -13,7 +13,7 @@
 	<div *ngIf="users != null" class="user-list">
 
 		<h3 *ngIf="users.isEmpty">
-			There are no users yet. Try creating one!
+			{{ "user-management.no-users" | i18n }}
 		</h3>
 
 		<div *ngFor="let user of users" class="user-card">
@@ -33,11 +33,11 @@
 </section>
 
 <modal [(visible)]="showUserDialog">
-	<material-dialog headered class="headered-dialog" [error]="userDialogErrorMessage">
+	<material-dialog headered class="headered-dialog" [error]="userDialogErrorMessage?.toString()">
 
 		<div header>
-			<h1 *ngIf="dialogType == createType">Create user</h1>
-			<h1 *ngIf="dialogType == editType">Edit user</h1>
+			<h1 *ngIf="dialogType == createType">{{ "user-management.create-user" | i18n }}</h1>
+			<h1 *ngIf="dialogType == editType">{{ "user-management.edit-user" | i18n }}</h1>
 		</div>
 
 		<div>
@@ -57,7 +57,7 @@
 				</div>
 
 				<div>
-					<span *ngIf="dialogType == editType">Leave the password field empty if you don't want to change it.</span>
+					<span *ngIf="dialogType == editType">{{ "user-management.edit-user.note" | i18n }}</span>
 				</div>
 			</form>
 
@@ -66,17 +66,17 @@
 		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
 			<material-button clear-size (trigger)="showUserDialog = false">
 				<material-icon icon="close"></material-icon>
-				Cancel
+				{{ "cancel" | i18n }}
 			</material-button>
 
 			<material-button *ngIf="dialogType == createType" clear-size type="submit" (click)="createUser(username, password)">
 				<material-icon icon="edit"></material-icon>
-				Create
+				{{ "create" | i18n }}
 			</material-button>
 
 			<material-button *ngIf="dialogType == editType" clear-size type="submit" (click)="editUser(username, password)">
 				<material-icon icon="edit"></material-icon>
-				Update
+				{{ "update" | i18n }}
 			</material-button>
 		</div>
 
@@ -101,7 +101,7 @@
 				<material-icon icon="close"></material-icon>
 			</material-button>
 
-			<h1>An error occurred</h1>
+			<h1>{{ "user-management.error-message" | i18n }}</h1>
 		</div>
 
 	</material-dialog>

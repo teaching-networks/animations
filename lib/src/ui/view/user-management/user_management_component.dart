@@ -11,6 +11,7 @@ import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/router/routes.dart';
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
@@ -38,6 +39,7 @@ class UserManagementComponent implements OnInit, OnDestroy {
   final Router _router;
   final Routes _routes;
   final AuthenticationService _authenticationService;
+  final I18nService _i18n;
 
   StreamSubscription<bool> _loggedInSub;
 
@@ -60,14 +62,15 @@ class UserManagementComponent implements OnInit, OnDestroy {
 
   bool showUserDialog = false;
   bool userDialogLoading = false;
-  String userDialogErrorMessage;
+  Message userDialogErrorMessage;
+  Message _userDialogErrorMessage;
 
   /*
   ERROR DIALOG PROPERTIES
    */
   bool showErrorDialog = false;
 
-  UserManagementComponent(this._userService, this._router, this._routes, this._authenticationService);
+  UserManagementComponent(this._userService, this._router, this._routes, this._authenticationService, this._i18n);
 
   @override
   void ngOnInit() {
@@ -82,7 +85,12 @@ class UserManagementComponent implements OnInit, OnDestroy {
       }
     });
 
+    _loadTranslations();
     _loadUsers(); // Initially load all users.
+  }
+
+  void _loadTranslations() {
+    _userDialogErrorMessage = _i18n.get("user-management.user-dialog-error-message");
   }
 
   @override
@@ -117,7 +125,7 @@ class UserManagementComponent implements OnInit, OnDestroy {
 
       showUserDialog = false;
     } else {
-      userDialogErrorMessage = "An error occurred";
+      userDialogErrorMessage = _userDialogErrorMessage;
     }
   }
 
@@ -150,7 +158,7 @@ class UserManagementComponent implements OnInit, OnDestroy {
 
       showUserDialog = false;
     } else {
-      userDialogErrorMessage = "An error occurred";
+      userDialogErrorMessage = _userDialogErrorMessage;
     }
   }
 
