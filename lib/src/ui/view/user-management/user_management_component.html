@@ -6,7 +6,16 @@
 		<material-icon icon="add_circle"></material-icon>
 	</material-button>
 
-	<div class="user-list">
+	<div *ngIf="users == null" class="centered-panel">
+		<material-spinner></material-spinner>
+	</div>
+
+	<div *ngIf="users != null" class="user-list">
+
+		<h3 *ngIf="users.isEmpty">
+			There are no users yet. Try creating one!
+		</h3>
+
 		<div *ngFor="let user of users" class="user-card">
 			<span class="user-entry">{{ user.id }}</span>
 			<span class="user-entry">{{ user.name }}</span>
@@ -24,7 +33,7 @@
 </section>
 
 <modal [(visible)]="showUserDialog">
-	<material-dialog headered>
+	<material-dialog headered class="headered-dialog" [error]="userDialogErrorMessage">
 
 		<div header>
 			<h1 *ngIf="dialogType == createType">Create user</h1>
@@ -33,22 +42,22 @@
 
 		<div>
 
-			<div *ngIf="isDialogLoading">
+			<div *ngIf="userDialogLoading">
 				<material-progress [indeterminate]="true"></material-progress>
 			</div>
 
-			<div *ngIf="showDialogError" style="color: coral">
-				<p>An error occurred.</p>
-			</div>
-
-			<form>
+			<form style="text-align: center">
 				<div>
 					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
-									name="username" [disabled]="isDialogLoading"></material-input>
+									name="username" [disabled]="userDialogLoading"></material-input>
 				</div>
 				<div>
 					<material-input [(ngModel)]="password" type="password" hintText="{{ 'login.password' | i18n }}"
-									name="password" [disabled]="isDialogLoading"></material-input>
+									name="password" [disabled]="userDialogLoading"></material-input>
+				</div>
+
+				<div>
+					<span *ngIf="dialogType == editType">Leave the password field empty if you don't want to change it.</span>
 				</div>
 			</form>
 
@@ -69,6 +78,30 @@
 				<material-icon icon="edit"></material-icon>
 				Update
 			</material-button>
+		</div>
+
+	</material-dialog>
+</modal>
+
+<modal [(visible)]="showLoadingDialog">
+	<material-dialog info class="info-dialog">
+
+		<div header class="centered-panel">
+			<material-spinner></material-spinner>
+		</div>
+
+	</material-dialog>
+</modal>
+
+<modal [(visible)]="showErrorDialog">
+	<material-dialog info class="info-dialog">
+
+		<div header>
+			<material-button icon autoFocus (trigger)="showErrorDialog = false">
+				<material-icon icon="close"></material-icon>
+			</material-button>
+
+			<h1>An error occurred</h1>
 		</div>
 
 	</material-dialog>

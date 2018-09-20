@@ -43,7 +43,7 @@
 </footer>
 
 <modal [(visible)]="showLoginDialog">
-	<material-dialog headered>
+	<material-dialog headered class="headered-dialog" [error]="loginErrorMessageToShow?.toString()">
 
 		<div header>
 			<h1>{{ "login.title" | i18n }}</h1>
@@ -54,10 +54,7 @@
 			<div *ngIf="isCheckingCredentials">
 				<material-progress [indeterminate]="true"></material-progress>
 			</div>
-			<div *ngIf="showLoginError" style="color: coral">
-				<p>{{ "login.error" | i18n }}</p>
-			</div>
-			<form>
+			<form style="text-align: center">
 				<div>
 					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
 									name="username" [disabled]="isCheckingCredentials"></material-input>

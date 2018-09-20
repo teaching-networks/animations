@@ -2,6 +2,9 @@
 @import url(https://fonts.googleapis.com/css?family=Raleway:300);
 @import url(https://fonts.googleapis.com/css?family=Material+Icons);
 
+@import 'package:angular_components/css/material/material';
+@import 'package:angular_components/material_dialog/mixins';
+
 html, body {
   height: 100%;
   margin: 0;
@@ -184,4 +187,20 @@ ul.highlighted-fields {
     width: 3.0em;
     height: 3.0em;
   }
+}
+
+
+.basic-dialog,
+.basic-scrolling-dialog,
+.max-height-dialog,
+.headered-dialog {
+  width: $mat-grid * 60;
+
+  [footer] material-button:not([disabled]) {
+    color: $mat-blue;
+  }
+}
+
+.info-dialog {
+  width: $mat-grid * 40;
 }

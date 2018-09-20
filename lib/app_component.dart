@@ -50,13 +50,19 @@ class AppComponent implements OnInit, OnDestroy {
   LanguageSelectionOptions languageSelectionOptions;
 
   final AuthenticationService _authenticationService;
+
+  StreamSubscription<bool> _loggedInStreamSub;
+
+  /*
+  LOGIN DIALOG PROPERTIES
+   */
   bool showLoginDialog = false;
   bool isCheckingCredentials = false;
-  bool showLoginError = false;
   bool isLoggedIn = false;
-  StreamSubscription<bool> _loggedInStreamSub;
   String username = "";
   String password = "";
+  Message loginErrorMessageToShow;
+  Message _loginErrorMessageLabel;
 
   final UserService _userService;
   User authenticatedUser;
@@ -65,6 +71,8 @@ class AppComponent implements OnInit, OnDestroy {
 
   @override
   ngOnInit() {
+    _initTranslations();
+
     languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
     languageSelectionOptions = new LanguageSelectionOptions(_i18n.getLanguages());
 
@@ -105,6 +113,10 @@ class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  void _initTranslations() {
+    _loginErrorMessageLabel = _i18n.get("login.error");
+  }
+
   /**
    * Called when a language has been selected.
    */
@@ -126,6 +138,7 @@ class AppComponent implements OnInit, OnDestroy {
       _authenticationService.logout();
     } else {
       showLoginDialog = true;
+      loginErrorMessageToShow = null;
     }
   }
 
@@ -142,7 +155,7 @@ class AppComponent implements OnInit, OnDestroy {
     if (success) {
       showLoginDialog = false;
     } else {
-      showLoginError = true;
+      loginErrorMessageToShow = _loginErrorMessageLabel;
     }
   }
 
