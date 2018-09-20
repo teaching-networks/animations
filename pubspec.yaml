@@ -4,7 +4,7 @@ version: 1.0.0
 author: beder@hm.edu
 
 environment:
-  sdk: '>=2.1.0-dev.4.0 <3.0.0'
+  sdk: '>=2.0.0 <3.0.0'
 
 dependencies:
   angular: ^5.0.0
