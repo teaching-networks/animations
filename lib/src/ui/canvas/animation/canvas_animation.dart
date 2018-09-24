@@ -1,10 +1,10 @@
 import 'dart:html';
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Abstract class for animations using the canvas component.
@@ -24,7 +24,7 @@ abstract class CanvasAnimation implements OnDestroy {
   /**
    * Whether to show FPS for development.
    */
-  static const bool SHOW_FPS = true;
+  static const bool SHOW_FPS = false;
 
   /**
    * Draw fps every FPS_MILLIS milliseconds.
@@ -173,6 +173,19 @@ abstract class CanvasAnimation implements OnDestroy {
    * Get the default font size of a canvas (e. g. 1.0em) in pixel.
    */
   double get defaultFontSize => window.devicePixelRatio * DEFAULT_FONT_SIZE_PX;
+
+  /// Set the font for the canvas.
+  /// Font size is set using [sizeFactor] where 1.0 is the [defaultFontSize].
+  /// Font Family is set using [fontFamily] where "sans-serif" is the default font family.
+  void setFont({
+    double sizeFactor = 1.0,
+    String fontFamily = "sans-serif"
+  }) {
+    context.font = "${defaultFontSize * sizeFactor}px $fontFamily";
+  }
+
+  /// Get the windows height.
+  int get windowHeight => window.innerHeight;
 
   @override
   ngOnDestroy() {

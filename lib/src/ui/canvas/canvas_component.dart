@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:html';
 import "package:angular/angular.dart";
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Canvas component a component enclosing a canvas which you can draw on.
@@ -15,10 +15,10 @@ import 'package:netzwerke_animationen/src/util/size.dart';
  */
 @Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [coreDirectives])
 class CanvasComponent implements OnInit {
-  @ViewChild("canvasWrapper")
+  @ViewChild("canvasWrapper", read: HtmlElement)
   HtmlElement canvasWrapper;
 
-  @ViewChild("canvas")
+  @ViewChild("canvas", read: HtmlElement)
   HtmlElement canvas;
 
   /**

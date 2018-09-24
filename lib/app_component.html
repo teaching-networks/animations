@@ -4,22 +4,79 @@
 	</div>
 	<div class="rest">
 		<span class="title">{{ "title" | i18n }}</span>
-		<nav>
-			<material-button [routerLink]="routes.overview.toUrl()"><material-icon icon="home"></material-icon>{{ "overview" | i18n }}</material-button>
+		<nav class="main-navigation">
+			<a [routerLink]="routes.overview.toUrl()">
+				<material-icon icon="home" class="animated"></material-icon>
+				{{ "overview" | i18n }}</a>
+			<a *restricted [routerLink]="routes.user.toUrl()">
+				<material-icon icon="person" class="animated"></material-icon>
+				{{ "user-management" | i18n }}</a>
 		</nav>
 	</div>
 </header>
 
-<router-outlet [routes]="routes.all"></router-outlet>
+<section class="main-section">
+	<router-outlet [routes]="routes.all"></router-outlet>
+</section>
 
 <footer class="footer">
+	<span class="aligned-footer">
+		<material-icon icon="language"></material-icon>
+		<material-dropdown-select
+				[buttonText]="languageSelectionLabel"
+				[selection]="languageSelectionModel"
+				[options]="languageSelectionOptions"
+				[factoryRenderer]="componentLabelFactory"
+				[deselectOnActivate]="false">
+		</material-dropdown-select>
+	</span>
+
 	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
-	<span>&nbsp;&bull;&nbsp;</span>
-	<material-dropdown-select
-			[buttonText]="languageSelectionLabel"
-			[selection]="languageSelectionModel"
-			[options]="languageSelectionOptions"
-			[factoryRenderer]="componentLabelFactory"
-			[deselectOnActivate]="false">
-	</material-dropdown-select>
+
+	<span class="aligned-footer">
+		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }}&nbsp;<b>{{ authenticatedUser.name }}</b></span>
+		<material-button (click)="authenticationChange()" icon>
+			<material-icon *ngIf="!isLoggedIn" icon="lock_open"></material-icon>
+			<material-icon *ngIf="isLoggedIn" icon="lock"></material-icon>
+		</material-button>
+	</span>
 </footer>
+
+<modal [(visible)]="showLoginDialog">
+	<material-dialog headered class="headered-dialog" [error]="loginErrorMessageToShow?.toString()">
+
+		<div header>
+			<h1>{{ "login.title" | i18n }}</h1>
+			<p>{{ "login.subtitle" | i18n }}</p>
+		</div>
+
+		<div>
+			<div *ngIf="isCheckingCredentials">
+				<material-progress [indeterminate]="true"></material-progress>
+			</div>
+			<form style="text-align: center">
+				<div>
+					<material-input [(ngModel)]="username" hintText="{{ 'login.username' | i18n }}"
+									name="username" [disabled]="isCheckingCredentials"></material-input>
+				</div>
+				<div>
+					<material-input [(ngModel)]="password" type="password" hintText="{{ 'login.password' | i18n }}"
+									name="password" [disabled]="isCheckingCredentials"></material-input>
+				</div>
+			</form>
+		</div>
+
+		<div footer style="display: flex; flex-flow: row; justify-content: space-between">
+			<material-button clear-size (trigger)="showLoginDialog = false">
+				<material-icon icon="close"></material-icon>
+				{{ "login.close" | i18n }}
+			</material-button>
+
+			<material-button clear-size type="submit" (click)="login()">
+				<material-icon icon="check_circle"></material-icon>
+				{{ "login.submit" | i18n }}
+			</material-button>
+		</div>
+
+	</material-dialog>
+</modal>

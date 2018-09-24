@@ -1,10 +1,9 @@
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
-import 'package:sprintf/sprintf.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
 
 /// Commonly used protocol for reliable transmission.
 class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
@@ -18,9 +17,12 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _receiverReceivedPktDup;
-  Message _receiverReceivedPkt;
-  Message _senderReceivedAckDup;
+  Message _receiverReceivedPktDup1;
+  Message _receiverReceivedPktDup2;
+  Message _receiverReceivedPkt1;
+  Message _receiverReceivedPkt2;
+  Message _senderReceivedAckDup1;
+  Message _senderReceivedAckDup2;
   Message _senderReceivedAck;
 
   SelectiveRepeatProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
@@ -28,9 +30,12 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   }
 
   void _initTranslations() {
-    _receiverReceivedPktDup = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup");
-    _receiverReceivedPkt = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt");
-    _senderReceivedAckDup = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup");
+    _receiverReceivedPktDup1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup.1");
+    _receiverReceivedPktDup2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt-dup.2");
+    _receiverReceivedPkt1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt.1");
+    _receiverReceivedPkt2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.receiver-received-pkt.2");
+    _senderReceivedAckDup1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.1");
+    _senderReceivedAckDup2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack-dup.2");
     _senderReceivedAck = _i18n.get("reliable-transmission-animation.protocol.log-messages.selective-repeat.sender-received-ack");
   }
 
@@ -45,15 +50,15 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
       _outstanding++;
     }
 
-    return new Packet(number: index % windowSize);
+    return new Packet(number: index % (windowSize * 2));
   }
 
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet == null) {
-      messageStreamController.add(sprintf(_receiverReceivedPktDup.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedPktDup1 ${movingPacket.number} $_receiverReceivedPktDup2");
     } else {
-      messageStreamController.add(sprintf(_receiverReceivedPkt.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedPkt1 ${movingPacket.number} $_receiverReceivedPkt2");
     }
 
     return false;
@@ -62,10 +67,10 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
   @override
   bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (packet == null) {
-      messageStreamController.add(sprintf(_senderReceivedAckDup.toString(), [movingPacket.number]));
+      messageStreamController.add("$_senderReceivedAckDup1 ${movingPacket.number} $_senderReceivedAckDup2");
     } else {
       _outstanding--;
-      messageStreamController.add(sprintf(_senderReceivedAck.toString(), [movingPacket.number]));
+      messageStreamController.add("$_senderReceivedAck ${movingPacket.number}");
     }
 
     return false;

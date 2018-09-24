@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
+import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import "package:intl/intl_browser.dart";
 
 typedef void LanguageChangedListener(String newLocale);
@@ -50,7 +51,10 @@ class I18nService {
   /**
    * Used to get the base url of the application.
    */
-  PlatformLocation _platformLocation;
+  final PlatformLocation _platformLocation;
+
+  /// Storage service to store things locally.
+  final StorageService _storage;
 
   /**
    * List of listeners which want to be notified when the language changes.
@@ -60,7 +64,7 @@ class I18nService {
   /**
    * I18n Service constructor.
    */
-  I18nService(this._platformLocation) {
+  I18nService(this._platformLocation, this._storage) {
     // Start locale file lookup.
     getLocale().then((locale) {
       _currentLocale = locale;
@@ -149,7 +153,7 @@ class I18nService {
    */
   void setLocale(String locale) {
     if (locale != getCurrentLocale() && _hasLocale(locale)) {
-      window.localStorage[LOCAL_STORAGE_LOCALE] = locale;
+      _storage.set(LOCAL_STORAGE_LOCALE, locale);
       _currentLocale = locale;
 
       _reload();
@@ -160,7 +164,7 @@ class I18nService {
    * Get locale.
    */
   Future<String> getLocale() async {
-    String l = window.localStorage[LOCAL_STORAGE_LOCALE];
+    String l = _storage.get(LOCAL_STORAGE_LOCALE);
 
     if (l == null) {
       return findSystemLocale().then((locale) {
@@ -190,7 +194,7 @@ class I18nService {
    * Clear locale in local storage.
    */
   void clearLocale() {
-    window.localStorage.remove(LOCAL_STORAGE_LOCALE);
+    _storage.remove(LOCAL_STORAGE_LOCALE);
   }
 
   /**

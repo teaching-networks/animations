@@ -2,17 +2,17 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/particles/generator/burst_particle_generator.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/particles/generator/particle_generator.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/size_type.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/ui/canvas/particles/generator/burst_particle_generator.dart';
+import 'package:hm_animations/src/ui/canvas/particles/generator/particle_generator.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Change listener listening for the packets state.
@@ -97,6 +97,9 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
 
   ParticleGenerator _particleGenerator;
 
+  /// References to all packets which are sent concurrently.
+  List<Packet> sentConcurrently;
+
   /**
    * Create new packet instance.
    */
@@ -126,7 +129,7 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
       changeToAck();
       _initAnimationWithState(PacketState.MOVING_FROM_RECEIVER, timestamp);
     } else if (_state == PacketState.DESTROY_START) {
-      _particleGenerator = new BurstParticleGenerator(color: rectangle.color, opacity: 0.1, minRadius: size.width / 5, maxRadius: size.width / 3, count: 100);
+      _particleGenerator = new BurstParticleGenerator(color: rectangle.color, opacity: 0.1, minRadius: size.width / 8, maxRadius: size.width / 5, count: 50, gravity: 5.0);
       _particleGenerator.start();
 
       _initAnimationWithState(PacketState.DESTROYING, timestamp);
@@ -236,6 +239,11 @@ class Packet extends CanvasDrawable with CanvasPausableMixin {
    * Whether the packet is still transmitting.
    */
   bool get inProgress => _state != PacketState.END;
+
+  /**
+   * Whether the packet is destroyed or destroying.
+   */
+  bool get isDestroyed => _state == PacketState.DESTROY_START || _state == PacketState.DESTROYING || _state == PacketState.DESTROYED;
 
   /**
    * Add a state change listener to the listener list.

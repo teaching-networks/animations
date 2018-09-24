@@ -1,27 +1,5 @@
 @import 'package:angular_components/css/material/material';
 
-.drawing-area {
-  padding: 1em 0;
-}
-
-.controls {
-  display: flex;
-  align-items: center;
-
-  & > * {
-    padding: 0 0.5em;
-  }
-}
-
-.slider-panel {
-  display: inline-block;
-  width: 200px;
-
-  & > div {
-    text-align: center;
-  }
-}
-
 .log-area {
   max-height: 100px;
   min-height: 100px;

@@ -1,7 +1,13 @@
+import 'dart:math';
+
 /**
  * Color utility class.
  */
 class Color {
+
+  /// Random number generator for random color constructor.
+  static Random rng = new Random();
+
   /**
    * Mask used to extract color components from number.
    */
@@ -33,7 +39,11 @@ class Color {
    */
   const Color.rgba(this.red, this.green, this.blue, this.alpha);
 
+  /// Create new random color.
+  Color.random() : red = rng.nextInt(255), green = rng.nextInt(255), blue = rng.nextInt(255), alpha = 1.0;
+
   static Color opacity(Color color, double alpha) {
     return new Color.rgba(color.red, color.green, color.blue, alpha);
   }
+
 }

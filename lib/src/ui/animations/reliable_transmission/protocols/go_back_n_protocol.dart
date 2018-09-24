@@ -1,10 +1,9 @@
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
-import 'package:sprintf/sprintf.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
 
 /// Popular implementation of a reliable transmission protocol, the Go-Back-N Protocol.
 class GoBackNProtocol extends ReliableTransmissionProtocol {
@@ -19,20 +18,30 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _senderRetransmitts;
-  Message _receiverReceivedOutOfOrder;
-  Message _receiverReceivedInOrder;
-  Message _senderReceivedResetTimeout;
+  Message _senderRetransmitts1;
+  Message _senderRetransmitts2;
+  Message _receiverReceivedOutOfOrder1;
+  Message _receiverReceivedOutOfOrder2;
+  Message _receiverReceivedInOrder1;
+  Message _receiverReceivedInOrder2;
+  Message _senderReceivedResetTimeout1;
+  Message _senderReceivedResetTimeout2;
+
+  bool isCumulativeACKEnabled = true;
 
   GoBackNProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _loadTranslations();
   }
 
   void _loadTranslations() {
-    _senderRetransmitts = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt");
-    _receiverReceivedOutOfOrder = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order");
-    _receiverReceivedInOrder = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order");
-    _senderReceivedResetTimeout = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout");
+    _senderRetransmitts1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt.1");
+    _senderRetransmitts2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.retransmitt.2");
+    _receiverReceivedOutOfOrder1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order.1");
+    _receiverReceivedOutOfOrder2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-out-of-order.2");
+    _receiverReceivedInOrder1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order.1");
+    _receiverReceivedInOrder2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.received-in-order.2");
+    _senderReceivedResetTimeout1 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout.1");
+    _senderReceivedResetTimeout2 = _i18n.get("reliable-transmission-animation.protocol.log-messages.go-back-n.reset-timeout.2");
   }
 
   @override
@@ -42,32 +51,46 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   @override
   Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
+    List<Packet> sentConcurrently;
     if (timeout) {
+      sentConcurrently = List<Packet>();
+
       // Resend all outstanding packets.
       int maxIndex = index + _outstanding;
-
-      messageStreamController.add(sprintf(_senderRetransmitts.toString(), [_outstanding]));
+      
+      messageStreamController.add("$_senderRetransmitts1 $_outstanding $_senderRetransmitts2");
 
       _outstanding--; // For the current packet.
 
       for (int i = index + 1; i < maxIndex; i++) {
         _outstanding--;
-        window.emitPacketByIndex(i, false);
+        Packet newPacket = window.emitPacketByIndex(i, false, true);
+        sentConcurrently.add(newPacket);
       }
     }
 
     _outstanding++;
 
-    return new Packet(number: index % windowSize);
+    Packet p = new Packet(number: index % _getMaxSequenceNum());
+
+    if (timeout) {
+      sentConcurrently.insert(0, p);
+
+      for (Packet packet in sentConcurrently) {
+        packet.sentConcurrently = sentConcurrently;
+      }
+    }
+
+    return p;
   }
 
   @override
   bool receiverReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
     if (slot.index > windowSpace.getOffset()) {
-      messageStreamController.add(sprintf(_receiverReceivedOutOfOrder.toString(), [movingPacket.number]));
+      messageStreamController.add("$_receiverReceivedOutOfOrder1 ${movingPacket.number} $_receiverReceivedOutOfOrder2");
 
-      movingPacket.number = windowSpace.getOffset() % windowSize;
-      movingPacket.overlayNumber = (movingPacket.number - 1) % windowSize;
+      movingPacket.number = windowSpace.getOffset() % _getMaxSequenceNum();
+      movingPacket.overlayNumber = (movingPacket.number - 1) % _getMaxSequenceNum();
 
       if (windowSpace.getOffset() == 0) {
         // Special case, no packets yet received -> send no acumulated ACK.
@@ -75,8 +98,22 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
       }
 
       slot.packets.second = null;
-    } else if (slot.index == windowSpace.getOffset()) {
-      messageStreamController.add(sprintf(_receiverReceivedInOrder.toString(), [movingPacket.number]));
+    } else {
+      if (slot.index == windowSpace.getOffset()) {
+        messageStreamController.add("$_receiverReceivedInOrder1 ${movingPacket.number} $_receiverReceivedInOrder2");
+      }
+
+      if (isCumulativeACKEnabled && movingPacket.sentConcurrently != null) {
+        int overlayNumber = movingPacket.number;
+        for (Packet packet in movingPacket.sentConcurrently) {
+          if (packet.isDestroyed) {
+            break;
+          } else {
+            overlayNumber = packet.number;
+          }
+        }
+        movingPacket.overlayNumber = overlayNumber;
+      }
     }
 
     return false;
@@ -91,14 +128,14 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
     // Cumulative ACK will accept all pending packet acks until the received one.
     for (int i = windowSpace.getOffset(); i < windowSpace.getOffset() + windowSize; i++) {
-      if (i % windowSize == packet.number) {
+      if (i % _getMaxSequenceNum() == packet.number) {
         break;
       }
 
       PacketSlot s = window.packetSlots[i];
 
       if (s.packets.first == null) {
-        s.packets.first = new Packet(number: i % windowSize, startState: PacketState.END);
+        s.packets.first = new Packet(number: i % _getMaxSequenceNum(), startState: PacketState.END);
         s.packets.first.changeToAck();
         _outstanding--;
         _received.add(s.index);
@@ -121,7 +158,7 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
     if (_outstanding > 0 && window.packetSlots.length > windowSpace.getOffset()) {
       // Reset timer because there are still missing acks.
       window.packetSlots[windowSpace.getOffset()].resetTimeout(packet);
-      messageStreamController.add(sprintf(_senderReceivedResetTimeout.toString(), [packet.number]));
+      messageStreamController.add("$_senderReceivedResetTimeout1 ${packet.number} $_senderReceivedResetTimeout2");
     }
 
     return destroyPacket;
@@ -139,6 +176,8 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
     windowSpace.setOffset(count);
   }
+
+  int _getMaxSequenceNum() => windowSize + 1;
 
   @override
   bool canChangeWindowSize() {

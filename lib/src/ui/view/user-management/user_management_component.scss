@@ -1,0 +1,49 @@
+section.user-management {
+
+}
+
+.user-list {
+  padding: 1.0em 0;
+
+  .user-card {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-bottom-width: 0;
+
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    position: relative;
+
+    & > .user-entry {
+      display: inline-block;
+      border-right: 1px solid #e0e0e0;
+      padding: 0.5em 1.0em;
+      height: 100%;
+
+      &:last-child {
+        border: none;
+      }
+    }
+
+    &:first-child {
+      border-radius: 0.5em 0.5em 0 0;
+    }
+
+    &:last-child {
+      border-radius: 0 0 0.5em 0.5em;
+      border-width: 1px;
+    }
+
+    &:first-child:last-child {
+      border-radius: 0.5em;
+      border-width: 1px;
+    }
+
+    &:hover {
+      background-color: #F9F9F9;
+    }
+
+  }
+
+}

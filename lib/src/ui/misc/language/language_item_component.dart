@@ -1,6 +1,6 @@
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 
 @Component(
     selector: "language-item-component",

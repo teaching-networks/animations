@@ -1,5 +1,5 @@
 import 'package:angular/angular.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 
 /**
  * I18n pipe used for easy access to the translation service.

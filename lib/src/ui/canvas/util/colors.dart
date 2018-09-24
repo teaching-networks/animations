@@ -1,4 +1,4 @@
-import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 /**
  * Set of colors for easy access.
@@ -6,6 +6,7 @@ import 'package:netzwerke_animationen/src/ui/canvas/util/color.dart';
 class Colors {
   static const Color BLACK = const Color.hex(0xFF000000);
   static const Color GREY = const Color.hex(0xFF999999);
+  static const Color LIGHTER_GRAY = const Color.rgb(245, 245, 245);
   static const Color LIGHTGREY = const Color.hex(0xFFDDDDDD);
   static const Color DARK_GRAY = const Color.hex(0xFF333333);
 

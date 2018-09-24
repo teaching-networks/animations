@@ -42,7 +42,7 @@
 <div>
 	<h3>{{ "reliable-transmission-animation.protocol-messages" | i18n }}</h3>
 
-	<div class="log-area" #logContainer>
+	<div class="log-area" #logcontainer>
 		<ul>
 			<li *ngFor="let log of logMessages">{{ log }}</li>
 		</ul>
@@ -92,5 +92,12 @@
 	<h3>{{ "description" | i18n }}:</h3>
 	<p>
 		{{ description.toString() }}
+	</p>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		{{ "reliable-transmission-animation.credits" | i18n }}
 	</p>
 </div>

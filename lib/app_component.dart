@@ -1,21 +1,41 @@
+import 'dart:async';
+
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
+import 'package:angular_forms/angular_forms.dart';
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/router/routes.dart';
-import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
-import 'package:netzwerke_animationen/src/util/component.dart';
+import 'package:hm_animations/src/router/routes.dart';
+import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/user_service/model/user.dart';
+import 'package:hm_animations/src/services/user_service/user_service.dart';
+import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
+import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
+import 'package:hm_animations/src/util/component.dart';
 
 @Component(
     selector: 'net-app',
-    styleUrls: const ['app_component.css'],
+    styleUrls: ['app_component.css'],
     templateUrl: 'app_component.html',
-    directives: const [materialDirectives, routerDirectives],
-    providers: const [materialProviders, const ClassProvider(AnimationService), const ClassProvider(Routes), const ClassProvider(I18nService)],
-    pipes: const [I18nPipe])
-class AppComponent implements OnInit {
+    directives: [
+      MaterialButtonComponent,
+      MaterialIconComponent,
+      MaterialDropdownSelectComponent,
+      MaterialDialogComponent,
+      ModalComponent,
+      MaterialProgressComponent,
+      RestrictedDirective,
+      AutoFocusDirective,
+      materialInputDirectives,
+      routerDirectives,
+      formDirectives,
+      coreDirectives,
+    ],
+    providers: [materialProviders, ClassProvider(AnimationService), ClassProvider(Routes)],
+    pipes: [I18nPipe])
+class AppComponent implements OnInit, OnDestroy {
   /**
    * All routes we can navigate to.
    */
@@ -29,10 +49,30 @@ class AppComponent implements OnInit {
   SelectionModel<Language> languageSelectionModel;
   LanguageSelectionOptions languageSelectionOptions;
 
-  AppComponent(this._i18n, this.routes);
+  final AuthenticationService _authenticationService;
+
+  StreamSubscription<bool> _loggedInStreamSub;
+
+  /*
+  LOGIN DIALOG PROPERTIES
+   */
+  bool showLoginDialog = false;
+  bool isCheckingCredentials = false;
+  bool isLoggedIn = false;
+  String username = "";
+  String password = "";
+  Message loginErrorMessageToShow;
+  Message _loginErrorMessageLabel;
+
+  final UserService _userService;
+  User authenticatedUser;
+
+  AppComponent(this._i18n, this.routes, this._authenticationService, this._userService);
 
   @override
   ngOnInit() {
+    _initTranslations();
+
     languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
     languageSelectionOptions = new LanguageSelectionOptions(_i18n.getLanguages());
 
@@ -56,6 +96,25 @@ class AppComponent implements OnInit {
         onLanguageSelected(change.added.first);
       }
     });
+
+    // Initialize login status
+    isLoggedIn = _authenticationService.isLoggedIn;
+
+    if (isLoggedIn) {
+      this._userService.getAuthenticatedUser().then((user) => authenticatedUser = user);
+    }
+
+    _loggedInStreamSub = _authenticationService.loggedIn.listen((loggedIn) {
+      isLoggedIn = loggedIn;
+
+      if (isLoggedIn) {
+        this._userService.getAuthenticatedUser().then((user) => authenticatedUser = user);
+      }
+    });
+  }
+
+  void _initTranslations() {
+    _loginErrorMessageLabel = _i18n.get("login.error");
   }
 
   /**
@@ -72,6 +131,35 @@ class AppComponent implements OnInit {
   }
 
   /**
+   * Either login or logout should happen.
+   */
+  void authenticationChange() {
+    if (_authenticationService.isLoggedIn) {
+      _authenticationService.logout();
+    } else {
+      showLoginDialog = true;
+      loginErrorMessageToShow = null;
+    }
+  }
+
+  /**
+   * Login process entry.
+   */
+  void login() async {
+    isCheckingCredentials = true;
+
+    var success = await _authenticationService.login(username, password);
+
+    isCheckingCredentials = false;
+
+    if (success) {
+      showLoginDialog = false;
+    } else {
+      loginErrorMessageToShow = _loginErrorMessageLabel;
+    }
+  }
+
+  /**
    * Get current year.
    */
   int get year => new DateTime.now().year;
@@ -82,6 +170,11 @@ class AppComponent implements OnInit {
    * Get component factory for components that display the language items in the language selection dropdown.
    */
   ComponentFactorySupplier get componentLabelFactory => (_) => languageItemComponent.LanguageItemComponentNgFactory;
+
+  @override
+  void ngOnDestroy() {
+    _loggedInStreamSub.cancel();
+  }
 }
 
 class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {

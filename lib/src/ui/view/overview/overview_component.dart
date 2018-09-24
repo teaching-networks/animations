@@ -1,45 +1,68 @@
 import 'dart:async';
 import "package:angular/angular.dart";
-import 'package:angular_components/angular_components.dart';
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_components/material_spinner/material_spinner.dart';
+import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:angular_router/angular_router.dart';
-import 'package:netzwerke_animationen/src/services/animation_service/animation_service.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/animation_descriptor.dart';
-import 'package:netzwerke_animationen/src/router/route_paths.dart' as paths;
+import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/services/animation_service/model/animation.dart';
+import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
+import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 
 /**
  * Overview component should give an overview over all available animations.
  */
-@Component(
-    selector: "overview-component",
-    templateUrl: "overview_component.html",
-    styleUrls: const ["overview_component.css"],
-    directives: const [routerDirectives, coreDirectives, materialDirectives],
-    providers: const [const ClassProvider(AnimationService)],
-    pipes: const [I18nPipe])
-class OverviewComponent implements OnInit {
-  Map<String, AnimationDescriptor> animations;
+@Component(selector: "overview-component", templateUrl: "overview_component.html", styleUrls: [
+  "overview_component.css",
+  "package:angular_components/css/mdc_web/card/mdc-card.scss.css"
+], directives: [
+  routerDirectives,
+  coreDirectives,
+  RestrictedDirective,
+  MaterialToggleComponent,
+  MaterialSpinnerComponent,
+  MaterialIconComponent,
+  MaterialButtonComponent
+], pipes: [
+  I18nPipe
+])
+class OverviewComponent implements OnInit, OnDestroy {
+  Map<String, AnimationDescriptor> animationDescriptors;
+  List<Animation> animations;
 
   /**
    * Service to get animation components from.
    */
-  AnimationService _animationService;
+  final AnimationService _animationService;
+
+  final AuthenticationService _authService;
+  StreamSubscription<bool> _loggedInSub;
 
   /**
    * Service used to get translations.
    */
-  I18nService _i18n;
+  final I18nService _i18n;
 
-  OverviewComponent(this._animationService, this._i18n);
+  OverviewComponent(this._animationService, this._authService, this._i18n);
 
   @override
   ngOnInit() {
     getAnimations();
+
+    _loggedInSub = _authService.loggedIn.listen((isLoggedIn) {
+      // Login state changed. Check if user can see all animations.
+      getAnimations();
+    });
   }
 
   Future<Null> getAnimations() async {
-    animations = await _animationService.getAnimationDescriptors();
+    animationDescriptors = await _animationService.getAnimationDescriptors();
+    animations = await _animationService.getAnimations();
   }
 
   /**
@@ -50,4 +73,57 @@ class OverviewComponent implements OnInit {
   }
 
   Message getAnimationName(String key) => _i18n.get(key);
+
+  bool isAnimationVisible(int id) {
+    if (animations != null) {
+      for (Animation animation in animations) {
+        if (animation.id == id) {
+          return animation.visible;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  Animation getAnimation(int id) {
+    if (animations == null) {
+      throw Exception("animations array mustn't be null here!");
+    }
+
+    for (Animation animation in animations) {
+      if (animation.id == id) {
+        return animation;
+      }
+    }
+
+    return null;
+  }
+
+  void onVisibilityChange(int id, bool visible) async {
+    var animation = getAnimation(id);
+
+    if (animation != null) {
+      animation.visible = visible;
+
+      if (!await _animationService.updateAnimation(animation)) {
+        throw Exception("Could not update animation state");
+      }
+    } else {
+      Animation animation = Animation(id, visible);
+
+      animation = await _animationService.createAnimation(animation);
+
+      if (animation != null) {
+        animations.add(animation);
+      } else {
+        throw Exception("Could not update animation state");
+      }
+    }
+  }
+
+  @override
+  void ngOnDestroy() {
+    _loggedInSub.cancel();
+  }
 }

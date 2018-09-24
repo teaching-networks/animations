@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 /**
  * Edges usable for radius info.

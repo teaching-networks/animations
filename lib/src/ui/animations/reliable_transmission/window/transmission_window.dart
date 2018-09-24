@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_pausable.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/round_rectangle.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/edges.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/paint_mode.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/shapes/util/size_type.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/util/colors.dart';
-import 'package:netzwerke_animationen/src/util/size.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 
 typedef int LabelSupplier(int index);
 
@@ -252,7 +252,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     emitPacketByIndex(_packetSlots.length, false);
   }
 
-  void emitPacketByIndex(int index, bool timeout) {
+  Packet emitPacketByIndex(int index, bool timeout, [bool sentConcurrently = false]) {
     PacketSlot slot;
     if (_packetSlots.length <= index) {
       slot = new PacketSlot(index, (p) {
@@ -281,6 +281,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
 
       slot.addPacket(p);
     }
+
+    return p;
   }
 
   /**

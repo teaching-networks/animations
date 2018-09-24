@@ -2,18 +2,18 @@ import 'dart:html';
 import 'dart:math';
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_pipe.dart';
-import 'package:netzwerke_animationen/src/services/i18n_service/i18n_service.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/animation/canvas_animation.dart';
-import 'package:netzwerke_animationen/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 
 @Component(
     selector: "transmission-animation",
     templateUrl: "transmission_animation.html",
     styleUrls: const ["transmission_animation.css"],
-    directives: const [coreDirectives, materialDirectives, CanvasComponent],
+    directives: const [coreDirectives, MaterialAutoSuggestInputComponent, MaterialButtonComponent, MaterialDropdownSelectComponent, MaterialDropdownSelectComponent, MaterialIconComponent, CanvasComponent],
     pipes: const [I18nPipe])
-class TransmissionAnimation extends CanvasAnimation implements OnInit {
+class TransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   /**
    * Propagation speed on the connection.
    */
@@ -57,7 +57,7 @@ class TransmissionAnimation extends CanvasAnimation implements OnInit {
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  ImageElement computer = new ImageElement(src: "img/computer.svg", width: 415, height: 290);
+  ImageElement computer = new ImageElement(src: "img/animation/computer.svg", width: 415, height: 290);
 
   /**
    * Whether to send a packet (Do the animation).

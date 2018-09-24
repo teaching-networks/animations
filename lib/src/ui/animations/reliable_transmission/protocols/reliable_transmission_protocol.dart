@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/transmission_window.dart';
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
 
 /// Protocol for reliable transmission.
 abstract class ReliableTransmissionProtocol {

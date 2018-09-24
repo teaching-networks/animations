@@ -1,16 +1,37 @@
-<ul *ngIf="animations != null" class="animation-list">
-	<li *ngFor="let anim of animations.values" [routerLink]="animationUrl(anim.path)">
-		<div>
-			<div>
-				<img width="100%" src="{{anim.previewImagePath}}">
+<div *ngIf="animationDescriptors == null" class="centered-panel">
+	<material-spinner></material-spinner>
+</div>
+
+<div *ngIf="animationDescriptors != null" class="animation-overview">
+
+	<h3 *ngIf="animationDescriptors.isEmpty">
+		{{ "overview.no-animations-available" | i18n }}
+	</h3>
+
+	<section *ngFor="let anim of animationDescriptors.values" class="animation-card">
+		<div class="mdc-card mdc-card--outlined animation-card-size">
+			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + ')'}"></div>
+			<div class="animation-card-primary">
+				<h2 class="animation-card-title">{{getAnimationName(anim.name)}}</h2>
 			</div>
-			<div>
-				<span>{{getAnimationName(anim.name)}}</span>
+			<!-- <div class="animation-card-secondary">
+				Short animation description?
+			</div> -->
+			<div class="mdc-card__actions">
+				<div class="mdc-card__action-buttons">
+					<material-button [routerLink]="animationUrl(anim.path)">
+						{{ "goto-animation" | i18n }}
+						<material-icon icon="play_arrow"></material-icon>
+					</material-button>
+				</div>
+				<div *restricted class="mdc-card__action-icons">
+					<material-toggle *restricted
+									 [checked]="isAnimationVisible(anim.id)"
+									 (checkedChange)="onVisibilityChange(anim.id, $event)">
+					</material-toggle>
+				</div>
 			</div>
 		</div>
-	</li>
-	<li>
-		<material-icon class="custom-size" icon="more_horiz"></material-icon>
-		{{ "moreAnimationsComing" | i18n }}
-	</li>
-</ul>
+	</section>
+
+</div>

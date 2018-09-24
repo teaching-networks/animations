@@ -1,7 +1,7 @@
 import 'dart:html';
 
-import 'package:netzwerke_animationen/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
-import 'package:netzwerke_animationen/src/util/pair.dart';
+import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
+import 'package:hm_animations/src/util/pair.dart';
 
 typedef void ArrivalListener(bool isAtSender, Packet packet, Packet movingPacket);
 typedef num TimeoutSupplier(Packet packet);
