@@ -11,6 +11,8 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selec
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/selective_repeat/selective_repeat_animation.template.dart' as selectiveRepeat;
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.template.dart' as queueSimulation;
+import 'package:hm_animations/src/ui/animations/dns/dns_animation.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_animation.template.dart' as dns;
 
 class Animations {
 
@@ -58,6 +60,13 @@ class Animations {
         "http-delay-animation.name",
         "img/animation/preview/http-delay-preview.png",
         "http-delay"
+    ),
+    new AnimationDescriptor<DNSAnimation>(
+        7,
+        dns.DNSAnimationNgFactory,
+        "dns-animation.name",
+        "img/animation/preview/image-preview.svg", // TODO: Change to real preview image
+        "dns"
     )
   ];
 
