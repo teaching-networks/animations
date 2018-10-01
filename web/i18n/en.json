@@ -112,5 +112,8 @@
 	"http-delay-animation.animation-speed": "Animation speed (Total delay)",
 	"http-delay-animation.start": "Start",
 	"http-delay-animation.rtt-help": "Round trip time of the animation after you clicked \"Start\"",
-	"http-delay-animation.credits": "This animation was inspired by a Java Applet originally developed by Pratima Akkunoor/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available."
+	"http-delay-animation.credits": "This animation was inspired by a Java Applet originally developed by Pratima Akkunoor/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available.",
+	"dns-animation.name": "DNS lookup",
+	"dns-animation.description": "There is no description yet.",
+	"dns-animation.credits": "There are not credits yet."
 }

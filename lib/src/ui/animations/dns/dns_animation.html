@@ -1,0 +1,29 @@
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li>
+				<material-button raised>
+					<material-icon icon="play_arrow"></material-icon>
+					Start
+				</material-button>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		{{ "dns-animation.description" | i18n }}
+	</p>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		{{ "dns-animation.credits" | i18n }}
+	</p>
+</div>
