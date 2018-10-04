@@ -1,6 +1,6 @@
 <div class="split-layout">
 	<div class="left">
-		<canvas-comp [height]="500" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+		<canvas-comp [aspectRatio]="WORLD_MAP_ASPECT_RATIO" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">

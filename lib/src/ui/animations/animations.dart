@@ -60,14 +60,14 @@ class Animations {
         "http-delay-animation.name",
         "img/animation/preview/http-delay-preview.png",
         "http-delay"
-    )
-    /*new AnimationDescriptor<DNSAnimation>(
+    ),
+    new AnimationDescriptor<DNSAnimation>(
         7,
         dns.DNSAnimationNgFactory,
         "dns-animation.name",
         "img/animation/preview/image-preview.svg", // TODO: Change to real preview image
         "dns"
-    )*/
+    )
   ];
 
 }

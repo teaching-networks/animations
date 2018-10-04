@@ -46,4 +46,14 @@ class Color {
     return new Color.rgba(color.red, color.green, color.blue, alpha);
   }
 
+  /// Brighten the passed [color] by the given [amount].
+  /// When [amount] is 1.0 the resulting color will be completely white.
+  static Color brighten(Color color, double amount) {
+    int red = ((color.red * (1.0 - amount) / 255 + amount) * 255).toInt();
+    int green = ((color.green * (1.0 - amount) / 255 + amount) * 255).toInt();
+    int blue = ((color.blue * (1.0 - amount) / 255 + amount) * 255).toInt();
+
+    return Color.rgb(red, green, blue);
+  }
+
 }
