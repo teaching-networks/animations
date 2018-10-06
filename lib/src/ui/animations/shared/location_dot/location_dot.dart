@@ -28,7 +28,7 @@ class LocationDot extends CanvasDrawable {
     double progress = Curves.easeInOutCubic(_getProgress(timestamp));
 
     Color c = Color.brighten(color, MAX_BRIGHTNESS_FACTOR * progress);
-    double size = rect.width + (rect.width * growFactor * progress);
+    double size = max(rect.width + (rect.width * growFactor * progress), 0.0);
 
     context.save();
 

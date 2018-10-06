@@ -1,5 +1,7 @@
 import 'dart:html';
+import 'dart:math';
 import 'package:angular/angular.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
@@ -15,11 +17,7 @@ import 'package:hm_animations/src/util/size.dart';
  * Bind in your component to make it work:
  * <canvas-comp (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
  */
-abstract class CanvasAnimation implements OnDestroy {
-  /**
-   * Default font size - will be scaled using window.devicePixelRatio.
-   */
-  static const DEFAULT_FONT_SIZE_PX = 16;
+abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
 
   /**
    * Whether to show FPS for development.
@@ -53,6 +51,10 @@ abstract class CanvasAnimation implements OnDestroy {
 
   CanvasRenderingContext2D context;
   Size size;
+
+  /// Display unit can be used to get a unit dependend on the actual size of the canvas (in pixel).
+  /// It is always one percent of the median of width and height.
+  double displayUnit = 0.0;
 
   num _lastTimestamp = -1;
   int fps = 0;
@@ -144,6 +146,13 @@ abstract class CanvasAnimation implements OnDestroy {
    */
   void onCanvasResize(Size newSize) {
     size = newSize;
+
+    _recalculateDisplayUnit(newSize);
+  }
+
+  /// Calculate display unit which is always one percent of the median of width and height of the canvas.
+  void _recalculateDisplayUnit(Size newSize) {
+    displayUnit = max((newSize.width + newSize.height).toDouble() / 2 / 100, 0.0);
   }
 
   /**
@@ -168,11 +177,6 @@ abstract class CanvasAnimation implements OnDestroy {
   void _initContextForIteration(CanvasRenderingContext2D context) {
     context.font = "${defaultFontSize}px 'Roboto'";
   }
-
-  /**
-   * Get the default font size of a canvas (e. g. 1.0em) in pixel.
-   */
-  double get defaultFontSize => window.devicePixelRatio * DEFAULT_FONT_SIZE_PX;
 
   /// Set the font for the canvas.
   /// Font size is set using [sizeFactor] where 1.0 is the [defaultFontSize].

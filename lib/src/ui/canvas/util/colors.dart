@@ -18,5 +18,6 @@ class Colors {
   static const Color AMBER = Color.hex(0xFFFFD54F);
   static const Color BLUE_GRAY = Color.hex(0xFF607D8B);
   static const Color TEAL = Color.hex(0xFF009688);
-  static const Color SLATE_GREY = Color.hex(0x778899);
+  static const Color SLATE_GREY = Color.hex(0xFF778899);
+  static const Color SPACE_BLUE = Color.hex(0xFF6699FF);
 }
