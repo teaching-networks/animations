@@ -115,5 +115,11 @@
 	"http-delay-animation.credits": "This animation was inspired by a Java Applet originally developed by Pratima Akkunoor/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available.",
 	"dns-animation.name": "DNS lookup",
 	"dns-animation.description": "There is no description yet.",
-	"dns-animation.credits": "There are not credits yet."
+	"dns-animation.credits": "There are not credits yet.",
+	"dns-animation.dns-query-type.recursive": "Recursive",
+	"dns-animation.dns-query-type.iterative": "Iterative",
+	"dns-animation.scenario.root-has-destination-cached": "ROOT server has the destination IP address cached.",
+	"dns-animation.scenario.root-has-intermediate-cached": "ROOT server has the intermediate DNS server cached.",
+	"dns-animation.scenario.root-has-authoritative-cached": "ROOT server has the authoritative DNS server cached.",
+	"dns-animation.scenario.local-has-destination-cached": "Local DNS server hat the destination IP address cached."
 }

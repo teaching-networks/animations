@@ -72,7 +72,7 @@ class CanvasComponent implements OnInit {
 
   @Input()
   void set height(int height) {
-    _height = (height / window.devicePixelRatio).round();
+    _height = height;
     _resizeY = false;
   }
 
@@ -93,7 +93,7 @@ class CanvasComponent implements OnInit {
 
   @Input()
   void set width(int width) {
-    _width = (width / window.devicePixelRatio).round();
+    _width = width;
     _resizeX = false;
   }
 

@@ -1,6 +1,6 @@
 name: hm_animations
 description: A web app aiming at providing animations for students to enhance lecture learning effect.
-version: 1.0.1
+version: 1.1.0
 author: beder@hm.edu
 
 environment:
@@ -11,6 +11,7 @@ dependencies:
   angular_components: ^0.9.2
   angular_router: ^2.0.0-alpha
   angular_forms: ^2.0.0
+  tuple: ^1.0.2
 
 dev_dependencies:
   angular_test: ^2.0.0

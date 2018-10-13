@@ -187,6 +187,16 @@ ul.highlighted-fields {
       border: none;
       background-color: transparent;
     }
+    
+    &.labeled > label {
+      text-transform: uppercase;
+      display: block;
+      color: slategray;
+      font-size: 0.7em;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 0.5em;
+    }
   }
 }
 

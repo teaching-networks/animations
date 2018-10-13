@@ -20,4 +20,5 @@ class Colors {
   static const Color TEAL = Color.hex(0xFF009688);
   static const Color SLATE_GREY = Color.hex(0xFF778899);
   static const Color SPACE_BLUE = Color.hex(0xFF6699FF);
+  static const Color BORDEAUX = Color.hex(0xFF990033);
 }
