@@ -1,0 +1,6 @@
+enum DNSServerType {
+  ROOT,
+  INTERMEDIATE,
+  AUTHORITATIVE,
+  LOCAL
+}
