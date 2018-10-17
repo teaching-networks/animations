@@ -7,4 +7,5 @@ class DNSScenario {
   final List<DNSServerType> route;
 
   const DNSScenario(this.description, this.route);
+
 }

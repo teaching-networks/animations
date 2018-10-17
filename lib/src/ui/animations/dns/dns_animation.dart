@@ -1,19 +1,15 @@
 import 'dart:async';
 import 'dart:html';
-import 'package:hm_animations/src/ui/animations/dns/dns_query_type.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_scenario.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_query.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_query_mode.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_query_type.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_scenario.dart';
 import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server_type.dart';
-import 'package:hm_animations/src/ui/animations/dns/waypoint_route_drawable.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/waypoint_route_drawable.dart';
 import 'package:tuple/tuple.dart';
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/shared/location_dot/location_dot.dart';
-import 'package:hm_animations/src/ui/animations/shared/route/route_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/progress/mutable_progress.dart';
@@ -24,7 +20,15 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     selector: "dns-animation",
     styleUrls: ["dns_animation.css"],
     templateUrl: "dns_animation.html",
-    directives: [coreDirectives, MaterialButtonComponent, MaterialIconComponent, MaterialDropdownSelectComponent, NgModel, CanvasComponent],
+    directives: [
+      coreDirectives,
+      MaterialButtonComponent,
+      MaterialIconComponent,
+      MaterialDropdownSelectComponent,
+      MaterialCheckboxComponent,
+      NgModel,
+      CanvasComponent
+    ],
     pipes: [I18nPipe])
 class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   static final int _WRAP_BUBBLE_TEXT_AT = 20;
@@ -78,13 +82,15 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   SelectionModel<DNSScenario> scenarioSelectModel;
   static ItemRenderer<DNSScenario> scenarioItemRenderer = (scenario) => scenario.description.toString();
 
+  bool rootDNSServerAllowsRecursiveLookup = false;
+
   DNSAnimation(this._i18n) {
     _fillLocationSource();
   }
 
   void _fillLocationSource() {
     _locationSource.add(Tuple4(_ORIGIN_LOCATION, _originDot, _originBubble, DNSServerType.LOCAL));
-    _locationSource.add(Tuple4(_DESTINATION_LOCATION, _destinationDot, _destinationBubble, null));
+    _locationSource.add(Tuple4(_DESTINATION_LOCATION, _destinationDot, _destinationBubble, DNSServerType.DESTINATION));
     _locationSource.add(Tuple4(_ROOT_DNS_SERVER_LOCATION, _rootDNSServerDot, _rootDNSServerBubble, DNSServerType.ROOT));
     _locationSource.add(Tuple4(_INTERMEDIATE_DNS_SERVER_LOCATION, _intermediateDNSServerDot, _intermediateDNSServerBubble, DNSServerType.INTERMEDIATE));
     _locationSource.add(Tuple4(_AUTHORITATIVE_DNS_SERVER_LOCATION, _authoritativeDNSServerDot, _authoritativeDNSServerBubble, DNSServerType.AUTHORITATIVE));
@@ -208,22 +214,43 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
     List<DNSServerType> waypoints = scenarioSelectModel.selectedValues.first.route;
     _routeDrawables.clear();
     _ways.clear();
-
-    bool rootDNSServerSupportsRecursive = false;
+    if (_currentProgressListener != null) { // If currently running animation
+      _currentProgressListener.cancel();
+    }
 
     bool isIterative = dnsQueryTypeSelectModel.selectedValues.first is IterativeDNSQueryType;
 
-    _ways = _buildWays(waypoints, isIterative, false); // TODO Add recursive support root check box in gui?
+    _ways = _buildWays(waypoints, isIterative, rootDNSServerAllowsRecursiveLookup);
 
     _nextWaypoint(0);
   }
 
+  /// Build ways from local name server to get the domain name resolved.
   List<Tuple3<DNSServerType, DNSServerType, bool>> _buildWays(List<DNSServerType> waypoints, bool isIterative, bool rootDNSSupportsRecursiveLookup) {
     if (isIterative) {
       return _buildIterativeWays(waypoints, DNSServerType.LOCAL);
     } else {
-      List<Tuple3<DNSServerType, DNSServerType, bool>> result = List();
+      return _buildRecursiveWays(waypoints, rootDNSSupportsRecursiveLookup);
+    }
+  }
 
+  /// Build ways to go when in iterative mode.
+  List<Tuple3<DNSServerType, DNSServerType, bool>> _buildIterativeWays(List<DNSServerType> waypoints, DNSServerType center) {
+    List<Tuple3<DNSServerType, DNSServerType, bool>> result = List();
+
+    for (var type in waypoints) {
+      result.add(Tuple3(center, type, true)); // Way forward
+      result.add(Tuple3(type, center, false)); // Way backward
+    }
+
+    return result;
+  }
+
+  /// Build ways to go when in recursive mode.
+  List<Tuple3<DNSServerType, DNSServerType, bool>> _buildRecursiveWays(List<DNSServerType> waypoints, bool rootDNSSupportsRecursiveLookup) {
+    List<Tuple3<DNSServerType, DNSServerType, bool>> result = List();
+
+    if (waypoints.isNotEmpty) {
       if (rootDNSSupportsRecursiveLookup) {
         // Way forward
         DNSServerType last = DNSServerType.LOCAL;
@@ -240,31 +267,21 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
         }
       } else {
         result.add(Tuple3(DNSServerType.LOCAL, DNSServerType.ROOT, true));
-        result.addAll(_buildIterativeWays(waypoints, DNSServerType.ROOT));
+        result.addAll(_buildIterativeWays(waypoints.where((type) => type != DNSServerType.ROOT).toList(), DNSServerType.ROOT));
         result.add(Tuple3(DNSServerType.ROOT, DNSServerType.LOCAL, false));
       }
-
-      return result;
-    }
-  }
-
-  List<Tuple3<DNSServerType, DNSServerType, bool>> _buildIterativeWays(List<DNSServerType> waypoints, DNSServerType center) {
-    List<Tuple3<DNSServerType, DNSServerType, bool>> result = List();
-
-    for (var type in waypoints) {
-      result.add(Tuple3(center, type, true)); // Way forward
-      result.add(Tuple3(type, center, false)); // Way backward
     }
 
     return result;
   }
 
   void _nextWaypoint(int wayIndex) {
+    _currentProgress = MutableProgress();
+    _startTimestamp = window.performance.now();
+
     if (wayIndex < _ways.length) {
       Tuple3<DNSServerType, DNSServerType, bool> way = _ways[wayIndex];
 
-      _currentProgress = MutableProgress();
-      _startTimestamp = window.performance.now();
       _routeDrawables.add(WaypointRouteDrawable(_currentProgress, way.item3 ? Colors.SLATE_GREY : Colors.CORAL, way.item1, way.item2));
 
       _currentProgressListener = _currentProgress.progressChanges.listen((progress) {
@@ -275,7 +292,18 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
         }
       });
     } else {
-      _currentProgress = null;
+      // Now animate way to destination.
+      _currentProgress = MutableProgress();
+      _startTimestamp = window.performance.now();
+
+      _currentProgressListener = _currentProgress.progressChanges.listen((progress) {
+        if (progress >= 1.0) {
+          _currentProgressListener.cancel();
+          _currentProgress = null;
+        }
+      });
+
+      _routeDrawables.add(WaypointRouteDrawable(_currentProgress, Colors.TEAL, DNSServerType.LOCAL, DNSServerType.DESTINATION));
     }
   }
 }

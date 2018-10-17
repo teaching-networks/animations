@@ -1,4 +1,0 @@
-enum DNSQueryMode {
-  ITERATIVE,
-  RECURSIVE
-}

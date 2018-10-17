@@ -26,18 +26,15 @@
 				</material-dropdown-select>
 			</li>
 
-			<li class="exception">
-				<hr>
+			<li class="labeled">
+				<label>ROOT DNS Server</label>
+				<material-checkbox [(checked)]="rootDNSServerAllowsRecursiveLookup" label="Allow recursive lookups"></material-checkbox>
 			</li>
 
 			<li style="text-align: center;">
 				<material-button raised (click)="startAnimation()">
 					<material-icon icon="play_arrow"></material-icon>
 					Start
-				</material-button>
-				<material-button raised>
-					<material-icon icon="delete"></material-icon>
-					Reset
 				</material-button>
 			</li>
 		</ul>
