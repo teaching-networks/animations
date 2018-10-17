@@ -56,4 +56,6 @@ class Color {
     return Color.rgb(red, green, blue);
   }
 
+  String toCSSColorString() => "rgba(${red},${green},${blue},${alpha})";
+
 }

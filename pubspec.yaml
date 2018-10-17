@@ -12,6 +12,7 @@ dependencies:
   angular_router: ^2.0.0-alpha
   angular_forms: ^2.0.0
   tuple: ^1.0.2
+  vector_math: ^2.0.8
 
 dev_dependencies:
   angular_test: ^2.0.0

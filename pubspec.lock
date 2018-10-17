@@ -596,6 +596,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.0+5"
+  vector_math:
+    dependency: "direct main"
+    description:
+      name: vector_math
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.8"
   vm_service_client:
     dependency: transitive
     description:
