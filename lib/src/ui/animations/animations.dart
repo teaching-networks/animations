@@ -65,7 +65,7 @@ class Animations {
         7,
         dns.DNSAnimationNgFactory,
         "dns-animation.name",
-        "img/animation/preview/image-preview.svg", // TODO: Change to real preview image
+        "img/animation/preview/dns-animation-preview.png",
         "dns"
     )
   ];

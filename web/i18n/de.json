@@ -115,11 +115,16 @@
 	"http-delay-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Pratima Akkunoor/Martin Reisslein, Arizona State University, USA, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
 	"dns-animation.name": "DNS Suchlauf",
 	"dns-animation.description": "Momentan ist noch keine Beschreibung vorhanden.",
-	"dns-animation.credits": "Momentan sind noch keine Credits vorhanden.",
+	"dns-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Beshan Kulapala/Martin Reisslein, Arizona State University, USA, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben. Die Deutschland Karte ist © 2017 - Simplemaps.com",
 	"dns-animation.dns-query-type.recursive": "Rekursiv",
 	"dns-animation.dns-query-type.iterative": "Iterativ",
 	"dns-animation.scenario.root-has-destination-cached": "ROOT Server hat die IP-Adresse des Ziels zwischengespeichert",
 	"dns-animation.scenario.root-has-intermediate-cached": "ROOT Server hat den Intermediate DNS Server zwischengespeichert",
 	"dns-animation.scenario.root-has-authoritative-cached": "ROOT Server hat den Authoritative DNS Server zwischengespeichert",
-	"dns-animation.scenario.local-has-destination-cached": "Lokaler DNS Server hat die IP-Adresse des Ziels zwischengespeichert"
+	"dns-animation.scenario.local-has-destination-cached": "Lokaler DNS Server hat die IP-Adresse des Ziels zwischengespeichert",
+	"dns-animation.controls.scenario.label": "Szenario",
+	"dns-animation.controls.dns-query-type.label": "DNS Anfrage Typ",
+	"dns-animation.controls.root-dns-server.label": "ROOT DNS Server",
+	"dns-animation.controls.root-dns-server.allows-recursive-lookups.label": "Erlaubt rekursive Anfragen",
+	"dns-animation.controls.start": "Start"
 }

@@ -5,7 +5,7 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled">
-				<label>Scenario</label>
+				<label>{{ "dns-animation.controls.scenario.label" | i18n }}</label>
 				<material-dropdown-select
 						[buttonText]="scenarioSelectionLabel"
 						[selection]="scenarioSelectModel"
@@ -16,7 +16,7 @@
 			</li>
 
 			<li class="labeled">
-				<label>DNS Query Type</label>
+				<label>{{ "dns-animation.controls.dns-query-type.label" | i18n }}</label>
 				<material-dropdown-select
 						[buttonText]="dnsQueryTypeSelectionLabel"
 						[selection]="dnsQueryTypeSelectModel"
@@ -27,14 +27,14 @@
 			</li>
 
 			<li class="labeled">
-				<label>ROOT DNS Server</label>
-				<material-checkbox [(checked)]="rootDNSServerAllowsRecursiveLookup" label="Allow recursive lookups"></material-checkbox>
+				<label>{{ "dns-animation.controls.root-dns-server.label" | i18n }}</label>
+				<material-checkbox [(checked)]="rootDNSServerAllowsRecursiveLookup" [label]="allowRecursiveLookupLabel.toString()"></material-checkbox>
 			</li>
 
 			<li style="text-align: center;">
 				<material-button raised (click)="startAnimation()">
 					<material-icon icon="play_arrow"></material-icon>
-					Start
+					{{ "dns-animation.controls.start" | i18n }}
 				</material-button>
 			</li>
 		</ul>

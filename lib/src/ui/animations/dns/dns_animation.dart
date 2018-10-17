@@ -82,6 +82,7 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   SelectionModel<DNSScenario> scenarioSelectModel;
   static ItemRenderer<DNSScenario> scenarioItemRenderer = (scenario) => scenario.description.toString();
 
+  Message allowRecursiveLookupLabel;
   bool rootDNSServerAllowsRecursiveLookup = false;
 
   DNSAnimation(this._i18n) {
@@ -100,6 +101,11 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   ngOnInit() {
     _initDNSQueryTypes();
     _initScenarios();
+    _initTranslations();
+  }
+
+  void _initTranslations() {
+    allowRecursiveLookupLabel = _i18n.get("dns-animation.controls.root-dns-server.allows-recursive-lookups.label");
   }
 
   void _initDNSQueryTypes() {
@@ -214,7 +220,8 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
     List<DNSServerType> waypoints = scenarioSelectModel.selectedValues.first.route;
     _routeDrawables.clear();
     _ways.clear();
-    if (_currentProgressListener != null) { // If currently running animation
+    if (_currentProgressListener != null) {
+      // If currently running animation
       _currentProgressListener.cancel();
     }
 
