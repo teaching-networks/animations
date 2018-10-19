@@ -1,15 +1,20 @@
 import 'dart:html';
 import 'dart:math';
-import 'package:vector_math/vector_math.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:vector_math/vector_math.dart' as vec;
 
 class RouteDrawable extends CanvasDrawable {
   final Progress progress;
   Color color;
+  bool curved;
 
-  RouteDrawable(this.progress, [this.color]);
+  RouteDrawable(this.progress, {
+    this.color = Colors.SLATE_GREY,
+    this.curved = true
+  });
 
   void renderLine(CanvasRenderingContext2D context, Point<double> start, Point<double> end) {
     context.save();
@@ -32,24 +37,33 @@ class RouteDrawable extends CanvasDrawable {
     var endX = end.x;
     var endY = end.y;
 
-    var lineVector = Vector2(endX - startX, endY - startY);
-    var perpendicular = lineVector.scaleOrthogonalInto(0.05, Vector2.all(0.0));
+    if (curved) {
+      var lineVector = vec.Vector2(endX - startX, endY - startY);
+      var perpendicular = lineVector.scaleOrthogonalInto(0.05, vec.Vector2.all(0.0));
 
-    var midX = (startX + endX) / 2;
-    var midY = (startY + endY) / 2;
+      var midX = (startX + endX) / 2;
+      var midY = (startY + endY) / 2;
 
-    perpendicular.add(Vector2(midX, midY));
+      perpendicular.add(vec.Vector2(midX, midY));
 
-    var controlPointX = perpendicular.x;
-    var controlPointY = perpendicular.y;
+      var controlPointX = perpendicular.x;
+      var controlPointY = perpendicular.y;
 
 
-    context.beginPath();
+      context.beginPath();
 
-    context.moveTo(startX, startY);
-    context.bezierCurveTo(controlPointX, controlPointY, controlPointX, controlPointY, endX, endY);
+      context.moveTo(startX, startY);
+      context.bezierCurveTo(controlPointX, controlPointY, controlPointX, controlPointY, endX, endY);
 
-    context.stroke();
+      context.stroke();
+    } else {
+      context.beginPath();
+
+      context.moveTo(startX, startY);
+      context.lineTo(endX, endY);
+
+      context.stroke();
+    }
 
     context.restore();
   }

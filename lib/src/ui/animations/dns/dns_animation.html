@@ -6,13 +6,9 @@
 		<ul class="highlighted-fields">
 			<li class="labeled">
 				<label>{{ "dns-animation.controls.scenario.label" | i18n }}</label>
-				<material-dropdown-select
-						[buttonText]="scenarioSelectionLabel"
-						[selection]="scenarioSelectModel"
-						[options]="scenarioOptions"
-						[itemRenderer]="scenarioItemRenderer"
-						style="width: 100%">
-				</material-dropdown-select>
+				<material-radio-group [(selectionModel)]="scenarioSelectionModel" style="display: flex; flex-direction: column; max-width: 300px">
+					<material-radio *ngFor="let scenario of scenarios" [value]="scenario">{{ scenario.description.toString() }}</material-radio>
+				</material-radio-group>
 			</li>
 
 			<li class="labeled">

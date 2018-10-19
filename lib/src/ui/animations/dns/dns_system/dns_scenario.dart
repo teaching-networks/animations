@@ -3,9 +3,10 @@ import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server_type.d
 
 class DNSScenario {
 
+  final int id;
   final Message description;
   final List<DNSServerType> route;
 
-  const DNSScenario(this.description, this.route);
+  const DNSScenario(this.id, this.description, this.route);
 
 }

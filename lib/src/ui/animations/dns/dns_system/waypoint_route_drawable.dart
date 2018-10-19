@@ -4,10 +4,8 @@ import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 class WaypointRouteDrawable extends RouteDrawable {
-
   final DNSServerType start;
   final DNSServerType end;
 
-  WaypointRouteDrawable(Progress progress, Color color, this.start, this.end) : super(progress, color);
-
+  WaypointRouteDrawable(Progress progress, this.start, this.end, {Color color, bool curved}) : super(progress, color: color, curved: curved);
 }
