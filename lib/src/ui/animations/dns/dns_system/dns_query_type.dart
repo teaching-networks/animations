@@ -5,7 +5,6 @@ abstract class DNSQueryType {
 
   DNSQueryType(this._name);
 
-  @override
   String get name => _name.toString();
 
   int get id;

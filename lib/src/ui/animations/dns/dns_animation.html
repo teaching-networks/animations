@@ -1,30 +1,51 @@
 <div class="split-layout">
 	<div class="left">
-		<canvas-comp [height]="canvasHeight" (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
+		<canvas-comp [height]="canvasHeight" (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"></canvas-comp>
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled">
 				<label>{{ "dns-animation.controls.scenario.label" | i18n }}</label>
-				<material-radio-group [(selectionModel)]="scenarioSelectionModel" style="display: flex; flex-direction: column; max-width: 300px">
-					<material-radio *ngFor="let scenario of scenarios" [value]="scenario">{{ scenario.description.toString() }}</material-radio>
+				<material-radio-group [selectionModel]="scenarioSelectionModel"
+									  style="display: flex; flex-direction: column; max-width: 300px">
+					<material-radio *ngFor="let scenario of scenarios" [value]="scenario">{{
+						scenario.description.toString() }}
+					</material-radio>
 				</material-radio-group>
 			</li>
 
 			<li class="labeled">
 				<label>{{ "dns-animation.controls.dns-query-type.label" | i18n }}</label>
-				<material-dropdown-select
-						[buttonText]="dnsQueryTypeSelectionLabel"
-						[selection]="dnsQueryTypeSelectModel"
-						[options]="dnsQueryTypeOptions"
-						[itemRenderer]="dnsQueryTypeItemRenderer"
-						style="width: 100%">
-				</material-dropdown-select>
-			</li>
 
-			<li class="labeled">
-				<label>{{ "dns-animation.controls.root-dns-server.label" | i18n }}</label>
-				<material-checkbox [(checked)]="rootDNSServerAllowsRecursiveLookup" [label]="allowRecursiveLookupLabel.toString()"></material-checkbox>
+				<div style="display: flex; flex-direction: row; justify-content: center">
+					<table>
+						<tbody>
+						<tr>
+							<td align="right">{{ "dns-animation.controls.query-type.local-dns-server" | i18n }}</td>
+							<td>
+								<material-dropdown-select
+										[buttonText]="localDNSQueryTypeSelectionLabel"
+										[selection]="localDNSQueryTypeSelectModel"
+										[options]="dnsQueryTypeOptions"
+										[itemRenderer]="dnsQueryTypeItemRenderer">
+								</material-dropdown-select>
+							</td>
+						</tr>
+						<tr>
+							<td align="right">{{ "dns-animation.controls.query-type.root-dns-server" | i18n }}</td>
+							<td>
+								<material-dropdown-select
+										[buttonText]="rootDNSQueryTypeSelectionLabel"
+										[selection]="rootDNSQueryTypeSelectModel"
+										[options]="dnsQueryTypeOptions"
+										[itemRenderer]="dnsQueryTypeItemRenderer">
+								</material-dropdown-select>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
 			</li>
 
 			<li style="text-align: center;">

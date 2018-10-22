@@ -114,7 +114,7 @@
 	"http-delay-animation.rtt-help": "Round trip time der Animation nachdem Sie auf \"Start\" geklickt haben",
 	"http-delay-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Pratima Akkunoor/Martin Reisslein, Arizona State University, USA, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
 	"dns-animation.name": "DNS Suchlauf",
-	"dns-animation.description": "Momentan ist noch keine Beschreibung vorhanden.",
+	"dns-animation.description": "In dieser Animation können Sie den Verlauf einer einfachen DNS Anfrage nach dem Domänennamen \"hm.edu\" verfolgen. Es gibt zwei Arten von DNS Anfragen: iterative und rekursive. Bei Iterativen übernimmt der Anfragende DNS Server den aktiven Teil der Namensauflösung. Jeder weitere angefragte DNS Server antwortet direkt mit dem nächsten zu fragenden DNS Server. Bei einer rekursiven Anfrage übernimmt der nächste DNS Server und versucht den Domänennamen aktiv aufzulösen (Sofern er rekursive Anfragen unterstützt) und am Ende die angefragte IP-Adresse zu liefern. Am Ende der Namensauflösung ist eine Anfrage zur IP-Adresse von \"hm.edu\" zu sehen.",
 	"dns-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Beshan Kulapala/Martin Reisslein, Arizona State University, USA, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben. Die Deutschland Karte ist © 2017 - Simplemaps.com",
 	"dns-animation.dns-query-type.recursive": "Rekursiv",
 	"dns-animation.dns-query-type.iterative": "Iterativ",
@@ -126,5 +126,10 @@
 	"dns-animation.controls.dns-query-type.label": "DNS Anfrage Typ",
 	"dns-animation.controls.root-dns-server.label": "ROOT DNS Server",
 	"dns-animation.controls.root-dns-server.allows-recursive-lookups.label": "Erlaubt rekursive Anfragen",
-	"dns-animation.controls.start": "Start"
+	"dns-animation.controls.start": "Start",
+	"dns-animation.controls.query-type.root-dns-server": "ROOT DNS",
+	"dns-animation.controls.query-type.local-dns-server": "Lokaler DNS",
+	"dns-animation.legend.query": "DNS Anfrage",
+	"dns-animation.legend.response": "DNS Antwort",
+	"dns-animation.legend.request": "Anfrage zur aufgelösten IP Adresse"
 }
