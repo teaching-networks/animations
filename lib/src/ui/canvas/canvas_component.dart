@@ -42,6 +42,9 @@ class CanvasComponent implements OnInit {
   int _width = 0;
   int _height = 100;
 
+  /// Custom aspect ratio to calculate the canvas height from if set.
+  double _aspectRatio = null;
+
   /*
   Whether the x and y axis are resized automatically when the window size changes.
   This is deactivated by setting a value manually.
@@ -74,6 +77,10 @@ class CanvasComponent implements OnInit {
   }
 
   int get height {
+    if (_aspectRatio != null) {
+      _height = _width ~/ _aspectRatio;
+    }
+
     return _height;
   }
 
@@ -99,6 +106,12 @@ class CanvasComponent implements OnInit {
    */
   int get widthHidpi {
     return (_width * window.devicePixelRatio).round();
+  }
+
+  @Input()
+  void set aspectRatio(double aspectRatio) {
+    _aspectRatio = aspectRatio;
+    _resizeY = false;
   }
 
   /**

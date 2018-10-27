@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+- DNS animation added
+- Minor visual changes of the application
+
 ## 1.0.1
 - Material Icons font now locally loaded
 

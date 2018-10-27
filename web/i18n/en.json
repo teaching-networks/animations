@@ -114,6 +114,21 @@
 	"http-delay-animation.rtt-help": "Round trip time of the animation after you clicked \"Start\"",
 	"http-delay-animation.credits": "This animation was inspired by a Java Applet originally developed by Pratima Akkunoor/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Java Applet author(s) for making their Java Applet publicly available.",
 	"dns-animation.name": "DNS lookup",
-	"dns-animation.description": "There is no description yet.",
-	"dns-animation.credits": "There are not credits yet."
+	"dns-animation.description": "This animation shows a sequence of a simple DNS query for the IP address of the domain name \"hm.edu\". There are two kinds of DNS querys: iterative and recursive. When dealing with iterative DNS querys the originating DNS server is taking the active part of the name resolution. Each queried DNS server just answers with the next DNS server to ask. With recursive querys each next DNS server is instead trying to fully resolve the queried IP address (Only if the DNS servers support recursive queries). At the end of the animation a request to the resolved IP address is shown.",
+	"dns-animation.credits": "This animation was inspired by a Java Applet originally developed by Beshan Kulapala/Martin Reisslein, Arizona State University, USA. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Applet author(s) for making their Java Applet publicly available. The germany map is © 2017 - Simplemaps.com",
+	"dns-animation.dns-query-type.recursive": "Recursive",
+	"dns-animation.dns-query-type.iterative": "Iterative",
+	"dns-animation.scenario.root-has-destination-cached": "ROOT server has the destination IP address cached.",
+	"dns-animation.scenario.root-has-intermediate-cached": "ROOT server has the intermediate DNS server cached.",
+	"dns-animation.scenario.root-has-authoritative-cached": "ROOT server has the authoritative DNS server cached.",
+	"dns-animation.scenario.local-has-destination-cached": "Local DNS server hat the destination IP address cached.",
+	"dns-animation.controls.scenario.label": "Scenario",
+	"dns-animation.controls.dns-query-type.label": "DNS Query Type",
+	"dns-animation.controls.root-dns-server.label": "ROOT DNS Server",
+	"dns-animation.controls.start": "Start",
+	"dns-animation.controls.query-type.root-dns-server": "ROOT DNS",
+	"dns-animation.controls.query-type.local-dns-server": "Local DNS",
+	"dns-animation.legend.query": "DNS Query",
+	"dns-animation.legend.response": "DNS Response",
+	"dns-animation.legend.request": "Request to the resolved IP address"
 }
