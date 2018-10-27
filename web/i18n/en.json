@@ -130,5 +130,8 @@
 	"dns-animation.controls.query-type.local-dns-server": "Local DNS",
 	"dns-animation.legend.query": "DNS Query",
 	"dns-animation.legend.response": "DNS Response",
-	"dns-animation.legend.request": "Request to the resolved IP address"
+	"dns-animation.legend.request": "Request to the resolved IP address",
+	"tcp-flow-control-animation.name": "TCP Flow Control",
+	"tcp-flow-control-animation.description": "No description yet.",
+	"tcp-flow-control-animation.credits": "No credits yet."
 }

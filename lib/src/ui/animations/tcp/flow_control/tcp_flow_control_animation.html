@@ -1,0 +1,16 @@
+<canvas-comp [height]="canvasHeight" (onResized)="onCanvasResize($event)"
+			 (onReady)="onCanvasReady($event)"></canvas-comp>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		{{ "tcp-flow-control-animation.description" | i18n }}
+	</p>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		{{ "tcp-flow-control-animation.credits" | i18n }}
+	</p>
+</div>
