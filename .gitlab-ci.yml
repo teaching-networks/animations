@@ -1,23 +1,18 @@
 before_script:
-  - sudo apt-get update
-  - sudo apt-get install dart
+- sudo apt-get update
+- sudo apt-get install dart
 
 stages:
-  - build
+- build
 
 webapp_build:
   stage: build
   tags:
-    - www
+  - www
   script:
-    - pub upgrade
-    - pub run build_runner build --release --output build
-    # Deploy
-    - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
-    - sudo mkdir -p /var/www/html/${CI_COMMIT_REF_SLUG}
-    # Clean output folder
-    - sudo rm -rf /var/www/html/${CI_COMMIT_REF_SLUG}/*
-    # Copy build app to output folder
-    - sudo cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
-    # Replace base href because the base path is no more /
-    - sudo sed -i 's:<base href="/">:<base href="/'${CI_COMMIT_REF_SLUG}'/">:g' /var/www/html/${CI_COMMIT_REF_SLUG}/index.html
+  - pub upgrade
+  - pub run build_runner build --release --output build
+  # Deploy
+  - echo "DEPLOYMENT FOR BRANCH ${CI_COMMIT_REF_SLUG}"
+  # Copy build app to output folder
+  - sudo cp -r build/web/* /var/www/html/
