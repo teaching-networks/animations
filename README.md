@@ -7,6 +7,7 @@
 Follow the Angular Dart instructions [here](https://webdev.dartlang.org/angular/) to install the Dart SDK, etc. Then just clone the repository and call `pub get` (or `pub upgrade`) followed by `pub run build_runner serve` to start the application.
 
 If you run your own local server (hm animations server) you will need to change the base url of the server in the `network_util.dart` file (for example: `http://localhost:4200`).
+Remember changing that afterwards again when committing.
 
 ### Debugging (JetBrains IDE)
 - Launch the debugging server with `pub run build_runner serve --live-reload` (Actually you can omit the --live-reload flag, but it is eases development a lot as you do not need to manually reload every time you change code)

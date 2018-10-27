@@ -83,7 +83,7 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   static ItemRenderer<DNSQueryType> dnsQueryTypeItemRenderer = (dnsQueryType) => dnsQueryType.name.toString();
 
   List<DNSScenario> scenarios;
-  SelectionModel<DNSScenario> scenarioSelectionModel;
+  DNSScenario selectedScenario;
 
   List<Tuple2<Message, Color>> _legendItems;
 
@@ -135,7 +135,7 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
 
     scenarios.add(DNSScenario(3, _i18n.get("dns-animation.scenario.local-has-destination-cached"), []));
 
-    scenarioSelectionModel = SelectionModel<DNSScenario>.single(selected: scenarios.first);
+    selectedScenario = scenarios[1]; // Pre select second scenario.
   }
 
   @override
@@ -270,7 +270,7 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
 
   /// Start the animation.
   void startAnimation() {
-    List<DNSServerType> waypoints = new List.from(scenarioSelectionModel.selectedValues.first.route);
+    List<DNSServerType> waypoints = new List.from(selectedScenario.route);
     _routeDrawables.clear();
     _ways.clear();
     if (_currentProgressListener != null) {

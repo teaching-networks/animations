@@ -7,7 +7,7 @@
 		<ul class="highlighted-fields">
 			<li class="labeled">
 				<label>{{ "dns-animation.controls.scenario.label" | i18n }}</label>
-				<material-radio-group [selectionModel]="scenarioSelectionModel"
+				<material-radio-group [(ngModel)]="selectedScenario"
 									  style="display: flex; flex-direction: column; max-width: 300px">
 					<material-radio *ngFor="let scenario of scenarios" [value]="scenario">{{
 						scenario.description.toString() }}
