@@ -12,6 +12,12 @@ class PacketLinePacket extends CanvasDrawable {
   /// Color of the packet.
   final Color color;
 
+  /// Direction of the packet. Either forward or backward.
+  final bool forward;
+
+  /// Data to transmit.
+  final Object data;
+
   /// Timestamp of the birth of the packet.
   num _birthTimestamp;
 
@@ -19,7 +25,7 @@ class PacketLinePacket extends CanvasDrawable {
   bool _alive = true;
 
   /// Create new packet line packet.
-  PacketLinePacket(this.id, this.color) {
+  PacketLinePacket(this.id, this.color, this.forward, this.data) {
     _birthTimestamp = window.performance.now();
   }
 

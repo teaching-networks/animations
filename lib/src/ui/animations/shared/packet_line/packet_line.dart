@@ -7,7 +7,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
-typedef void PacketArrivalListener(int packetId, Color packetColor);
+typedef void PacketArrivalListener(int packetId, Color packetColor, bool forward, Object data);
 
 /// A packet line is a representation for a connection between two points. Packets
 /// are sent between the two points, always from A to B.
@@ -67,6 +67,10 @@ class PacketLine extends CanvasDrawable {
       if (packet.alive) {
         double progress = (timestamp - packet.birth) / duration.inMilliseconds;
 
+        if (!packet.forward) {
+          progress = 1.0 - progress;
+        }
+
         // Transform progress interval [0.0; 1.0] to real interval [0.0 - packetWidth; width]
         double offset = -packetWidth + (rect.width + packetWidth) * progress;
 
@@ -96,17 +100,17 @@ class PacketLine extends CanvasDrawable {
   /// Emit a packet on the line.
   /// Returns id of the new packet.
   /// The Id can be used to later determine which packet arrived using the arrival callback.
-  int emit({Color color = Colors.BLACK}) {
+  int emit({Color color = Colors.BLACK, bool forward = true, Object data = null}) {
     var id = _packetIdGenerator++;
 
-    PacketLinePacket packet = new PacketLinePacket(id, color);
+    PacketLinePacket packet = new PacketLinePacket(id, color, forward, data);
     _packets.add(packet);
 
     _arrivalSubscriptions[packet.id] = new Future.delayed(duration).asStream().listen((_) {
       packet.kill();
 
       _arrivalSubscriptions.remove(packet.id);
-      onArrival?.call(packet.id, packet.color);
+      onArrival?.call(packet.id, packet.color, packet.forward, packet.data);
     });
 
     return id;

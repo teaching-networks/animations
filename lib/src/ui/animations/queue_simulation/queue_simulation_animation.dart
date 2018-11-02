@@ -124,7 +124,7 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
       _postRouterLine = new PacketLine(duration: const Duration(seconds: 5));
       _queueRouter = new QueueRouter(queueLength);
 
-      _preRouterLine = new PacketLine(duration: const Duration(seconds: 5), onArrival: (packetId, packetColor) {
+      _preRouterLine = new PacketLine(duration: const Duration(seconds: 5), onArrival: (packetId, packetColor, forward, data) {
         if (!_queueRouter.addToQueue(color: packetColor)) {
           _droppedPackets++;
         }
