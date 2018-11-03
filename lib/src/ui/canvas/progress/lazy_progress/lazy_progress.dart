@@ -52,7 +52,7 @@ class LazyProgress implements Progress {
       throw new Exception("Unexpected progress $p. Progress must be in range [0.0; 1.0].");
     }
 
-    if (_isChanging()) {
+    if (isChanging()) {
       _progress = _tmpProgress;
     }
 
@@ -64,7 +64,7 @@ class LazyProgress implements Progress {
 
   @override
   double get progress {
-    if (_isChanging()) {
+    if (isChanging()) {
       _tmpProgress = _oldProgress + (_progress - _oldProgress) * _animationProgress;
     }
 
@@ -77,7 +77,7 @@ class LazyProgress implements Progress {
   }
 
   /// Whether the progress is currently changing (animating).
-  bool _isChanging() => _tmpProgress != _progress;
+  bool isChanging() => _tmpProgress != _progress;
 
   /// Get the progress [0.0; 1.0] of the current animation.
   double get _animationProgress => min(_modifier((window.performance.now() - _startTimestamp) / duration.inMilliseconds), 1.0);

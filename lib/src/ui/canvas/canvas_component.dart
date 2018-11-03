@@ -88,7 +88,7 @@ class CanvasComponent implements OnInit {
    * Get height with HiDPI support.
    */
   int get heightHidpi {
-    return (_height * window.devicePixelRatio).round();
+    return (height * window.devicePixelRatio).round();
   }
 
   @Input()
@@ -105,7 +105,7 @@ class CanvasComponent implements OnInit {
    * Get width with HiPDI support.
    */
   int get widthHidpi {
-    return (_width * window.devicePixelRatio).round();
+    return (width * window.devicePixelRatio).round();
   }
 
   @Input()

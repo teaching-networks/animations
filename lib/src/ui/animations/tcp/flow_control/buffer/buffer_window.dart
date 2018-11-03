@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:html';
 
 import 'dart:math';
@@ -26,6 +27,12 @@ abstract class BufferWindow extends CanvasDrawable {
   /// Progress bar visualizing the buffer fill state.
   ProgressRect _bufferBar;
 
+  /// Stream controller of when the buffer is full.
+  StreamController<void> _bufferFull = StreamController.broadcast(sync: true);
+
+  /// Stream controller of when the buffer is empty.
+  StreamController<void> _bufferEmpty = StreamController.broadcast(sync: true);
+
   /// Create new buffer window.
   BufferWindow({this.dataSize = 4096, this.bufferSize = 2048, double startDataProgress = 1.0, double startBufferProgress = 0.0}) {
     dataProgress = createDataProgress();
@@ -53,6 +60,14 @@ abstract class BufferWindow extends CanvasDrawable {
   /// Clear the buffer.
   void clearBuffer();
 
+  /// Stream of when the buffer is full.
+  Stream<void> get bufferFull => _bufferFull.stream;
+
+  /// Stream of when the buffer is empty.
+  Stream<void> get bufferEmpty => _bufferEmpty.stream;
+
+  bool _bufferProgressWasChanging = false;
+
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     context.save();
@@ -73,6 +88,37 @@ abstract class BufferWindow extends CanvasDrawable {
     context.strokeRect(i, rect.height - bufferBarHeight, rect.width - ii, bufferBarHeight - i);
     _bufferBar.render(context, Rectangle(0.0, rect.height - bufferBarHeight, rect.width, bufferBarHeight));
 
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    setFillColor(context, Color.opacity(Colors.BLACK, 0.6));
+
+    // Draw data size label
+    double lazyDataKBytes = dataProgress.progress * dataSize / 1024;
+    context.fillText("DATA: ${lazyDataKBytes.toStringAsFixed(2)} KB", rect.width / 2, (rect.height - bufferBarHeight) / 2);
+
+    // Draw buffer label
+    double lazyBufferKBytes = bufferProgress.progress * bufferSize / 1024;
+    context.fillText("BUFFER: ${lazyBufferKBytes.toStringAsFixed(2)} KB", rect.width / 2, rect.height - bufferBarHeight / 2);
+
     context.restore();
+
+    _bufferProgressNotification();
+  }
+
+  /// Notify whether buffer progress is full or empty or do not notify at all.
+  void _bufferProgressNotification() {
+    if (!bufferProgress.isChanging()) {
+      if (_bufferProgressWasChanging) {
+        _bufferProgressWasChanging = false;
+
+        if (bufferProgress.actual == 0.0) {
+          _bufferEmpty.add(null);
+        } else if (bufferProgress.actual == 1.0) {
+          _bufferFull.add(null);
+        }
+      }
+    } else {
+      _bufferProgressWasChanging = true;
+    }
   }
 }

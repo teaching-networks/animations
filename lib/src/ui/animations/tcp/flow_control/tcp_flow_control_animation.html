@@ -1,8 +1,7 @@
-<canvas-comp [height]="canvasHeight" (onResized)="onCanvasResize($event)"
+<canvas-comp [aspectRatio]="3" (onResized)="onCanvasResize($event)"
 			 (onReady)="onCanvasReady($event)"></canvas-comp>
 
-<button (click)="test()">Fill buffer</button>
-<button (click)="test2()">Empty buffer</button>
+<material-button raised (click)="start()">Start</material-button>
 
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>
