@@ -2,10 +2,11 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 /// Packet on a packet line.
-class PacketLinePacket extends CanvasDrawable {
+class PacketLinePacket extends CanvasDrawable with CanvasPausableMixin {
   /// Id of the packet.
   final int id;
 
@@ -23,6 +24,8 @@ class PacketLinePacket extends CanvasDrawable {
 
   /// Whether the packet is still running.
   bool _alive = true;
+
+  double lastProgress = 0.0;
 
   /// Create new packet line packet.
   PacketLinePacket(this.id, this.color, this.forward, this.data) {
@@ -51,5 +54,15 @@ class PacketLinePacket extends CanvasDrawable {
     }
 
     context.restore();
+  }
+
+  @override
+  void switchPauseSubAnimations() {
+    // Do nothing
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    _birthTimestamp += timestampDifference;
   }
 }

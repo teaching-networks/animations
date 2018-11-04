@@ -11,6 +11,7 @@ import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/receiver
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/sender_buffer_window.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
@@ -21,7 +22,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     styleUrls: ["tcp_flow_control_animation.css"],
     directives: [coreDirectives, CanvasComponent, MaterialButtonComponent],
     pipes: [I18nPipe])
-class TCPFlowControlAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   final I18nService _i18n;
 
   /// Buffer window of the sender.
@@ -44,6 +45,9 @@ class TCPFlowControlAnimation extends CanvasAnimation implements OnInit, OnDestr
 
   /// Temporary stream subscription.
   StreamSubscription<void> _sub;
+
+  /// Whether to pause the animation.
+  bool pause = false;
 
   TCPFlowControlAnimation(this._i18n) {
     _reset();
@@ -206,6 +210,19 @@ class TCPFlowControlAnimation extends CanvasAnimation implements OnInit, OnDestr
         _emitSendDataPacket(Colors.SLATE_GREY, SendData(sizeInBuffer, 0));
       });
     });
+  }
+
+  @override
+  void switchPauseSubAnimations() {
+    _packetLine.switchPause();
+
+    _senderWindow.switchPause();
+    _receiverWindow.switchPause();
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    // Do nothing.
   }
 }
 

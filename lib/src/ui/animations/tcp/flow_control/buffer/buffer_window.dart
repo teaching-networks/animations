@@ -4,14 +4,16 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/horizontal_progress_bar.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/progress_rect.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/vertical_progress_bar.dart';
 import 'package:hm_animations/src/ui/canvas/progress/lazy_progress/lazy_progress.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
-abstract class BufferWindow extends CanvasDrawable {
+abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   final int dataSize;
   final int bufferSize;
 
@@ -26,6 +28,12 @@ abstract class BufferWindow extends CanvasDrawable {
 
   /// Progress bar visualizing the buffer fill state.
   ProgressRect _bufferBar;
+
+  /// When the tooltip should disappear.
+  num _tooltipDisappearTimestamp = -1;
+
+  /// Tooltip to show. Is null if no tooltip should be shown.
+  Bubble _tooltip;
 
   /// Stream controller of when the buffer is full.
   StreamController<void> _bufferFull = StreamController.broadcast(sync: true);
@@ -70,6 +78,8 @@ abstract class BufferWindow extends CanvasDrawable {
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
+    _processTimestamp(timestamp);
+
     context.save();
 
     context.translate(rect.left, rect.top);
@@ -100,6 +110,11 @@ abstract class BufferWindow extends CanvasDrawable {
     double lazyBufferKBytes = bufferProgress.progress * bufferSize / 1024;
     context.fillText("BUFFER: ${lazyBufferKBytes.toStringAsFixed(2)} KB", rect.width / 2, rect.height - bufferBarHeight / 2);
 
+    // Draw tooltip (if any).
+    if (_tooltip != null) {
+      _tooltip.render(context, Rectangle(rect.width / 2, rect.height - bufferBarHeight, 0.0, 0.0));
+    }
+
     context.restore();
 
     _bufferProgressNotification();
@@ -120,5 +135,30 @@ abstract class BufferWindow extends CanvasDrawable {
     } else {
       _bufferProgressWasChanging = true;
     }
+  }
+
+  /// Process timestamp of the animation.
+  void _processTimestamp(num timestamp) {
+    if (_tooltip != null && timestamp > _tooltipDisappearTimestamp) {
+      _tooltip = null; // Let tooltip disappear.
+    }
+  }
+
+  /// Show tooltip with the passed [text] for the passed [duration].
+  void showTooltip(String text, Duration duration) {
+    _tooltip = Bubble(text, 30, color: Colors.BLACK);
+
+    _tooltipDisappearTimestamp = window.performance.now() + duration.inMilliseconds;
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    // Do nothing.
+  }
+
+  @override
+  void switchPauseSubAnimations() {
+    dataProgress.switchPause();
+    bufferProgress.switchPause();
   }
 }

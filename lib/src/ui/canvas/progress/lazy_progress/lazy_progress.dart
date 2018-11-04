@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 
 /// Modifier modifies progress.
@@ -16,7 +17,7 @@ typedef double Modifier(double p);
 /// It now will take the lazy progress a second to change its progress to 1.0.
 ///
 /// This may be tremendously useful with animations.
-class LazyProgress implements Progress {
+class LazyProgress extends CanvasPausableMixin implements Progress {
   /// Progress in range [0.0; 1.0]
   double _progress;
 
@@ -64,7 +65,7 @@ class LazyProgress implements Progress {
 
   @override
   double get progress {
-    if (isChanging()) {
+    if (!isPaused && isChanging()) {
       _tmpProgress = _oldProgress + (_progress - _oldProgress) * _animationProgress;
     }
 
@@ -81,4 +82,16 @@ class LazyProgress implements Progress {
 
   /// Get the progress [0.0; 1.0] of the current animation.
   double get _animationProgress => min(_modifier((window.performance.now() - _startTimestamp) / duration.inMilliseconds), 1.0);
+
+  @override
+  void switchPauseSubAnimations() {
+    // Do nothing
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    if (_startTimestamp != null) {
+      _startTimestamp += timestampDifference;
+    }
+  }
 }
