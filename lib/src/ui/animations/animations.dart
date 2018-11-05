@@ -78,7 +78,7 @@ class Animations {
         ID_COUNTER++,
         tcpFlowControl.TCPFlowControlAnimationNgFactory,
         "tcp-flow-control-animation.name",
-        "", // TODO Add preview image
+        "img/animation/preview/tcp-flow-control-preview.png",
         "tcp-flow-control"
     )
   ];
