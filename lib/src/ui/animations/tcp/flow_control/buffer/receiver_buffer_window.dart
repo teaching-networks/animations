@@ -20,6 +20,11 @@ class ReceiverBufferWindow extends BufferWindow {
 
   Random _rng = new Random();
 
+  ReceiverBufferWindow({
+    int dataSize = 4096,
+    int bufferSize = 2048
+  }): super(dataSize: dataSize, bufferSize: bufferSize);
+
   @override
   void clearBuffer() {
     int currentBufferSize = (bufferSize * bufferProgress.actual).round();
@@ -34,8 +39,8 @@ class ReceiverBufferWindow extends BufferWindow {
   }
 
   @override
-  void fillBuffer() {
-    bufferProgress.progress = 1.0;
+  void fillBuffer([double p = 1.0]) {
+    bufferProgress.progress = p;
 
     if (_nextConsumeTimestamp == -1) {
       _nextConsumeTimestamp = window.performance.now() +

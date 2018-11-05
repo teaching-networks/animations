@@ -35,14 +35,11 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   /// Tooltip to show. Is null if no tooltip should be shown.
   Bubble _tooltip;
 
-  /// Stream controller of when the buffer is full.
-  StreamController<void> _bufferFull = StreamController.broadcast(sync: true);
-
-  /// Stream controller of when the buffer is empty.
-  StreamController<void> _bufferEmpty = StreamController.broadcast(sync: true);
+  /// Stream controller of when the buffers fill state changes.
+  StreamController<void> _bufferStateChanged = StreamController.broadcast(sync: true);
 
   /// Create new buffer window.
-  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048, double startDataProgress = 1.0, double startBufferProgress = 0.0}) {
+  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048}) {
     dataProgress = createDataProgress();
     bufferProgress = createBufferProgress();
 
@@ -63,16 +60,13 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   HorizontalProgressBar createBufferBar();
 
   /// Fill the buffer again.
-  void fillBuffer();
+  void fillBuffer([double p = 1.0]);
 
   /// Clear the buffer.
   void clearBuffer();
 
   /// Stream of when the buffer is full.
-  Stream<void> get bufferFull => _bufferFull.stream;
-
-  /// Stream of when the buffer is empty.
-  Stream<void> get bufferEmpty => _bufferEmpty.stream;
+  Stream<void> get bufferStateChanged => _bufferStateChanged.stream;
 
   bool _bufferProgressWasChanging = false;
 
@@ -126,11 +120,7 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
       if (_bufferProgressWasChanging) {
         _bufferProgressWasChanging = false;
 
-        if (bufferProgress.actual == 0.0) {
-          _bufferEmpty.add(null);
-        } else if (bufferProgress.actual == 1.0) {
-          _bufferFull.add(null);
-        }
+        _bufferStateChanged.add(null);
       }
     } else {
       _bufferProgressWasChanging = true;

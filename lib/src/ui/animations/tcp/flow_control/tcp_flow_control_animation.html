@@ -1,8 +1,14 @@
-<canvas-comp [aspectRatio]="3" (onResized)="onCanvasResize($event)"
-			 (onReady)="onCanvasReady($event)"></canvas-comp>
-
 <material-button raised (click)="start()">Start</material-button>
 <material-button raised (click)="switchPause()">Pause</material-button>
+
+File size:
+<material-auto-suggest-input [inputText]="fileSizeLabel" (inputTextChange)="onFileSizeChange($event)" [selectionOptions]="fileSizeSuggestions" [limit]="3"></material-auto-suggest-input>
+
+Buffer size:
+<material-auto-suggest-input [inputText]="bufferSizeLabel" (inputTextChange)="onBufferSizeChange($event)" [selectionOptions]="bufferSizeSuggestions" [limit]="3"></material-auto-suggest-input>
+
+<canvas-comp [aspectRatio]="3" (onResized)="onCanvasResize($event)"
+			 (onReady)="onCanvasReady($event)"></canvas-comp>
 
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>

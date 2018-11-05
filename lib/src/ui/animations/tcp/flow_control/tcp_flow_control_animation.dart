@@ -20,7 +20,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     selector: "tcp-flow-control-animation",
     templateUrl: "tcp_flow_control_animation.html",
     styleUrls: ["tcp_flow_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent],
+    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialAutoSuggestInputComponent],
     pipes: [I18nPipe])
 class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   final I18nService _i18n;
@@ -31,8 +31,17 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
   /// Buffer window of the receiver.
   BufferWindow _receiverWindow;
 
+  /// Size of the file to transmit.
   int fileSize = 4096;
+
+  /// Size of the buffer of sender and receiver (in bytes).
   int bufferSize = 2048;
+
+  /// Suggestions for the file size.
+  List<String> fileSizeSuggestions = ["4 KB", "8 KB", "16 KB"];
+
+  /// Suggestions for the buffer size.
+  List<String> bufferSizeSuggestions = ["2 KB", "4 KB"];
 
   /// Packet line representing a connection between sender and receiver.
   PacketLine _packetLine;
@@ -55,8 +64,8 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// Reset the animation.
   void _reset() {
-    _senderWindow = SenderBufferWindow(); // TODO Set the file and buffer size in the constructor.
-    _receiverWindow = ReceiverBufferWindow();
+    _senderWindow = SenderBufferWindow(dataSize: fileSize, bufferSize: bufferSize);
+    _receiverWindow = ReceiverBufferWindow(dataSize: fileSize, bufferSize: bufferSize);
     _packetLine =
         PacketLine(duration: Duration(seconds: 1, milliseconds: 500), onArrival: (id, color, forward, data) => onPacketLineArrival(id, color, forward, data));
   }
@@ -114,10 +123,10 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
     int acknowledgementNumber = sendData.sequenceNumber;
 
     if (remainingSizeInBuffer > 0 && sendData.size > 1) {
-      _receiverWindow.fillBuffer();
+      _receiverWindow.fillBuffer(sendData.size / _receiverWindow.bufferSize);
 
       // Wait until buffer is full.
-      _sub = _receiverWindow.bufferFull.listen((_) {
+      _sub = _receiverWindow.bufferStateChanged.listen((_) {
         _sub.cancel();
 
         remainingSizeInBuffer = ((1.0 - _receiverWindow.bufferProgress.actual) * _receiverWindow.bufferSize).toInt();
@@ -142,14 +151,14 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
   void _onSenderReceivedPacket(ResponseData responseData) {
     print("Received: ACK: ${responseData.acknowledgementNumber}, WINDOW_SIZE: ${responseData.windowSize}");
 
-    bool isBufferFull = _senderWindow.bufferProgress.actual == 1.0;
+    bool isBufferEmpty = _senderWindow.bufferProgress.actual == 0.0;
 
-    if (!isBufferFull) {
+    if (isBufferEmpty) {
       // Fill sender buffer again.
       _senderWindow.fillBuffer();
 
       // Wait until buffer is full.
-      _sub = _senderWindow.bufferFull.listen((_) {
+      _sub = _senderWindow.bufferStateChanged.listen((_) {
         _sub.cancel();
 
         _senderSendPacket(responseData);
@@ -169,7 +178,7 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
         _senderWindow.clearBuffer();
 
         // Wait until the buffer is empty.
-        _sub = _senderWindow.bufferEmpty.listen((_) {
+        _sub = _senderWindow.bufferStateChanged.listen((_) {
           _sub.cancel();
 
           // Send new data.
@@ -197,14 +206,14 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
     _senderWindow.fillBuffer();
 
     // Wait until buffer full.
-    _sub = _senderWindow.bufferFull.listen((_) {
+    _sub = _senderWindow.bufferStateChanged.listen((_) {
       _sub.cancel();
 
       int sizeInBuffer = (_senderWindow.bufferProgress.actual * _senderWindow.bufferSize).round();
 
       _senderWindow.clearBuffer();
       // Wait until buffer cleared.
-      _sub = _senderWindow.bufferEmpty.listen((_) {
+      _sub = _senderWindow.bufferStateChanged.listen((_) {
         _sub.cancel();
 
         _emitSendDataPacket(Colors.SLATE_GREY, SendData(sizeInBuffer, 0));
@@ -224,6 +233,51 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
   void unpaused(num timestampDifference) {
     // Do nothing.
   }
+
+  String get fileSizeLabel => "${(fileSize / 1024).round()} KB";
+
+  String get bufferSizeLabel => "${(bufferSize / 1024).round()} KB";
+
+  /// What should happen in case the file size input changes.
+  void onFileSizeChange(String newFileSize) {
+    int newSize = parseSize(newFileSize);
+
+    if (newSize != null) {
+      fileSize = newSize * 1024;
+    }
+  }
+
+  /// What should happen in case the buffer size input changes.
+  void onBufferSizeChange(String newBufferSize) {
+    int newSize = parseSize(newBufferSize);
+
+    if (newSize != null) {
+      bufferSize = newSize * 1024;
+    }
+  }
+
+  /// Get the parsed number from the passed string or null if not parsable.
+  int parseSize(String newSize) {
+    newSize = newSize.trimLeft();
+
+    if (newSize != null && newSize.isNotEmpty) {
+      for (int i = 0; i < newSize.codeUnits.length; i++) {
+        var codeUnit = newSize.codeUnitAt(i);
+
+        if (!isCodeUnitNumeric(codeUnit)) {
+          newSize = newSize.substring(0, i);
+          break;
+        }
+      }
+
+      return int.tryParse(newSize, radix: 10);
+    }
+
+    return null;
+  }
+
+  /// Whether a passed code unit is numeric (in range 0-9).
+  bool isCodeUnitNumeric(int codeUnit) => codeUnit >= 48 && codeUnit <= 57;
 }
 
 /// Data transmitted via packets from sender to receiver.
