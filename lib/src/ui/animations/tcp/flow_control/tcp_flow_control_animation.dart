@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/angular.dart';
@@ -20,7 +21,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     selector: "tcp-flow-control-animation",
     templateUrl: "tcp_flow_control_animation.html",
     styleUrls: ["tcp_flow_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialAutoSuggestInputComponent],
+    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialAutoSuggestInputComponent, MaterialSliderComponent],
     pipes: [I18nPipe])
 class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   final I18nService _i18n;
@@ -36,6 +37,9 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// Size of the buffer of sender and receiver (in bytes).
   int bufferSize = 2048;
+
+  /// Speed measure of the animation (milliseconds).
+  int speed = 1000;
 
   /// Suggestions for the file size.
   List<String> fileSizeSuggestions = ["4 KB", "8 KB", "16 KB"];
@@ -64,10 +68,10 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// Reset the animation.
   void _reset() {
-    _senderWindow = SenderBufferWindow(dataSize: fileSize, bufferSize: bufferSize);
-    _receiverWindow = ReceiverBufferWindow(dataSize: fileSize, bufferSize: bufferSize);
+    _senderWindow = SenderBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: speed);
+    _receiverWindow = ReceiverBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: speed);
     _packetLine =
-        PacketLine(duration: Duration(seconds: 1, milliseconds: 500), onArrival: (id, color, forward, data) => onPacketLineArrival(id, color, forward, data));
+        PacketLine(duration: Duration(milliseconds: speed), onArrival: (id, color, forward, data) => onPacketLineArrival(id, color, forward, data));
   }
 
   @override
@@ -84,27 +88,27 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
   void render(num timestamp) {
     context.clearRect(0, 0, size.width, size.height);
 
-    double windowSize = size.height;
-    double windowY = 0.0;
+    double windowSize = size.height / 2;
+    double windowY = windowSize / 2;
+
+    context.font = "${displayUnit * 2}px sans-serif";
 
     _senderWindow.render(context, Rectangle(0.0, windowY, windowSize, windowSize), timestamp);
-    _receiverWindow.render(context, Rectangle(windowSize * 2, windowY, windowSize, windowSize), timestamp);
+    _receiverWindow.render(context, Rectangle(size.width - windowSize, windowY, windowSize, windowSize), timestamp);
 
-    double packetLineSize = windowSize / 5;
-    _packetLine.render(context, Rectangle(windowSize, windowY + windowSize - packetLineSize, windowSize, packetLineSize), timestamp);
+    double packetLineHeight = windowSize / 5;
+    double packetLineWidth = size.width - 2 * windowSize;
+    _packetLine.render(context, Rectangle(windowSize, windowY + windowSize - packetLineHeight, packetLineWidth, packetLineHeight), timestamp);
 
     context.textAlign = "center";
     context.textBaseline = "bottom";
 
-    double packetInfoWidth = windowSize;
-    double packetInfoY = windowY + windowSize - packetLineSize - displayUnit * 2;
+    double packetInfoWidth = size.width - 2 * windowSize;
+    double packetInfoY = windowY + windowSize - packetLineHeight - displayUnit * 2;
 
     context.fillText(packetInfoLeft, windowSize + packetInfoWidth / 3, packetInfoY, packetInfoWidth / 2);
     context.fillText(packetInfoRight, windowSize + packetInfoWidth / 3 * 2, packetInfoY, packetInfoWidth / 2);
   }
-
-  /// Get the canvas height.
-  int get canvasHeight => (windowHeight * 0.8).round();
 
   /// What should happen when a packet arrives at the end of the packet line.
   void onPacketLineArrival(int packetID, Color color, bool forward, Object data) {
@@ -234,9 +238,9 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
     // Do nothing.
   }
 
-  String get fileSizeLabel => "${(fileSize / 1024).round()} KB";
+  String get fileSizeLabel => "${(fileSize / 1024).round()}";
 
-  String get bufferSizeLabel => "${(bufferSize / 1024).round()} KB";
+  String get bufferSizeLabel => "${(bufferSize / 1024).round()}";
 
   /// What should happen in case the file size input changes.
   void onFileSizeChange(String newFileSize) {
@@ -278,6 +282,8 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// Whether a passed code unit is numeric (in range 0-9).
   bool isCodeUnitNumeric(int codeUnit) => codeUnit >= 48 && codeUnit <= 57;
+
+  double get aspectRatio => 2.0;
 }
 
 /// Data transmitted via packets from sender to receiver.

@@ -12,18 +12,16 @@ import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/canvas/util/direction.dart';
 
 class ReceiverBufferWindow extends BufferWindow {
-  static const Duration MAX_CONSUME_DURATION = const Duration(seconds: 7);
-  static const Duration MIN_CONSUME_DURATION = const Duration(seconds: 3);
-
   /// When to consume the next package at the receiver.
   num _nextConsumeTimestamp = -1;
 
   Random _rng = new Random();
 
-  ReceiverBufferWindow({
-    int dataSize = 4096,
-    int bufferSize = 2048
-  }): super(dataSize: dataSize, bufferSize: bufferSize);
+  ReceiverBufferWindow({int dataSize = 4096, int bufferSize = 2048, int speed = 1500}) : super(dataSize: dataSize, bufferSize: bufferSize, speed: speed);
+
+  int get maxConsumeDuration => speed * 5;
+
+  int get minConsumeDuration => speed * 2;
 
   @override
   void clearBuffer() {
@@ -43,9 +41,7 @@ class ReceiverBufferWindow extends BufferWindow {
     bufferProgress.progress = p;
 
     if (_nextConsumeTimestamp == -1) {
-      _nextConsumeTimestamp = window.performance.now() +
-          MIN_CONSUME_DURATION.inMilliseconds +
-          (MAX_CONSUME_DURATION.inMilliseconds - MIN_CONSUME_DURATION.inMilliseconds) * _rng.nextDouble();
+      _nextConsumeTimestamp = window.performance.now() + minConsumeDuration + (maxConsumeDuration - minConsumeDuration) * _rng.nextDouble();
     }
   }
 
@@ -56,7 +52,7 @@ class ReceiverBufferWindow extends BufferWindow {
 
       if (shouldConsume) {
         showTooltip("Data consumed", Duration(seconds: 3));
-        
+
         clearBuffer();
 
         _nextConsumeTimestamp = -1;
@@ -73,7 +69,7 @@ class ReceiverBufferWindow extends BufferWindow {
 
   @override
   LazyProgress createBufferProgress() {
-    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p));
+    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p), duration: Duration(milliseconds: speed ~/ 2));
   }
 
   @override
@@ -83,7 +79,7 @@ class ReceiverBufferWindow extends BufferWindow {
 
   @override
   LazyProgress createDataProgress() {
-    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p));
+    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p), duration: Duration(milliseconds: speed ~/ 2));
   }
 
   @override

@@ -1,14 +1,46 @@
-<material-button raised (click)="start()">Start</material-button>
-<material-button raised (click)="switchPause()">Pause</material-button>
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp [aspectRatio]="aspectRatio" (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li class="labeled">
+				<label>File size</label>
+				<material-auto-suggest-input [inputText]="fileSizeLabel"
+											 (inputTextChange)="onFileSizeChange($event)"
+											 [selectionOptions]="fileSizeSuggestions"
+											 [limit]="3">
+				</material-auto-suggest-input>
+				KB
+			</li>
 
-File size:
-<material-auto-suggest-input [inputText]="fileSizeLabel" (inputTextChange)="onFileSizeChange($event)" [selectionOptions]="fileSizeSuggestions" [limit]="3"></material-auto-suggest-input>
+			<li class="labeled">
+				<label>Buffer size</label>
+				<material-auto-suggest-input [inputText]="bufferSizeLabel"
+											 (inputTextChange)="onBufferSizeChange($event)"
+											 [selectionOptions]="bufferSizeSuggestions"
+											 [limit]="3">
+				</material-auto-suggest-input>
+				KB
+			</li>
 
-Buffer size:
-<material-auto-suggest-input [inputText]="bufferSizeLabel" (inputTextChange)="onBufferSizeChange($event)" [selectionOptions]="bufferSizeSuggestions" [limit]="3"></material-auto-suggest-input>
+			<li class="labeled">
+				<label>Speed</label>
+				<material-slider [min]="500"
+								 [max]="5000"
+								 [step]="250"
+								 [(value)]="speed">
+				</material-slider>
+			</li>
 
-<canvas-comp [aspectRatio]="3" (onResized)="onCanvasResize($event)"
-			 (onReady)="onCanvasReady($event)"></canvas-comp>
+			<li class="labeled">
+				<material-button raised (click)="start()">Start</material-button>
+				<material-button raised (click)="switchPause()">Pause</material-button>
+			</li>
+		</ul>
+	</div>
+</div>
 
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>

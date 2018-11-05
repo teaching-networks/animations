@@ -10,7 +10,7 @@ import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/canvas/util/direction.dart';
 
 class SenderBufferWindow extends BufferWindow {
-  SenderBufferWindow({int dataSize = 4096, int bufferSize = 2048}) : super(dataSize: dataSize, bufferSize: bufferSize);
+  SenderBufferWindow({int dataSize = 4096, int bufferSize = 2048, int speed = 1500}) : super(dataSize: dataSize, bufferSize: bufferSize, speed: speed);
 
   @override
   void clearBuffer() {
@@ -38,7 +38,7 @@ class SenderBufferWindow extends BufferWindow {
 
   @override
   LazyProgress createBufferProgress() {
-    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p));
+    return LazyProgress(startProgress: 0.0, modifier: (p) => Curves.easeInOutCubic(p), duration: Duration(milliseconds: speed ~/ 2));
   }
 
   @override
@@ -48,6 +48,6 @@ class SenderBufferWindow extends BufferWindow {
 
   @override
   LazyProgress createDataProgress() {
-    return LazyProgress(startProgress: 1.0, modifier: (p) => Curves.easeInOutCubic(p));
+    return LazyProgress(startProgress: 1.0, modifier: (p) => Curves.easeInOutCubic(p), duration: Duration(milliseconds: speed ~/ 2));
   }
 }

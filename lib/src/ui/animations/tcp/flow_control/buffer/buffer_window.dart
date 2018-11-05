@@ -16,6 +16,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   final int dataSize;
   final int bufferSize;
+  final int speed;
 
   /// Progress of the data bar.
   LazyProgress dataProgress;
@@ -39,7 +40,7 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   StreamController<void> _bufferStateChanged = StreamController.broadcast(sync: true);
 
   /// Create new buffer window.
-  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048}) {
+  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048, this.speed = 1500}) {
     dataProgress = createDataProgress();
     bufferProgress = createBufferProgress();
 
