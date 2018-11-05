@@ -3,6 +3,7 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/horizontal_progress_bar.dart';
@@ -17,6 +18,9 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   final int dataSize;
   final int bufferSize;
   final int speed;
+
+  final Message dataLabel;
+  final Message bufferLabel;
 
   /// Progress of the data bar.
   LazyProgress dataProgress;
@@ -40,7 +44,7 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   StreamController<void> _bufferStateChanged = StreamController.broadcast(sync: true);
 
   /// Create new buffer window.
-  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048, this.speed = 1500}) {
+  BufferWindow({this.dataSize = 4096, this.bufferSize = 2048, this.speed = 1500, this.bufferLabel = null, this.dataLabel = null}) {
     dataProgress = createDataProgress();
     bufferProgress = createBufferProgress();
 
@@ -97,13 +101,16 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
     context.textBaseline = "middle";
     setFillColor(context, Color.opacity(Colors.BLACK, 0.6));
 
+    String dataLabelString = dataLabel != null ? dataLabel.toString() : "DATA";
+    String bufferLabelString = bufferLabel != null ? bufferLabel.toString() : "BUFFER";
+
     // Draw data size label
     double lazyDataKBytes = dataProgress.progress * dataSize / 1024;
-    context.fillText("DATA: ${lazyDataKBytes.toStringAsFixed(2)} KB", rect.width / 2, (rect.height - bufferBarHeight) / 2);
+    context.fillText("${dataLabelString}: ${lazyDataKBytes.toStringAsFixed(2)} KB", rect.width / 2, (rect.height - bufferBarHeight) / 2);
 
     // Draw buffer label
     double lazyBufferKBytes = bufferProgress.progress * bufferSize / 1024;
-    context.fillText("BUFFER: ${lazyBufferKBytes.toStringAsFixed(2)} KB", rect.width / 2, rect.height - bufferBarHeight / 2);
+    context.fillText("${bufferLabelString}: ${lazyBufferKBytes.toStringAsFixed(2)} KB", rect.width / 2, rect.height - bufferBarHeight / 2);
 
     // Draw tooltip (if any).
     if (_tooltip != null) {

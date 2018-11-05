@@ -21,7 +21,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     selector: "tcp-flow-control-animation",
     templateUrl: "tcp_flow_control_animation.html",
     styleUrls: ["tcp_flow_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialAutoSuggestInputComponent, MaterialSliderComponent],
+    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialIconComponent, MaterialAutoSuggestInputComponent, MaterialSliderComponent],
     pipes: [I18nPipe])
 class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   final I18nService _i18n;
@@ -72,8 +72,15 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// Reset the animation.
   void _reset() {
-    _senderWindow = SenderBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: realSpeed);
-    _receiverWindow = ReceiverBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: realSpeed);
+    if (isPaused) {
+      switchPause();
+    }
+
+    var dataLabel = _i18n.get("tcp-flow-control-animation.data");
+    var bufferLabel = _i18n.get("tcp-flow-control-animation.buffer");
+
+    _senderWindow = SenderBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: realSpeed, dataLabel: dataLabel, bufferLabel: bufferLabel);
+    _receiverWindow = ReceiverBufferWindow(dataSize: fileSize, bufferSize: bufferSize, speed: realSpeed, dataLabel: dataLabel, bufferLabel: bufferLabel);
     _packetLine =
         PacketLine(duration: Duration(milliseconds: realSpeed), onArrival: (id, color, forward, data) => onPacketLineArrival(id, color, forward, data));
   }
@@ -135,8 +142,6 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// What to do when the receiver received a packet with [sendData].
   void _onReceiverReceivedPacket(SendData sendData) {
-    print("Received: SIZE: ${sendData.size}, SEQ: ${sendData.sequenceNumber}");
-
     int remainingSizeInBuffer = ((1.0 - _receiverWindow.bufferProgress.actual) * _receiverWindow.bufferSize).toInt();
     int acknowledgementNumber = sendData.sequenceNumber;
 
@@ -167,8 +172,6 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   /// What to do when the sender received a packet with [responseData].
   void _onSenderReceivedPacket(ResponseData responseData) {
-    print("Received: ACK: ${responseData.acknowledgementNumber}, WINDOW_SIZE: ${responseData.windowSize}");
-
     bool isBufferEmpty = _senderWindow.bufferProgress.actual == 0.0;
 
     if (isBufferEmpty) {

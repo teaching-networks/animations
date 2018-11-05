@@ -133,6 +133,12 @@
 	"dns-animation.legend.response": "DNS Antwort",
 	"dns-animation.legend.request": "Anfrage zur aufgelösten IP Adresse",
 	"tcp-flow-control-animation.name": "TCP Flusskontrolle",
-	"tcp-flow-control-animation.description": "Beschreibung noch nicht verfügbar.",
-	"tcp-flow-control-animation.credits": "Credits nicht verfügbar."
+	"tcp-flow-control-animation.description": "In dieser Animation wird die TCP Flusskontrolle visualisiert. Der Sender sendet Packete zum Empfänger. Der Empfänger liest diese ein und puffert bis er die Daten lesen kann. Solange benachrichtigt er den Sender von einer Fenstergröße gleich 0. Der Sender sendet solange Paket mit einer Größe von 1 bis der Empfänger wieder Platz in seinem Pufferfenster vermelden kann.",
+	"tcp-flow-control-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Hyojin Kim, Univ. of Pennsylvania/Rodrigo Neri, Park Univ., Missouri, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
+	"tcp-flow-control-animation.control.file-size": "Dateigröße",
+	"tcp-flow-control-animation.control.buffer-size": "Puffergröße",
+	"tcp-flow-control-animation.control.speed": "Geschwindigkeit",
+	"tcp-flow-control-animation.control.start": "Start",
+	"tcp-flow-control-animation.data": "DATEN",
+	"tcp-flow-control-animation.buffer": "PUFFER"
 }

@@ -132,6 +132,12 @@
 	"dns-animation.legend.response": "DNS Response",
 	"dns-animation.legend.request": "Request to the resolved IP address",
 	"tcp-flow-control-animation.name": "TCP Flow Control",
-	"tcp-flow-control-animation.description": "No description yet.",
-	"tcp-flow-control-animation.credits": "No credits yet."
+	"tcp-flow-control-animation.description": "This animation visualizes the TCP flow control mechanism. The sender sends packets to the receiver which it will buffer until it is ready to read them. As long as the buffer is full the receiver is advertising the sender a window size of 0. The sender is checking again by sending a packet with size 1 until the receivers buffer window will be > 0.",
+	"tcp-flow-control-animation.credits": "This animation was inspired by a Java Applet originally developed by Hyojin Kim, Univ. of Pennsylvania/Rodrigo Neri, Park Univ., Missouri. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Applet author(s) for making their Java Applet publicly available.",
+	"tcp-flow-control-animation.control.file-size": "File size",
+	"tcp-flow-control-animation.control.buffer-size": "Buffer size",
+	"tcp-flow-control-animation.control.speed": "Animation speed",
+	"tcp-flow-control-animation.control.start": "Start",
+	"tcp-flow-control-animation.data": "DATA",
+	"tcp-flow-control-animation.buffer": "BUFFER"
 }
