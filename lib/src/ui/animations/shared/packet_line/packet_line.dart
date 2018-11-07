@@ -1,17 +1,17 @@
-import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/shared/packet_line/packet_line_packet.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
-typedef void PacketArrivalListener(int packetId, Color packetColor);
+typedef void PacketArrivalListener(int packetId, Color packetColor, bool forward, Object data);
 
 /// A packet line is a representation for a connection between two points. Packets
 /// are sent between the two points, always from A to B.
-class PacketLine extends CanvasDrawable {
+class PacketLine extends CanvasDrawable with CanvasPausableMixin {
   /// Default duration a packet is on the line.
   static const Duration DEFAULT_DURATION = const Duration(seconds: 3);
 
@@ -23,7 +23,6 @@ class PacketLine extends CanvasDrawable {
 
   /// Packets currently in the line.
   List<PacketLinePacket> _packets = new List<PacketLinePacket>();
-  Map<int, StreamSubscription> _arrivalSubscriptions = new Map<int, StreamSubscription>();
 
   /// Duration the packet is on the line.
   final Duration duration;
@@ -62,10 +61,30 @@ class PacketLine extends CanvasDrawable {
   void _drawPackets(CanvasRenderingContext2D context, Rectangle<double> rect, num timestamp) {
     double packetWidth = rect.width / 20;
 
-    Set<int> packetsScheduledForRemoval;
+    Set<PacketLinePacket> packetsScheduledForRemoval;
     for (PacketLinePacket packet in _packets) {
       if (packet.alive) {
-        double progress = (timestamp - packet.birth) / duration.inMilliseconds;
+        double progress = packet.lastProgress;
+
+        if (!isPaused) {
+          double progress = min((timestamp - packet.birth) / duration.inMilliseconds, 1.0);
+
+          packet.lastProgress = progress;
+
+          if (progress == 1.0) {
+            packet.kill();
+
+            if (packetsScheduledForRemoval == null) {
+              packetsScheduledForRemoval = new Set<PacketLinePacket>();
+
+              packetsScheduledForRemoval.add(packet);
+            }
+          }
+        }
+
+        if (!packet.forward) {
+          progress = 1.0 - progress;
+        }
 
         // Transform progress interval [0.0; 1.0] to real interval [0.0 - packetWidth; width]
         double offset = -packetWidth + (rect.width + packetWidth) * progress;
@@ -79,35 +98,24 @@ class PacketLine extends CanvasDrawable {
         }
 
         packet.render(context, new Rectangle(offset, 0.0, pW, rect.height));
-      } else {
-        if (packetsScheduledForRemoval == null) {
-          packetsScheduledForRemoval = new Set<int>();
-        }
-
-        packetsScheduledForRemoval.add(packet.id);
       }
     }
 
     if (packetsScheduledForRemoval != null) {
       _packets.removeWhere((packet) => packetsScheduledForRemoval.contains(packet.id));
+
+      packetsScheduledForRemoval.forEach((packet) => onArrival?.call(packet.id, packet.color, packet.forward, packet.data));
     }
   }
 
   /// Emit a packet on the line.
   /// Returns id of the new packet.
   /// The Id can be used to later determine which packet arrived using the arrival callback.
-  int emit({Color color = Colors.BLACK}) {
+  int emit({Color color = Colors.BLACK, bool forward = true, Object data = null}) {
     var id = _packetIdGenerator++;
 
-    PacketLinePacket packet = new PacketLinePacket(id, color);
+    PacketLinePacket packet = new PacketLinePacket(id, color, forward, data);
     _packets.add(packet);
-
-    _arrivalSubscriptions[packet.id] = new Future.delayed(duration).asStream().listen((_) {
-      packet.kill();
-
-      _arrivalSubscriptions.remove(packet.id);
-      onArrival?.call(packet.id, packet.color);
-    });
 
     return id;
   }
@@ -115,11 +123,17 @@ class PacketLine extends CanvasDrawable {
   /// Clear the packet line of packets.
   void clear() {
     _packets.clear();
+  }
 
-    _arrivalSubscriptions.forEach((key, subscription) {
-      subscription.cancel();
-    });
+  @override
+  void switchPauseSubAnimations() {
+    for (var packet in _packets) {
+      packet.switchPause();
+    }
+  }
 
-    _arrivalSubscriptions.clear();
+  @override
+  void unpaused(num timestampDifference) {
+    // Do nothing
   }
 }

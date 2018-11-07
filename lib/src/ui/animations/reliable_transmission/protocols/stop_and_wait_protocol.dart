@@ -13,7 +13,6 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   /// Initial window size of the protocol.
   static const int INITIAL_WINDOW_SIZE = 1;
 
-  int _lastPacketSequenceNumber = 1;
   bool _received = true;
 
   I18nService _i18n;
@@ -51,16 +50,17 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
 
   @override
   Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
+    int packetNumber = index.isEven ? 0 : 1;
+
     if (_received) {
       _received = false;
-      _lastPacketSequenceNumber = _lastPacketSequenceNumber == 0 ? 1 : 0;
 
-      messageStreamController.add("$_senderSendsPktLabel $_lastPacketSequenceNumber");
+      messageStreamController.add("$_senderSendsPktLabel $packetNumber");
     } else {
-      messageStreamController.add("$_senderResendsPktLabel1 $_lastPacketSequenceNumber $_senderResendsPktLabel2");
+      messageStreamController.add("$_senderResendsPktLabel1 $packetNumber $_senderResendsPktLabel2");
     }
 
-    Packet packet = new Packet(number: _lastPacketSequenceNumber);
+    Packet packet = new Packet(number: packetNumber);
 
     return packet;
   }
@@ -70,7 +70,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
     if (packet != null) {
       messageStreamController.add("$_receiverReceivedPktLabel ${movingPacket.number}");
     } else {
-      messageStreamController.add("$_receiverReceivedPktDupLabel1 $_lastPacketSequenceNumber $_receiverReceivedPktDupLabel2");
+      messageStreamController.add("$_receiverReceivedPktDupLabel1 ${movingPacket.number} $_receiverReceivedPktDupLabel2");
     }
 
     return false;
@@ -83,7 +83,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
     if (packet != null) {
       messageStreamController.add("$_senderReceivedAckLabel ${movingPacket.number}");
     } else {
-      messageStreamController.add("$_senderReceivedAckDupLabel1 $_lastPacketSequenceNumber $_senderReceivedAckDupLabel2");
+      messageStreamController.add("$_senderReceivedAckDupLabel1 ${movingPacket.number} $_senderReceivedAckDupLabel2");
     }
 
     return false;
@@ -97,7 +97,6 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   @override
   void reset() {
     _received = true;
-    _lastPacketSequenceNumber = 1;
   }
 
   @override

@@ -1,0 +1,62 @@
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp [aspectRatio]="aspectRatio" (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li class="labeled">
+				<label>{{ "tcp-flow-control-animation.control.file-size" | i18n }}</label>
+				<material-auto-suggest-input [inputText]="fileSizeLabel"
+											 (inputTextChange)="onFileSizeChange($event)"
+											 [selectionOptions]="fileSizeSuggestions"
+											 [limit]="3">
+				</material-auto-suggest-input>
+				KiB
+			</li>
+
+			<li class="labeled">
+				<label>{{ "tcp-flow-control-animation.control.buffer-size" | i18n }}</label>
+				<material-auto-suggest-input [inputText]="bufferSizeLabel"
+											 (inputTextChange)="onBufferSizeChange($event)"
+											 [selectionOptions]="bufferSizeSuggestions"
+											 [limit]="3">
+				</material-auto-suggest-input>
+				KiB
+			</li>
+
+			<li class="labeled">
+				<label>{{ "tcp-flow-control-animation.control.speed" | i18n }}</label>
+				<material-slider [min]="0"
+								 [max]="4500"
+								 [step]="250"
+								 [(value)]="speed">
+				</material-slider>
+			</li>
+
+			<li class="labeled" style="display: flex; flex-direction: row; justify-content: center; align-items: center">
+				<material-button raised (click)="start()">
+					{{ "tcp-flow-control-animation.control.start" | i18n }}
+				</material-button>
+				<material-button raised (click)="switchPause()" icon>
+					<material-icon *ngIf="isPaused" icon="play_arrow"></material-icon>
+					<material-icon *ngIf="!isPaused" icon="pause"></material-icon>
+				</material-button>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		{{ "tcp-flow-control-animation.description" | i18n }}
+	</p>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		{{ "tcp-flow-control-animation.credits" | i18n }}
+	</p>
+</div>

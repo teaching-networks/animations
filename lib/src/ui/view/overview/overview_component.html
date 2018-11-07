@@ -10,7 +10,7 @@
 
 	<section *ngFor="let anim of animationDescriptors.values" class="animation-card">
 		<div class="mdc-card mdc-card--outlined animation-card-size">
-			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + ')'}"></div>
+			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + '), linear-gradient(to bottom, #EAEAEA 0%, transparent 100%)'}"></div>
 			<div class="animation-card-primary">
 				<h2 class="animation-card-title">{{getAnimationName(anim.name)}}</h2>
 			</div>

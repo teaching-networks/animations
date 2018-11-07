@@ -11,22 +11,23 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
 
 class Bubble extends CanvasDrawable {
-
   /// Text to show in the bubble.
   final String text;
 
   /// At which string length to wrap the text.
   final int wrapAtLength;
+  final Color color;
 
-  RoundRectangle _bubbleRect =
-      new RoundRectangle(color: Color.opacity(Colors.SLATE_GREY, 0.5), paintMode: PaintMode.FILL, radius: Edges.all(0.2), radiusSizeType: SizeType.PERCENT);
+  RoundRectangle _bubbleRect;
 
   List<String> _lines;
   String _longestLine;
 
-  Bubble(this.text, this.wrapAtLength) {
+  Bubble(this.text, this.wrapAtLength, {this.color = Colors.SLATE_GREY}) {
     _lines = _buildLines(text, wrapAtLength);
     _longestLine = _getLongestLine(_lines);
+
+    _bubbleRect = RoundRectangle(color: Color.opacity(this.color, 0.5), paintMode: PaintMode.FILL, radius: Edges.all(0.2), radiusSizeType: SizeType.PERCENT);
   }
 
   @override
@@ -80,7 +81,7 @@ class Bubble extends CanvasDrawable {
     var metrics = context.measureText(_longestLine);
 
     var width = metrics.width;
-    
+
     var lineHeight = defaultFontSize;
     var height = lineHeight * _lines.length;
 

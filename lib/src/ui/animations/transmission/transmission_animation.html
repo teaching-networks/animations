@@ -8,7 +8,7 @@
 			<li>
 				{{ "packetTransmission.length" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="lengthValue"
-											 [suggestions]="lengthSuggestions"
+											 [selectionOptions]="lengthSuggestions"
 											 [limit]="5">
 				</material-auto-suggest-input>
 				<material-dropdown-select
@@ -21,7 +21,7 @@
 			<li>
 				{{ "packetTransmission.rate" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="rateValue"
-											 [suggestions]="rateSuggestions"
+											 [selectionOptions]="rateSuggestions"
 											 [limit]="5">
 				</material-auto-suggest-input>
 				<material-dropdown-select
@@ -34,7 +34,7 @@
 			<li>
 				{{ "packetTransmission.size" | i18n }}:
 				<material-auto-suggest-input [(inputText)]="packetSizeValue"
-											 [suggestions]="sizeSuggestions"
+											 [selectionOptions]="sizeSuggestions"
 											 [limit]="5">
 				</material-auto-suggest-input>
 				<material-dropdown-select
