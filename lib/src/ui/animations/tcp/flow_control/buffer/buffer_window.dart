@@ -106,11 +106,11 @@ abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
 
     // Draw data size label
     double lazyDataKBytes = dataProgress.progress * dataSize / 1024;
-    context.fillText("${dataLabelString}: ${lazyDataKBytes.toStringAsFixed(2)} KB", rect.width / 2, (rect.height - bufferBarHeight) / 2);
+    context.fillText("${dataLabelString}: ${lazyDataKBytes.toStringAsFixed(2)} KiB", rect.width / 2, (rect.height - bufferBarHeight) / 2);
 
     // Draw buffer label
     double lazyBufferKBytes = bufferProgress.progress * bufferSize / 1024;
-    context.fillText("${bufferLabelString}: ${lazyBufferKBytes.toStringAsFixed(2)} KB", rect.width / 2, rect.height - bufferBarHeight / 2);
+    context.fillText("${bufferLabelString}: ${lazyBufferKBytes.toStringAsFixed(2)} KiB", rect.width / 2, rect.height - bufferBarHeight / 2);
 
     // Draw tooltip (if any).
     if (_tooltip != null) {

@@ -42,10 +42,10 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
   int speed = 1000;
 
   /// Suggestions for the file size.
-  List<String> fileSizeSuggestions = ["4 KB", "8 KB", "16 KB"];
+  List<String> fileSizeSuggestions = ["4", "8", "16", "32"];
 
   /// Suggestions for the buffer size.
-  List<String> bufferSizeSuggestions = ["2 KB", "4 KB"];
+  List<String> bufferSizeSuggestions = ["2", "4", "8"];
 
   /// Packet line representing a connection between sender and receiver.
   PacketLine _packetLine;
