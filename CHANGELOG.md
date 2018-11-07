@@ -2,6 +2,7 @@
 
 ## 1.2.0
 - TCP flow control animation added
+- Fixed minor bugs
 
 ## 1.1.0
 - DNS animation added
