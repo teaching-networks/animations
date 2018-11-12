@@ -13,7 +13,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   /// Initial window size of the protocol.
   static const int INITIAL_WINDOW_SIZE = 1;
 
-  bool _received = true;
+  int _currentIndex;
 
   I18nService _i18n;
 
@@ -44,16 +44,17 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
   }
 
   @override
-  bool canEmitPacket(List<PacketSlot> packetSlots) {
-    return _received;
-  }
+  bool canEmitPacket(List<PacketSlot> packetSlots) =>
+      packetSlots == null || packetSlots.isEmpty || (packetSlots.isNotEmpty && packetSlots[_currentIndex].isFinished);
 
   @override
   Packet senderSendPacket(int index, bool timeout, TransmissionWindow window) {
     int packetNumber = index.isEven ? 0 : 1;
 
-    if (_received) {
-      _received = false;
+    bool packetSlotFinished = window.packetSlots[index].isFinished;
+
+    if (!packetSlotFinished) {
+      _currentIndex = index;
 
       messageStreamController.add("$_senderSendsPktLabel $packetNumber");
     } else {
@@ -78,8 +79,6 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
 
   @override
   bool senderReceivedPacket(Packet packet, Packet movingPacket, PacketSlot slot, WindowSpaceDrawable windowSpace, TransmissionWindow window) {
-    _received = true;
-
     if (packet != null) {
       messageStreamController.add("$_senderReceivedAckLabel ${movingPacket.number}");
     } else {
@@ -96,7 +95,7 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
 
   @override
   void reset() {
-    _received = true;
+    _currentIndex = 0;
   }
 
   @override
