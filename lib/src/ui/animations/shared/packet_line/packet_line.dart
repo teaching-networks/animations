@@ -102,7 +102,7 @@ class PacketLine extends CanvasDrawable with CanvasPausableMixin {
     }
 
     if (packetsScheduledForRemoval != null) {
-      _packets.removeWhere((packet) => packetsScheduledForRemoval.contains(packet.id));
+      _packets.removeWhere((packet) => packetsScheduledForRemoval.contains(packet));
 
       packetsScheduledForRemoval.forEach((packet) => onArrival?.call(packet.id, packet.color, packet.forward, packet.data));
     }

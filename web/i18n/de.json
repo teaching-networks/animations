@@ -140,5 +140,8 @@
 	"tcp-flow-control-animation.control.speed": "Geschwindigkeit",
 	"tcp-flow-control-animation.control.start": "Start",
 	"tcp-flow-control-animation.data": "DATEN",
-	"tcp-flow-control-animation.buffer": "PUFFER"
+	"tcp-flow-control-animation.buffer": "PUFFER",
+	"tcp-congestion-control-animation.name": "TCP Staukontrolle",
+	"tcp-congestion-control-animation.description": "No description yet.",
+	"tcp-congestion-control-animation.credits": "No credits yet."
 }

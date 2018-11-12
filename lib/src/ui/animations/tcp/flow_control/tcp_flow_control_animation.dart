@@ -92,6 +92,8 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin i
 
   @override
   void ngOnDestroy() {
+    super.ngOnDestroy();
+
     if (_sub != null) {
       _sub.cancel();
     }

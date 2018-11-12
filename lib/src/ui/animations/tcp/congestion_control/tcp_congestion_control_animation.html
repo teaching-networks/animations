@@ -1,0 +1,27 @@
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp [aspectRatio]="aspectRatio" (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"></canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li class="labeled">
+				<label>Test</label>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<p>
+		{{ "tcp-congestion-control-animation.description" | i18n }}
+	</p>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		{{ "tcp-congestion-control-animation.credits" | i18n }}
+	</p>
+</div>

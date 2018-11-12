@@ -139,5 +139,8 @@
 	"tcp-flow-control-animation.control.speed": "Animation speed",
 	"tcp-flow-control-animation.control.start": "Start",
 	"tcp-flow-control-animation.data": "DATA",
-	"tcp-flow-control-animation.buffer": "BUFFER"
+	"tcp-flow-control-animation.buffer": "BUFFER",
+	"tcp-congestion-control-animation.name": "TCP Congestion Control",
+	"tcp-congestion-control-animation.description": "No description yet.",
+	"tcp-congestion-control-animation.credits": "No credits yet."
 }

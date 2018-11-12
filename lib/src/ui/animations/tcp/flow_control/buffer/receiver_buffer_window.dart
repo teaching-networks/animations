@@ -6,7 +6,6 @@ import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/buffer_w
 import 'package:hm_animations/src/ui/canvas/progress/bar/horizontal_progress_bar.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/vertical_progress_bar.dart';
 import 'package:hm_animations/src/ui/canvas/progress/lazy_progress/lazy_progress.dart';
-import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';

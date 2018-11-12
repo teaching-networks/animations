@@ -15,6 +15,8 @@ import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulatio
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.template.dart' as queueSimulation;
 import 'package:hm_animations/src/ui/animations/dns/dns_animation.dart';
 import 'package:hm_animations/src/ui/animations/dns/dns_animation.template.dart' as dns;
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/tcp_congestion_control_animation.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/tcp_congestion_control_animation.template.dart' as tcpCongestionControl;
 
 /// List of all animation is stored here.
 class Animations {
@@ -80,6 +82,13 @@ class Animations {
         "tcp-flow-control-animation.name",
         "img/animation/preview/tcp-flow-control-preview.png",
         "tcp-flow-control"
+    ),
+    new AnimationDescriptor<TCPCongestionControlAnimation>(
+        ID_COUNTER++,
+        tcpCongestionControl.TCPCongestionControlAnimationNgFactory,
+        "tcp-congestion-control-animation.name",
+        "", // TOOD Add preview image
+        "tcp-congestion-control"
     )
   ];
 
