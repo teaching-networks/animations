@@ -22,7 +22,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   /**
    * Whether to show FPS for development.
    */
-  static const bool SHOW_FPS = false;
+  static const bool SHOW_FPS = true;
 
   /**
    * Draw fps every FPS_MILLIS milliseconds.

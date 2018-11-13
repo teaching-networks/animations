@@ -1,0 +1,196 @@
+import 'dart:html';
+
+import 'dart:math';
+
+import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/util/size.dart';
+
+/// Function to display as a graph.
+typedef num Graph2DFunction(num x);
+
+/// Draw an arbitrary graph using this drawable.
+class Graph2D extends CanvasDrawable {
+  /// Functions to draw in the graph.
+  List<Graph2DFunction> _functions = List<Graph2DFunction>();
+
+  /// Minimum x-axis value.
+  num _minX;
+
+  /// Maximum x-axis value.
+  num _maxX;
+
+  /// Minimum y-axis value.
+  num _minY;
+
+  /// Maximum y-axis value.
+  num _maxY;
+
+  /// How many points to draw for the function.
+  num _points;
+
+  /// Alternative to [points].
+  /// Sets the amount of pixel between two x coordinates to sample the functions.
+  /// If this is set the value of [points] will no more be used.
+  num _precision;
+
+  /// Whether the [_valueCache] is valid at the moment.
+  /// May change once the graphs values (e.g. [minX], [maxX], ...) change.
+  bool _cacheValid = false;
+
+  /// Cached values for the functions.
+  Map<int, List<Point<double>>> _valueCache;
+
+  /// Create new Graph2D.
+  Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null})
+      : this._minX = minX,
+        this._maxX = maxX,
+        this._minY = minY,
+        this._maxY = maxY,
+        this._points = points,
+        this._precision = precision;
+
+  /// Calculate values for all functions.
+  Map<int, List<Point<double>>> _calculateFunctions(List<Graph2DFunction> functions, int samples, double minValue, double maxValue) {
+    Map<int, List<Point<double>>> result = Map<int, List<Point<double>>>();
+
+    for (int i = 0; i < functions.length; i++) {
+      result[i] = _calculateFunction(functions[i], samples, minValue, maxValue);
+    }
+
+    return result;
+  }
+
+  /// Calculate values for the passed function.
+  List<Point<double>> _calculateFunction(Graph2DFunction function, int samples, double minValue, double maxValue) {
+    List<Point<double>> result = List<Point<double>>();
+
+    double xDistance = (maxValue - minValue) / samples;
+    double x = minValue;
+
+    for (int i = 0; i <= samples; i++) {
+      result.add(Point(x, function(x)));
+
+      x += xDistance;
+    }
+
+    return result;
+  }
+
+  @override
+  void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
+    context.save();
+
+    context.translate(rect.left, rect.top);
+
+    if (!_cacheValid) {
+      int samples = _getSamples(rect.width);
+      _valueCache = _calculateFunctions(_functions, samples, _minX, _maxX);
+    }
+
+    for (int i = 0; i < _functions.length; i++) {
+      _renderGraph(context, Size(rect.width, rect.height), _valueCache[i]);
+    }
+
+    context.restore();
+  }
+
+  /// Render the graph on the canvas [context] with the specified [size] and already calculates [values].
+  void _renderGraph(CanvasRenderingContext2D context, Size size, List<Point<double>> values) {
+    if (values.isNotEmpty) {
+      context.beginPath();
+
+      double yLength = _maxY - _minY;
+      double xLength = _maxX - _minX;
+
+      int samples = values.length;
+
+      Point<double> sample = values[0];
+
+      double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
+      double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
+
+      context.moveTo(xPixel, yPixel);
+
+      for (int i = 1; i < samples; i++) {
+        sample = values[i];
+
+        double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
+        double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
+
+        context.lineTo(xPixel, yPixel);
+      }
+
+      context.lineJoin = 'round';
+      context.lineWidth = window.devicePixelRatio * 3;
+      context.stroke();
+    }
+  }
+
+  /// Invalidate the value cache. Needs to be recalculated afterwards.
+  void _invalidateCache() => _cacheValid = false;
+
+  /// Get samples to get for the function graphs.
+  int _getSamples(double pixelWidth) => _precision != null ? (pixelWidth / _precision).round() : _points;
+
+  /// Convert the passed y pixel to the real y pixel (invert it).
+  double _toY(double yPixel, double height) => height - yPixel;
+
+  /// Get the pixel for the passed value.
+  double _valueToPixel(double value, double minValue, double length, double pixelSize) => (value - minValue) / length * pixelSize;
+
+  /// Add a [function] to draw.
+  void addFunction(Graph2DFunction function) {
+    _functions.add(function);
+    _invalidateCache();
+  }
+
+  /// Remove a [function] to draw.
+  void removeFunction(Graph2DFunction function) {
+    _functions.remove(function);
+    _invalidateCache();
+  }
+
+  num get precision => _precision;
+
+  set precision(num value) {
+    _precision = value;
+    _invalidateCache();
+  }
+
+  num get points => _points;
+
+  set points(num value) {
+    _points = value;
+    _invalidateCache();
+  }
+
+  num get maxY => _maxY;
+
+  set maxY(num value) {
+    _maxY = value;
+    _invalidateCache();
+  }
+
+  num get minY => _minY;
+
+  set minY(num value) {
+    _minY = value;
+    _invalidateCache();
+  }
+
+  num get maxX => _maxX;
+
+  set maxX(num value) {
+    _maxX = value;
+    _invalidateCache();
+  }
+
+  num get minX => _minX;
+
+  set minX(num value) {
+    _minX = value;
+    _invalidateCache();
+  }
+
+
+}
