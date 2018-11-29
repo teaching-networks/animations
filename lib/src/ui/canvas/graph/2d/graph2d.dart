@@ -37,8 +37,11 @@ class Graph2D extends CanvasDrawable {
   /// May change once the graphs values (e.g. [minX], [maxX], ...) change.
   bool _cacheValid = false;
 
+  /// Distance from one sample to another from the last calculation.
+  double _lastSampleDistance;
+
   /// Cached values for the functions.
-  Map<int, List<Point<double>>> _valueCache;
+  List<List<Point<double>>> _valueCache;
 
   /// Create new Graph2D.
   Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null})
@@ -50,8 +53,8 @@ class Graph2D extends CanvasDrawable {
         this._precision = precision;
 
   /// Calculate values for all functions.
-  Map<int, List<Point<double>>> _calculateFunctions(List<Graph2DFunction> functions, int samples, double minValue, double maxValue) {
-    Map<int, List<Point<double>>> result = Map<int, List<Point<double>>>();
+  List<List<Point<double>>> _calculateFunctions(List<Graph2DFunction> functions, int samples, double minValue, double maxValue) {
+    List<List<Point<double>>> result = List<List<Point<double>>>(functions.length);
 
     for (int i = 0; i < functions.length; i++) {
       result[i] = _calculateFunction(functions[i], samples, minValue, maxValue);
@@ -73,6 +76,8 @@ class Graph2D extends CanvasDrawable {
       x += xDistance;
     }
 
+    _lastSampleDistance = xDistance;
+
     return result;
   }
 
@@ -85,6 +90,7 @@ class Graph2D extends CanvasDrawable {
     if (!_cacheValid) {
       int samples = _getSamples(rect.width);
       _valueCache = _calculateFunctions(_functions, samples, _minX, _maxX);
+      _cacheValid = true;
     }
 
     for (int i = 0; i < _functions.length; i++) {
@@ -148,6 +154,17 @@ class Graph2D extends CanvasDrawable {
   void removeFunction(Graph2DFunction function) {
     _functions.remove(function);
     _invalidateCache();
+  }
+
+  /// Translate whole graph area (min. and max. x and y values) by the passed [x] and [y].
+  void translate(double x, double y) {
+    _minX += x;
+    _maxX += x;
+
+    _minY += y;
+    _maxY += y;
+
+    _cacheValid = false;
   }
 
   num get precision => _precision;

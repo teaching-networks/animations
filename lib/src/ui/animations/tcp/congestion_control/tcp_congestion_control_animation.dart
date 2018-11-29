@@ -18,14 +18,14 @@ import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 class TCPCongestionControlAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   final I18nService _i18n;
 
-  double xPerSecond = 2.0;
+  double xPerSecond = 3.0;
   num lastTimestamp;
 
-  Graph2D test = Graph2D(precision: 10, minX: -10, maxX: 10, minY: -2, maxY: 2);
+  Graph2D test = Graph2D(precision: 5.0, minX: -4, maxX: 4, minY: -2, maxY: 2);
 
   TCPCongestionControlAnimation(this._i18n) {
-    test.addFunction((x) => x);
-    test.addFunction((x) => pow(x, 2));
+    test.addFunction((x) => max(-1, min(1, x)));
+    //test.addFunction((x) => pow(x, 2));
     test.addFunction((x) => sin(x));
   }
 
@@ -48,8 +48,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation implements OnInit, O
       num diff = timestamp - lastTimestamp;
       double add = xPerSecond * (diff / 1000);
 
-      test.minX += add;
-      test.maxX += add;
+      test.translate(add, 0.0);
     }
 
     test.render(context, toRect(0.0, 0.0, size));
