@@ -3,10 +3,9 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/function/graph2d_function.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/util/size.dart';
-
-/// Function to display as a graph.
-typedef num Graph2DFunction(num x);
 
 /// Draw an arbitrary graph using this drawable.
 class Graph2D extends CanvasDrawable {
@@ -85,7 +84,7 @@ class Graph2D extends CanvasDrawable {
     double x = minValue;
 
     for (int i = 0; i <= samples; i++) {
-      result.add(Point(x, function(x)));
+      result.add(Point(x, function.processor(x)));
 
       x += xDistance;
     }
@@ -122,14 +121,14 @@ class Graph2D extends CanvasDrawable {
     }
 
     for (int i = 0; i < _functions.length; i++) {
-      _renderGraph(context, Size(rect.width, rect.height), _valueCache[i]);
+      _renderGraph(context, Size(rect.width, rect.height), _functions[i], _valueCache[i]);
     }
 
     context.restore();
   }
 
-  /// Render the graph on the canvas [context] with the specified [size] and already calculates [values].
-  void _renderGraph(CanvasRenderingContext2D context, Size size, List<Point<double>> values) {
+  /// Render the graph on the canvas [context] with the specified [size] and already calculates [values] for a [function].
+  void _renderGraph(CanvasRenderingContext2D context, Size size, Graph2DFunction function, List<Point<double>> values) {
     if (values.isNotEmpty) {
       context.beginPath();
 
@@ -140,10 +139,20 @@ class Graph2D extends CanvasDrawable {
 
       Point<double> sample;
       bool notDrawnAnythingYet = true;
+
+      // first and last sample x offset for later use.
+      double firstDrawnSampleXOffset;
+      double lastDrawnSampleXOffset;
       for (int i = 0; i < samples; i++) {
         sample = values[i];
 
-        if (sample.x + _lastSampleDistance >= _minX || sample.x - _lastSampleDistance <= _maxX) {
+        if (sample.x + _lastSampleDistance < _minX) {
+          continue; // Out of range from left -> skip!
+        } else if (sample.x - _lastSampleDistance > _maxX) {
+          break; // Out of range from right -> break because the next samples won't be shown either.
+        } else {
+          // In range (visible sample) -> draw it!
+
           double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
           double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
 
@@ -151,15 +160,30 @@ class Graph2D extends CanvasDrawable {
             notDrawnAnythingYet = false;
 
             context.moveTo(xPixel, yPixel); // Position first point to draw.
+            firstDrawnSampleXOffset = xPixel;
           } else {
             context.lineTo(xPixel, yPixel); // Draw next point to draw.
           }
+
+          lastDrawnSampleXOffset = xPixel;
         }
       }
 
       context.lineJoin = 'round';
       context.lineWidth = window.devicePixelRatio * 3;
+      setStrokeColor(context, function.style.color);
       context.stroke();
+
+      if (function.style.fillArea) {
+        setFillColor(context, Color.opacity(function.style.color, 0.2));
+
+        // Close graph path over the bottom of the visible area.
+        context.lineTo(lastDrawnSampleXOffset, size.height);
+        context.lineTo(firstDrawnSampleXOffset, size.height);
+        context.closePath();
+
+        context.fill();
+      }
     }
   }
 

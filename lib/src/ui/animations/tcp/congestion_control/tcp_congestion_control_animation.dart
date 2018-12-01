@@ -1,32 +1,39 @@
 import 'dart:math';
 
 import 'package:angular/angular.dart';
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/function/graph2d_function.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// Animation showing the TCP congestion control mechanism.
 @Component(
     selector: "tcp-congestion-control-animation",
     templateUrl: "tcp_congestion_control_animation.html",
     styleUrls: ["tcp_congestion_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialSliderComponent],
+    directives: [coreDirectives, CanvasComponent, MaterialSliderComponent, MaterialButtonComponent, MaterialIconComponent],
     pipes: [I18nPipe])
-class TCPCongestionControlAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   final I18nService _i18n;
 
   double xPerSecond = 1.0;
   num lastTimestamp;
 
-  Graph2D test = Graph2D(precision: 5.0, minX: -4, maxX: 4, minY: -2, maxY: 2);
+  Graph2D graph = Graph2D(precision: 5.0, minX: -4, maxX: 4, minY: -2, maxY: 2);
+
+  Point<double> _lastMousePos;
 
   TCPCongestionControlAnimation(this._i18n) {
-    test.addFunction((x) => max(-1, min(1, x)));
-    //test.addFunction((x) => pow(x, 2));
-    test.addFunction((x) => sin(x));
+    graph.addFunction(Graph2DFunction(processor: (x) => sin(x), style: Graph2DFunctionStyle(fillArea: true)));
+    graph.addFunction(Graph2DFunction(processor: (x) => cos(x), style: Graph2DFunctionStyle(color: Colors.AMBER, fillArea: true)));
+    graph.addFunction(Graph2DFunction(processor: (x) => 0.1 * x, style: Graph2DFunctionStyle(color: Colors.CORAL, fillArea: true)));
   }
 
   @override
@@ -48,15 +55,50 @@ class TCPCongestionControlAnimation extends CanvasAnimation implements OnInit, O
       num diff = timestamp - lastTimestamp;
       double add = xPerSecond * (diff / 1000);
 
-      test.translate(add, 0.0);
+      if (!isPaused) {
+        graph.translate(add, 0.0);
+      }
     }
 
-    test.render(context, toRect(0.0, 0.0, size));
+    graph.render(context, toRect(0.0, 0.0, size));
 
     lastTimestamp = timestamp;
   }
 
+  /// What to do on mouse down on the canvas.
+  void onMouseDown(Point<double> pos) {
+    _lastMousePos = pos;
+  }
+
+  /// What to do on mouse up on the canvas.
+  void onMouseUp(Point<double> pos) {
+    _lastMousePos = null;
+  }
+
+  /// What to do on mouse move on the canvas.
+  void onMouseMove(Point<double> pos) {
+    if (_lastMousePos != null && isPaused) {
+      double xLength = graph.maxX - graph.minX;
+
+      double xDiff = (pos.x - _lastMousePos.x) / size.width * xLength;
+
+      graph.translate(-xDiff, 0.0);
+
+      _lastMousePos = pos;
+    }
+  }
+
   /// Aspect ratio of the canvas.
   double get aspectRatio => 2.0;
+
+  @override
+  void switchPauseSubAnimations() {
+    // Nothing to switch yet.
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    // Nothing to adjust.
+  }
 
 }

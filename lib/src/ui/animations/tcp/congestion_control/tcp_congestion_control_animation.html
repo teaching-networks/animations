@@ -1,12 +1,20 @@
 <div class="split-layout">
 	<div class="left">
-		<canvas-comp [aspectRatio]="aspectRatio" (onResized)="onCanvasResize($event)"
-					 (onReady)="onCanvasReady($event)"></canvas-comp>
+		<canvas-comp [aspectRatio]="aspectRatio"
+					 (onResized)="onCanvasResize($event)"
+					 (onReady)="onCanvasReady($event)"
+					 (onMouseDown)="onMouseDown($event)"
+					 (onMouseUp)="onMouseUp($event)"
+					 (onMouseMove)="onMouseMove($event)"></canvas-comp>
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled" style="width: 200px">
 				<label>Test</label>
+				<material-button raised (click)="switchPause()">
+					<material-icon *ngIf="isPaused" icon="play_circle_outline"></material-icon>
+					<material-icon *ngIf="!isPaused" icon="pause_circle_outline"></material-icon>
+				</material-button>
 			</li>
 		</ul>
 	</div>

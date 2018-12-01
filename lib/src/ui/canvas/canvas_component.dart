@@ -14,7 +14,7 @@ import 'package:hm_animations/src/util/size.dart';
  * to properly scale the canvas content while setting the width and height css properties to the unscaled width and height.
  */
 @Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [coreDirectives])
-class CanvasComponent implements OnInit {
+class CanvasComponent implements OnInit, OnDestroy {
   @ViewChild("canvasWrapper", read: HtmlElement)
   HtmlElement canvasWrapper;
 
@@ -36,6 +36,15 @@ class CanvasComponent implements OnInit {
    */
   final _clickController = new StreamController<Point<double>>.broadcast();
 
+  /// Stream controller emitting mouse move events on the canvas.
+  final _mouseDownController = new StreamController<Point<double>>.broadcast();
+
+  /// Stream controller emitting mouse up events on the canvas.
+  final _mouseUpController = new StreamController<Point<double>>.broadcast();
+
+  /// Stream controller emitting mouse moved events on the canvas.
+  final _mouseMoveController = new StreamController<Point<double>>.broadcast();
+
   /*
   Width and height of the canvas.
    */
@@ -52,6 +61,11 @@ class CanvasComponent implements OnInit {
   bool _resizeX = true;
   bool _resizeY = true;
 
+  StreamSubscription<MouseEvent> _clickSub;
+  StreamSubscription<MouseEvent> _mouseDownSub;
+  StreamSubscription<MouseEvent> _mouseUpSub;
+  StreamSubscription<MouseEvent> _mouseMoveSub;
+
   @override
   ngOnInit() {
     CanvasElement canvasElement = canvas as CanvasElement;
@@ -59,8 +73,20 @@ class CanvasComponent implements OnInit {
     // Get canvas rendering context used to draw on the canvas.
     CanvasRenderingContext2D context = canvasElement.getContext("2d");
 
-    canvasElement.onClick.listen((event) {
+    _clickSub = canvasElement.onClick.listen((event) {
       _clickController.add(_mouseEventToPoint(event));
+    });
+
+    _mouseDownSub = canvasElement.onMouseDown.listen((event) {
+      _mouseDownController.add(_mouseEventToPoint(event));
+    });
+
+    _mouseUpSub = canvasElement.onMouseUp.listen((event) {
+      _mouseUpController.add(_mouseEventToPoint(event));
+    });
+
+    _mouseMoveSub = canvasElement.onMouseMove.listen((event) {
+      _mouseMoveController.add(_mouseEventToPoint(event));
     });
 
     _initCanvasSize();
@@ -68,6 +94,20 @@ class CanvasComponent implements OnInit {
     // Send event that the user is able to start drawing.
     _readyController.add(context);
     _readyController.close();
+  }
+
+  @override
+  void ngOnDestroy() {
+    _clickSub.cancel();
+    _mouseUpSub.cancel();
+    _mouseMoveSub.cancel();
+    _mouseDownSub.cancel();
+
+    _sizeChangedController.close();
+    _clickController.close();
+    _mouseUpController.close();
+    _mouseDownController.close();
+    _mouseMoveController.close();
   }
 
   @Input()
@@ -139,6 +179,18 @@ class CanvasComponent implements OnInit {
   @Output()
   Stream get onClick => _clickController.stream;
 
+  /// Register on mouse down events on the canvas.
+  @Output()
+  Stream get onMouseDown => _mouseDownController.stream;
+
+  /// Register on mouse up events on the canvas.
+  @Output()
+  Stream get onMouseUp => _mouseUpController.stream;
+
+  /// Register on mouse down events on the canvas.
+  @Output()
+  Stream get onMouseMove => _mouseMoveController.stream;
+
   /**
    * Initialize the canvas size and append window resize listeners
    * to listen for resize events.
@@ -186,13 +238,15 @@ class CanvasComponent implements OnInit {
       resized = true;
     }
 
-    if (resized) {
-      _sizeChangedController.add(_getSize());
-    }
+    if (!_sizeChangedController.isClosed) {
+      if (resized) {
+        _sizeChangedController.add(_getSize());
+      }
 
-    window.requestAnimationFrame((timestamp) {
-      _resizeCanvas();
-    });
+      window.requestAnimationFrame((timestamp) {
+        _resizeCanvas();
+      });
+    }
   }
 
   /**
@@ -215,4 +269,5 @@ class CanvasComponent implements OnInit {
 
     return point;
   }
+
 }
