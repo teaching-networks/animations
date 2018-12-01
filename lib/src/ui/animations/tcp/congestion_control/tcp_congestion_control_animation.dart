@@ -18,7 +18,7 @@ import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 class TCPCongestionControlAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   final I18nService _i18n;
 
-  double xPerSecond = 3.0;
+  double xPerSecond = 1.0;
   num lastTimestamp;
 
   Graph2D test = Graph2D(precision: 5.0, minX: -4, maxX: 4, minY: -2, maxY: 2);

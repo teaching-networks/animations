@@ -40,17 +40,31 @@ class Graph2D extends CanvasDrawable {
   /// Distance from one sample to another from the last calculation.
   double _lastSampleDistance;
 
+  /// Defines how much more samples are calculated out of the minX to maxX range.
+  /// Example: 0.5 would precalculate the sample count * 0.5 more samples out of the x range.
+  /// 0.0 would not precalculate anything.
+  double _precalculationFactor;
+
   /// Cached values for the functions.
   List<List<Point<double>>> _valueCache;
 
+  /// Minimum x value which has been cached.
+  /// Since the x values are precalculated this might be smaller than [_minX].
+  double _minXInCache;
+
+  /// Maximum x value which has been cached.
+  /// Since the x values are precalculated this might be higher than [_maxX].
+  double _maxXInCache;
+
   /// Create new Graph2D.
-  Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null})
+  Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null, double precalculationFactor = 0.5})
       : this._minX = minX,
         this._maxX = maxX,
         this._minY = minY,
         this._maxY = maxY,
         this._points = points,
-        this._precision = precision;
+        this._precision = precision,
+        this._precalculationFactor = precalculationFactor;
 
   /// Calculate values for all functions.
   List<List<Point<double>>> _calculateFunctions(List<Graph2DFunction> functions, int samples, double minValue, double maxValue) {
@@ -81,6 +95,22 @@ class Graph2D extends CanvasDrawable {
     return result;
   }
 
+  /// Rebuild the function value cache.
+  void _rebuildCache(double pixelWidth) {
+    int samples = _getSamples(pixelWidth);
+
+    double valueLength = (_maxX - _minX).abs();
+    double precalculateLength = valueLength * _precalculationFactor;
+    double delta = precalculateLength / 2;
+
+    _minXInCache = _minX - delta;
+    _maxXInCache = _maxX + delta;
+
+    _valueCache = _calculateFunctions(_functions, samples, _minXInCache, _maxXInCache);
+
+    _cacheValid = true; // Mark cache as valid.
+  }
+
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     context.save();
@@ -88,9 +118,7 @@ class Graph2D extends CanvasDrawable {
     context.translate(rect.left, rect.top);
 
     if (!_cacheValid) {
-      int samples = _getSamples(rect.width);
-      _valueCache = _calculateFunctions(_functions, samples, _minX, _maxX);
-      _cacheValid = true;
+      _rebuildCache(rect.width);
     }
 
     for (int i = 0; i < _functions.length; i++) {
@@ -110,20 +138,23 @@ class Graph2D extends CanvasDrawable {
 
       int samples = values.length;
 
-      Point<double> sample = values[0];
-
-      double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
-      double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
-
-      context.moveTo(xPixel, yPixel);
-
-      for (int i = 1; i < samples; i++) {
+      Point<double> sample;
+      bool notDrawnAnythingYet = true;
+      for (int i = 0; i < samples; i++) {
         sample = values[i];
 
-        double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
-        double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
+        if (sample.x + _lastSampleDistance >= _minX || sample.x - _lastSampleDistance <= _maxX) {
+          double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
+          double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
 
-        context.lineTo(xPixel, yPixel);
+          if (notDrawnAnythingYet) {
+            notDrawnAnythingYet = false;
+
+            context.moveTo(xPixel, yPixel); // Position first point to draw.
+          } else {
+            context.lineTo(xPixel, yPixel); // Draw next point to draw.
+          }
+        }
       }
 
       context.lineJoin = 'round';
@@ -143,6 +174,17 @@ class Graph2D extends CanvasDrawable {
 
   /// Get the pixel for the passed value.
   double _valueToPixel(double value, double minValue, double length, double pixelSize) => (value - minValue) / length * pixelSize;
+
+  /// Should be called when the x range changes (minX and maxX).
+  /// Will check whether the cache should be invalidated.
+  void _onXRangeChange() {
+    if (_cacheValid) {
+      if (minX < _minXInCache
+          || maxX > _maxXInCache) {
+        _invalidateCache();
+      }
+    }
+  }
 
   /// Add a [function] to draw.
   void addFunction(Graph2DFunction function) {
@@ -164,7 +206,7 @@ class Graph2D extends CanvasDrawable {
     _minY += y;
     _maxY += y;
 
-    _cacheValid = false;
+    _onXRangeChange();
   }
 
   num get precision => _precision;
@@ -185,29 +227,27 @@ class Graph2D extends CanvasDrawable {
 
   set maxY(num value) {
     _maxY = value;
-    _invalidateCache();
   }
 
   num get minY => _minY;
 
   set minY(num value) {
     _minY = value;
-    _invalidateCache();
   }
 
   num get maxX => _maxX;
 
   set maxX(num value) {
     _maxX = value;
-    _invalidateCache();
+
+    _onXRangeChange();
   }
 
   num get minX => _minX;
 
   set minX(num value) {
     _minX = value;
-    _invalidateCache();
+
+    _onXRangeChange();
   }
-
-
 }
