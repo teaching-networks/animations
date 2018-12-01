@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/angular.dart';
@@ -26,14 +27,17 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   double xPerSecond = 1.0;
   num lastTimestamp;
 
-  Graph2D graph = Graph2D(precision: 5.0, minX: -4, maxX: 4, minY: -2, maxY: 2);
+  int bandwidth = 500;
+  double displayBandwidth = 0.5;
+
+  Graph2D graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: -2, maxX: 2, minY: 0, maxY: 1);
 
   Point<double> _lastMousePos;
 
   TCPCongestionControlAnimation(this._i18n) {
-    graph.addFunction(Graph2DFunction(processor: (x) => sin(x), style: Graph2DFunctionStyle(fillArea: true)));
-    graph.addFunction(Graph2DFunction(processor: (x) => cos(x), style: Graph2DFunctionStyle(color: Colors.AMBER, fillArea: true)));
-    graph.addFunction(Graph2DFunction(processor: (x) => 0.1 * x, style: Graph2DFunctionStyle(color: Colors.CORAL, fillArea: true)));
+    graph.addFunction(Graph2DFunction(processor: (x) => 0.3 * sin(x) + 0.5, style: Graph2DFunctionStyle(fillArea: true)));
+    graph.addFunction(Graph2DFunction(processor: (x) => 0.2 * cos(x) + 0.5, style: Graph2DFunctionStyle(color: Colors.AMBER, fillArea: true)));
+    graph.addFunction(Graph2DFunction(processor: (x) => displayBandwidth, style: Graph2DFunctionStyle(color: Colors.CORAL)));
   }
 
   @override
@@ -86,6 +90,15 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
       _lastMousePos = pos;
     }
+  }
+
+  /// What to do if the bandwidth is changed.
+  void onBandwidthChange(int newBandwidth) {
+    bandwidth = newBandwidth;
+    displayBandwidth = newBandwidth / 1000;
+
+    // Tell graph to recalculate.
+    graph.invalidate();
   }
 
   /// Aspect ratio of the canvas.

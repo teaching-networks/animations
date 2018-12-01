@@ -187,6 +187,10 @@ class Graph2D extends CanvasDrawable {
     }
   }
 
+  /// Invalidate the graph. Will recalculate everything.
+  /// Do this for example from outside if functions change.
+  void invalidate() => _invalidateCache();
+
   /// Invalidate the value cache. Needs to be recalculated afterwards.
   void _invalidateCache() => _cacheValid = false;
 
