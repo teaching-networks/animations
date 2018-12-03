@@ -10,8 +10,10 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/function/graph2d_function.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_function.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// Animation showing the TCP congestion control mechanism.
@@ -22,27 +24,41 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     directives: [coreDirectives, CanvasComponent, MaterialSliderComponent, MaterialButtonComponent, MaterialIconComponent],
     pipes: [I18nPipe])
 class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+  /// Service for translations.
   final I18nService _i18n;
 
+  /// x-value increase per second (Transition of the graph).
   double xPerSecond = 1.0;
+
+  /// Timestamp needed for animating.
   num lastTimestamp;
 
+  /// Current bandwidth to simulate (in MBit).
   int bandwidth = 500;
+
+  /// Current bandwidth shown in the graph (y-value).
   double displayBandwidth = 0.5;
 
+  /// Graph to show the network traffic.
   Graph2D graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: -2, maxX: 2, minY: 0, maxY: 1);
 
+  /// Temporary last mouse position (used for example to determine graph drags).
   Point<double> _lastMousePos;
 
   TCPCongestionControlAnimation(this._i18n) {
-    graph.addFunction(Graph2DFunction(processor: (x) => 0.3 * sin(x) + 0.5, style: Graph2DFunctionStyle(fillArea: true)));
-    graph.addFunction(Graph2DFunction(processor: (x) => 0.2 * cos(x) + 0.5, style: Graph2DFunctionStyle(color: Colors.AMBER, fillArea: true)));
-    graph.addFunction(Graph2DFunction(processor: (x) => displayBandwidth, style: Graph2DFunctionStyle(color: Colors.CORAL)));
+    graph.add(Graph2DFunction(processor: (x) => 0.3 * sin(x) + 0.5, style: Graph2DStyle(fillArea: true)));
+    graph.add(Graph2DFunction(processor: (x) => displayBandwidth, style: Graph2DStyle(color: Colors.CORAL)));
+    graph.add(Graph2DSeries(series: [
+      Point(-2.0, 0.0),
+      Point(-1.0, 0.3),
+      Point(0.0, 0.5),
+      Point(1.0, 0.0),
+      Point(2.0, 0.3)
+    ], style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true)));
   }
 
   @override
-  void ngOnInit() {
-  }
+  void ngOnInit() {}
 
   @override
   ngOnDestroy() {
@@ -113,5 +129,4 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   void unpaused(num timestampDifference) {
     // Nothing to adjust.
   }
-
 }

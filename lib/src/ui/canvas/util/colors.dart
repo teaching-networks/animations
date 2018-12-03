@@ -15,6 +15,7 @@ class Colors {
   static const Color RED = Color.hex(0xFFFF0000);
   static const Color CORAL = Color.rgb(255, 102, 102);
   static const Color LIME = Color.hex(0xFFCCFF33);
+  static const Color GREY_GREEN = Color.hex(0xFF66CC66);
   static const Color AMBER = Color.hex(0xFFFFD54F);
   static const Color BLUE_GRAY = Color.hex(0xFF607D8B);
   static const Color TEAL = Color.hex(0xFF009688);

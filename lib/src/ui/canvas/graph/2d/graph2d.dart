@@ -3,14 +3,17 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/function/graph2d_function.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/interfaces/graph2d_calculatable.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/interfaces/graph2d_renderable.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/util/size.dart';
 
 /// Draw an arbitrary graph using this drawable.
 class Graph2D extends CanvasDrawable {
   /// Functions to draw in the graph.
-  List<Graph2DFunction> _functions = List<Graph2DFunction>();
+  List<Graph2DRenderable> _renderables = List<Graph2DRenderable>();
 
   /// Minimum x-axis value.
   num _minX;
@@ -36,16 +39,10 @@ class Graph2D extends CanvasDrawable {
   /// May change once the graphs values (e.g. [minX], [maxX], ...) change.
   bool _cacheValid = false;
 
-  /// Distance from one sample to another from the last calculation.
-  double _lastSampleDistance;
-
   /// Defines how much more samples are calculated out of the minX to maxX range.
   /// Example: 0.5 would precalculate the sample count * 0.5 more samples out of the x range.
   /// 0.0 would not precalculate anything.
-  double _precalculationFactor;
-
-  /// Cached values for the functions.
-  List<List<Point<double>>> _valueCache;
+  double _preCalculationFactor;
 
   /// Minimum x value which has been cached.
   /// Since the x values are precalculated this might be smaller than [_minX].
@@ -56,59 +53,14 @@ class Graph2D extends CanvasDrawable {
   double _maxXInCache;
 
   /// Create new Graph2D.
-  Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null, double precalculationFactor = 0.5})
+  Graph2D({num minX = -1.0, num maxX = 1.0, num minY = -1.0, num maxY = 1.0, num points = 100, num precision = null, double preCalculationFactor = 0.5})
       : this._minX = minX,
         this._maxX = maxX,
         this._minY = minY,
         this._maxY = maxY,
         this._points = points,
         this._precision = precision,
-        this._precalculationFactor = precalculationFactor;
-
-  /// Calculate values for all functions.
-  List<List<Point<double>>> _calculateFunctions(List<Graph2DFunction> functions, int samples, double minValue, double maxValue) {
-    List<List<Point<double>>> result = List<List<Point<double>>>(functions.length);
-
-    for (int i = 0; i < functions.length; i++) {
-      result[i] = _calculateFunction(functions[i], samples, minValue, maxValue);
-    }
-
-    return result;
-  }
-
-  /// Calculate values for the passed function.
-  List<Point<double>> _calculateFunction(Graph2DFunction function, int samples, double minValue, double maxValue) {
-    List<Point<double>> result = List<Point<double>>();
-
-    double xDistance = (maxValue - minValue) / samples;
-    double x = minValue;
-
-    for (int i = 0; i <= samples; i++) {
-      result.add(Point(x, function.processor(x)));
-
-      x += xDistance;
-    }
-
-    _lastSampleDistance = xDistance;
-
-    return result;
-  }
-
-  /// Rebuild the function value cache.
-  void _rebuildCache(double pixelWidth) {
-    int samples = _getSamples(pixelWidth);
-
-    double valueLength = (_maxX - _minX).abs();
-    double precalculateLength = valueLength * _precalculationFactor;
-    double delta = precalculateLength / 2;
-
-    _minXInCache = _minX - delta;
-    _maxXInCache = _maxX + delta;
-
-    _valueCache = _calculateFunctions(_functions, samples, _minXInCache, _maxXInCache);
-
-    _cacheValid = true; // Mark cache as valid.
-  }
+        this._preCalculationFactor = preCalculationFactor;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -120,62 +72,62 @@ class Graph2D extends CanvasDrawable {
       _rebuildCache(rect.width);
     }
 
-    for (int i = 0; i < _functions.length; i++) {
-      _renderGraph(context, Size(rect.width, rect.height), _functions[i], _valueCache[i]);
+    for (int i = 0; i < _renderables.length; i++) {
+      _renderGraph(context, Size(rect.width, rect.height), _renderables[i]);
     }
 
     context.restore();
   }
 
-  /// Render the graph on the canvas [context] with the specified [size] and already calculates [values] for a [function].
-  void _renderGraph(CanvasRenderingContext2D context, Size size, Graph2DFunction function, List<Point<double>> values) {
-    if (values.isNotEmpty) {
-      context.beginPath();
+  /// Render the passed [renderable] with the specified [size] and on the passed [context].
+  void _renderGraph(CanvasRenderingContext2D context, Size size, Graph2DRenderable renderable) {
+    List<Point<double>> samples = renderable.getSamples();
 
-      double yLength = _maxY - _minY;
-      double xLength = _maxX - _minX;
+    if (samples.isEmpty) {
+      return;
+    }
 
-      int samples = values.length;
+    try {
+      int firstIndex = _findFirstIndexToDraw(samples);
+      int lastIndex = _findLastIndexToDraw(samples, firstIndex);
 
-      Point<double> sample;
-      bool notDrawnAnythingYet = true;
+      double xRange = _maxX - _minX;
+      double yRange = _maxY - _minY;
 
       // first and last sample x offset for later use.
       double firstDrawnSampleXOffset;
       double lastDrawnSampleXOffset;
-      for (int i = 0; i < samples; i++) {
-        sample = values[i];
 
-        if (sample.x + _lastSampleDistance < _minX) {
-          continue; // Out of range from left -> skip!
-        } else if (sample.x - _lastSampleDistance > _maxX) {
-          break; // Out of range from right -> break because the next samples won't be shown either.
+      context.beginPath();
+
+      // Draw all visible samples.
+      double xPixel;
+      double yPixel;
+      for (int i = firstIndex; i <= lastIndex; i++) {
+        Point<double> sample = samples[i];
+
+        xPixel = _valueToPixel(sample.x, _minX, xRange, size.width);
+        yPixel = _toY(_valueToPixel(sample.y, _minY, yRange, size.height), size.height);
+
+        if (i == firstIndex) {
+          context.moveTo(xPixel, yPixel); // First point to draw.
+          firstDrawnSampleXOffset = xPixel;
         } else {
-          // In range (visible sample) -> draw it!
-
-          double xPixel = _valueToPixel(sample.x, _minX, xLength, size.width);
-          double yPixel = _toY(_valueToPixel(sample.y, _minY, yLength, size.height), size.height);
-
-          if (notDrawnAnythingYet) {
-            notDrawnAnythingYet = false;
-
-            context.moveTo(xPixel, yPixel); // Position first point to draw.
-            firstDrawnSampleXOffset = xPixel;
-          } else {
-            context.lineTo(xPixel, yPixel); // Draw next point to draw.
-          }
-
-          lastDrawnSampleXOffset = xPixel;
+          context.lineTo(xPixel, yPixel); // Draw next point to draw.
         }
+
+        lastDrawnSampleXOffset = xPixel;
       }
+
+      Graph2DStyle style = renderable.getStyle();
 
       context.lineJoin = 'round';
       context.lineWidth = window.devicePixelRatio * 3;
-      setStrokeColor(context, function.style.color);
+      setStrokeColor(context, style.color);
       context.stroke();
 
-      if (function.style.fillArea) {
-        setFillColor(context, Color.opacity(function.style.color, 0.2));
+      if (style.fillArea) {
+        setFillColor(context, Color.opacity(style.color, 0.2));
 
         // Close graph path over the bottom of the visible area.
         context.lineTo(lastDrawnSampleXOffset, size.height);
@@ -184,7 +136,80 @@ class Graph2D extends CanvasDrawable {
 
         context.fill();
       }
+    } catch (e) {
+      // Do nothing.
     }
+  }
+
+  /// Find the first index to draw in the list of [samples].
+  /// Returns either the index of the sample to draw first (the sample before the first visible one)
+  /// or throws exception if there is no sample to draw at all.
+  int _findFirstIndexToDraw(List<Point<double>> samples) {
+    for (int i = 0; i < samples.length; i++) {
+      if (samples[i].x >= _minX) {
+        return max(0, i - 1); // Is visible
+      }
+    }
+
+    throw Exception("No first sample to draw found.");
+  }
+
+  /// Find the last index to draw in the list of [samples] with a [startIndex].
+  /// Returns either the index to draw last (sample after the last visible one) or throws an exception
+  /// if there is no sample to draw at all.
+  int _findLastIndexToDraw(List<Point<double>> samples, int startIndex) {
+    if (samples.isEmpty) {
+      throw Exception("No last sample to draw found.");
+    }
+
+    for (int i = startIndex; i < samples.length; i++) {
+      if (samples[i].x > _maxX) {
+        return i; // Is invisible
+      }
+    }
+
+    return samples.length - 1;
+  }
+
+  /// Rebuild the value cache for all calculatable Graph2D components.
+  void _rebuildCache(double pixelWidth) {
+    int samples = _getSamples(pixelWidth);
+
+    double valueLength = (_maxX - _minX).abs();
+    double preCalculateLength = valueLength * _preCalculationFactor;
+    double delta = preCalculateLength / 2;
+
+    _minXInCache = _minX - delta;
+    _maxXInCache = _maxX + delta;
+
+    _calculateRenderables(_renderables, samples, _minXInCache, _maxXInCache);
+
+    _cacheValid = true; // Mark cache as valid.
+  }
+
+  /// Calculate values for all calculatable Graph2D renderables.
+  void _calculateRenderables(List<Graph2DRenderable> renderables, int samples, double minValue, double maxValue) {
+    for (Graph2DRenderable renderable in renderables) {
+      if (renderable is Graph2DCalculatable) {
+        _recalculate(renderable as Graph2DCalculatable, samples, minValue, maxValue);
+      }
+    }
+  }
+
+  /// Calculate values for the passed function.
+  void _recalculate(Graph2DCalculatable calculatable, int samples, double minValue, double maxValue) {
+    List<Point<double>> result = List<Point<double>>();
+
+    double xDistance = (maxValue - minValue) / samples;
+    double x = minValue;
+
+    for (int i = 0; i <= samples; i++) {
+      result.add(Point(x, calculatable.getProcessor()(x)));
+
+      x += xDistance;
+    }
+
+    calculatable.cached = result; // Store the result in Graph2D component cache
   }
 
   /// Invalidate the graph. Will recalculate everything.
@@ -207,22 +232,21 @@ class Graph2D extends CanvasDrawable {
   /// Will check whether the cache should be invalidated.
   void _onXRangeChange() {
     if (_cacheValid) {
-      if (minX < _minXInCache
-          || maxX > _maxXInCache) {
+      if (minX < _minXInCache || maxX > _maxXInCache) {
         _invalidateCache();
       }
     }
   }
 
-  /// Add a [function] to draw.
-  void addFunction(Graph2DFunction function) {
-    _functions.add(function);
+  /// Add a [renderable] to draw.
+  void add(Graph2DRenderable renderable) {
+    _renderables.add(renderable);
     _invalidateCache();
   }
 
-  /// Remove a [function] to draw.
-  void removeFunction(Graph2DFunction function) {
-    _functions.remove(function);
+  /// Remove a [renderable] to draw.
+  void remove(Graph2DRenderable renderable) {
+    _renderables.remove(renderable);
     _invalidateCache();
   }
 
