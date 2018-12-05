@@ -35,7 +35,7 @@ class TCPTahoe implements TCPCongestionControlAlgorithm {
   void onACK(TCPCongestionControlContext context) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
-    if (algorithm == null) {
+    if (algorithm == null || algorithm.onAckMethod == null) {
       throw Exception("State $context.state is unknown to the TCP Tahoe congestion control algorithm.");
     }
 

@@ -7,6 +7,9 @@ import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_reno.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_tahoe.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/tcp_congestion_controller.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
@@ -24,37 +27,50 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     directives: [coreDirectives, CanvasComponent, MaterialSliderComponent, MaterialButtonComponent, MaterialIconComponent],
     pipes: [I18nPipe])
 class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+  /// Scale of one ACK on the graph.
+  /// 100 means 1:100 which means 1 on the x-axis of the graph is 100 ACKs.
+  static const int ACK_ON_GRAPH_SCALE = 100;
+
+  /// Maximum possible bandwidth in MSS (Maximum segment size).
+  static const int MAX_BANDWIDTH = 100;
+
   /// Service for translations.
   final I18nService _i18n;
 
-  /// x-value increase per second (Transition of the graph).
-  double xPerSecond = 1.0;
+  /// How many ACKs are simulated in a second.
+  double acksPerSecond = 1.0;
+
+  /// The progress of receiving the next ACK.
+  /// 0.5 means for example that the next ACK is halfway there!
+  double ackProgress = 0.0;
 
   /// Timestamp needed for animating.
   num lastTimestamp;
 
-  /// Current bandwidth to simulate (in MBit).
-  int bandwidth = 500;
+  /// Current bandwidth to simulate (in MSS - Maximum segment size).
+  int bandwidth = MAX_BANDWIDTH ~/ 2;
 
   /// Current bandwidth shown in the graph (y-value).
   double displayBandwidth = 0.5;
 
   /// Graph to show the network traffic.
-  Graph2D graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: -2, maxX: 2, minY: 0, maxY: 1);
+  Graph2D graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: 0, maxX: 1, minY: 0, maxY: 1);
 
   /// Temporary last mouse position (used for example to determine graph drags).
   Point<double> _lastMousePos;
 
+  TCPCongestionController _controller;
+
+  List<Point<double>> test;
+
   TCPCongestionControlAnimation(this._i18n) {
-    graph.add(Graph2DFunction(processor: (x) => 0.3 * sin(x) + 0.5, style: Graph2DStyle(fillArea: true)));
+    _controller = TCPCongestionController(bandwidth);
+    _controller.algorithm = TCPReno();
+
+    test = [Point(graph.maxX, 0.0)];
+
     graph.add(Graph2DFunction(processor: (x) => displayBandwidth, style: Graph2DStyle(color: Colors.CORAL)));
-    graph.add(Graph2DSeries(series: [
-      Point(-2.0, 0.0),
-      Point(-1.0, 0.3),
-      Point(0.0, 0.5),
-      Point(1.0, 0.0),
-      Point(2.0, 0.3)
-    ], style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true)));
+    graph.add(Graph2DSeries(series: test, style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true)));
   }
 
   @override
@@ -71,12 +87,26 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
     context.strokeRect(0.0, 0.0, size.width, size.height);
 
-    if (lastTimestamp != null) {
+    if (lastTimestamp != null && !isPaused) {
       num diff = timestamp - lastTimestamp;
-      double add = xPerSecond * (diff / 1000);
 
-      if (!isPaused) {
-        graph.translate(add, 0.0);
+      double add = acksPerSecond * (diff / 1000);
+      ackProgress += add;
+
+      graph.translate(add / ACK_ON_GRAPH_SCALE, 0.0);
+
+      if (ackProgress >= 1.0) {
+        int packets = ackProgress.floor();
+        ackProgress = ackProgress - packets;
+
+        // Mostly this is only 1 packet.
+        // But for slow computers or extremely high [acksPerSecond]
+        // packets might be lost otherwise.
+        for (int i = 0; i < packets; i++) {
+          _controller.onACKReceived();
+
+          _nextTestPoint();
+        }
       }
     }
 
@@ -111,7 +141,9 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// What to do if the bandwidth is changed.
   void onBandwidthChange(int newBandwidth) {
     bandwidth = newBandwidth;
-    displayBandwidth = newBandwidth / 1000;
+    displayBandwidth = newBandwidth / MAX_BANDWIDTH;
+
+    _controller.availableBandwidth = bandwidth;
 
     // Tell graph to recalculate.
     graph.invalidate();
@@ -128,5 +160,38 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   @override
   void unpaused(num timestampDifference) {
     // Nothing to adjust.
+  }
+
+  void testTimeout() {
+    _controller.onTimeout();
+    _nextTestPoint();
+  }
+
+  void test3Acks() {
+    _controller.onDuplicateACK(3);
+    _nextTestPoint();
+  }
+
+  void _nextTestPoint() {
+    Point next = Point<double>(graph.maxX, _controller.getCwndTest() / MAX_BANDWIDTH);
+
+    // Check if linear line by checking the last two points vector.
+    Point p1 = test.last;
+    Point p2 = test[test.length - 1];
+
+    double xInc1 = p1.x - p2.x;
+    double yInc1 = p1.y - p2.y;
+
+    p2 = p1;
+    p1 = next;
+
+    double xInc2 = p1.x - p2.x;
+    double yInc2 = p1.y - p2.y;
+
+    if (xInc1 == xInc2 && yInc1 == yInc2) {
+      test.last = Point(p2.x + xInc2, p2.y + yInc2);
+    } else {
+      test.add(next);
+    }
   }
 }

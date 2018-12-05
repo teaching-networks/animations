@@ -26,7 +26,7 @@ class TCPReno implements TCPCongestionControlAlgorithm {
   void onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
-    if (algorithm != null) {
+    if (algorithm != null && algorithm.onDuplicateAckMethod != null) {
       algorithm.onDuplicateACK(context, numberOfDuplicateACKs);
     } else {
       if (numberOfDuplicateACKs == 3) {
@@ -48,7 +48,7 @@ class TCPReno implements TCPCongestionControlAlgorithm {
   void onACK(TCPCongestionControlContext context) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
-    if (algorithm != null) {
+    if (algorithm != null && algorithm.onAckMethod != null) {
       algorithm.onACK(context);
     } else {
       context.congestionWindow += 1; // Congestion avoidance mode
