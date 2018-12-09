@@ -8,9 +8,10 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp
 class TCPTahoe implements TCPCongestionControlAlgorithm {
   Map<TCPCongestionControlState, TCPCongestionControlAlgorithm> _states = {
     TCPCongestionControlState.SLOW_START: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
-      context.congestionWindow = max(context.congestionWindow * 2, context.slowStartThreshold);
+      context.congestionWindow *= 2;
 
-      if (context.congestionWindow == context.slowStartThreshold) {
+      if (context.slowStartThreshold != -1 && context.congestionWindow >= context.slowStartThreshold) {
+        context.congestionWindow = context.slowStartThreshold;
         context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
       }
     }),

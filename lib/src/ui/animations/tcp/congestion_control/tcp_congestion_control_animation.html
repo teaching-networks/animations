@@ -13,27 +13,13 @@
 				<label>Bandwidth</label>
 				<span class="slider-panel">
 					<material-slider [min]="0"
-									 [max]="1000"
-									 [step]="25"
+									 [max]="100"
+									 [step]="1"
 									 [value]="bandwidth"
 									 (valueChange)="onBandwidthChange($event)">
 					</material-slider>
 					<div>
 						{{ bandwidth }}
-					</div>
-				</span>
-			</li>
-
-			<li class="labeled">
-				<label>Speed</label>
-				<span class="slider-panel">
-				<material-slider [min]="1.0"
-								 [max]="100.0"
-								 [step]="1.0"
-								 [(value)]="acksPerSecond">
-				</material-slider>
-					<div>
-						ACKs per second = {{ acksPerSecond }}
 					</div>
 				</span>
 			</li>

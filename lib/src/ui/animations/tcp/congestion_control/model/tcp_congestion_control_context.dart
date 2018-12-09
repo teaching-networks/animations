@@ -3,7 +3,7 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp
 /// Context for TCP congestion control.
 class TCPCongestionControlContext {
   /// Slow start threshold (ssthresh).
-  int slowStartThreshold = 0;
+  int slowStartThreshold = -1;
 
   /// Congestion window size (cwnd).
   int congestionWindow = 1;

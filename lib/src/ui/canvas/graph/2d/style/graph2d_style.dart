@@ -9,7 +9,15 @@ class Graph2DStyle {
   /// Whether to fill the area below the Graph2D component line.
   final bool fillArea;
 
-  const Graph2DStyle({Color color = Colors.SLATE_GREY, bool fillArea = false})
+  /// The join type of the line.
+  final String lineJoin;
+
+  /// Line cap type.
+  final String lineCap;
+
+  const Graph2DStyle({Color color = Colors.SLATE_GREY, bool fillArea = false, String lineJoin = "round", String lineCap = "round"})
       : this.color = color,
-        this.fillArea = fillArea;
+        this.fillArea = fillArea,
+        this.lineJoin = lineJoin,
+        this.lineCap = lineCap;
 }

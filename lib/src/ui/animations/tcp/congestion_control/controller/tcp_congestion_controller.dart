@@ -16,6 +16,9 @@ class TCPCongestionController {
   /// Currently available bandwidth (in MSS - Maximum segment size).
   int _availableBandwidth;
 
+  /// Whether to simulate the next ACK receival as lost packet.
+  bool _simulateACKLost = false;
+
   TCPCongestionController(this._availableBandwidth);
 
   set algorithm(TCPCongestionControlAlgorithm value) {
@@ -26,24 +29,45 @@ class TCPCongestionController {
     _availableBandwidth = value;
   }
 
-  void onDuplicateACK(int numberOfDuplicateACKs) {
+  /// What to do when a duplicate ACK has been received.
+  /// Returns whether the state has been changed.
+  bool onDuplicateACK(int numberOfDuplicateACKs) {
+    TCPCongestionControlState stateBefore = _context.state;
+
     _algorithm.onDuplicateACK(_context, numberOfDuplicateACKs);
+
+    return stateBefore != _context.state;
   }
 
-  void onTimeout() {
+  /// What to do when a timeout happened.
+  /// Returns whether the state has been changed.
+  bool onTimeout() {
+    TCPCongestionControlState stateBefore = _context.state;
+
     _algorithm.onTimeout(_context);
+
+    return stateBefore != _context.state;
   }
 
-  void onACKReceived() {
-    _algorithm.onACK(_context);
+  /// What to do when an ACK has been received.
+  /// Returns whether the state has been changed.
+  bool onACKReceived() {
+    TCPCongestionControlState stateBefore = _context.state;
 
-    if (_context.congestionWindow > _availableBandwidth) {
-      // Simulate a packet loss as the available bandwidth has been exceeded.
+    if (_simulateACKLost) {
+      _simulateACKLost = false;
       onDuplicateACK(3);
+    } else {
+      _algorithm.onACK(_context);
+
+      if (_context.congestionWindow > _availableBandwidth) {
+        // Simulate a packet loss as the available bandwidth has been exceeded.
+        _simulateACKLost = true;
+      }
     }
+
+    return stateBefore != _context.state;
   }
 
-  int getCwndTest() {
-    return _context.congestionWindow;
-  }
+  TCPCongestionControlContext get context => _context;
 }
