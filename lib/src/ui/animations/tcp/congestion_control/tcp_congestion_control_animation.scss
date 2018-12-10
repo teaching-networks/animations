@@ -1,0 +1,17 @@
+.tcp-entity-control {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-between;
+
+  & > material-button {
+    background-color: white;
+  }
+}
+
+.button-control {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: space-evenly;
+}

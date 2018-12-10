@@ -24,20 +24,54 @@
 				</span>
 			</li>
 
-			<li class="labeled">
-				<material-button raised (click)="switchPause()">
+			<li class="labeled button-control">
+				<material-button raised icon (click)="switchPause()" materialTooltip="Pause / Unpause">
 					<material-icon *ngIf="isPaused" icon="play_circle_outline"></material-icon>
 					<material-icon *ngIf="!isPaused" icon="pause_circle_outline"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="testTimeout()">
-					TimeoutTest
+				<material-button raised icon [disabled]="tcpEntities.length >= maxTCPEntities" (click)="addTCPEntity()"
+								 materialTooltip="Add workstation">
+					<material-icon icon="add_circle"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="test3Acks()">
-					3AcksTest
+				<material-button raised icon [disabled]="tcpEntities.length == 1"
+								 (click)="removeTCPEntity()" materialTooltip="Remove workstation">
+					<material-icon icon="delete_forever"></material-icon>
 				</material-button>
 			</li>
+
+			<li class="exception">
+				<hr>
+			</li>
+
+			<li class="labeled" *ngFor="let tcpEntity of tcpEntities; let i = index"
+				[ngStyle]="{'background-color': getBrighterColor(tcpEntity.color).toCSSColorString()}">
+				<label [ngStyle]="{'color': tcpEntity.color.toCSSColorString()}">Workstation {{ i + 1 }}</label>
+
+				<div class="tcp-entity-control">
+					<material-button raised (click)="doTimeout(tcpEntity)"
+									 materialTooltip="Simulate a timeout on the workstation">
+						Timeout
+					</material-button>
+
+					<material-button raised (click)="do3Acks(tcpEntity)"
+									 materialTooltip="Simulate 3 duplicate ACK packets on the workstation">
+						3 ACKs
+					</material-button>
+
+					<material-dropdown-select style="width: 80px" raised
+											  [buttonText]="tcpEntity.selectionModel.selectedValues.first.getName()"
+											  [selection]="tcpEntity.selectionModel"
+											  [options]="algorithmOptions"
+											  [itemRenderer]="algorithmItemRenderer"
+											  [deselectOnActivate]="false"
+											  (selectionChange)="onAlgorithmChange(tcpEntity, $event)"
+											  materialTooltip="TCP congestion control algorithm to use">
+					</material-dropdown-select>
+				</div>
+			</li>
+
 		</ul>
 	</div>
 </div>

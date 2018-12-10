@@ -6,6 +6,9 @@ class Graph2DStyle {
   /// [color] of the Graph2D component.
   final Color color;
 
+  /// Whether to draw the line of the Graph2D component.
+  final bool drawLine;
+
   /// Whether to fill the area below the Graph2D component line.
   final bool fillArea;
 
@@ -15,8 +18,9 @@ class Graph2DStyle {
   /// Line cap type.
   final String lineCap;
 
-  const Graph2DStyle({Color color = Colors.SLATE_GREY, bool fillArea = false, String lineJoin = "round", String lineCap = "round"})
+  const Graph2DStyle({Color color = Colors.SLATE_GREY, bool drawLine = true, bool fillArea = false, String lineJoin = "round", String lineCap = "round"})
       : this.color = color,
+        this.drawLine = drawLine,
         this.fillArea = fillArea,
         this.lineJoin = lineJoin,
         this.lineCap = lineCap;

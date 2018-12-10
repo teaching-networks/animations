@@ -4,11 +4,18 @@ import 'dart:math';
 import 'package:angular/angular.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_components/material_select/material_dropdown_select.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
+import 'package:angular_components/material_tooltip/material_tooltip.dart';
+import 'package:angular_components/model/selection/selection_model.dart';
+import 'package:angular_components/model/selection/selection_options.dart';
+import 'package:angular_components/model/ui/has_renderer.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_reno.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_tahoe.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/tcp_congestion_control_algorithm.dart';
+import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/congestion_window_provider.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/tcp_congestion_controller.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp_congestion_control_state.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
@@ -18,6 +25,11 @@ import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_functio
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
@@ -26,8 +38,17 @@ import 'package:vector_math/vector_math_64.dart' as vector;
     selector: "tcp-congestion-control-animation",
     templateUrl: "tcp_congestion_control_animation.html",
     styleUrls: ["tcp_congestion_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialSliderComponent, MaterialButtonComponent, MaterialIconComponent],
-    pipes: [I18nPipe])
+    directives: [
+      coreDirectives,
+      CanvasComponent,
+      MaterialSliderComponent,
+      MaterialButtonComponent,
+      MaterialIconComponent,
+      MaterialTooltipDirective,
+      MaterialDropdownSelectComponent
+    ],
+    pipes: [I18nPipe],
+    changeDetection: ChangeDetectionStrategy.OnPush)
 class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   /// How many ACKs fit on the x-axis of the graph.
   static const int ACKS_ON_GRAPH_X = 100;
@@ -38,6 +59,15 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// Maximum size of a series list.
   static const int MAX_SERIES_SIZE = 250;
 
+  /// Background color of the graph.
+  static const Color BACKGROUND_COLOR = Color.hex(0xFFF9F9F9);
+
+  /// Colors for the TCP entities.
+  static const List<Color> TCP_ENTITY_COLORS = const [Colors.ORANGE, Colors.PURPLE, Colors.PINK_RED, Colors.TEAL];
+
+  /// Maximum amount of TCP entities.
+  static const int MAX_TCP_ENTITIES = 4;
+
   /// Service for translations.
   final I18nService _i18n;
 
@@ -46,16 +76,19 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
   /// The progress of receiving the next ACK.
   /// 0.5 means for example that the next ACK is halfway there!
-  double ackProgress = 0.0;
+  double _ackProgress = 0.0;
 
   /// Timestamp needed for animating.
-  num lastTimestamp;
+  num _lastAnimTimestamp;
 
   /// Current bandwidth to simulate (in MSS - Maximum segment size).
   int bandwidth = MAX_BANDWIDTH ~/ 2;
 
+  /// The currently available bandwidth.
+  AvailableBandwidth _availableBandwidth;
+
   /// Graph to show the network traffic.
-  Graph2D graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: 0, maxX: ACKS_ON_GRAPH_X, minY: 0, maxY: MAX_BANDWIDTH);
+  Graph2D _graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: 0, maxX: ACKS_ON_GRAPH_X, minY: 0, maxY: MAX_BANDWIDTH);
 
   /// Temporary last mouse position (used for example to determine graph drags).
   Point<double> _lastMousePos;
@@ -66,22 +99,39 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// Max x before pause.
   double _beforePauseMaxX;
 
-  TCPCongestionController _controller;
+  /// List of tcp entities in the simulation.
+  List<TCPEntity> _tcpEntities = List<TCPEntity>();
 
-  List<Point<double>> test;
+  /// Plot of the total congestion window size.
+  List<Point<double>> _totalCongestionWindowPlot;
+
+  /// Rectangle forming the background of the canvas.
+  RoundRectangle _backgroundRect =
+      RoundRectangle(color: BACKGROUND_COLOR, paintMode: PaintMode.FILL, radius: Edges.all(0.02), radiusSizeType: SizeType.PERCENT);
+
+  /// Algorithms for TCP congestion control.
+  List<TCPCongestionControlAlgorithm> _algorithms = [TCPReno(), TCPTahoe()];
+
+  SelectionOptions<TCPCongestionControlAlgorithm> algorithmOptions;
+  static ItemRenderer<TCPCongestionControlAlgorithm> algorithmItemRenderer = (algorithm) => algorithm.getName();
 
   TCPCongestionControlAnimation(this._i18n) {
-    _controller = TCPCongestionController(bandwidth);
-    _controller.algorithm = TCPTahoe();
+    _availableBandwidth = AvailableBandwidth(bandwidth);
 
-    test = [Point(graph.maxX, 0.0)];
+    addTCPEntity(); // Add initial TCP entity.
 
-    graph.add(Graph2DFunction(processor: (x) => bandwidth, style: Graph2DStyle(color: Colors.CORAL)));
-    graph.add(Graph2DSeries(series: test, style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true)));
+    // Add line graph for the maximum bandwidth.
+    _graph.add(Graph2DFunction(processor: (x) => bandwidth, style: Graph2DStyle(color: Colors.CORAL)));
+
+    // Add area plot for the total congestion window.
+    _totalCongestionWindowPlot = [Point(_graph.maxX, 0.0)];
+    _graph.add(Graph2DSeries(series: _totalCongestionWindowPlot, style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true, drawLine: false)));
   }
 
   @override
-  void ngOnInit() {}
+  void ngOnInit() {
+    algorithmOptions = SelectionOptions.fromList(_algorithms);
+  }
 
   @override
   ngOnDestroy() {
@@ -92,37 +142,52 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   void render(num timestamp) {
     context.clearRect(0.0, 0.0, size.width, size.height);
 
-    context.strokeRect(0.0, 0.0, size.width, size.height);
+    _backgroundRect.render(context, toRect(0.0, 0.0, size));
 
     num diff = -1;
 
-    if (lastTimestamp != null) {
-      diff = timestamp - lastTimestamp;
+    if (_lastAnimTimestamp != null) {
+      diff = timestamp - _lastAnimTimestamp;
     }
-    lastTimestamp = timestamp;
+    _lastAnimTimestamp = timestamp;
 
     if (diff != -1 && !isPaused) {
       double add = acksPerSecond * (diff / 1000);
-      ackProgress += add;
+      _ackProgress += add;
 
-      graph.translate(add, 0.0);
+      _graph.translate(add, 0.0);
 
-      if (ackProgress >= 1.0) {
-        int packets = ackProgress.floor();
-        ackProgress = ackProgress - packets;
+      if (_ackProgress >= 1.0) {
+        int packets = _ackProgress.floor();
+        _ackProgress = _ackProgress - packets;
 
-        // Mostly this is only 1 packet.
-        // But for slow computers or extremely high [acksPerSecond]
-        // packets might be lost otherwise.
-        for (int i = 0; i < packets; i++) {
-          bool stateChanged = _controller.onACKReceived();
-
-          _nextTestPoint(!stateChanged && _controller.context.state == TCPCongestionControlState.CONGESTION_AVOIDANCE);
-        }
+        _addAcks(packets);
       }
     }
 
-    graph.render(context, toRect(0.0, 0.0, size));
+    _graph.render(context, toRect(0.0, 0.0, size));
+  }
+
+  /// Add acks to the plot.
+  void _addAcks(int packetCount) {
+    // Mostly this is only 1 packet.
+    // But for slow computers or extremely high [acksPerSecond]
+    // packets might be lost otherwise.
+    for (int i = 0; i < packetCount; i++) {
+      int totalCongestionWindow = 0;
+
+      for (TCPEntity entity in _tcpEntities) {
+        bool stateChanged = entity.controller.onACKReceived();
+
+        int currentCongestionWindow = entity.controller.getCongestionWindow();
+        totalCongestionWindow += currentCongestionWindow;
+
+        _nextPoint(currentCongestionWindow, entity.plot, !stateChanged && entity.controller.context.state == TCPCongestionControlState.CONGESTION_AVOIDANCE);
+      }
+
+      // Total congestion window plot.
+      _nextPoint(totalCongestionWindow, _totalCongestionWindowPlot, true);
+    }
   }
 
   /// What to do on mouse down on the canvas.
@@ -138,11 +203,11 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// What to do on mouse move on the canvas.
   void onMouseMove(Point<double> pos) {
     if (_lastMousePos != null && isPaused) {
-      double xLength = graph.maxX - graph.minX;
+      double xLength = _graph.maxX - _graph.minX;
 
       double xDiff = (pos.x - _lastMousePos.x) / size.width * xLength;
 
-      graph.translate(-xDiff, 0.0);
+      _graph.translate(-xDiff, 0.0);
 
       _lastMousePos = pos;
     }
@@ -151,11 +216,15 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// What to do if the bandwidth is changed.
   void onBandwidthChange(int newBandwidth) {
     bandwidth = newBandwidth;
-
-    _controller.availableBandwidth = bandwidth;
+    _availableBandwidth.maxBandwidth = bandwidth;
 
     // Tell graph to recalculate.
-    graph.invalidate();
+    _graph.invalidate();
+  }
+
+  /// What to do if the algorithm for a [tcpEntity] changes.
+  void onAlgorithmChange(TCPEntity tcpEntity, TCPCongestionControlAlgorithm newSelection) {
+    tcpEntity.controller.algorithm = newSelection;
   }
 
   /// Aspect ratio of the canvas.
@@ -164,11 +233,11 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   @override
   void switchPauseSubAnimations() {
     if (isPaused) {
-      _beforePauseMinX = graph.minX;
-      _beforePauseMaxX = graph.maxX;
+      _beforePauseMinX = _graph.minX;
+      _beforePauseMaxX = _graph.maxX;
     } else {
-      graph.minX = _beforePauseMinX;
-      graph.maxX = _beforePauseMaxX;
+      _graph.minX = _beforePauseMinX;
+      _graph.maxX = _beforePauseMaxX;
     }
   }
 
@@ -177,25 +246,53 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
     // Nothing to adjust.
   }
 
-  void testTimeout() {
-    _controller.onTimeout();
-    _nextTestPoint();
+  /// Simulate a timeout on the entity with the passed [entityIndex].
+  void doTimeout(TCPEntity entity) {
+    entity.controller.onTimeout();
+    _nextPoint(entity.controller.getCongestionWindow(), entity.plot);
   }
 
-  void test3Acks() {
-    _controller.onDuplicateACK(3);
-    _nextTestPoint();
+  /// Simulate 3 ACK packets on the entity with the passed [entityIndex].
+  void do3Acks(TCPEntity entity) {
+    entity.controller.onDuplicateACK(3);
+    _nextPoint(entity.controller.getCongestionWindow(), entity.plot);
   }
 
-  void _nextTestPoint([bool checkIfContinuesLinear = false]) {
-    Point<double> next = Point<double>(graph.maxX + 1, _controller.context.congestionWindow.toDouble());
+  /// Remove a TCP entity from the scenario.
+  void removeTCPEntity() {
+    if (_tcpEntities.length > 1) {
+      var entity = _tcpEntities.removeLast();
 
-    if (checkIfContinuesLinear && _pointContinuesLinear(next, test, precision: 1.0)) {
-      test.last = next;
+      _availableBandwidth.deregister(entity.controller);
+      _nextPoint(0, entity.plot);
+    }
+  }
+
+  /// Add a TCP entity to the scenario.
+  void addTCPEntity() {
+    if (_tcpEntities.length < MAX_TCP_ENTITIES) {
+      var plotSeries = [Point<double>(_graph.maxX, 0.0)];
+      var color = TCP_ENTITY_COLORS[_tcpEntities.length];
+
+      var graph = Graph2DSeries(series: plotSeries, style: Graph2DStyle(color: color, fillArea: false));
+      var selectionModel = SelectionModel.single(selected: _algorithms.first, keyProvider: (dnsQueryType) => dnsQueryType.getName());
+      var controller = TCPCongestionController(_availableBandwidth)..algorithm = _algorithms.first;
+
+      _tcpEntities.add(TCPEntity(controller, plotSeries, color, graph, selectionModel));
+      _graph.add(graph);
+    }
+  }
+
+  /// Add a new point to the passed [plot] showing the passed [congestionWindow].
+  void _nextPoint(int congestionWindow, List<Point<double>> plot, [bool checkIfContinuesLinear = false]) {
+    Point<double> next = Point<double>(_graph.maxX + 1, congestionWindow.toDouble());
+
+    if (checkIfContinuesLinear && _pointContinuesLinear(next, plot, precision: 1.0)) {
+      plot.last = next;
     } else {
-      test.add(next);
+      plot.add(next);
 
-      _trimSeries(test, MAX_SERIES_SIZE);
+      _trimSeries(plot, MAX_SERIES_SIZE);
     }
   }
 
@@ -225,4 +322,44 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
     return newDiff.y >= oldDiff.y - precision && newDiff.y <= oldDiff.y + precision;
   }
+
+  /// Get the tcp entities list.
+  List<TCPEntity> get tcpEntities => _tcpEntities;
+
+  /// Get maximum amount of tcp entities.
+  int get maxTCPEntities => MAX_TCP_ENTITIES;
+
+  /// Get a brighter color.
+  Color getBrighterColor(Color color) => Color.brighten(color, 0.9);
+}
+
+class AvailableBandwidth {
+  int _maxBandwidth;
+
+  List<CongestionWindowProvider> _congestionWindowProvider = List<CongestionWindowProvider>();
+
+  AvailableBandwidth(this._maxBandwidth);
+
+  void register(CongestionWindowProvider provider) {
+    _congestionWindowProvider.add(provider);
+  }
+
+  void deregister(CongestionWindowProvider provider) {
+    _congestionWindowProvider.remove(provider);
+  }
+
+  void set maxBandwidth(int maxBandwidth) => _maxBandwidth = maxBandwidth;
+
+  int get availableBandwidth =>
+      _maxBandwidth - _congestionWindowProvider.map((provider) => provider.getCongestionWindow()).reduce((value, element) => value + element);
+}
+
+class TCPEntity {
+  final TCPCongestionController controller;
+  final List<Point<double>> plot;
+  final Color color;
+  final Graph2DSeries graph;
+  final SelectionModel<TCPCongestionControlAlgorithm> selectionModel;
+
+  TCPEntity(this.controller, this.plot, this.color, this.graph, this.selectionModel);
 }

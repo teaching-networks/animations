@@ -121,11 +121,13 @@ class Graph2D extends CanvasDrawable {
 
       Graph2DStyle style = renderable.getStyle();
 
-      context.lineJoin = style.lineJoin;
-      context.lineCap = style.lineCap;
-      context.lineWidth = window.devicePixelRatio * 2;
-      setStrokeColor(context, style.color);
-      context.stroke();
+      if (style.drawLine) {
+        context.lineJoin = style.lineJoin;
+        context.lineCap = style.lineCap;
+        context.lineWidth = window.devicePixelRatio * 2;
+        setStrokeColor(context, style.color);
+        context.stroke();
+      }
 
       if (style.fillArea) {
         setFillColor(context, Color.opacity(style.color, 0.2));

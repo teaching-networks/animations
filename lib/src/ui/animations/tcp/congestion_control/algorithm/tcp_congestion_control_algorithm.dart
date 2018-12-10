@@ -11,6 +11,9 @@ abstract class TCPCongestionControlAlgorithm {
 
   /// What should happen if an ACK has been received (non-duplicate).
   void onACK(TCPCongestionControlContext context);
+
+  /// Get the name of the algorithm.
+  String getName();
 }
 
 typedef void OnAck(TCPCongestionControlContext context);
@@ -41,5 +44,10 @@ class ConfigurableTCPCongestionControlAlgorithm implements TCPCongestionControlA
   @override
   void onTimeout(TCPCongestionControlContext context) {
     onTimeoutMethod(context);
+  }
+
+  @override
+  String getName() {
+    return "Custom";
   }
 }

@@ -6,6 +6,9 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp
 
 /// Tahoe algorithm for TCP congestion control.
 class TCPTahoe implements TCPCongestionControlAlgorithm {
+  /// Name of the algorithm.
+  static const String NAME = "Tahoe";
+
   Map<TCPCongestionControlState, TCPCongestionControlAlgorithm> _states = {
     TCPCongestionControlState.SLOW_START: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
       context.congestionWindow *= 2;
@@ -47,5 +50,10 @@ class TCPTahoe implements TCPCongestionControlAlgorithm {
     context.state = TCPCongestionControlState.SLOW_START;
     context.slowStartThreshold = context.congestionWindow ~/ 2;
     context.congestionWindow = 1;
+  }
+
+  @override
+  String getName() {
+    return NAME;
   }
 }

@@ -6,6 +6,9 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp
 
 /// Reno algorithm for TCP congestion control.
 class TCPReno implements TCPCongestionControlAlgorithm {
+  /// Name of the algorithm.
+  static const String NAME = "Reno";
+
   Map<TCPCongestionControlState, TCPCongestionControlAlgorithm> _states = {
     TCPCongestionControlState.SLOW_START: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
       context.congestionWindow *= 2;
@@ -54,5 +57,10 @@ class TCPReno implements TCPCongestionControlAlgorithm {
     } else {
       context.congestionWindow += 1; // Congestion avoidance mode
     }
+  }
+
+  @override
+  String getName() {
+    return NAME;
   }
 }
