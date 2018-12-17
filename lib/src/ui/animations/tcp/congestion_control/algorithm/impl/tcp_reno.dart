@@ -17,39 +17,54 @@ class TCPReno implements TCPCongestionControlAlgorithm {
         context.congestionWindow = context.slowStartThreshold;
         context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
       }
+
+      return true;
+    }),
+    TCPCongestionControlState.FAST_RECOVERY: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
+      context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
+      context.congestionWindow += 1;
+
+      return true;
     })
   };
 
   @override
-  void onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
+  bool onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
     if (algorithm != null && algorithm.onDuplicateAckMethod != null) {
-      algorithm.onDuplicateACK(context, numberOfDuplicateACKs);
+      return algorithm.onDuplicateACK(context, numberOfDuplicateACKs);
     } else {
       if (numberOfDuplicateACKs == 3) {
-        context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
+        context.state = TCPCongestionControlState.FAST_RECOVERY;
         context.slowStartThreshold = context.congestionWindow ~/ 2;
         context.congestionWindow = context.slowStartThreshold;
+
+        return true;
       }
+
+      return false;
     }
   }
 
   @override
-  void onTimeout(TCPCongestionControlContext context) {
+  bool onTimeout(TCPCongestionControlContext context) {
     context.state = TCPCongestionControlState.SLOW_START;
     context.slowStartThreshold = context.congestionWindow ~/ 2;
     context.congestionWindow = 1;
+
+    return true;
   }
 
   @override
-  void onACK(TCPCongestionControlContext context) {
+  bool onACK(TCPCongestionControlContext context) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
     if (algorithm != null && algorithm.onAckMethod != null) {
-      algorithm.onACK(context);
+      return algorithm.onACK(context);
     } else {
       context.congestionWindow += 1; // Congestion avoidance mode
+      return false;
     }
   }
 

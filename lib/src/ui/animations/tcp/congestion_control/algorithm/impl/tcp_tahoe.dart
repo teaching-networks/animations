@@ -17,33 +17,41 @@ class TCPTahoe implements TCPCongestionControlAlgorithm {
         context.congestionWindow = context.slowStartThreshold;
         context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
       }
+
+      return true;
     }),
     TCPCongestionControlState.CONGESTION_AVOIDANCE: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
       context.congestionWindow += 1;
+
+      return false;
     })
   };
 
   @override
-  void onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
+  bool onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
     if (numberOfDuplicateACKs == 3) {
       _changeToSlowStart(context);
+      return true;
     }
+
+    return false;
   }
 
   @override
-  void onTimeout(TCPCongestionControlContext context) {
+  bool onTimeout(TCPCongestionControlContext context) {
     _changeToSlowStart(context);
+    return true;
   }
 
   @override
-  void onACK(TCPCongestionControlContext context) {
+  bool onACK(TCPCongestionControlContext context) {
     ConfigurableTCPCongestionControlAlgorithm algorithm = _states[context.state];
 
     if (algorithm == null || algorithm.onAckMethod == null) {
       throw Exception("State $context.state is unknown to the TCP Tahoe congestion control algorithm.");
     }
 
-    _states[context.state].onACK(context);
+    return algorithm.onACK(context);
   }
 
   void _changeToSlowStart(TCPCongestionControlContext context) {

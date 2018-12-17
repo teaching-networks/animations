@@ -4,21 +4,24 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp
 /// It mainly decides what should happen on a timeout or three duplicate ACK packets (4 ACKs for the same packet).
 abstract class TCPCongestionControlAlgorithm {
   /// What should happen if a timeout happens.
-  void onTimeout(TCPCongestionControlContext context);
+  /// Return whether it is an important event.
+  bool onTimeout(TCPCongestionControlContext context);
 
   /// What should happen if duplicate ACKs have been received.
-  void onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs);
+  /// Return whether it is an important event.
+  bool onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs);
 
   /// What should happen if an ACK has been received (non-duplicate).
-  void onACK(TCPCongestionControlContext context);
+  /// Return whether it is an important event.
+  bool onACK(TCPCongestionControlContext context);
 
   /// Get the name of the algorithm.
   String getName();
 }
 
-typedef void OnAck(TCPCongestionControlContext context);
-typedef void OnTimeout(TCPCongestionControlContext context);
-typedef void OnDuplicateAck(TCPCongestionControlContext context, int numberOfDuplicateACKs);
+typedef bool OnAck(TCPCongestionControlContext context);
+typedef bool OnTimeout(TCPCongestionControlContext context);
+typedef bool OnDuplicateAck(TCPCongestionControlContext context, int numberOfDuplicateACKs);
 
 /// From outside configurable congestion control algorithm.
 class ConfigurableTCPCongestionControlAlgorithm implements TCPCongestionControlAlgorithm {
@@ -32,18 +35,18 @@ class ConfigurableTCPCongestionControlAlgorithm implements TCPCongestionControlA
         onDuplicateAckMethod = onDuplicateAck;
 
   @override
-  void onACK(TCPCongestionControlContext context) {
-    onAckMethod(context);
+  bool onACK(TCPCongestionControlContext context) {
+    return onAckMethod(context);
   }
 
   @override
-  void onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
-    onDuplicateAckMethod(context, numberOfDuplicateACKs);
+  bool onDuplicateACK(TCPCongestionControlContext context, int numberOfDuplicateACKs) {
+    return onDuplicateAckMethod(context, numberOfDuplicateACKs);
   }
 
   @override
-  void onTimeout(TCPCongestionControlContext context) {
-    onTimeoutMethod(context);
+  bool onTimeout(TCPCongestionControlContext context) {
+    return onTimeoutMethod(context);
   }
 
   @override

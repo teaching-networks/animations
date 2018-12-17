@@ -17,7 +17,6 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/tcp_congestion_control_algorithm.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/congestion_window_provider.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/tcp_congestion_controller.dart';
-import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp_congestion_control_state.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
@@ -31,7 +30,6 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
-import 'package:vector_math/vector_math_64.dart' as vector;
 
 /// Animation showing the TCP congestion control mechanism.
 @Component(
@@ -51,10 +49,10 @@ import 'package:vector_math/vector_math_64.dart' as vector;
     changeDetection: ChangeDetectionStrategy.OnPush)
 class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   /// How many ACKs fit on the x-axis of the graph.
-  static const int ACKS_ON_GRAPH_X = 100;
+  static const int ACKS_ON_GRAPH_X = 500;
 
   /// Maximum possible bandwidth in MSS (Maximum segment size).
-  static const int MAX_BANDWIDTH = 100;
+  static const int MAX_BANDWIDTH = 1000;
 
   /// Maximum size of a series list.
   static const int MAX_SERIES_SIZE = 250;
@@ -72,11 +70,14 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   final I18nService _i18n;
 
   /// How many ACKs are simulated in a second.
-  int acksPerSecond = 15;
+  int acksPerSecond = 100;
 
   /// The progress of receiving the next ACK.
   /// 0.5 means for example that the next ACK is halfway there!
   double _ackProgress = 0.0;
+
+  /// Number of the last ACK packet.
+  double _lastAck = ACKS_ON_GRAPH_X + 1.0;
 
   /// Timestamp needed for animating.
   num _lastAnimTimestamp;
@@ -157,7 +158,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
       _graph.translate(add, 0.0);
 
-      if (_ackProgress >= 1.0) {
+      if (_ackProgress >= MAX_BANDWIDTH / 200) {
         int packets = _ackProgress.floor();
         _ackProgress = _ackProgress - packets;
 
@@ -175,18 +176,24 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
     // packets might be lost otherwise.
     for (int i = 0; i < packetCount; i++) {
       int totalCongestionWindow = 0;
+      _lastAck++;
 
       for (TCPEntity entity in _tcpEntities) {
-        bool stateChanged = entity.controller.onACKReceived();
+        var stateBefore = entity.controller.context.state;
+        bool important = entity.controller.onACKReceived();
+
+        if (stateBefore == entity.controller.context.state) {
+          entity.controller.context.cyclesInState++;
+        }
 
         int currentCongestionWindow = entity.controller.getCongestionWindow();
         totalCongestionWindow += currentCongestionWindow;
 
-        _nextPoint(currentCongestionWindow, entity.plot, !stateChanged && entity.controller.context.state == TCPCongestionControlState.CONGESTION_AVOIDANCE);
+        _nextPoint(_lastAck, currentCongestionWindow, entity.plot, entity.maxCacheCount, replaceLast: !important && entity.controller.context.cyclesInState > 1);
       }
 
       // Total congestion window plot.
-      _nextPoint(totalCongestionWindow, _totalCongestionWindowPlot, true);
+      _nextPoint(_lastAck, totalCongestionWindow, _totalCongestionWindowPlot, MAX_SERIES_SIZE * 2, reduce: true, reducePrecision: ACKS_ON_GRAPH_X / 200);
     }
   }
 
@@ -249,13 +256,13 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   /// Simulate a timeout on the entity with the passed [entityIndex].
   void doTimeout(TCPEntity entity) {
     entity.controller.onTimeout();
-    _nextPoint(entity.controller.getCongestionWindow(), entity.plot);
+    _nextPoint(_lastAck, entity.controller.getCongestionWindow(), entity.plot, entity.maxCacheCount);
   }
 
   /// Simulate 3 ACK packets on the entity with the passed [entityIndex].
   void do3Acks(TCPEntity entity) {
     entity.controller.onDuplicateACK(3);
-    _nextPoint(entity.controller.getCongestionWindow(), entity.plot);
+    _nextPoint(_lastAck, entity.controller.getCongestionWindow(), entity.plot, entity.maxCacheCount);
   }
 
   /// Remove a TCP entity from the scenario.
@@ -264,7 +271,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
       var entity = _tcpEntities.removeLast();
 
       _availableBandwidth.deregister(entity.controller);
-      _nextPoint(0, entity.plot);
+      _nextPoint(_lastAck, 0, entity.plot, entity.maxCacheCount);
     }
   }
 
@@ -278,21 +285,28 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
       var selectionModel = SelectionModel.single(selected: _algorithms.first, keyProvider: (dnsQueryType) => dnsQueryType.getName());
       var controller = TCPCongestionController(_availableBandwidth)..algorithm = _algorithms.first;
 
-      _tcpEntities.add(TCPEntity(controller, plotSeries, color, graph, selectionModel));
+      _tcpEntities.add(TCPEntity(controller, plotSeries, color, graph, selectionModel, MAX_SERIES_SIZE));
       _graph.add(graph);
     }
   }
 
   /// Add a new point to the passed [plot] showing the passed [congestionWindow].
-  void _nextPoint(int congestionWindow, List<Point<double>> plot, [bool checkIfContinuesLinear = false]) {
-    Point<double> next = Point<double>(_graph.maxX + 1, congestionWindow.toDouble());
+  void _nextPoint(double ackNumber, int congestionWindow, List<Point<double>> plot, int maxCacheCount, {bool replaceLast = false, bool reduce = false, double reducePrecision = 1.0}) {
+    Point<double> next = Point<double>(ackNumber, congestionWindow.toDouble());
 
-    if (checkIfContinuesLinear && _pointContinuesLinear(next, plot, precision: 1.0)) {
+    if (reduce && plot.length > 1) {
+      // Try to reduce the amount of points added by reducing the density of points.
+      if (next.x - plot[plot.length - 2].x < reducePrecision) {
+        replaceLast = true;
+      }
+    }
+
+    if (replaceLast) {
       plot.last = next;
     } else {
       plot.add(next);
 
-      _trimSeries(plot, MAX_SERIES_SIZE);
+      _trimSeries(plot, maxCacheCount);
     }
   }
 
@@ -302,25 +316,6 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
     if (removeCount > 0) {
       series.removeRange(0, removeCount);
     }
-  }
-
-  /// Check if the passed [nextPoint] continues the passed series [history] of points lineary.
-  /// Adjust the [precision] to your needs.
-  bool _pointContinuesLinear(Point<double> nextPoint, List<Point<double>> history, {double precision = 0.1}) {
-    if (history.length < 2) {
-      return false;
-    }
-
-    Point<double> last = history.last;
-    Point<double> beforeLast = history[history.length - 2];
-
-    double xDiff = last.x - beforeLast.x;
-    var oldDiff = vector.Vector2(xDiff, last.y - beforeLast.y) / xDiff;
-
-    xDiff = nextPoint.x - last.x;
-    var newDiff = vector.Vector2(xDiff, nextPoint.y - last.y) / xDiff;
-
-    return newDiff.y >= oldDiff.y - precision && newDiff.y <= oldDiff.y + precision;
   }
 
   /// Get the tcp entities list.
@@ -361,5 +356,8 @@ class TCPEntity {
   final Graph2DSeries graph;
   final SelectionModel<TCPCongestionControlAlgorithm> selectionModel;
 
-  TCPEntity(this.controller, this.plot, this.color, this.graph, this.selectionModel);
+  /// Maximum amount of nodes to cache.
+  final int maxCacheCount;
+
+  TCPEntity(this.controller, this.plot, this.color, this.graph, this.selectionModel, this.maxCacheCount);
 }

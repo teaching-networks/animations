@@ -9,5 +9,15 @@ class TCPCongestionControlContext {
   int congestionWindow = 1;
 
   /// Current state of the congestion control.
-  TCPCongestionControlState state = TCPCongestionControlState.SLOW_START;
+  TCPCongestionControlState _state = TCPCongestionControlState.SLOW_START;
+
+  /// How many cycles the context is in the same state.
+  int cyclesInState = 0;
+
+  TCPCongestionControlState get state => _state;
+
+  void set state(TCPCongestionControlState newState) {
+    cyclesInState = 0;
+    _state = newState;
+  }
 }

@@ -16,7 +16,7 @@ class TCPCongestionController implements CongestionWindowProvider {
   /// Currently available bandwidth (in MSS - Maximum segment size).
   AvailableBandwidth _availableBandwidth;
 
-  /// Whether to simulate the next ACK receival as lost packet.
+  /// Whether to simulate the next ACK received as lost packet.
   bool _simulateACKLost = false;
 
   TCPCongestionController(this._availableBandwidth) {
@@ -28,43 +28,36 @@ class TCPCongestionController implements CongestionWindowProvider {
   }
 
   /// What to do when a duplicate ACK has been received.
-  /// Returns whether the state has been changed.
+  /// Returns whether it was an important event.
   bool onDuplicateACK(int numberOfDuplicateACKs) {
-    TCPCongestionControlState stateBefore = _context.state;
-
-    _algorithm.onDuplicateACK(_context, numberOfDuplicateACKs);
-
-    return stateBefore != _context.state;
+    return _algorithm.onDuplicateACK(_context, numberOfDuplicateACKs);
   }
 
   /// What to do when a timeout happened.
-  /// Returns whether the state has been changed.
+  /// Returns whether it was an important event.
   bool onTimeout() {
-    TCPCongestionControlState stateBefore = _context.state;
-
-    _algorithm.onTimeout(_context);
-
-    return stateBefore != _context.state;
+    return _algorithm.onTimeout(_context);
   }
 
   /// What to do when an ACK has been received.
-  /// Returns whether the state has been changed.
+  /// Returns whether it was an important event.
   bool onACKReceived() {
-    TCPCongestionControlState stateBefore = _context.state;
+    bool important = false;
 
     if (_simulateACKLost) {
       _simulateACKLost = false;
-      onDuplicateACK(3);
+      important = onDuplicateACK(3);
     } else {
-      _algorithm.onACK(_context);
+      important = _algorithm.onACK(_context);
 
       if (_availableBandwidth.availableBandwidth < 0) {
         // Simulate a packet loss as the available bandwidth has been exceeded.
         _simulateACKLost = true;
+        important = true;
       }
     }
 
-    return stateBefore != _context.state;
+    return important;
   }
 
   TCPCongestionControlContext get context => _context;
