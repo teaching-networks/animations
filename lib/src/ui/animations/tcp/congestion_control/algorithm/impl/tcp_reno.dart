@@ -17,12 +17,6 @@ class TCPReno implements TCPCongestionControlAlgorithm {
         context.congestionWindow = context.slowStartThreshold;
         context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
       }
-    }),
-    TCPCongestionControlState.FAST_RECOVERY: ConfigurableTCPCongestionControlAlgorithm(onAck: (context) {
-      context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
-      context.congestionWindow = context.slowStartThreshold;
-    }, onDuplicateAck: (context, numberOfDuplicateAcks) {
-      context.congestionWindow += 1;
     })
   };
 
@@ -34,9 +28,9 @@ class TCPReno implements TCPCongestionControlAlgorithm {
       algorithm.onDuplicateACK(context, numberOfDuplicateACKs);
     } else {
       if (numberOfDuplicateACKs == 3) {
-        context.state = TCPCongestionControlState.FAST_RECOVERY;
+        context.state = TCPCongestionControlState.CONGESTION_AVOIDANCE;
         context.slowStartThreshold = context.congestionWindow ~/ 2;
-        context.congestionWindow = context.slowStartThreshold + 3; // "Inflating the window", see RFC 2581.
+        context.congestionWindow = context.slowStartThreshold;
       }
     }
   }
