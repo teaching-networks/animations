@@ -159,7 +159,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
    * Visible getter so that the last timestamp cannot be altered
    * by extending classes.
    */
-  num get lastTimestamp {
+  num get _lastAnimTimestamp {
     return _lastTimestamp;
   }
 

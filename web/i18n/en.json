@@ -139,5 +139,19 @@
 	"tcp-flow-control-animation.control.speed": "Animation speed",
 	"tcp-flow-control-animation.control.start": "Start",
 	"tcp-flow-control-animation.data": "DATA",
-	"tcp-flow-control-animation.buffer": "BUFFER"
+	"tcp-flow-control-animation.buffer": "BUFFER",
+	"tcp-congestion-control-animation.name": "TCP Congestion Control",
+	"tcp-congestion-control-animation.description": "The above graph is the TCP fairness graph. It shows the congestion windows for each TCP workstation competing for bandwidth (the red line) calculated by TCP congestion algorithms TCP Tahoe and Reno. Total congestion window for all workstations is visualized by the green area.",
+	"tcp-congestion-control-animation.credits": "This animation was inspired by a Java Applet originally developed by M. Lahuis, N. Oldersma (adv: J.Bredek), Hanzehogescl Groningen, NL. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Applet author(s) for making their Java Applet publicly available.",
+	"tcp-congestion-control-animation.control.bandwidth.label": "Bandwidth",
+	"tcp-congestion-control-animation.control.pause.tooltip": "Pause / Unpause",
+	"tcp-congestion-control-animation.control.add-workstation.tooltip": "Add workstation",
+	"tcp-congestion-control-animation.control.remove-workstation.tooltip": "Remove workstation",
+	"tcp-congestion-control-animation.control.workstation.label": "Workstation",
+	"tcp-congestion-control-animation.control.workstation.3acks": "3 ACKs",
+	"tcp-congestion-control-animation.control.workstation.3acks.tooltip": "Simulate 3 duplicate ACK packets on the workstation",
+	"tcp-congestion-control-animation.control.workstation.timeout": "Timeout",
+	"tcp-congestion-control-animation.control.workstation.timeout.tooltip": "Simulate a timeout on the workstation",
+	"tcp-congestion-control-animation.control.workstation.algorithmTooltip": "TCP congestion control algorithm to use",
+	"tcp-congestion-control-animation.control.reset.tooltip": "Reset animation"
 }
