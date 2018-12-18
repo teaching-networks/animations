@@ -152,5 +152,6 @@
 	"tcp-congestion-control-animation.control.workstation.3acks.tooltip": "Simulate 3 duplicate ACK packets on the workstation",
 	"tcp-congestion-control-animation.control.workstation.timeout": "Timeout",
 	"tcp-congestion-control-animation.control.workstation.timeout.tooltip": "Simulate a timeout on the workstation",
-	"tcp-congestion-control-animation.control.workstation.algorithmTooltip": "TCP congestion control algorithm to use"
+	"tcp-congestion-control-animation.control.workstation.algorithmTooltip": "TCP congestion control algorithm to use",
+	"tcp-congestion-control-animation.control.reset.tooltip": "Reset animation"
 }

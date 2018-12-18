@@ -72,22 +72,22 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
   /// The progress of receiving the next ACK.
   /// 0.5 means for example that the next ACK is halfway there!
-  double _ackProgress = 0.0;
+  double _ackProgress;
 
   /// Number of the last ACK packet.
-  double _lastAck = ACKS_ON_GRAPH_X + 1.0;
+  double _lastAck;
 
   /// Timestamp needed for animating.
   num _lastAnimTimestamp;
 
   /// Current bandwidth to simulate (in MSS - Maximum segment size).
-  int bandwidth = MAX_BANDWIDTH ~/ 2;
+  int bandwidth;
 
   /// The currently available bandwidth.
   AvailableBandwidth _availableBandwidth;
 
   /// Graph to show the network traffic.
-  Graph2D _graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: 0, maxX: ACKS_ON_GRAPH_X, minY: 0, maxY: MAX_BANDWIDTH);
+  Graph2D _graph;
 
   /// Temporary last mouse position (used for example to determine graph drags).
   Point<double> _lastMousePos;
@@ -99,7 +99,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   double _beforePauseMaxX;
 
   /// List of tcp entities in the simulation.
-  List<TCPEntity> _tcpEntities = List<TCPEntity>();
+  List<TCPEntity> _tcpEntities;
 
   /// Plot of the total congestion window size.
   List<Point<double>> _totalCongestionWindowPlot;
@@ -120,9 +120,38 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   Message algorithmTooltip;
   Message timeoutTooltip;
   Message threeAcksTooltip;
+  Message resetTooltip;
+
+  /// Whether it is the first unpause action.
+  bool _isResetting;
+
+  /// Whether it is the first time the animation is paused.
+  bool _isFirstPause;
 
   TCPCongestionControlAnimation(this._i18n) {
+    reset();
+  }
+
+  @override
+  void ngOnInit() {
+    algorithmOptions = SelectionOptions.fromList(_algorithms);
+
+    _initTranslations();
+  }
+
+  /// Reset the animation.
+  void reset() {
+    // First and foremost reset all values.
+    _isResetting = true;
+    _lastAnimTimestamp = null;
+    _ackProgress = 0.0;
+    _lastAck = ACKS_ON_GRAPH_X + 1.0;
+    _tcpEntities = List<TCPEntity>();
+    _graph = Graph2D(precision: 5.0 * window.devicePixelRatio, minX: 0, maxX: ACKS_ON_GRAPH_X, minY: 0, maxY: MAX_BANDWIDTH);
     _availableBandwidth = AvailableBandwidth(bandwidth);
+
+    // Now configure them.
+    onBandwidthChange(MAX_BANDWIDTH ~/ 2);
 
     addTCPEntity(); // Add initial TCP entity.
 
@@ -132,13 +161,11 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
     // Add area plot for the total congestion window.
     _totalCongestionWindowPlot = [Point(_graph.maxX, 0.0)];
     _graph.add(Graph2DSeries(series: _totalCongestionWindowPlot, style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true, drawLine: false)));
-  }
 
-  @override
-  void ngOnInit() {
-    algorithmOptions = SelectionOptions.fromList(_algorithms);
-
-    _initTranslations();
+    // Start animation paused.
+    switchPause(pauseAnimation: true);
+    _isResetting = false;
+    _isFirstPause = true;
   }
 
   /// Initialize all translations for the animation.
@@ -149,6 +176,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
     algorithmTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.algorithmTooltip");
     timeoutTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.timeout.tooltip");
     threeAcksTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.3acks.tooltip");
+    resetTooltip = _i18n.get("tcp-congestion-control-animation.control.reset.tooltip");
   }
 
   @override
@@ -257,6 +285,10 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
   @override
   void switchPauseSubAnimations() {
+    if (_isResetting || _isFirstPause) {
+      return;
+    }
+
     if (isPaused) {
       _beforePauseMinX = _graph.minX;
       _beforePauseMaxX = _graph.maxX;

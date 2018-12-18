@@ -253,6 +253,12 @@ class Graph2D extends CanvasDrawable {
     _invalidateCache();
   }
 
+  /// Remove all [renderables].
+  void removeAll() {
+    _renderables.clear();
+    _invalidateCache();
+  }
+
   /// Translate whole graph area (min. and max. x and y values) by the passed [x] and [y].
   void translate(double x, double y) {
     _minX += x;

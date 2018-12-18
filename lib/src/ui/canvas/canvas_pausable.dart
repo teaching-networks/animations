@@ -17,8 +17,8 @@ abstract class CanvasPausableMixin {
   /**
    * Pause / unpause animation.
    */
-  void switchPause() {
-    _isPaused = !_isPaused;
+  void switchPause({bool pauseAnimation}) {
+    _isPaused = pauseAnimation != null ? pauseAnimation : !_isPaused;
 
     switchPauseSubAnimations();
 

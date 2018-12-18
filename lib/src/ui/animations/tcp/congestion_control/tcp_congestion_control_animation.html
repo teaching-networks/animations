@@ -30,6 +30,10 @@
 					<material-icon *ngIf="!isPaused" icon="pause_circle_outline"></material-icon>
 				</material-button>
 
+				<material-button raised icon (click)="reset()" [materialTooltip]="resetTooltip.toString()">
+					<material-icon icon="delete_forever"></material-icon>
+				</material-button>
+
 				<material-button raised icon [disabled]="tcpEntities.length >= maxTCPEntities" (click)="addTCPEntity()"
 								 [materialTooltip]="addWorkstationTooltip.toString()">
 					<material-icon icon="add_circle"></material-icon>
@@ -37,7 +41,7 @@
 
 				<material-button raised icon [disabled]="tcpEntities.length == 1"
 								 (click)="removeTCPEntity()" [materialTooltip]="removeWorkstationTooltip.toString()">
-					<material-icon icon="delete_forever"></material-icon>
+					<material-icon icon="remove_circle"></material-icon>
 				</material-button>
 			</li>
 
