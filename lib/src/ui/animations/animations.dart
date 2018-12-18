@@ -87,7 +87,7 @@ class Animations {
         ID_COUNTER++,
         tcpCongestionControl.TCPCongestionControlAnimationNgFactory,
         "tcp-congestion-control-animation.name",
-        "", // TOOD Add preview image
+        "img/animation/preview/tcp_congestion_control_preview.png",
         "tcp-congestion-control"
     )
   ];
