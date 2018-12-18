@@ -32,21 +32,19 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// Animation showing the TCP congestion control mechanism.
-@Component(
-    selector: "tcp-congestion-control-animation",
-    templateUrl: "tcp_congestion_control_animation.html",
-    styleUrls: ["tcp_congestion_control_animation.css"],
-    directives: [
-      coreDirectives,
-      CanvasComponent,
-      MaterialSliderComponent,
-      MaterialButtonComponent,
-      MaterialIconComponent,
-      MaterialTooltipDirective,
-      MaterialDropdownSelectComponent
-    ],
-    pipes: [I18nPipe],
-    changeDetection: ChangeDetectionStrategy.OnPush)
+@Component(selector: "tcp-congestion-control-animation", templateUrl: "tcp_congestion_control_animation.html", styleUrls: [
+  "tcp_congestion_control_animation.css"
+], directives: [
+  coreDirectives,
+  CanvasComponent,
+  MaterialSliderComponent,
+  MaterialButtonComponent,
+  MaterialIconComponent,
+  MaterialTooltipDirective,
+  MaterialDropdownSelectComponent
+], pipes: [
+  I18nPipe
+])
 class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   /// How many ACKs fit on the x-axis of the graph.
   static const int ACKS_ON_GRAPH_X = 500;
@@ -116,6 +114,13 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   SelectionOptions<TCPCongestionControlAlgorithm> algorithmOptions;
   static ItemRenderer<TCPCongestionControlAlgorithm> algorithmItemRenderer = (algorithm) => algorithm.getName();
 
+  Message pauseTooltip;
+  Message addWorkstationTooltip;
+  Message removeWorkstationTooltip;
+  Message algorithmTooltip;
+  Message timeoutTooltip;
+  Message threeAcksTooltip;
+
   TCPCongestionControlAnimation(this._i18n) {
     _availableBandwidth = AvailableBandwidth(bandwidth);
 
@@ -132,6 +137,18 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   @override
   void ngOnInit() {
     algorithmOptions = SelectionOptions.fromList(_algorithms);
+
+    _initTranslations();
+  }
+
+  /// Initialize all translations for the animation.
+  void _initTranslations() {
+    pauseTooltip = _i18n.get("tcp-congestion-control-animation.control.pause.tooltip");
+    addWorkstationTooltip = _i18n.get("tcp-congestion-control-animation.control.add-workstation.tooltip");
+    removeWorkstationTooltip = _i18n.get("tcp-congestion-control-animation.control.remove-workstation.tooltip");
+    algorithmTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.algorithmTooltip");
+    timeoutTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.timeout.tooltip");
+    threeAcksTooltip = _i18n.get("tcp-congestion-control-animation.control.workstation.3acks.tooltip");
   }
 
   @override
@@ -189,7 +206,8 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
         int currentCongestionWindow = entity.controller.getCongestionWindow();
         totalCongestionWindow += currentCongestionWindow;
 
-        _nextPoint(_lastAck, currentCongestionWindow, entity.plot, entity.maxCacheCount, replaceLast: !important && entity.controller.context.cyclesInState > 1);
+        _nextPoint(_lastAck, currentCongestionWindow, entity.plot, entity.maxCacheCount,
+            replaceLast: !important && entity.controller.context.cyclesInState > 1);
       }
 
       // Total congestion window plot.
@@ -291,7 +309,8 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   }
 
   /// Add a new point to the passed [plot] showing the passed [congestionWindow].
-  void _nextPoint(double ackNumber, int congestionWindow, List<Point<double>> plot, int maxCacheCount, {bool replaceLast = false, bool reduce = false, double reducePrecision = 1.0}) {
+  void _nextPoint(double ackNumber, int congestionWindow, List<Point<double>> plot, int maxCacheCount,
+      {bool replaceLast = false, bool reduce = false, double reducePrecision = 1.0}) {
     Point<double> next = Point<double>(ackNumber, congestionWindow.toDouble());
 
     if (reduce && plot.length > 1) {

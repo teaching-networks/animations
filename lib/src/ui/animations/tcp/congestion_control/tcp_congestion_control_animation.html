@@ -10,33 +10,33 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled">
-				<label>Bandwidth</label>
+				<label>{{ "tcp-congestion-control-animation.control.bandwidth.label" | i18n }}</label>
 				<span class="slider-panel">
 					<material-slider [min]="0"
 									 [max]="1000"
-									 [step]="100"
+									 [step]="25"
 									 [value]="bandwidth"
 									 (valueChange)="onBandwidthChange($event)">
 					</material-slider>
 					<div>
-						{{ bandwidth }}
+						{{ bandwidth }} MSS
 					</div>
 				</span>
 			</li>
 
 			<li class="labeled button-control">
-				<material-button raised icon (click)="switchPause()" materialTooltip="Pause / Unpause">
+				<material-button raised icon (click)="switchPause()" [materialTooltip]="pauseTooltip.toString()">
 					<material-icon *ngIf="isPaused" icon="play_circle_outline"></material-icon>
 					<material-icon *ngIf="!isPaused" icon="pause_circle_outline"></material-icon>
 				</material-button>
 
 				<material-button raised icon [disabled]="tcpEntities.length >= maxTCPEntities" (click)="addTCPEntity()"
-								 materialTooltip="Add workstation">
+								 [materialTooltip]="addWorkstationTooltip.toString()">
 					<material-icon icon="add_circle"></material-icon>
 				</material-button>
 
 				<material-button raised icon [disabled]="tcpEntities.length == 1"
-								 (click)="removeTCPEntity()" materialTooltip="Remove workstation">
+								 (click)="removeTCPEntity()" [materialTooltip]="removeWorkstationTooltip.toString()">
 					<material-icon icon="delete_forever"></material-icon>
 				</material-button>
 			</li>
@@ -47,17 +47,18 @@
 
 			<li class="labeled" *ngFor="let tcpEntity of tcpEntities; let i = index"
 				[ngStyle]="{'background-color': getBrighterColor(tcpEntity.color).toCSSColorString()}">
-				<label [ngStyle]="{'color': tcpEntity.color.toCSSColorString()}">Workstation {{ i + 1 }}</label>
+				<label [ngStyle]="{'color': tcpEntity.color.toCSSColorString()}">{{
+					"tcp-congestion-control-animation.control.workstation.label" | i18n }} {{ i + 1 }}</label>
 
 				<div class="tcp-entity-control">
 					<material-button raised (click)="doTimeout(tcpEntity)"
-									 materialTooltip="Simulate a timeout on the workstation">
-						Timeout
+									 [materialTooltip]="timeoutTooltip.toString()">
+						{{ "tcp-congestion-control-animation.control.workstation.timeout" | i18n }}
 					</material-button>
 
 					<material-button raised (click)="do3Acks(tcpEntity)"
-									 materialTooltip="Simulate 3 duplicate ACK packets on the workstation">
-						3 ACKs
+									 [materialTooltip]="threeAcksTooltip.toString()">
+						{{ "tcp-congestion-control-animation.control.workstation.3acks" | i18n }}
 					</material-button>
 
 					<material-dropdown-select style="width: 80px" raised
@@ -67,7 +68,7 @@
 											  [itemRenderer]="algorithmItemRenderer"
 											  [deselectOnActivate]="false"
 											  (selectionChange)="onAlgorithmChange(tcpEntity, $event)"
-											  materialTooltip="TCP congestion control algorithm to use">
+											  [materialTooltip]="algorithmTooltip.toString()">
 					</material-dropdown-select>
 				</div>
 			</li>

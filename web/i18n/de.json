@@ -142,6 +142,16 @@
 	"tcp-flow-control-animation.data": "DATEN",
 	"tcp-flow-control-animation.buffer": "PUFFER",
 	"tcp-congestion-control-animation.name": "TCP Staukontrolle",
-	"tcp-congestion-control-animation.description": "No description yet.",
-	"tcp-congestion-control-animation.credits": "No credits yet."
+	"tcp-congestion-control-animation.description": "Zu sehen ist der TCP Fairness Graph, welcher die verschiedenen Staufenster (Congestion windows) für jede Workstation im Zeitverlauf zeigt. Die Workstations konkurrieren um die verfügbare Bandbreite, wobei diese jedoch möglichst fair aufgeteilt werden soll. Das wird unter anderem mit den, im Graph sichtbaren, TCP Staukontrolle Algorithmen, TCP Tahoe und Reno erledigt. Der grüne Bereich zeigt das gesamte Staufenster an.",
+	"tcp-congestion-control-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von M. Lahuis, N. Oldersma (adv: J.Bredek), Hanzehogescl Groningen, NL, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
+	"tcp-congestion-control-animation.control.bandwidth.label": "Bandbreite",
+	"tcp-congestion-control-animation.control.pause.tooltip": "Pause / Weiter",
+	"tcp-congestion-control-animation.control.add-workstation.tooltip": "Workstation hinzufügen",
+	"tcp-congestion-control-animation.control.remove-workstation.tooltip": "Workstation entfernen",
+	"tcp-congestion-control-animation.control.workstation.label": "Workstation",
+	"tcp-congestion-control-animation.control.workstation.3acks": "3 ACKs",
+	"tcp-congestion-control-animation.control.workstation.3acks.tooltip": "Simuliert drei aufeinanderfolgende Duplicate ACK Pakete auf der Workstation",
+	"tcp-congestion-control-animation.control.workstation.timeout": "Timeout",
+	"tcp-congestion-control-animation.control.workstation.timeout.tooltip": "Simuliert einen Timeout auf der Workstation",
+	"tcp-congestion-control-animation.control.workstation.algorithmTooltip": "Verwendeter TCP Staukontrolle Algorithmus"
 }
