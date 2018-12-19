@@ -1,5 +1,8 @@
-<div *ngIf="animationDescriptors == null" class="centered-panel">
-	<material-spinner></material-spinner>
+<div *ngIf="animationDescriptors == null" class="centered-panel info-box">
+	<material-spinner *ngIf="!isError"></material-spinner>
+	<div *ngIf="isError">
+		{{ "overview.loading-error" | i18n }}
+	</div>
 </div>
 
 <div *ngIf="animationDescriptors != null" class="animation-overview">
@@ -12,11 +15,11 @@
 		<div class="mdc-card mdc-card--outlined animation-card-size">
 			<div class="mdc-card__media mdc-card__media--16-9 animation-card-image" [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + '), linear-gradient(to bottom, #EAEAEA 0%, transparent 100%)'}"></div>
 			<div class="animation-card-primary">
-				<h2 class="animation-card-title">{{getAnimationName(anim.name)}}</h2>
+				<h2 class="animation-card-title">{{getAnimationName(anim.baseTranslationKey)}}</h2>
 			</div>
-			<!-- <div class="animation-card-secondary">
-				Short animation description?
-			</div> -->
+			<div class="animation-card-secondary">
+				{{ getAnimationDescription(anim.baseTranslationKey) }}
+			</div>
 			<div class="mdc-card__actions">
 				<div class="mdc-card__action-buttons">
 					<material-button [routerLink]="animationUrl(anim.path)">

@@ -1,9 +1,14 @@
+<h1 *ngIf="animationTitle != null">{{ animationTitle.toString() }}</h1>
+
 <dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
 
-<div  class="centered-panel">
+<div class="centered-panel info-box">
 	<material-spinner *ngIf="isLoading"></material-spinner>
 	<div *ngIf="notVisible">
 		{{ "animation-not-visible" | i18n }}
+	</div>
+	<div *ngIf="isError">
+		{{ "animation-error" | i18n }}
 	</div>
 </div>
 

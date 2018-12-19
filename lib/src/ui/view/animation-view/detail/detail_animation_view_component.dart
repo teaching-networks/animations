@@ -15,8 +15,7 @@ import 'package:hm_animations/src/router/route_paths.dart' as paths;
     templateUrl: "detail_animation_view_component.html",
     styleUrls: ["detail_animation_view_component.css"],
     directives: [coreDirectives, DynamicContentComponent, MaterialSpinnerComponent],
-    pipes: [I18nPipe]
-)
+    pipes: [I18nPipe])
 class DetailAnimationViewComponent implements OnActivate {
   final AnimationService _animationService;
 
@@ -24,6 +23,7 @@ class DetailAnimationViewComponent implements OnActivate {
 
   bool isLoading = true;
   bool notVisible = false;
+  bool isError = false;
 
   DetailAnimationViewComponent(this._animationService);
 
@@ -33,8 +33,6 @@ class DetailAnimationViewComponent implements OnActivate {
 
     if (id != null) {
       _animationService.getAnimationDescriptors().then((animations) {
-        isLoading = false;
-
         AnimationDescriptor descriptor = animations[id];
 
         if (descriptor != null) {
@@ -42,7 +40,10 @@ class DetailAnimationViewComponent implements OnActivate {
         } else {
           notVisible = true;
         }
-      });
+      }).catchError((e) {
+        isError = true;
+        return null;
+      }).whenComplete(() => isLoading = false);
     }
   }
 }

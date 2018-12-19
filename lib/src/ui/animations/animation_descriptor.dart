@@ -11,9 +11,9 @@ class AnimationDescriptor<T> {
   final ComponentFactory<T> componentFactory;
 
   /**
-   * Name of the animation.
+   * Base string for all translations of the animation.
    */
-  final String name;
+  final String baseTranslationKey;
 
   /**
    * Path to a preview image.
@@ -25,5 +25,5 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
-  const AnimationDescriptor(this.id, this.componentFactory, this.name, this.previewImagePath, this.path);
+  const AnimationDescriptor(this.id, this.componentFactory, this.baseTranslationKey, this.previewImagePath, this.path);
 }

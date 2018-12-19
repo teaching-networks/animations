@@ -48,6 +48,9 @@ class OverviewComponent implements OnInit, OnDestroy {
    */
   final I18nService _i18n;
 
+  /// Whether to show an error message.
+  bool isError = false;
+
   OverviewComponent(this._animationService, this._authService, this._i18n);
 
   @override
@@ -61,8 +64,12 @@ class OverviewComponent implements OnInit, OnDestroy {
   }
 
   Future<Null> getAnimations() async {
-    animationDescriptors = await _animationService.getAnimationDescriptors();
-    animations = await _animationService.getAnimations();
+    try {
+      animationDescriptors = await _animationService.getAnimationDescriptors();
+      animations = await _animationService.getAnimations();
+    } catch (e) {
+      isError = true;
+    }
   }
 
   /**
@@ -72,7 +79,9 @@ class OverviewComponent implements OnInit, OnDestroy {
     return paths.animation.toUrl(parameters: {paths.idParam: animationPath});
   }
 
-  Message getAnimationName(String key) => _i18n.get(key);
+  Message getAnimationName(String baseKey) => _i18n.get("${baseKey}.name");
+
+  Message getAnimationDescription(String baseKey) => _i18n.get("${baseKey}.short-description");
 
   bool isAnimationVisible(int id) {
     if (animations != null) {
