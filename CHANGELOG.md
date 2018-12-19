@@ -5,6 +5,9 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 1.4.0
+- CSMA/CD animation added
+
 ### 1.3.0
 - TCP congestion flow animation added
 - Graph2D component to display arbitrary 2-dimensional functions
