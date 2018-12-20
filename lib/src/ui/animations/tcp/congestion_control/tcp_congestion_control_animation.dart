@@ -285,7 +285,12 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
 
   @override
   void switchPauseSubAnimations() {
-    if (_isResetting || _isFirstPause) {
+    if (_isResetting) {
+      return;
+    }
+
+    if (_isFirstPause) {
+      _isFirstPause = false;
       return;
     }
 
