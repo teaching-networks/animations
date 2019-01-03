@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/vertical_progress_bar.dart';
@@ -31,6 +32,8 @@ class DrawableSharedMedium extends CanvasDrawable {
   /// Drawable peers from medium.
   List<DrawableSharedMediumPeer> _peers;
 
+  VerticalSignalEmitter _test;
+
   /// Create drawable medium.
   DrawableSharedMedium({
     @required this.medium,
@@ -42,6 +45,12 @@ class DrawableSharedMedium extends CanvasDrawable {
   void _init() {
     int idCounter = 1;
     _peers = medium.getPeers().map((peer) => DrawableSharedMediumPeer(id: idCounter++, peer: peer)).toList(growable: false);
+
+    _test = VerticalSignalEmitter(
+      start: 0.3,
+      propagationSpeed: 0.1,
+      signalDuration: Duration(seconds: 10),
+    );
   }
 
   @override
@@ -50,13 +59,13 @@ class DrawableSharedMedium extends CanvasDrawable {
 
     context.translate(rect.left, rect.top);
 
-    _drawPeers(context, _peers, rect.height);
+    _drawPeers(context, _peers, rect.height, timestamp);
 
     context.restore();
   }
 
   /// Draw all peers with connection lines.
-  void _drawPeers(CanvasRenderingContext2D context, List<DrawableSharedMediumPeer> peers, double height) {
+  void _drawPeers(CanvasRenderingContext2D context, List<DrawableSharedMediumPeer> peers, double height, timestamp) {
     double peerSize = height / peers.length / 2.5;
 
     double minY = peerSize / 2;
@@ -88,5 +97,7 @@ class DrawableSharedMedium extends CanvasDrawable {
     context.fillRect(lineXOffset + lineWidth, lineYOffset, peers.length * _laneWidth * window.devicePixelRatio, maxY - minY + lineWidth);
 
     for (int i = 0; i < peers.length; i++) {}
+
+    _test.render(context, Rectangle<double>(lineXOffset, lineYOffset, _laneWidth * window.devicePixelRatio, maxY - minY + lineWidth), timestamp);
   }
 }

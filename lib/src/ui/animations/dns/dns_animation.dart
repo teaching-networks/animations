@@ -80,7 +80,7 @@ class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   SelectionOptions<DNSQueryType> dnsQueryTypeOptions;
   SelectionModel<DNSQueryType> localDNSQueryTypeSelectModel;
   SelectionModel<DNSQueryType> rootDNSQueryTypeSelectModel;
-  static ItemRenderer<DNSQueryType> dnsQueryTypeItemRenderer = (dnsQueryType) => dnsQueryType.name.toString();
+  static ItemRenderer<DNSQueryType> dnsQueryTypeItemRenderer = (dynamic dnsQueryType) => dnsQueryType.name.toString();
 
   List<DNSScenario> scenarios;
   DNSScenario selectedScenario;

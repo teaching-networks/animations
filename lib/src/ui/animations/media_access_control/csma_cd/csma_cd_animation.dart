@@ -58,7 +58,7 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
     double mediumSizeFactor = 0.9;
     double yOffset = size.height * ((1 - mediumSizeFactor) / 2);
 
-    _sharedMedium.render(context, toRect(yOffset, yOffset, Size(size.width - yOffset, size.height * mediumSizeFactor)));
+    _sharedMedium.render(context, toRect(yOffset, yOffset, Size(size.width - yOffset, size.height * mediumSizeFactor)), timestamp);
   }
 
   int get canvasHeight => 500;

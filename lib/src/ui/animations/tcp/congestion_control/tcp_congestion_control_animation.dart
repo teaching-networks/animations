@@ -112,7 +112,7 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   List<TCPCongestionControlAlgorithm> _algorithms = [TCPReno(), TCPTahoe()];
 
   SelectionOptions<TCPCongestionControlAlgorithm> algorithmOptions;
-  static ItemRenderer<TCPCongestionControlAlgorithm> algorithmItemRenderer = (algorithm) => algorithm.getName();
+  static ItemRenderer<TCPCongestionControlAlgorithm> algorithmItemRenderer = (dynamic algorithm) => algorithm.getName();
 
   Message pauseTooltip;
   Message addWorkstationTooltip;
