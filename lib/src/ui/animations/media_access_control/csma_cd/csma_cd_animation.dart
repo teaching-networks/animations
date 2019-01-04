@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
@@ -32,7 +34,10 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
 
   /// Reset the animation to default state.
   void reset() {
-    final busSharedMedium = BusSharedMedium(length: 250, speed: 1234);
+    final busSharedMedium = BusSharedMedium(
+      length: 250,
+      speed: 2.0 * pow(10, 8),
+    );
 
     for (int i = 0; i < _peerCount; i++) {
       busSharedMedium.registerPeer(BusPeer());
@@ -59,6 +64,16 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
     double yOffset = size.height * ((1 - mediumSizeFactor) / 2);
 
     _sharedMedium.render(context, toRect(yOffset, yOffset, Size(size.width - yOffset, size.height * mediumSizeFactor)), timestamp);
+  }
+
+  /// What to do on mouse up on the canvas.
+  void onMouseUp(Point<double> pos) {
+    _sharedMedium.onMouseUp(pos);
+  }
+
+  /// What to do on mouse move on the canvas.
+  void onMouseMove(Point<double> pos) {
+    _sharedMedium.onMouseMove(pos);
   }
 
   int get canvasHeight => 500;

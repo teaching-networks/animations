@@ -59,8 +59,13 @@ abstract class SignalEmitter extends CanvasDrawable {
       propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
     );
 
-    drawRange(context, range1, rect);
-    drawRange(context, range2, rect);
+    if (range1.item2 == range2.item1) {
+      // Merge range.
+      drawRange(context, Tuple2<double, double>(range1.item1, range2.item2), rect);
+    } else {
+      drawRange(context, range1, rect);
+      drawRange(context, range2, rect);
+    }
   }
 
   /// Draw the passed range.

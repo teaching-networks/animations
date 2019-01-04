@@ -1,5 +1,5 @@
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_packet.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_signal.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:meta/meta.dart';
 
@@ -23,7 +23,7 @@ class BusSharedMedium extends SharedMedium {
   double getSpeed() => _speed;
 
   @override
-  void sendPacket(SharedMediumPeer peer, SharedMediumPacket packet) {
+  void sendSignal(SharedMediumPeer peer, SharedMediumSignal signal) {
     // TODO: implement sendPacket
   }
 }

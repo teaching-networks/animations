@@ -1,5 +1,5 @@
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_packet.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_signal.dart';
 
 /// A participant on a shared medium.
 abstract class SharedMediumPeer {
@@ -13,7 +13,7 @@ abstract class SharedMediumPeer {
   bool _mediumOccupied = false;
 
   /// Send on the medium.
-  void sendSafe(SharedMediumPacket packet) {
+  void sendSafe(SharedMediumSignal packet) {
     assert(_medium != null);
 
     send(packet);
@@ -45,7 +45,7 @@ abstract class SharedMediumPeer {
   bool isMediumOccupied() => _mediumOccupied;
 
   /// Send packet on the medium.
-  void send(SharedMediumPacket packet);
+  void send(SharedMediumSignal packet);
 
   /// Emit the JAM signal on the medium.
   void emitJAMSignal();

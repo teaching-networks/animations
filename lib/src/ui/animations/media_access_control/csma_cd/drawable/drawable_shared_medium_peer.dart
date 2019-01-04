@@ -2,6 +2,7 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
@@ -19,6 +20,18 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
   /// Peer to draw.
   final SharedMediumPeer peer;
 
+  /// Whether the drawable is currently highlighted.
+  bool _highlighted = false;
+
+  /// Actual bounds of the drawn peer.
+  Rectangle<double> _actualBounds;
+
+  /// Signal emitter to draw.
+  VerticalSignalEmitter _signalEmitter;
+
+  /// Position of the peer on the shared medium.
+  final double position;
+
   /// Round rectangle as background for the peer.
   final RoundRectangle _roundRectangle = RoundRectangle(
     color: Colors.SLATE_GREY,
@@ -31,6 +44,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
   DrawableSharedMediumPeer({
     @required this.id,
     @required this.peer,
+    @required this.position,
   });
 
   @override
@@ -43,6 +57,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
     context.textBaseline = "middle";
     context.font = "${rect.height * 0.6}px 'Raleway'";
 
+    _roundRectangle.color = _highlighted ? Colors.TEAL : Colors.SLATE_GREY;
     _roundRectangle.render(
         context,
         Rectangle(
@@ -56,5 +71,22 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
     context.fillText(id.toString(), rect.width / 2, rect.height / 2);
 
     context.restore();
+
+    _actualBounds = rect;
+  }
+
+  /// Set whether the drawable should be highlighted.
+  void setHighlighted(bool highlighted) => _highlighted = highlighted;
+
+  /// Get the actual bounds of the drawn peer.
+  Rectangle<double> getActualBounds() => _actualBounds;
+
+  /// Set the drawables actual bounds.
+  void setActualBounds(Rectangle<double> bounds) => _actualBounds = bounds;
+
+  VerticalSignalEmitter get signalEmitter => _signalEmitter;
+
+  set signalEmitter(VerticalSignalEmitter value) {
+    _signalEmitter = value;
   }
 }

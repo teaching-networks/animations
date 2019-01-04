@@ -2,7 +2,9 @@
 	<div class="left">
 		<canvas-comp [height]="canvasHeight"
 					 (onResized)="onCanvasResize($event)"
-					 (onReady)="onCanvasReady($event)">
+					 (onReady)="onCanvasReady($event)"
+					 (onMouseUp)="onMouseUp($event)"
+					 (onMouseMove)="onMouseMove($event)">
 		</canvas-comp>
 	</div>
 	<div class="right">
