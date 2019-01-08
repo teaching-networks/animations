@@ -140,6 +140,9 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
       start: peer.position,
       signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
       propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
+      onEnd: () {
+        print("Signal end reached!");
+      },
     );
 
     sendSignal(peer.peer, signal);

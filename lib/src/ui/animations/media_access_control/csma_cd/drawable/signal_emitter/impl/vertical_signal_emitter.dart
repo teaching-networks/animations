@@ -14,10 +14,12 @@ class VerticalSignalEmitter extends SignalEmitter {
     @required double start,
     @required Duration signalDuration,
     @required double propagationSpeed,
+    Function onEnd,
   }) : super(
           start: start,
           signalDuration: signalDuration,
           propagationSpeed: propagationSpeed,
+          onEnd: onEnd,
         );
 
   @override

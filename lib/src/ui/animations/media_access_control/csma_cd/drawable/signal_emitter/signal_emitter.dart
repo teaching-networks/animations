@@ -17,18 +17,29 @@ abstract class SignalEmitter extends CanvasDrawable {
   /// Speed of the propagation of the signal in percent per second (e. g. 1.0 == 100% per second).
   final double propagationSpeed;
 
+  /// Callback which is called when the signal emitting finished.
+  final Function onEnd;
+
   /// Start timestamp of the animation.
   num _startTimestamp = -1;
+
+  /// Whether the end of the animation has been reached.
+  bool _isEnd = false;
 
   /// Create signal emitter.
   SignalEmitter({
     @required this.start,
     @required this.signalDuration,
     @required this.propagationSpeed,
+    this.onEnd,
   });
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
+    if (_isEnd) {
+      return; // Do not do anything.
+    }
+
     if (_startTimestamp == -1) {
       _startTimestamp = timestamp;
 
@@ -59,14 +70,26 @@ abstract class SignalEmitter extends CanvasDrawable {
       propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
     );
 
-    if (range1.item2 == range2.item1) {
-      // Merge range.
-      drawRange(context, Tuple2<double, double>(range1.item1, range2.item2), rect);
-    } else {
-      drawRange(context, range1, rect);
-      drawRange(context, range2, rect);
+    bool outOfVisible = _isOutOfVisible(range1) && _isOutOfVisible(range2);
+
+    if (!outOfVisible) {
+      // Draw ranges.
+
+      if (range1.item2 == range2.item1) {
+        // Merge range.
+        drawRange(context, Tuple2<double, double>(range1.item1, range2.item2), rect);
+      } else {
+        drawRange(context, range1, rect);
+        drawRange(context, range2, rect);
+      }
+    } else if (onEnd != null) {
+      _isEnd = true;
+      onEnd();
     }
   }
+
+  /// Check if passed [range] is out of visible area.
+  bool _isOutOfVisible(Tuple2<double, double> range) => (range.item1 <= 0.0 || range.item1 >= 1.0) && (range.item2 <= 0.0 || range.item2 >= 1.0);
 
   /// Draw the passed range.
   void drawRange(CanvasRenderingContext2D context, Tuple2<double, double> range, Rectangle<double> rect);
