@@ -5,7 +5,7 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/pee
 class BusPeer extends SharedMediumPeer {
   @override
   void emitJAMSignal() {
-    // TODO: implement emitJAMSignal
+    // TODO Send JAM signal.
   }
 
   @override

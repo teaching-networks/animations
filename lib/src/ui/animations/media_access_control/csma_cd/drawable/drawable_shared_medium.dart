@@ -12,6 +12,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
+import 'package:tuple/tuple.dart';
 
 /// A drawable medium.
 class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
@@ -121,6 +122,8 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
       yOffset += yDelta;
     }
+
+    _updateOccupiedState();
   }
 
   /// What to do on mouse up on the shared medium drawable.
@@ -141,12 +144,39 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
       signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
       propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
       onEnd: () {
-        print("Signal end reached!");
+        peer.signalEmitter = null;
       },
     );
 
     sendSignal(peer.peer, signal);
   }
+
+  /// Update the medium occupied state on the peers.
+  void _updateOccupiedState() {
+    for (final peer in _peers) {
+      peer.peer.setMediumOccupied(_checkMediumOccupied(peer));
+    }
+  }
+
+  /// Check whether the passed [peer] is currently occupied and update its occupied state.
+  bool _checkMediumOccupied(DrawableSharedMediumPeer peer) {
+    for (final p in _peers) {
+      if (p != peer && p.signalEmitter != null) {
+        final signalRanges = p.signalEmitter.getSignalRanges();
+
+        if (signalRanges.item1 != null && signalRanges.item2 != null) {
+          if (_inRange(peer.position, signalRanges.item1) || _inRange(peer.position, signalRanges.item2)) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /// Check if passed [value] is in passed [range].
+  bool _inRange(double value, Tuple2<double, double> range) => value >= range.item1 && value <= range.item2;
 
   /// Calculate the signal duration in seconds.
   double _calculateSignalDuration(int bandwidth, int signalSize) => signalSize / bandwidth;

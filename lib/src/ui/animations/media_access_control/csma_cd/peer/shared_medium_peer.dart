@@ -12,6 +12,9 @@ abstract class SharedMediumPeer {
   /// Whether from the peers perception the medium is currently occupied.
   bool _mediumOccupied = false;
 
+  /// Whether the peer is currently sending.
+  bool _isSending = false;
+
   /// Send on the medium.
   void sendSafe(SharedMediumSignal packet) {
     assert(_medium != null);
@@ -39,10 +42,23 @@ abstract class SharedMediumPeer {
   bool isListening() => _listening;
 
   /// Set mediums occupied state from the peers perception.
-  void setMediumOccupied(bool occupied) => _mediumOccupied = occupied;
+  void setMediumOccupied(bool occupied) {
+    if (isMediumOccupied() != occupied) {
+      // occupied state changed.
+
+      if (isSending() && occupied) {
+        emitJAMSignalSafe();
+      }
+    }
+
+    _mediumOccupied = occupied;
+  }
 
   /// Whether the medium is occupied from the peers perception.
   bool isMediumOccupied() => _mediumOccupied;
+
+  /// Whether the peer is currently sending.
+  bool isSending() => _isSending;
 
   /// Send packet on the medium.
   void send(SharedMediumSignal packet);

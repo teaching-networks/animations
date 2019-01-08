@@ -9,6 +9,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
@@ -57,7 +58,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
     context.textBaseline = "middle";
     context.font = "${rect.height * 0.6}px 'Raleway'";
 
-    _roundRectangle.color = _highlighted ? Colors.TEAL : Colors.SLATE_GREY;
+    _roundRectangle.color = _getBackgroundColor();
     _roundRectangle.render(
         context,
         Rectangle(
@@ -73,6 +74,17 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
     context.restore();
 
     _actualBounds = rect;
+  }
+
+  /// Get background color of peer.
+  Color _getBackgroundColor() {
+    Color color = peer.isMediumOccupied() ? Colors.DARK_GRAY : Colors.SLATE_GREY;
+
+    if (_highlighted) {
+      color = Color.brighten(color, 0.1);
+    }
+
+    return color;
   }
 
   /// Set whether the drawable should be highlighted.

@@ -6,6 +6,8 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
+typedef void RangeListener(Tuple2<double, double> range1, Tuple2<double, double> range2);
+
 /// Drawable similar to PacketLine but vertical and emits in both directions from the starting point.
 abstract class SignalEmitter extends CanvasDrawable {
   /// From which point to start the signal emitting.
@@ -20,11 +22,17 @@ abstract class SignalEmitter extends CanvasDrawable {
   /// Callback which is called when the signal emitting finished.
   final Function onEnd;
 
+  /// Listen to range changes.
+  final RangeListener listen;
+
   /// Start timestamp of the animation.
   num _startTimestamp = -1;
 
   /// Whether the end of the animation has been reached.
   bool _isEnd = false;
+
+  Tuple2<double, double> _lastRange1;
+  Tuple2<double, double> _lastRange2;
 
   /// Create signal emitter.
   SignalEmitter({
@@ -32,6 +40,7 @@ abstract class SignalEmitter extends CanvasDrawable {
     @required this.signalDuration,
     @required this.propagationSpeed,
     this.onEnd,
+    this.listen,
   });
 
   @override
@@ -70,11 +79,17 @@ abstract class SignalEmitter extends CanvasDrawable {
       propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
     );
 
+    _lastRange1 = range1;
+    _lastRange2 = range2;
+
     bool outOfVisible = _isOutOfVisible(range1) && _isOutOfVisible(range2);
 
     if (!outOfVisible) {
-      // Draw ranges.
+      if (listen != null) {
+        listen(range1, range2);
+      }
 
+      // Draw ranges.
       if (range1.item2 == range2.item1) {
         // Merge range.
         drawRange(context, Tuple2<double, double>(range1.item1, range2.item2), rect);
@@ -129,4 +144,7 @@ abstract class SignalEmitter extends CanvasDrawable {
     @required final double extrema,
   }) =>
       extrema > start ? start + propagationProgress : start - propagationProgress;
+
+  /// Get the current signal ranges.
+  Tuple2<Tuple2<double, double>, Tuple2<double, double>> getSignalRanges() => Tuple2(_lastRange1, _lastRange2);
 }
