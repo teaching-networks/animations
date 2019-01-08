@@ -22,13 +22,6 @@ abstract class SharedMediumPeer {
     send(packet);
   }
 
-  /// Emit the JAM signal on the medium.
-  void emitJAMSignalSafe() {
-    assert(_medium != null);
-
-    emitJAMSignal();
-  }
-
   /// Set shared medium peer is sending and listing on.
   void setMedium(SharedMedium medium) => _medium = medium;
 
@@ -47,7 +40,7 @@ abstract class SharedMediumPeer {
       // occupied state changed.
 
       if (isSending() && occupied) {
-        emitJAMSignalSafe();
+        onCollisionDetected();
       }
     }
 
@@ -62,9 +55,6 @@ abstract class SharedMediumPeer {
 
   /// Send packet on the medium.
   void send(SharedMediumSignal packet);
-
-  /// Emit the JAM signal on the medium.
-  void emitJAMSignal();
 
   /// What to do when a collision has been detected.
   void onCollisionDetected();

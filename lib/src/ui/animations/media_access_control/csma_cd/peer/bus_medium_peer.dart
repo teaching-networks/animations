@@ -4,12 +4,9 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/pee
 /// Bus peer (peer on a shared medium).
 class BusPeer extends SharedMediumPeer {
   @override
-  void emitJAMSignal() {
-    // TODO Send JAM signal.
+  void onCollisionDetected() {
+    // TODO Implement
   }
-
-  @override
-  void onCollisionDetected() => emitJAMSignalSafe();
 
   @override
   void send(SharedMediumSignal packet) => getMedium().sendSignal(this, packet);
