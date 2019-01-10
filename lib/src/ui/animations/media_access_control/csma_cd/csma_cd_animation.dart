@@ -58,12 +58,7 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   void render(num timestamp) {
     context.clearRect(0, 0, size.width, size.height);
 
-    context.strokeRect(0, 0, size.width, size.height);
-
-    double mediumSizeFactor = 0.9;
-    double yOffset = size.height * ((1 - mediumSizeFactor) / 2);
-
-    _sharedMedium.render(context, toRect(yOffset, yOffset, Size(size.width - yOffset, size.height * mediumSizeFactor)), timestamp);
+    _sharedMedium.render(context, toRect(0, 0, size), timestamp);
   }
 
   /// What to do on mouse up on the canvas.

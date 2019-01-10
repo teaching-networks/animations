@@ -82,9 +82,9 @@ abstract class SignalEmitter extends CanvasDrawable {
     _lastRange1 = range1;
     _lastRange2 = range2;
 
-    bool outOfVisible = _isOutOfVisible(range1) && _isOutOfVisible(range2);
+    bool isEnd = _isOutOfVisible(range1) && _isOutOfVisible(range2) && signalProgress >= 1.0;
 
-    if (!outOfVisible) {
+    if (!isEnd) {
       if (listen != null) {
         listen(range1, range2);
       }
