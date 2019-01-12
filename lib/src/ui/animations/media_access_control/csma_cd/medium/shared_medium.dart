@@ -1,4 +1,3 @@
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_signal.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 
 /// A shared medium is for example a bus.
@@ -9,7 +8,6 @@ abstract class SharedMedium {
   /// Register a peer listening and sending on the medium.
   void registerPeer(SharedMediumPeer peer) {
     getPeers().add(peer);
-    peer.setMedium(this);
   }
 
   /// Unregister a peer formerly listening and sending on the medium.
@@ -35,7 +33,4 @@ abstract class SharedMedium {
 
   /// Length of the medium in m.
   double getLength();
-
-  /// Send [signal] from the [peer] on this medium.
-  void sendSignal(SharedMediumPeer peer, SharedMediumSignal signal);
 }

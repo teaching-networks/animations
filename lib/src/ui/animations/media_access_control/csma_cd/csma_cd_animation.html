@@ -10,7 +10,35 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled">
-				<label>Test</label>
+				<label>Medium Length (m)</label>
+				<material-auto-suggest-input
+						[(inputText)]="selectedMediumLength"
+						[selectionOptions]="mediumLengthSuggestions">
+				</material-auto-suggest-input>
+			</li>
+
+			<li class="labeled">
+				<label>Size (bits)</label>
+				<material-auto-suggest-input
+						[(inputText)]="selectedSignalSize"
+						[selectionOptions]="signalSizeSuggestions">
+				</material-auto-suggest-input>
+			</li>
+
+			<li class="labeled">
+				<label>Bandwidth (Mbps)</label>
+				<material-auto-suggest-input
+						[(inputText)]="selectedBandwidth"
+						[selectionOptions]="bandwidthSuggestions">
+				</material-auto-suggest-input>
+			</li>
+
+			<li class="labeled">
+				<label>Control</label>
+				<material-button raised (click)="reset()">
+					<material-icon icon="done"></material-icon>
+					Apply changes
+				</material-button>
 			</li>
 		</ul>
 	</div>

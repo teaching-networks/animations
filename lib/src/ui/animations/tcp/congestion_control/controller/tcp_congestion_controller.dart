@@ -2,7 +2,6 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/tcp_congestion_control_algorithm.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controller/congestion_window_provider.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp_congestion_control_context.dart';
-import 'package:hm_animations/src/ui/animations/tcp/congestion_control/model/tcp_congestion_control_state.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/tcp_congestion_control_animation.dart';
 
 /// Controller controlling TCP congestion.

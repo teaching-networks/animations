@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/interfaces/graph2d_calculatable.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/interfaces/graph2d_renderable.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/util/size.dart';

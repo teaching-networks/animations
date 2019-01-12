@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
@@ -14,12 +15,18 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
 /// A Drawable shared medium peer.
-class DrawableSharedMediumPeer extends CanvasDrawable {
+class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPeer {
+  /// Colors of the peers.
+  static const List<Color> _peerColors = [
+    Colors.ORANGE,
+    Colors.BLUE_GRAY,
+    Colors.PURPLE,
+    Colors.SPACE_BLUE,
+    Colors.NAVY,
+  ];
+
   /// Id of the peer.
   final int id;
-
-  /// Peer to draw.
-  final SharedMediumPeer peer;
 
   /// Whether the drawable is currently highlighted.
   bool _highlighted = false;
@@ -47,13 +54,24 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
     radius: Edges.all(1.0),
   );
 
+  /// Medium the peer is sending and listening on.
+  final SharedMedium medium;
+
+  /// Whether the peer is listening to the medium.
+  bool _listening = false;
+
+  /// Whether from the peers perception the medium is currently occupied.
+  bool _mediumOccupied = false;
+
+  /// Whether the peer is currently sending.
+  bool _isSending = false;
+
   /// Create drawable peer.
   DrawableSharedMediumPeer({
     @required this.id,
-    @required this.peer,
+    @required this.medium,
     @required this.position,
-    @required this.color,
-  });
+  }) : color = DrawableSharedMediumPeer._peerColors.length > id ? DrawableSharedMediumPeer._peerColors[id] : Colors.SLATE_GREY;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -89,9 +107,9 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
 
     double shadowOffset = window.devicePixelRatio * 2;
     setFillColor(context, Colors.DARK_GRAY);
-    context.fillText(id.toString(), rect.width / 2 + shadowOffset, rect.height / 2 + shadowOffset);
+    context.fillText((id + 1).toString(), rect.width / 2 + shadowOffset, rect.height / 2 + shadowOffset);
     setFillColor(context, Colors.WHITE);
-    context.fillText(id.toString(), rect.width / 2, rect.height / 2);
+    context.fillText((id + 1).toString(), rect.width / 2, rect.height / 2);
   }
 
   /// Draw notes next to the peer (if any).
@@ -121,7 +139,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
 
   /// Get background color of peer.
   Color _getBackgroundColor() {
-    Color color = peer.isMediumOccupied() ? Colors.DARK_GRAY : this.color;
+    Color color = isMediumOccupied() ? Colors.DARK_GRAY : this.color;
 
     if (_highlighted) {
       color = Color.brighten(color, 0.1);
@@ -153,4 +171,40 @@ class DrawableSharedMediumPeer extends CanvasDrawable {
 
   /// Clear the notes shown next to the peer.
   void clearNotes() => _notes = null;
+
+  /// Set mediums occupied state from the peers perception.
+  void setMediumOccupied(bool occupied) {
+    if (isMediumOccupied() != occupied) {
+      // occupied state changed.
+
+      if (isSending() && occupied) {
+        onCollisionDetected();
+      }
+    }
+
+    _mediumOccupied = occupied;
+  }
+
+  /// Whether the medium is occupied from the peers perception.
+  @override
+  bool isMediumOccupied() => _mediumOccupied;
+
+  @override
+  SharedMedium getMedium() => medium;
+
+  @override
+  bool isListening() => _listening;
+
+  @override
+  bool isSending() => _isSending;
+
+  @override
+  void onCollisionDetected() {
+    // TODO: implement onCollisionDetected
+  }
+
+  @override
+  void send() {
+    // TODO: implement send
+  }
 }

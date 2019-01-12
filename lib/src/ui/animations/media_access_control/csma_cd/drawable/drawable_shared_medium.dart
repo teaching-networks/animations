@@ -2,11 +2,9 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/drawable_shared_medium_peer.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/shared_medium_signal.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/packet/simple_shared_medium_signal.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
@@ -17,7 +15,7 @@ import 'package:tuple/tuple.dart';
 /// A drawable medium.
 class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Slow down the animation by a factor of ...
-  static const int _slowDownRate = 1000 * 1000;
+  static const int _slowDownRate = 500 * 1000;
 
   /// Color for lines between peers.
   static const Color _lineColor = Color.hex(0xFFDDDDDD);
@@ -31,20 +29,11 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Width of a shared medium lane.
   static const int _laneWidth = 20;
 
-  /// Colors of the peers.
-  static const List<Color> _peerColors = [
-    Colors.ORANGE,
-    Colors.BLUE_GRAY,
-    Colors.PURPLE,
-    Colors.SPACE_BLUE,
-    Colors.NAVY,
-  ];
-
   /// Medium to draw.
   final SharedMedium medium;
 
   /// Drawable peers from medium.
-  List<DrawableSharedMediumPeer> _peers;
+  List<SharedMediumPeer> _peers;
 
   /// Peer which is currently highlighted.
   DrawableSharedMediumPeer _highlightedPeer;
@@ -52,33 +41,24 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Timestamp of the start of the animation.
   num _startTimestamp;
 
-  /// TODO Make the next two attributes adjustable
-  int bandwidth = 10 * 1000 * 1000;
-  int signalSize = 50;
+  /// Bandwidth signals are sent with.
+  final int bandwidth;
+
+  /// Size of signals sent on the medium.
+  final int signalSize;
 
   /// Create drawable medium.
   DrawableSharedMedium({
     @required this.medium,
+    @required this.bandwidth,
+    @required this.signalSize,
   }) {
     _init();
   }
 
   /// Init drawable medium.
   void _init() {
-    int idCounter = 1;
-
-    double offset = 1.0 / (medium.getPeers().length - 1);
-    int i = 0;
-
-    _peers = medium
-        .getPeers()
-        .map((peer) => DrawableSharedMediumPeer(
-              id: idCounter++,
-              peer: peer,
-              position: i++ * offset,
-              color: _peerColors[i - 1],
-            ))
-        .toList(growable: false);
+    _peers = medium.getPeers();
   }
 
   @override
@@ -93,14 +73,16 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
     _drawPeers(context, _peers, rect, timestamp);
 
-    setFillColor(context, Colors.BLACK);
-    context.fillText("Time (in µs): ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)}", 200, 0); // TODO Position correctly
+    context.textBaseline = "top";
+    context.textAlign = "left";
+    setFillColor(context, Colors.DARK_GRAY);
+    context.fillText("Time (in µs): ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)}", 0, 0); // TODO Position correctly
 
     context.restore();
   }
 
   /// Draw all peers with connection lines.
-  void _drawPeers(CanvasRenderingContext2D context, List<DrawableSharedMediumPeer> peers, Rectangle<double> rect, timestamp) {
+  void _drawPeers(CanvasRenderingContext2D context, List<SharedMediumPeer> peers, Rectangle<double> rect, timestamp) {
     double peerSize = rect.height / peers.length / 2.5;
 
     double minY = peerSize / 2;
@@ -128,7 +110,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     context.fillRect(lineXOffset + lineWidth, lineYOffset, peers.length * laneWidth, maxY - minY + lineWidth);
 
     for (int i = 0; i < peers.length; i++) {
-      final peer = peers[i];
+      final peer = peers[i] as DrawableSharedMediumPeer;
 
       peer.render(context, Rectangle<double>(0, yOffset, rect.width, peerSize));
       peer.setActualBounds(Rectangle<double>(rect.left + halfWidth - halfPeerSize, rect.top + yOffset, peerSize, peerSize));
@@ -151,12 +133,12 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     DrawableSharedMediumPeer peer = _getPeerForMousePos(pos);
 
     if (peer != null && peer.signalEmitter == null) {
-      _sendSignal(peer, SimpleSharedMediumSignal());
+      _sendSignal(peer);
     }
   }
 
   /// Let the passed peer send a signal on the medium.
-  void _sendSignal(DrawableSharedMediumPeer peer, SharedMediumSignal signal) {
+  void _sendSignal(DrawableSharedMediumPeer peer) {
     double signalTime = _calculateSignalDuration(bandwidth, signalSize) * _slowDownRate;
 
     peer.signalEmitter = VerticalSignalEmitter(
@@ -171,22 +153,21 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     );
 
     peer.setNotes(["Transmitting"]);
-
-    sendSignal(peer.peer, signal);
   }
 
   /// Update the medium occupied state on the peers.
   void _updateOccupiedState() {
     for (final peer in _peers) {
-      peer.peer.setMediumOccupied(_checkMediumOccupied(peer));
+      peer.setMediumOccupied(_checkMediumOccupied(peer));
     }
   }
 
   /// Check whether the passed [peer] is currently occupied and update its occupied state.
   bool _checkMediumOccupied(DrawableSharedMediumPeer peer) {
-    for (final p in _peers) {
-      if (p != peer && p.signalEmitter != null) {
-        final signalRanges = p.signalEmitter.getSignalRanges();
+    for (var p in _peers) {
+      final drawablePeer = p as DrawableSharedMediumPeer;
+      if (drawablePeer != peer && drawablePeer.signalEmitter != null) {
+        final signalRanges = drawablePeer.signalEmitter.getSignalRanges();
 
         if (signalRanges.item1 != null && signalRanges.item2 != null) {
           if (_inRange(peer.position, signalRanges.item1) || _inRange(peer.position, signalRanges.item2)) {
@@ -223,7 +204,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Get the peer on the passed mouse [pos] or null if not found.
   DrawableSharedMediumPeer _getPeerForMousePos(Point<double> pos) {
     for (final peer in _peers) {
-      final bounds = peer.getActualBounds();
+      final bounds = (peer as DrawableSharedMediumPeer).getActualBounds();
       if (bounds != null && bounds.containsPoint(pos)) {
         return peer;
       }
@@ -255,11 +236,6 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   @override
   void registerPeer(SharedMediumPeer peer) {
     medium.registerPeer(peer);
-  }
-
-  @override
-  void sendSignal(SharedMediumPeer peer, SharedMediumSignal signal) {
-    medium.sendSignal(peer, signal);
   }
 
   @override
