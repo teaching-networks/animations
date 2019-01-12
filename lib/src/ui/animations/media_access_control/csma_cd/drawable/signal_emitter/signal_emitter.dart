@@ -34,6 +34,9 @@ abstract class SignalEmitter extends CanvasDrawable {
   Tuple2<double, double> _lastRange1;
   Tuple2<double, double> _lastRange2;
 
+  /// When the emitting has been cancelled.
+  num _cancelledTimestamp = -1;
+
   /// Create signal emitter.
   SignalEmitter({
     @required this.start,
@@ -57,12 +60,15 @@ abstract class SignalEmitter extends CanvasDrawable {
 
     final diff = timestamp - _startTimestamp;
 
+    bool cancelled = _cancelledTimestamp != -1;
+
     final propagationProgress = diff / 1000 * propagationSpeed;
-    final signalProgress = diff / signalDuration.inMilliseconds;
+    final signalProgress = cancelled ? 1.1 : diff / signalDuration.inMilliseconds;
 
     double propagationProgressSinceSignalEnd = 0.0;
     if (signalProgress >= 1.0) {
-      propagationProgressSinceSignalEnd = (diff - signalDuration.inMilliseconds) / 1000 * propagationSpeed;
+      propagationProgressSinceSignalEnd =
+          (diff - (cancelled ? (_cancelledTimestamp - _startTimestamp) : signalDuration.inMilliseconds)) / 1000 * propagationSpeed;
     }
 
     Tuple2<double, double> range1 = _calculateSignalRange(
@@ -147,4 +153,9 @@ abstract class SignalEmitter extends CanvasDrawable {
 
   /// Get the current signal ranges.
   Tuple2<Tuple2<double, double>, Tuple2<double, double>> getSignalRanges() => Tuple2(_lastRange1, _lastRange2);
+
+  /// Cancel the signal emitting.
+  void cancelSignal() {
+    _cancelledTimestamp = window.performance.now();
+  }
 }

@@ -26,6 +26,9 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     Colors.NAVY,
   ];
 
+  /// Random number generator.
+  static Random _rng = Random();
+
   /// Id of the peer.
   final int id;
 
@@ -36,7 +39,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   Rectangle<double> _actualBounds;
 
   /// Signal emitter to draw.
-  VerticalSignalEmitter _signalEmitter;
+  List<VerticalSignalEmitter> _signalEmitter;
 
   /// Position of the peer on the shared medium.
   final double position;
@@ -66,6 +69,9 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
 
   /// Whether the peer is currently sending.
   bool _isSending = false;
+
+  /// Number of collisions since the last signal sending request.
+  int _numberOfCollisions = 0;
 
   /// Create drawable peer.
   DrawableSharedMediumPeer({
@@ -158,10 +164,15 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// Set the drawables actual bounds.
   void setActualBounds(Rectangle<double> bounds) => _actualBounds = bounds;
 
-  VerticalSignalEmitter get signalEmitter => _signalEmitter;
+  List<VerticalSignalEmitter> get signalEmitter => _signalEmitter;
 
-  set signalEmitter(VerticalSignalEmitter value) {
-    _signalEmitter = value;
+  /// Add a signal emitter.
+  void addSignalEmitter(VerticalSignalEmitter emitter) {
+    if (_signalEmitter == null) {
+      _signalEmitter = List<VerticalSignalEmitter>();
+    }
+
+    _signalEmitter.add(emitter);
   }
 
   /// Set notes to show next to the peer.
@@ -217,14 +228,49 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   void _onSendEnd() {
     setListening(false);
 
-    signalEmitter = null;
+    if (_signalEmitter.length > 1) {
+      _signalEmitter.removeAt(0);
+    } else {
+      _signalEmitter = null;
+    }
+
+    _numberOfCollisions = 0;
     _notes.clear();
   }
 
   /// What to do in case a collision has been detected.
   void _onCollisionDetected() {
-    // TODO
-    print("Oh no.. a collision detected at peer $id");
+    _numberOfCollisions++;
+
+    _abortSending();
+
+    final double backoffTime = medium is DrawableSharedMedium ? (medium as DrawableSharedMedium).calculateSignalDuration(512) : 1;
+    int k = _rng.nextInt(pow(2, _numberOfCollisions));
+
+    double totalBackoffTime = backoffTime * k;
+
+    Future.delayed(Duration(milliseconds: (totalBackoffTime * 1000).round())).then((_) {
+      setMediumOccupied(false);
+      if (medium is DrawableSharedMedium) {
+        (medium as DrawableSharedMedium).sendSignal(this);
+      }
+
+      setNotes(["Transmitting"]);
+    });
+
+    setNotes([
+      "Exponential Backoff",
+      "Collisions: $_numberOfCollisions",
+      "K: $k",
+    ]);
+  }
+
+  void _abortSending() {
+    if (_signalEmitter != null) {
+      VerticalSignalEmitter emitter = _signalEmitter.last;
+
+      emitter.cancelSignal();
+    }
   }
 
   /// What to do in case the medium occupied state changes.

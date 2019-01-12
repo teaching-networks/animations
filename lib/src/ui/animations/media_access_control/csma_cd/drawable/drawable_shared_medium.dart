@@ -73,10 +73,11 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
     _drawPeers(context, _peers, rect, timestamp);
 
-    context.textBaseline = "top";
+    context.textBaseline = "middle";
     context.textAlign = "left";
     setFillColor(context, Colors.DARK_GRAY);
-    context.fillText("Time (in µs): ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)}", 0, 0); // TODO Position correctly
+    context.fillText(
+        "Time: ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)} µs", 10.0 * window.devicePixelRatio, rect.height / 2);
 
     context.restore();
   }
@@ -119,7 +120,9 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
       context.fillRect(halfWidth + halfPeerSize, yOffset + peerSize / 2, connectionLineLength, lineWidth);
 
       if (peer.signalEmitter != null) {
-        peer.signalEmitter.render(context, Rectangle<double>(lineXOffset + i * laneWidth, lineYOffset, laneWidth, maxY - minY + lineWidth), timestamp);
+        for (final emitter in peer.signalEmitter) {
+          emitter.render(context, Rectangle<double>(lineXOffset + i * laneWidth, lineYOffset, laneWidth, maxY - minY + lineWidth), timestamp);
+        }
       }
 
       yOffset += yDelta;
@@ -143,22 +146,24 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
     if (peer.isMediumOccupied()) {
       // Medium is currently occupied, wait until medium free again.
-      peer.addNote("Busy Channel");
+      peer.setNotes(["Busy Channel"]);
       return;
     }
 
     peer.setSending(true);
 
-    double signalTime = _calculateSignalDuration(bandwidth, signalSize) * _slowDownRate;
+    double signalTime = calculateSignalDuration(signalSize);
 
-    peer.signalEmitter = VerticalSignalEmitter(
-      start: peer.position,
-      signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
-      propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
-      color: Color.brighten(peer.color, 0.3),
-      onEnd: () {
-        peer.setSending(false);
-      },
+    peer.addSignalEmitter(
+      VerticalSignalEmitter(
+        start: peer.position,
+        signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
+        propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
+        color: Color.brighten(peer.color, 0.3),
+        onEnd: () {
+          peer.setSending(false);
+        },
+      ),
     );
 
     peer.setNotes(["Transmitting"]);
@@ -176,11 +181,13 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     for (var p in _peers) {
       final drawablePeer = p as DrawableSharedMediumPeer;
       if (drawablePeer != peer && drawablePeer.signalEmitter != null) {
-        final signalRanges = drawablePeer.signalEmitter.getSignalRanges();
+        for (final emitter in drawablePeer.signalEmitter) {
+          final signalRanges = emitter.getSignalRanges();
 
-        if (signalRanges.item1 != null && signalRanges.item2 != null) {
-          if (_inRange(peer.position, signalRanges.item1) || _inRange(peer.position, signalRanges.item2)) {
-            return true;
+          if (signalRanges.item1 != null && signalRanges.item2 != null) {
+            if (_inRange(peer.position, signalRanges.item1) || _inRange(peer.position, signalRanges.item2)) {
+              return true;
+            }
           }
         }
       }
@@ -193,7 +200,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   bool _inRange(double value, Tuple2<double, double> range) => value >= range.item1 && value <= range.item2;
 
   /// Calculate the signal duration in seconds.
-  double _calculateSignalDuration(int bandwidth, int signalSize) => signalSize / bandwidth;
+  double calculateSignalDuration(int signalSize) => signalSize / bandwidth * _slowDownRate;
 
   /// What to do on mouse move on the shared medium drawable.
   void onMouseMove(Point<double> pos) {
