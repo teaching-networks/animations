@@ -2,6 +2,7 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
@@ -167,22 +168,24 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   void setNotes(List<String> notes) => _notes = notes;
 
   /// Add a note to the shown notes next to the peer.
-  void addNote(String note) => _notes != null ? _notes.add(note) : [note];
+  void addNote(String note) => _notes != null ? _notes.add(note) : _notes = [note];
 
   /// Clear the notes shown next to the peer.
   void clearNotes() => _notes = null;
 
   /// Set mediums occupied state from the peers perception.
   void setMediumOccupied(bool occupied) {
-    if (isMediumOccupied() != occupied) {
-      // occupied state changed.
-
-      if (isSending() && occupied) {
-        onCollisionDetected();
-      }
-    }
+    bool oldOccupied = isMediumOccupied();
 
     _mediumOccupied = occupied;
+
+    if (oldOccupied != occupied) {
+      _onOccupiedStateChanged(occupied);
+
+      if (isSending() && occupied) {
+        _onCollisionDetected();
+      }
+    }
   }
 
   /// Whether the medium is occupied from the peers perception.
@@ -196,15 +199,43 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   bool isListening() => _listening;
 
   @override
+  void setListening(bool isListening) => _listening = isListening;
+
+  @override
   bool isSending() => _isSending;
 
   @override
-  void onCollisionDetected() {
-    // TODO: implement onCollisionDetected
+  void setSending(bool isSending) {
+    _isSending = isSending;
+
+    if (!_isSending) {
+      _onSendEnd();
+    }
   }
 
-  @override
-  void send() {
-    // TODO: implement send
+  /// What to do when the sending has ended.
+  void _onSendEnd() {
+    setListening(false);
+
+    signalEmitter = null;
+    _notes.clear();
+  }
+
+  /// What to do in case a collision has been detected.
+  void _onCollisionDetected() {
+    // TODO
+    print("Oh no.. a collision detected at peer $id");
+  }
+
+  /// What to do in case the medium occupied state changes.
+  void _onOccupiedStateChanged(bool isNowOccupied) {
+    if (!isNowOccupied) {
+      if (!this.isSending() && this.isListening()) {
+        // Peer is listening because he wants to send a signal but could not in the past -> send signal now.
+        if (medium is DrawableSharedMedium) {
+          (medium as DrawableSharedMedium).sendSignal(this);
+        }
+      }
+    }
   }
 }

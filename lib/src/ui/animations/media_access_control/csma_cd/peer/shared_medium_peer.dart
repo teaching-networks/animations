@@ -5,6 +5,9 @@ abstract class SharedMediumPeer {
   /// Get shared medium peer is sending and listing on.
   SharedMedium getMedium();
 
+  /// Set the listening state of the peer.
+  void setListening(bool isListening);
+
   /// Check if the peer is currently listening.
   bool isListening();
 
@@ -14,12 +17,9 @@ abstract class SharedMediumPeer {
   /// Whether the medium is occupied from the peers perception.
   bool isMediumOccupied();
 
+  /// Set the sending state of the peer.
+  void setSending(bool isSending);
+
   /// Whether the peer is currently sending.
   bool isSending();
-
-  /// Send packet on the medium.
-  void send();
-
-  /// What to do when a collision has been detected.
-  void onCollisionDetected();
 }

@@ -133,12 +133,22 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     DrawableSharedMediumPeer peer = _getPeerForMousePos(pos);
 
     if (peer != null && peer.signalEmitter == null) {
-      _sendSignal(peer);
+      sendSignal(peer);
     }
   }
 
   /// Let the passed peer send a signal on the medium.
-  void _sendSignal(DrawableSharedMediumPeer peer) {
+  void sendSignal(DrawableSharedMediumPeer peer) {
+    peer.setListening(true);
+
+    if (peer.isMediumOccupied()) {
+      // Medium is currently occupied, wait until medium free again.
+      peer.addNote("Busy Channel");
+      return;
+    }
+
+    peer.setSending(true);
+
     double signalTime = _calculateSignalDuration(bandwidth, signalSize) * _slowDownRate;
 
     peer.signalEmitter = VerticalSignalEmitter(
@@ -147,8 +157,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
       propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
       color: Color.brighten(peer.color, 0.3),
       onEnd: () {
-        peer.signalEmitter = null;
-        peer.clearNotes();
+        peer.setSending(false);
       },
     );
 
