@@ -156,6 +156,13 @@ abstract class SignalEmitter extends CanvasDrawable {
 
   /// Cancel the signal emitting.
   void cancelSignal() {
-    _cancelledTimestamp = window.performance.now();
+    final currentTimestamp = window.performance.now();
+    final diff = currentTimestamp - _startTimestamp;
+    final signalProgress = diff / signalDuration.inMilliseconds;
+
+    // Only cancel if signal not already ended.
+    if (signalProgress < 1.0) {
+      _cancelledTimestamp = window.performance.now();
+    }
   }
 }

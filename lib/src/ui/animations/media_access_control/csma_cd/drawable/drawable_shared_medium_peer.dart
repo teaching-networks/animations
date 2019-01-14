@@ -2,6 +2,7 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
@@ -73,11 +74,21 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// Number of collisions since the last signal sending request.
   int _numberOfCollisions = 0;
 
+  /// Whether peer is currently waiting for backoff time to expire.
+  bool _isInBackoff = false;
+
+  /// Whether to wait for a signal sending.
+  bool _sendAwaited = false;
+
+  /// Map for translations.
+  final Map<String, Message> labelMap;
+
   /// Create drawable peer.
   DrawableSharedMediumPeer({
     @required this.id,
     @required this.medium,
     @required this.position,
+    @required this.labelMap,
   }) : color = DrawableSharedMediumPeer._peerColors.length > id ? DrawableSharedMediumPeer._peerColors[id] : Colors.SLATE_GREY;
 
   @override
@@ -175,6 +186,11 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     _signalEmitter.add(emitter);
   }
 
+  /// Clear all signal emitter.
+  void clearSignalEmitter() {
+    _signalEmitter = null;
+  }
+
   /// Set notes to show next to the peer.
   void setNotes(List<String> notes) => _notes = notes;
 
@@ -228,39 +244,39 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   void _onSendEnd() {
     setListening(false);
 
-    if (_signalEmitter.length > 1) {
-      _signalEmitter.removeAt(0);
-    } else {
-      _signalEmitter = null;
-    }
-
     _numberOfCollisions = 0;
     _notes.clear();
   }
 
   /// What to do in case a collision has been detected.
   void _onCollisionDetected() {
-    _numberOfCollisions++;
+    if (_isInBackoff) {
+      return;
+    }
 
-    _abortSending();
+    _isInBackoff = true;
+
+    _numberOfCollisions++;
 
     final double backoffTime = medium is DrawableSharedMedium ? (medium as DrawableSharedMedium).calculateSignalDuration(512) : 1;
     int k = _rng.nextInt(pow(2, _numberOfCollisions));
 
     double totalBackoffTime = backoffTime * k;
 
-    Future.delayed(Duration(milliseconds: (totalBackoffTime * 1000).round())).then((_) {
-      setMediumOccupied(false);
-      if (medium is DrawableSharedMedium) {
-        (medium as DrawableSharedMedium).sendSignal(this);
-      }
+    _abortSending();
 
-      setNotes(["Transmitting"]);
+    Future.delayed(Duration(milliseconds: (totalBackoffTime * 1000).round())).then((_) {
+      _sendAwaited = true;
+      if (medium is DrawableSharedMedium) {
+        if ((medium as DrawableSharedMedium).sendSignal(this)) {
+          _isInBackoff = false;
+        }
+      }
     });
 
     setNotes([
-      "Exponential Backoff",
-      "Collisions: $_numberOfCollisions",
+      labelMap["exponential-backoff"].toString(),
+      "${labelMap["collisions"].toString()}: $_numberOfCollisions",
       "K: $k",
     ]);
   }
@@ -276,12 +292,18 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// What to do in case the medium occupied state changes.
   void _onOccupiedStateChanged(bool isNowOccupied) {
     if (!isNowOccupied) {
-      if (!this.isSending() && this.isListening()) {
+      if ((!this.isSending() || (_isInBackoff && _sendAwaited)) && this.isListening()) {
         // Peer is listening because he wants to send a signal but could not in the past -> send signal now.
         if (medium is DrawableSharedMedium) {
-          (medium as DrawableSharedMedium).sendSignal(this);
+          if ((medium as DrawableSharedMedium).sendSignal(this) && _isInBackoff) {
+            _sendAwaited = false;
+            _isInBackoff = false;
+          }
         }
       }
     }
   }
+
+  /// Whether peer currently waits for backoff time to expire.
+  bool get isInBackoff => _isInBackoff;
 }

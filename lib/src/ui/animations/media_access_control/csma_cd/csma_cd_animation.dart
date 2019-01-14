@@ -15,7 +15,9 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 /// Animation showing the CSMA/CD media-access-control protocol.
 @Component(
   selector: "csma-cd-animation",
-  styleUrls: ["csma_cd_animation.css"],
+  styleUrls: [
+    "csma_cd_animation.css",
+  ],
   templateUrl: "csma_cd_animation.html",
   directives: [
     coreDirectives,
@@ -24,7 +26,9 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     MaterialButtonComponent,
     MaterialIconComponent,
   ],
-  pipes: [I18nPipe],
+  pipes: [
+    I18nPipe,
+  ],
 )
 class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   /// Peers to display in the animation.
@@ -117,6 +121,11 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
       medium: busSharedMedium,
       bandwidth: bandwidth * 1000 * 1000,
       signalSize: signalSize,
+      labelMap: {
+        "time": _i18n.get("csma-cd-animation.time"),
+        "busy-channel": _i18n.get("csma-cd-animation.peer.state.busy-channel"),
+        "transmitting": _i18n.get("csma-cd-animation.peer.state.transmitting"),
+      },
     );
 
     for (int i = 0; i < _peerCount; i++) {
@@ -124,6 +133,10 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
         id: i,
         position: i * offset,
         medium: _sharedMedium,
+        labelMap: {
+          "exponential-backoff": _i18n.get("csma-cd-animation.peer.state.exponential-backoff"),
+          "collisions": _i18n.get("csma-cd-animation.peer.state.exponential-backoff.collisions"),
+        },
       ));
     }
   }

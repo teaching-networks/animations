@@ -2,6 +2,7 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
@@ -47,11 +48,15 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Size of signals sent on the medium.
   final int signalSize;
 
+  /// Mapping for translations.
+  final Map<String, Message> labelMap;
+
   /// Create drawable medium.
   DrawableSharedMedium({
     @required this.medium,
     @required this.bandwidth,
     @required this.signalSize,
+    @required this.labelMap,
   }) {
     _init();
   }
@@ -76,8 +81,8 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     context.textBaseline = "middle";
     context.textAlign = "left";
     setFillColor(context, Colors.DARK_GRAY);
-    context.fillText(
-        "Time: ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)} µs", 10.0 * window.devicePixelRatio, rect.height / 2);
+    context.fillText("${labelMap["time"].toString()}: ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)} µs",
+        10.0 * window.devicePixelRatio, rect.height / 2);
 
     context.restore();
   }
@@ -141,13 +146,15 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   }
 
   /// Let the passed peer send a signal on the medium.
-  void sendSignal(DrawableSharedMediumPeer peer) {
+  bool sendSignal(DrawableSharedMediumPeer peer) {
     peer.setListening(true);
 
     if (peer.isMediumOccupied()) {
       // Medium is currently occupied, wait until medium free again.
-      peer.setNotes(["Busy Channel"]);
-      return;
+      if (!peer.isInBackoff) {
+        peer.setNotes([labelMap["busy-channel"].toString()]);
+      }
+      return false;
     }
 
     peer.setSending(true);
@@ -161,12 +168,22 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
         propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
         color: Color.brighten(peer.color, 0.3),
         onEnd: () {
-          peer.setSending(false);
+          if (peer.signalEmitter.length > 1) {
+            peer.signalEmitter.removeAt(0);
+          } else {
+            peer.clearSignalEmitter();
+
+            if (!peer.isInBackoff) {
+              peer.setSending(false);
+            }
+          }
         },
       ),
     );
 
-    peer.setNotes(["Transmitting"]);
+    peer.setNotes([labelMap["transmitting"].toString()]);
+
+    return true;
   }
 
   /// Update the medium occupied state on the peers.

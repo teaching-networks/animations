@@ -10,7 +10,7 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled">
-				<label>Medium Length (m)</label>
+				<label>{{ "csma-cd-animation.control.medium-length" | i18n }}</label>
 				<material-auto-suggest-input
 						[(inputText)]="selectedMediumLength"
 						[selectionOptions]="mediumLengthSuggestions">
@@ -18,7 +18,7 @@
 			</li>
 
 			<li class="labeled">
-				<label>Size (bits)</label>
+				<label>{{ "csma-cd-animation.control.signal-size" | i18n }}</label>
 				<material-auto-suggest-input
 						[(inputText)]="selectedSignalSize"
 						[selectionOptions]="signalSizeSuggestions">
@@ -26,18 +26,17 @@
 			</li>
 
 			<li class="labeled">
-				<label>Bandwidth (Mbps)</label>
+				<label>{{ "csma-cd-animation.control.bandwidth" | i18n }}</label>
 				<material-auto-suggest-input
 						[(inputText)]="selectedBandwidth"
 						[selectionOptions]="bandwidthSuggestions">
 				</material-auto-suggest-input>
 			</li>
 
-			<li class="labeled">
-				<label>Control</label>
+			<li style="text-align: center">
 				<material-button raised (click)="reset()">
 					<material-icon icon="done"></material-icon>
-					Apply changes
+					{{ "csma-cd-animation.control.apply" | i18n }}
 				</material-button>
 			</li>
 		</ul>

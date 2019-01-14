@@ -169,6 +169,15 @@
 	"tcp-congestion-control-animation.control.reset.tooltip": "Animation zurücksetzen",
 	"csma-cd-animation.name": "CSMA/CD",
 	"csma-cd-animation.short-description": "Protokoll welches den Zugriff auf ein geteiltes Medium regelt",
-	"csma-cd-animation.description": "Es ist noch keine Beschreibung verfügbar.",
-	"csma-cd-animation.credits": "Credits sind bisher noch nicht verfügbar."
+	"csma-cd-animation.description": "Diese Animation zeigt den Effekt von Signalgröße, Medium Länge und Bandbreite auf das CSMA/CD Protokoll.",
+	"csma-cd-animation.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Daniel Brushteyn, University of Pennsylvania, entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
+	"csma-cd-animation.control.medium-length": "Länge des Mediums (m)",
+	"csma-cd-animation.control.signal-size": "Signalgröße (bits)",
+	"csma-cd-animation.control.bandwidth": "Bandbreite (Mbps)",
+	"csma-cd-animation.control.apply": "Anwenden",
+	"csma-cd-animation.time": "Zeit",
+	"csma-cd-animation.peer.state.busy-channel": "Medium belegt",
+	"csma-cd-animation.peer.state.transmitting": "Überträgt...",
+	"csma-cd-animation.peer.state.exponential-backoff": "Exponentieller Backoff",
+	"csma-cd-animation.peer.state.exponential-backoff.collisions": "Kollisionen"
 }

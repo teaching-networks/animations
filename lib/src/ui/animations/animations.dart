@@ -95,7 +95,7 @@ class Animations {
       ID_COUNTER++,
       CSMACD.CSMACDAnimationNgFactory,
       "csma-cd-animation",
-      "",
+      "img/animation/preview/csma-cd-preview.png",
       "csma-cd",
     ),
   ];
