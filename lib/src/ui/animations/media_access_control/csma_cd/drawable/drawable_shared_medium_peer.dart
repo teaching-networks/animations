@@ -312,10 +312,13 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     if (_scheduledAfterBackoffSignalTimestamp != null && _lastRenderTimestamp >= _scheduledAfterBackoffSignalTimestamp) {
       _scheduledAfterBackoffSignalTimestamp = null;
 
-      _sendAwaited = true;
-      if (medium is DrawableSharedMedium) {
-        if ((medium as DrawableSharedMedium).sendSignal(this)) {
-          _isInBackoff = false;
+      if (isMediumOccupied()) {
+        _sendAwaited = true;
+      } else {
+        if (medium is DrawableSharedMedium) {
+          if ((medium as DrawableSharedMedium).sendSignal(this)) {
+            _isInBackoff = false;
+          }
         }
       }
     }
