@@ -83,8 +83,8 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// Map for translations.
   final Map<String, Message> labelMap;
 
-  /// If a signal sending is schedules after backoff signal.
-  bool _scheduleAfterBackoffSignalSending = false;
+  /// When the after backoff signal should be sent.
+  num _scheduledAfterBackoffSignalTimestamp;
 
   /// Timestamp from last render cycle.
   num _lastRenderTimestamp = -1;
@@ -273,9 +273,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
 
     _abortSending();
 
-    Future.delayed(Duration(milliseconds: (totalBackoffTime * 1000).round())).then((_) {
-      _scheduleAfterBackoffSignalSending = true;
-    });
+    _scheduledAfterBackoffSignalTimestamp = window.performance.now() + totalBackoffTime * 1000;
 
     setNotes([
       labelMap["exponential-backoff"].toString(),
@@ -311,8 +309,8 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   bool get isInBackoff => _isInBackoff;
 
   void afterRender() {
-    if (_scheduleAfterBackoffSignalSending) {
-      _scheduleAfterBackoffSignalSending = false;
+    if (_scheduledAfterBackoffSignalTimestamp != null && _lastRenderTimestamp >= _scheduledAfterBackoffSignalTimestamp) {
+      _scheduledAfterBackoffSignalTimestamp = null;
 
       _sendAwaited = true;
       if (medium is DrawableSharedMedium) {

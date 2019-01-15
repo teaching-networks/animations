@@ -159,7 +159,6 @@ abstract class SignalEmitter extends CanvasDrawable {
 
     // Only cancel if signal not already ended.
     if (signalProgress < 1.0) {
-      print("cancel ${_signalDuration.inMilliseconds} | ${Duration(microseconds: ((cancelTimestamp - _startTimestamp) * 1000).round()).inMilliseconds} | $cancelTimestamp | $_startTimestamp");
       _signalDuration = Duration(microseconds: ((cancelTimestamp - _startTimestamp) * 1000).round());
     }
   }
