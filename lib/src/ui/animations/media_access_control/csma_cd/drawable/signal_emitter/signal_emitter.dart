@@ -14,7 +14,7 @@ abstract class SignalEmitter extends CanvasDrawable {
   final double start;
 
   /// Duration until the signal stops.
-  final Duration signalDuration;
+  Duration _signalDuration;
 
   /// Speed of the propagation of the signal in percent per second (e. g. 1.0 == 100% per second).
   final double propagationSpeed;
@@ -34,17 +34,14 @@ abstract class SignalEmitter extends CanvasDrawable {
   Tuple2<double, double> _lastRange1;
   Tuple2<double, double> _lastRange2;
 
-  /// When the emitting has been cancelled.
-  num _cancelledTimestamp = -1;
-
   /// Create signal emitter.
   SignalEmitter({
     @required this.start,
-    @required this.signalDuration,
+    @required Duration signalDuration,
     @required this.propagationSpeed,
     this.onEnd,
     this.listen,
-  });
+  }) : _signalDuration = signalDuration;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -60,15 +57,12 @@ abstract class SignalEmitter extends CanvasDrawable {
 
     final diff = timestamp - _startTimestamp;
 
-    bool cancelled = _cancelledTimestamp != -1;
-
     final propagationProgress = diff / 1000 * propagationSpeed;
-    final signalProgress = cancelled ? 1.1 : diff / signalDuration.inMilliseconds;
+    final signalProgress = diff / _signalDuration.inMilliseconds;
 
     double propagationProgressSinceSignalEnd = 0.0;
     if (signalProgress >= 1.0) {
-      propagationProgressSinceSignalEnd =
-          (diff - (cancelled ? (_cancelledTimestamp - _startTimestamp) : signalDuration.inMilliseconds)) / 1000 * propagationSpeed;
+      propagationProgressSinceSignalEnd = (diff - _signalDuration.inMilliseconds) / 1000 * propagationSpeed;
     }
 
     Tuple2<double, double> range1 = _calculateSignalRange(
@@ -155,14 +149,18 @@ abstract class SignalEmitter extends CanvasDrawable {
   Tuple2<Tuple2<double, double>, Tuple2<double, double>> getSignalRanges() => Tuple2(_lastRange1, _lastRange2);
 
   /// Cancel the signal emitting.
-  void cancelSignal() {
-    final currentTimestamp = window.performance.now();
-    final diff = currentTimestamp - _startTimestamp;
-    final signalProgress = diff / signalDuration.inMilliseconds;
+  void cancelSignal([num cancelTimestamp]) {
+    if (cancelTimestamp == null) {
+      cancelTimestamp = window.performance.now();
+    }
+
+    final diff = cancelTimestamp - _startTimestamp;
+    final signalProgress = diff / _signalDuration.inMilliseconds;
 
     // Only cancel if signal not already ended.
     if (signalProgress < 1.0) {
-      _cancelledTimestamp = window.performance.now();
+      print("cancel ${_signalDuration.inMilliseconds} | ${Duration(microseconds: ((cancelTimestamp - _startTimestamp) * 1000).round()).inMilliseconds} | $cancelTimestamp | $_startTimestamp");
+      _signalDuration = Duration(microseconds: ((cancelTimestamp - _startTimestamp) * 1000).round());
     }
   }
 }

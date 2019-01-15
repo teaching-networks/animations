@@ -87,6 +87,14 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     context.restore();
   }
 
+  void afterRender() {
+    for (final peer in _peers) {
+      if (peer is DrawableSharedMediumPeer) {
+        peer.afterRender();
+      }
+    }
+  }
+
   /// Draw all peers with connection lines.
   void _drawPeers(CanvasRenderingContext2D context, List<SharedMediumPeer> peers, Rectangle<double> rect, timestamp) {
     double peerSize = rect.height / peers.length / 2.5;
@@ -118,7 +126,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     for (int i = 0; i < peers.length; i++) {
       final peer = peers[i] as DrawableSharedMediumPeer;
 
-      peer.render(context, Rectangle<double>(0, yOffset, rect.width, peerSize));
+      peer.render(context, Rectangle<double>(0, yOffset, rect.width, peerSize), timestamp);
       peer.setActualBounds(Rectangle<double>(rect.left + halfWidth - halfPeerSize, rect.top + yOffset, peerSize, peerSize));
 
       setFillColor(context, _lineColor);

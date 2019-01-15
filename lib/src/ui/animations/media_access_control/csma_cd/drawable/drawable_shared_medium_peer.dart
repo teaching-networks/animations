@@ -83,6 +83,12 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// Map for translations.
   final Map<String, Message> labelMap;
 
+  /// If a signal sending is schedules after backoff signal.
+  bool _scheduleAfterBackoffSignalSending = false;
+
+  /// Timestamp from last render cycle.
+  num _lastRenderTimestamp = -1;
+
   /// Create drawable peer.
   DrawableSharedMediumPeer({
     @required this.id,
@@ -115,6 +121,8 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     context.restore();
 
     _actualBounds = rect;
+
+    _lastRenderTimestamp = timestamp;
   }
 
   /// Draw the number of the peer.
@@ -266,12 +274,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     _abortSending();
 
     Future.delayed(Duration(milliseconds: (totalBackoffTime * 1000).round())).then((_) {
-      _sendAwaited = true;
-      if (medium is DrawableSharedMedium) {
-        if ((medium as DrawableSharedMedium).sendSignal(this)) {
-          _isInBackoff = false;
-        }
-      }
+      _scheduleAfterBackoffSignalSending = true;
     });
 
     setNotes([
@@ -285,7 +288,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     if (_signalEmitter != null) {
       VerticalSignalEmitter emitter = _signalEmitter.last;
 
-      emitter.cancelSignal();
+      emitter.cancelSignal(_lastRenderTimestamp);
     }
   }
 
@@ -306,4 +309,17 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
 
   /// Whether peer currently waits for backoff time to expire.
   bool get isInBackoff => _isInBackoff;
+
+  void afterRender() {
+    if (_scheduleAfterBackoffSignalSending) {
+      _scheduleAfterBackoffSignalSending = false;
+
+      _sendAwaited = true;
+      if (medium is DrawableSharedMedium) {
+        if ((medium as DrawableSharedMedium).sendSignal(this)) {
+          _isInBackoff = false;
+        }
+      }
+    }
+  }
 }
