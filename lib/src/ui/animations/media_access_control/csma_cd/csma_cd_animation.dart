@@ -164,7 +164,7 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
     _sharedMedium.onMouseMove(pos);
   }
 
-  int get canvasHeight => 500;
+  int get canvasHeight => 650;
 
   List<int> get bandwidthSuggestions => _bandwidthSuggestions;
 

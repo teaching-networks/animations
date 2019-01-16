@@ -30,6 +30,10 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
   /// Random number generator.
   static Random _rng = Random();
 
+  /// Icon of a host computer.
+  static ImageElement _hostIcon = ImageElement(src: "img/animation/host_icon.svg");
+  static const double _HOST_ICON_ASPECT_RATIO = 232.28 / 142.6;
+
   /// Id of the peer.
   final int id;
 
@@ -115,6 +119,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
           size,
         ));
 
+    _drawHostIcon(context, rect);
     _drawPeerNumber(context, rect);
     _drawNotes(context, rect, _notes);
 
@@ -123,6 +128,14 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
     _actualBounds = rect;
 
     _lastRenderTimestamp = timestamp;
+  }
+
+  /// Draw an icon of a host.
+  void _drawHostIcon(CanvasRenderingContext2D context, Rectangle<double> rect) {
+    double iconWidth = rect.height * 0.85;
+    double iconHeight = iconWidth / _HOST_ICON_ASPECT_RATIO;
+
+    context.drawImageToRect(_hostIcon, Rectangle(rect.width / 2 - iconWidth / 2, rect.height / 2 - iconHeight / 2, iconWidth, iconHeight));
   }
 
   /// Draw the number of the peer.
@@ -165,7 +178,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
 
   /// Get background color of peer.
   Color _getBackgroundColor() {
-    Color color = isMediumOccupied() ? Colors.DARK_GRAY : this.color;
+    Color color = isMediumOccupied() ? Colors.GREY : this.color;
 
     if (_highlighted) {
       color = Color.brighten(color, 0.1);

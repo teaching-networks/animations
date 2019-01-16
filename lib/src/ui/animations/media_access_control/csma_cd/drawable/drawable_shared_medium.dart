@@ -98,7 +98,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
   /// Draw all peers with connection lines.
   void _drawPeers(CanvasRenderingContext2D context, List<SharedMediumPeer> peers, Rectangle<double> rect, timestamp) {
-    double peerSize = rect.height / peers.length / 2.5;
+    double peerSize = rect.height / peers.length / 2.0;
 
     double minY = peerSize / 2;
     double maxY = rect.height - peerSize / 2;
