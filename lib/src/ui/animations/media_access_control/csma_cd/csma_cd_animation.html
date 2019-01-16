@@ -33,6 +33,23 @@
 				</material-auto-suggest-input>
 			</li>
 
+			<li class="labeled">
+				<label>
+					{{ "csma-cd-animation.control.speed" | i18n }}
+				</label>
+				<span class="slider-panel">
+					<material-slider [min]="0.25"
+									 [max]="5.0"
+									 [step]="0.25"
+									 [value]="speedMultiplier"
+									 (valueChange)="onSpeedMultiplierChange($event)">
+					</material-slider>
+					<div>
+						{{ speedMultiplierLabel }}x
+					</div>
+				</span>
+			</li>
+
 			<li style="text-align: center">
 				<material-button raised (click)="reset()">
 					<material-icon icon="done"></material-icon>

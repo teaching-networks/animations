@@ -175,6 +175,7 @@
 	"csma-cd-animation.control.signal-size": "Signalgröße (bits)",
 	"csma-cd-animation.control.bandwidth": "Bandbreite (Mbps)",
 	"csma-cd-animation.control.apply": "Anwenden",
+	"csma-cd-animation.control.speed": "Animationsgeschwindigkeit",
 	"csma-cd-animation.time": "Zeit",
 	"csma-cd-animation.peer.state.busy-channel": "Medium belegt",
 	"csma-cd-animation.peer.state.transmitting": "Überträgt...",

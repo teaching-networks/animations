@@ -52,12 +52,16 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   /// Mapping for translations.
   final Map<String, Message> labelMap;
 
+  /// Make the animation faster or slower with the multiplier.
+  final double speedMultiplier;
+
   /// Create drawable medium.
   DrawableSharedMedium({
     @required this.medium,
     @required this.bandwidth,
     @required this.signalSize,
     @required this.labelMap,
+    @required this.speedMultiplier,
   }) {
     _init();
   }
@@ -82,8 +86,16 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
     context.textBaseline = "middle";
     context.textAlign = "left";
     setFillColor(context, Colors.DARK_GRAY);
-    context.fillText("${labelMap["time"].toString()}: ${((timestamp - _startTimestamp) / (_slowDownRate / 1000)).toStringAsFixed(0)} µs",
-        10.0 * window.devicePixelRatio, rect.height / 2);
+    context.fillText(
+      "${labelMap["time"].toString()}: ${((timestamp - _startTimestamp) / (slowDownRate / 1000)).toStringAsFixed(0)} µs",
+      10.0 * window.devicePixelRatio,
+      rect.height / 2 - defaultFontSize,
+    );
+    context.fillText(
+      "${speedMultiplier.toStringAsFixed(2)}x",
+      10.0 * window.devicePixelRatio,
+      rect.height / 2 + defaultFontSize,
+    );
 
     context.restore();
   }
@@ -174,7 +186,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
       VerticalSignalEmitter(
         start: peer.position,
         signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
-        propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / _slowDownRate),
+        propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / slowDownRate),
         color: Color.brighten(peer.color, 0.3),
         onEnd: () {
           if (peer.signalEmitter.length > 1) {
@@ -226,7 +238,7 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   bool _inRange(double value, Tuple2<double, double> range) => value >= range.item1 && value <= range.item2;
 
   /// Calculate the signal duration in seconds.
-  double calculateSignalDuration(int signalSize) => signalSize / bandwidth * _slowDownRate;
+  double calculateSignalDuration(int signalSize) => signalSize / bandwidth * slowDownRate;
 
   /// What to do on mouse move on the shared medium drawable.
   void onMouseMove(Point<double> pos) {
@@ -289,4 +301,6 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   void unregisterPeer(SharedMediumPeer peer) {
     medium.unregisterPeer(peer);
   }
+
+  double get slowDownRate => _slowDownRate / speedMultiplier;
 }

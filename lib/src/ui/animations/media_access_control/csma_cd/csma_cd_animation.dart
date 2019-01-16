@@ -4,6 +4,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_input/material_auto_suggest_input.dart';
+import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
@@ -25,6 +26,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     MaterialAutoSuggestInputComponent,
     MaterialButtonComponent,
     MaterialIconComponent,
+    MaterialSliderComponent,
   ],
   pipes: [
     I18nPipe,
@@ -86,6 +88,9 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   String selectedBandwidth = _defaultBandwidthSuggestion.toString();
   String selectedSignalSize = _defaultSignalSizeSuggestion.toString();
 
+  /// Make the animation faster or slower with the [speedMultiplier].
+  double speedMultiplier = 1.0;
+
   /// Create animation.
   CSMACDAnimation(this._i18n);
 
@@ -126,6 +131,7 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
         "busy-channel": _i18n.get("csma-cd-animation.peer.state.busy-channel"),
         "transmitting": _i18n.get("csma-cd-animation.peer.state.transmitting"),
       },
+      speedMultiplier: speedMultiplier,
     );
 
     for (int i = 0; i < _peerCount; i++) {
@@ -171,4 +177,10 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   List<int> get signalSizeSuggestions => _signalSizeSuggestions;
 
   List<int> get mediumLengthSuggestions => _mediumLengthSuggestions;
+
+  void onSpeedMultiplierChange(double value) {
+    speedMultiplier = value;
+  }
+
+  String get speedMultiplierLabel => speedMultiplier.toStringAsFixed(2);
 }
