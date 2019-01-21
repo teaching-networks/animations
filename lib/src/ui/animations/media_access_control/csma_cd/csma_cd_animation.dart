@@ -109,6 +109,10 @@ class CSMACDAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// Reset the animation to default state.
   void reset() {
+    if (isPaused) {
+      switchPause();
+    }
+
     int mediumLength = int.tryParse(selectedMediumLength) ?? _defaultMediumLengthSuggestion;
     int signalSize = int.tryParse(selectedSignalSize) ?? _defaultSignalSizeSuggestion;
     int bandwidth = int.tryParse(selectedBandwidth) ?? _defaultBandwidthSuggestion;
