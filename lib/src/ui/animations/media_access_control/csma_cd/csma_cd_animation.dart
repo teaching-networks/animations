@@ -5,6 +5,7 @@ import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_input/material_auto_suggest_input.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
+import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
@@ -12,6 +13,7 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/med
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 
 /// Animation showing the CSMA/CD media-access-control protocol.
 @Component(
@@ -27,12 +29,13 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
     MaterialButtonComponent,
     MaterialIconComponent,
     MaterialSliderComponent,
+    MaterialIconToggleDirective,
   ],
   pipes: [
     I18nPipe,
   ],
 )
-class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+class CSMACDAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   /// Peers to display in the animation.
   static const int _peerCount = 3;
 
@@ -151,6 +154,10 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   void render(num timestamp) {
     context.clearRect(0, 0, size.width, size.height);
 
+    if (isPaused) {
+      timestamp = pauseTimestamp;
+    }
+
     _sharedMedium.render(context, toRect(0, 0, size), timestamp);
 
     afterRender();
@@ -183,4 +190,16 @@ class CSMACDAnimation extends CanvasAnimation implements OnInit, OnDestroy {
   }
 
   String get speedMultiplierLabel => speedMultiplier.toStringAsFixed(2);
+
+  @override
+  void switchPauseSubAnimations() {
+    if (_sharedMedium != null) {
+      _sharedMedium.switchPause();
+    }
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    // Do nothing.
+  }
 }

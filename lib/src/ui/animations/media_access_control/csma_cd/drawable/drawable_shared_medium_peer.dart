@@ -8,6 +8,7 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/dra
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
@@ -17,7 +18,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
 /// A Drawable shared medium peer.
-class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPeer {
+class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin implements SharedMediumPeer {
   /// Colors of the peers.
   static const List<Color> _peerColors = [
     Colors.ORANGE,
@@ -334,6 +335,26 @@ class DrawableSharedMediumPeer extends CanvasDrawable implements SharedMediumPee
           }
         }
       }
+    }
+  }
+
+  @override
+  void switchPauseSubAnimations() {
+    if (_signalEmitter != null && _signalEmitter.isNotEmpty) {
+      for (final emitter in _signalEmitter) {
+        emitter.switchPause();
+      }
+    }
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    if (_lastRenderTimestamp != null) {
+      _lastRenderTimestamp += timestampDifference;
+    }
+
+    if (_scheduledAfterBackoffSignalTimestamp != null) {
+      _scheduledAfterBackoffSignalTimestamp += timestampDifference;
     }
   }
 }

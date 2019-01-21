@@ -5,17 +5,17 @@ import 'dart:math';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
 /// A drawable medium.
-class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
+class DrawableSharedMedium extends CanvasDrawable with CanvasPausableMixin implements SharedMedium {
   /// Slow down the animation by a factor of ...
   static const int _slowDownRate = 500 * 1000;
 
@@ -182,25 +182,29 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
 
     double signalTime = calculateSignalDuration(signalSize);
 
-    peer.addSignalEmitter(
-      VerticalSignalEmitter(
-        start: peer.position,
-        signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
-        propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / slowDownRate),
-        color: Color.brighten(peer.color, 0.3),
-        onEnd: () {
-          if (peer.signalEmitter.length > 1) {
-            peer.signalEmitter.removeAt(0);
-          } else {
-            peer.clearSignalEmitter();
+    final emitter = VerticalSignalEmitter(
+      start: peer.position,
+      signalDuration: Duration(milliseconds: (signalTime * 1000).round()),
+      propagationSpeed: 1.0 / medium.getLength() * (medium.getSpeed() / slowDownRate),
+      color: Color.brighten(peer.color, 0.3),
+      onEnd: () {
+        if (peer.signalEmitter.length > 1) {
+          peer.signalEmitter.removeAt(0);
+        } else {
+          peer.clearSignalEmitter();
 
-            if (!peer.isInBackoff) {
-              peer.setSending(false);
-            }
+          if (!peer.isInBackoff) {
+            peer.setSending(false);
           }
-        },
-      ),
+        }
+      },
     );
+
+    peer.addSignalEmitter(emitter);
+
+    if (isPaused) {
+      emitter.switchPause();
+    }
 
     peer.setNotes([labelMap["transmitting"].toString()]);
 
@@ -303,4 +307,20 @@ class DrawableSharedMedium extends CanvasDrawable implements SharedMedium {
   }
 
   double get slowDownRate => _slowDownRate / speedMultiplier;
+
+  @override
+  void switchPauseSubAnimations() {
+    if (_peers != null && _peers.isNotEmpty) {
+      for (final peer in _peers) {
+        if (peer is DrawableSharedMediumPeer) {
+          peer.switchPause();
+        }
+      }
+    }
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    _startTimestamp += timestampDifference;
+  }
 }
