@@ -19,6 +19,8 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/tcp_conge
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/tcp_congestion_control_animation.template.dart' as tcpCongestionControl;
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.template.dart' as CSMACD;
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra_algorithm_animation.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra_algorithm_animation.template.dart' as dijkstra;
 
 /// List of all animation is stored here.
 class Animations {
@@ -97,6 +99,13 @@ class Animations {
       "csma-cd-animation",
       "img/animation/preview/csma-cd-preview.png",
       "csma-cd",
+    ),
+    new AnimationDescriptor<DijkstraAlgorithmAnimation>(
+      ID_COUNTER++,
+      dijkstra.DijkstraAlgorithmAnimationNgFactory,
+      "dijkstra-algorithm-animation",
+      "", // TODO Add preview image
+      "dijkstra",
     ),
   ];
 }

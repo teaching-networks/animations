@@ -179,5 +179,9 @@
 	"csma-cd-animation.peer.state.busy-channel": "Busy channel",
 	"csma-cd-animation.peer.state.transmitting": "Transmitting...",
 	"csma-cd-animation.peer.state.exponential-backoff": "Exponential Backoff",
-	"csma-cd-animation.peer.state.exponential-backoff.collisions": "Collisions"
+	"csma-cd-animation.peer.state.exponential-backoff.collisions": "Collisions",
+	"dijkstra-algorithm-animation.name": "Dijkstra | Shortest Path",
+	"dijkstra-algorithm-animation.short-description": "Dijkstra is an algorithm aiming to find the shortest path from a given start point to all other points",
+	"dijkstra-algorithm-animation.description": "No description yet.",
+	"dijkstra-algorithm-animation.credits": "No credits yet."
 }

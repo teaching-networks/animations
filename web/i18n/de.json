@@ -180,5 +180,9 @@
 	"csma-cd-animation.peer.state.busy-channel": "Medium belegt",
 	"csma-cd-animation.peer.state.transmitting": "Überträgt...",
 	"csma-cd-animation.peer.state.exponential-backoff": "Exponentieller Backoff",
-	"csma-cd-animation.peer.state.exponential-backoff.collisions": "Kollisionen"
+	"csma-cd-animation.peer.state.exponential-backoff.collisions": "Kollisionen",
+	"dijkstra-algorithm-animation.name": "Dijkstra | Kürzeste Pfade",
+	"dijkstra-algorithm-animation.short-description": "Dijkstra ist ein Algorithmus um den kürzesten Pfad von einem gegebenen Startpunkt zu allen anderen zu finden",
+	"dijkstra-algorithm-animation.description": "Noch keine Beschreibung vorhanden.",
+	"dijkstra-algorithm-animation.credits": "Noch keine Credits vorhanden."
 }
