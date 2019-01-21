@@ -3,13 +3,14 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
 typedef void RangeListener(Tuple2<double, double> range1, Tuple2<double, double> range2);
 
 /// Drawable similar to PacketLine but vertical and emits in both directions from the starting point.
-abstract class SignalEmitter extends CanvasDrawable {
+abstract class SignalEmitter extends CanvasDrawable with CanvasPausableMixin {
   /// From which point to start the signal emitting.
   final double start;
 
@@ -47,6 +48,11 @@ abstract class SignalEmitter extends CanvasDrawable {
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     if (_isEnd) {
       return; // Do not do anything.
+    }
+
+    // Has not started yet.
+    if (isPaused && _startTimestamp == -1) {
+      return;
     }
 
     if (_startTimestamp == -1) {
@@ -160,6 +166,18 @@ abstract class SignalEmitter extends CanvasDrawable {
     // Only cancel if signal not already ended.
     if (signalProgress < 1.0) {
       _signalDuration = Duration(microseconds: ((cancelTimestamp - _startTimestamp) * 1000).round());
+    }
+  }
+
+  @override
+  void switchPauseSubAnimations() {
+    // Do nothing.
+  }
+
+  @override
+  void unpaused(num timestampDifference) {
+    if (_startTimestamp != -1) {
+      _startTimestamp += timestampDifference;
     }
   }
 }

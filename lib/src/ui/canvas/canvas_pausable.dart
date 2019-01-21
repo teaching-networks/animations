@@ -36,6 +36,9 @@ abstract class CanvasPausableMixin {
    */
   bool get isPaused => _isPaused;
 
+  /// Timestamp of the pause.
+  num get pauseTimestamp => _pauseTimestamp;
+
   /**
    * Pause animations that are not in your direct control.
    */

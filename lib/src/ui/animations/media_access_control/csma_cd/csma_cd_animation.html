@@ -55,6 +55,9 @@
 					<material-icon icon="done"></material-icon>
 					{{ "csma-cd-animation.control.apply" | i18n }}
 				</material-button>
+				<material-button raised (click)="switchPause()">
+					<material-icon [toggle]="isPaused" icon="pause" toggledIcon="play_arrow"></material-icon>
+				</material-button>
 			</li>
 		</ul>
 	</div>
