@@ -12,21 +12,21 @@ class DijkstraNode extends CanvasDrawable {
 
   /// Position of the node on the canvas.
   /// The coordinates are given in range [0.0, 1.0].
-  final Point<double> coordinates;
+  Point<double> _coordinates;
 
   /// Create node.
   DijkstraNode({
     @required this.size,
-    @required this.coordinates,
-  });
+    @required Point<double> coordinates,
+  }) : _coordinates = coordinates;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     context.save();
     context.translate(rect.left, rect.top);
 
-    double x = coordinates.x * rect.width;
-    double y = coordinates.y * rect.width;
+    double x = _coordinates.x * rect.width;
+    double y = _coordinates.y * rect.width;
 
     context.lineWidth = window.devicePixelRatio * 2;
     context.beginPath();
@@ -39,4 +39,10 @@ class DijkstraNode extends CanvasDrawable {
 
     context.restore();
   }
+
+  /// Get the points coordinates.
+  Point<double> get coordinates => _coordinates;
+
+  /// Set new coordinates for the node.
+  void set coordinates(Point<double> newCoords) => _coordinates = newCoords;
 }

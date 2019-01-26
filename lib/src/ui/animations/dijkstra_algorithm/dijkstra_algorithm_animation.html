@@ -4,9 +4,9 @@
 				[height]="canvasHeight"
 				(onResized)="onCanvasResize($event)"
 				(onReady)="onCanvasReady($event)"
-				(onMouseUp)="onMouseUp($event)"
-				(onMouseMove)="onMouseMove($event)"
-				(onMouseDown)="onMouseDown($event)"
+				(onMouseUp)="mouseListener.onMouseUp($event)"
+				(onMouseMove)="mouseListener.onMouseMove($event)"
+				(onMouseDown)="mouseListener.onMouseDown($event)"
 		>
 		</canvas-comp>
 	</div>
