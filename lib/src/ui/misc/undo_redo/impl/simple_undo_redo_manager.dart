@@ -13,16 +13,26 @@ class SimpleUndoRedoManager implements UndoRedoManager {
   List<UndoRedoStep> _steps = List<UndoRedoStep>();
 
   /// Position in the undoable step list.
-  int _position;
+  int _position = 0;
 
   /// Create undo redo manager.
   SimpleUndoRedoManager({
-    this.limit,
+    this.limit = _defaultLimit,
   });
 
   /// Add an undoable to the manager.
-  void addUndoable(UndoRedoStep step) {
+  void addStep(UndoRedoStep step) {
+    int trim = 0;
+    if (_position > limit - 1) {
+      trim = _position - (limit - 1);
+    }
+
+    _steps = _steps.getRange(trim, _position).toList();
+    _position -= trim;
+
     _steps.add(step);
+
+    _position++;
   }
 
   @override
@@ -31,8 +41,8 @@ class SimpleUndoRedoManager implements UndoRedoManager {
       return;
     }
 
-    UndoRedoStep redoable = _steps[++_position];
-    redoable.undo();
+    UndoRedoStep step = _steps[_position++];
+    step.redo();
   }
 
   @override
@@ -41,13 +51,13 @@ class SimpleUndoRedoManager implements UndoRedoManager {
       return;
     }
 
-    UndoRedoStep undoable = _steps[--_position];
-    undoable.undo();
+    UndoRedoStep step = _steps[--_position];
+    step.undo();
   }
 
   /// Whether an undo is possible.
   bool canUndo() => _steps.isNotEmpty && _position > 0;
 
   /// Whether an redo is possible.
-  bool canRedo() => _steps.isNotEmpty && _steps.length > _position + 1;
+  bool canRedo() => _steps.isNotEmpty && _steps.length > _position;
 }

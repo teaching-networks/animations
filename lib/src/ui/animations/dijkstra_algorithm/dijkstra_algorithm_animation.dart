@@ -11,6 +11,7 @@ import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
+import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as vector;
@@ -43,6 +44,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Name of the keyup event.
   static const String _keyUpEventName = "keyup";
 
+  /// Name of the keypress event.
+  static const String _keyPressEventName = "keypress";
+
   /// Default node size.
   static const double _nodeSize = 20.0;
 
@@ -57,6 +61,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Window key up listener.
   Function _windowKeyUpListener;
+
+  /// Window key press listener.
+  Function _windowKeyPressListener;
 
   /// Boolean used to only fire a key down event once.
   bool _keyEventFired = false;
@@ -75,6 +82,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     mouseListener = DijkstraNodeMouseListener(
       nodes: _nodes,
       nodeSize: _nodeSize,
+      undoRedoManager: _undoRedoManager,
     );
   }
 
@@ -94,6 +102,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _onWindowKeyUp(event);
     };
     window.addEventListener(_keyUpEventName, _windowKeyUpListener);
+
+    _windowKeyPressListener = (event) {
+      _onWindowKeyPress(event);
+    };
+    window.addEventListener(_keyPressEventName, _windowKeyPressListener);
   }
 
   @override
@@ -102,6 +115,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     window.removeEventListener(_keyDownEventName, _windowKeyDownListener);
     window.removeEventListener(_keyUpEventName, _windowKeyUpListener);
+    window.removeEventListener(_keyPressEventName, _windowKeyPressListener);
 
     super.ngOnDestroy();
   }
@@ -259,17 +273,41 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _keyEventFired = true;
 
       if (event.keyCode == _removeKeyCode && mouseListener.selectedNode != null) {
+        Point<double> removedNodeCoordinates = mouseListener.selectedNode.coordinates;
+        int removedNodeId = mouseListener.selectedNode.id;
+        List<DijkstraNode> connectedTo = mouseListener.selectedNode.connectedTo?.sublist(0);
+        List<DijkstraNode> connectedFrom = mouseListener.selectedNode.connectedFrom?.sublist(0);
+
         _removeNode(mouseListener.selectedNode);
+
+        _undoRedoManager.addStep(UndoRedoStep(
+          undoFunction: () {
+            DijkstraNode node = DijkstraNode(
+              id: removedNodeId,
+              size: _nodeSize * window.devicePixelRatio,
+              coordinates: removedNodeCoordinates,
+            );
+
+            // Restore connections.
+            if (connectedTo != null) {
+              for (DijkstraNode to in connectedTo) {
+                node.connectTo(to);
+              }
+            }
+            if (connectedFrom != null) {
+              for (DijkstraNode from in connectedFrom) {
+                from.connectTo(node);
+              }
+            }
+
+            _nodes.add(node);
+          },
+          redoFunction: () {
+            _removeNode(_getNodeById(removedNodeId));
+          },
+        ));
       } else if (event.keyCode == _createModeKeyCode) {
         mouseListener.createMode = true;
-      } else if (event.ctrlKey) {
-        if (event.keyCode == 90) {
-          // Ctrl + Z
-          _undo();
-        } else if (event.keyCode == 89) {
-          // Ctrl + Y
-          _redo();
-        }
       }
     }
   }
@@ -283,6 +321,19 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
   }
 
+  /// What to do on window key press.
+  void _onWindowKeyPress(KeyboardEvent event) {
+    if (event.ctrlKey) {
+      if (event.keyCode == 26) {
+        // Ctrl + z
+        _undo();
+      } else if (event.keyCode == 25) {
+        // Ctrl + y
+        _redo();
+      }
+    }
+  }
+
   // Convert coordinates to position point.
   Point<double> _coordinatesToPosition(Point<double> coordinates) {
     return Point<double>(coordinates.x * size.width, coordinates.y * size.height);
@@ -293,8 +344,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     /// Disconnect all nodes this node is connected to and connected from.
     node.disconnectAll();
 
-    _nodes.remove(mouseListener.selectedNode);
-    mouseListener.deselectNode();
+    _nodes.remove(node);
+
+    if (node == mouseListener.selectedNode) {
+      mouseListener.deselectNode();
+    }
   }
 
   /// Undo a step.
@@ -306,4 +360,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   void _redo() {
     _undoRedoManager.redo();
   }
+
+  /// Get a node by its id.
+  DijkstraNode _getNodeById(int id) => _nodes.firstWhere((node) => node.id == id);
 }

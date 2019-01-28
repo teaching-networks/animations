@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
 import 'package:hm_animations/src/ui/canvas/mouse/canvas_mouse_listener.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
+import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
@@ -51,6 +52,9 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
   /// Counter for nodes.
   int _nodeCounter = 0;
+
+  /// Coordinates of the currently dragged node on the drag start.
+  Point<double> _dragStartCoordinates;
 
   /// Create listener.
   DijkstraNodeMouseListener({
@@ -120,20 +124,61 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   void onMouseUp(Point<double> pos) {
     DijkstraNode nodeAtPos = _getNodeAtPos(pos);
 
-    if (nodeAtPos != null) {
-      if (_isDragging) {
-        if (_isCreateMode && _draggedNode != null) {
-          _addArrow(_draggedNode, nodeAtPos);
+    if (_isDragging) {
+      if (_draggedNode != null) {
+        if (_isCreateMode) {
+          if (nodeAtPos != null) {
+            _addArrow(_draggedNode, nodeAtPos);
+
+            int fromId = _draggedNode.id;
+            int toId = nodeAtPos.id;
+
+            undoRedoManager.addStep(UndoRedoStep(
+              undoFunction: () {
+                _removeArrow(_getNodeById(fromId), _getNodeById(toId));
+              },
+              redoFunction: () {
+                _addArrow(_getNodeById(fromId), _getNodeById(toId));
+              },
+            ));
+          }
+        } else {
+          int nodeId = _draggedNode.id;
+          Point<double> finalCoordinates = _positionToCoordinates(pos);
+          Point<double> startCoordinates = _dragStartCoordinates;
+
+          // Save node move as undo / redo step.
+          undoRedoManager.addStep(UndoRedoStep(
+            undoFunction: () {
+              DijkstraNode node = _getNodeById(nodeId);
+              node.coordinates = startCoordinates;
+            },
+            redoFunction: () {
+              DijkstraNode node = _getNodeById(nodeId);
+              node.coordinates = finalCoordinates;
+            },
+          ));
         }
-      } else {
-        _selectNode(nodeAtPos);
       }
     } else {
-      if (!_isDragging) {
+      if (nodeAtPos != null) {
+        _selectNode(nodeAtPos);
+      } else {
         _selectedNode = null;
 
         if (pos == _mouseDownStart) {
-          _addNode(pos);
+          DijkstraNode newNode = _addNode(pos);
+
+          // Add undoable step.
+          undoRedoManager.addStep(UndoRedoStep(
+            undoFunction: () {
+              DijkstraNode nodeToRemove = _getNodeById(newNode.id);
+              _removeNode(nodeToRemove);
+            },
+            redoFunction: () {
+              _addNode(pos, id: newNode.id);
+            },
+          ));
         }
       }
     }
@@ -166,6 +211,7 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
         if (nodeAtPos != null) {
           _draggedNode = nodeAtPos;
+          _dragStartCoordinates = nodeAtPos.coordinates;
         }
       }
     }
@@ -229,14 +275,48 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   }
 
   /// Add node at the passed [pos].
-  void _addNode(Point<double> pos) {
+  DijkstraNode _addNode(
+    Point<double> pos, {
+    int id,
+  }) {
     Point<double> coordinates = _positionToCoordinates(pos);
 
-    nodes.add(DijkstraNode(id: _nodeCounter++, size: nodeSize * window.devicePixelRatio, coordinates: coordinates));
+    DijkstraNode node = DijkstraNode(
+      id: id == null ? _nodeCounter++ : id,
+      size: nodeSize * window.devicePixelRatio,
+      coordinates: coordinates,
+    );
+    nodes.add(node);
+
+    return node;
+  }
+
+  /// Get a node by its id.
+  DijkstraNode _getNodeById(int id) => nodes.firstWhere((node) => node.id == id);
+
+  /// Remove the passed [node].
+  void _removeNode(DijkstraNode node) {
+    if (node == null) {
+      return;
+    }
+
+    /// Disconnect all nodes this node is connected to and connected from.
+    node.disconnectAll();
+
+    nodes.remove(node);
+
+    if (node == _selectedNode) {
+      deselectNode();
+    }
   }
 
   /// Add arrow [from] [to] the passed nodes.
   void _addArrow(DijkstraNode from, DijkstraNode to) {
     from.connectTo(to);
+  }
+
+  /// Remove arrow [from] [to] the passed nodes.
+  void _removeArrow(DijkstraNode from, DijkstraNode to) {
+    from.disconnect(to);
   }
 }
