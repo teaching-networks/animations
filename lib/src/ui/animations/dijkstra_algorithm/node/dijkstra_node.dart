@@ -7,6 +7,9 @@ import 'package:meta/meta.dart';
 
 /// Node of the dijkstra animation.
 class DijkstraNode extends CanvasDrawable {
+  /// Id of the node.
+  final int id;
+
   /// Size of the node.
   final double size;
 
@@ -22,6 +25,7 @@ class DijkstraNode extends CanvasDrawable {
 
   /// Create node.
   DijkstraNode({
+    @required this.id,
     @required this.size,
     @required Point<double> coordinates,
   }) : _coordinates = coordinates;
@@ -54,6 +58,9 @@ class DijkstraNode extends CanvasDrawable {
 
   /// Get all nodes this node is connected to.
   List<DijkstraNode> get connectedTo => _connectedTo;
+
+  /// Get all nodes this node is connected from.
+  List<DijkstraNode> get connectedFrom => _connectedFrom;
 
   /// Connect this node to the passed [node].
   void connectTo(DijkstraNode node) {
@@ -88,9 +95,15 @@ class DijkstraNode extends CanvasDrawable {
     }
 
     if (_connectedFrom != null) {
-      for (DijkstraNode from in _connectedFrom) {
+      for (DijkstraNode from in _connectedFrom.sublist(0)) {
         from.disconnect(this);
       }
     }
   }
+
+  @override
+  bool operator ==(Object other) => identical(this, other) || other is DijkstraNode && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
 import 'package:hm_animations/src/ui/canvas/mouse/canvas_mouse_listener.dart';
+import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
@@ -45,10 +46,17 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   /// Size of a dijkstra node.
   final double nodeSize;
 
+  /// Undo redo manager used to undo / redo steps.
+  final SimpleUndoRedoManager undoRedoManager;
+
+  /// Counter for nodes.
+  int _nodeCounter = 0;
+
   /// Create listener.
   DijkstraNodeMouseListener({
     @required this.nodes,
     @required this.nodeSize,
+    @required this.undoRedoManager,
   });
 
   /// Set the current canvas size.
@@ -114,7 +122,7 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
     if (nodeAtPos != null) {
       if (_isDragging) {
-        if (_draggedNode != null) {
+        if (_isCreateMode && _draggedNode != null) {
           _addArrow(_draggedNode, nodeAtPos);
         }
       } else {
@@ -224,7 +232,7 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   void _addNode(Point<double> pos) {
     Point<double> coordinates = _positionToCoordinates(pos);
 
-    nodes.add(DijkstraNode(size: nodeSize * window.devicePixelRatio, coordinates: coordinates));
+    nodes.add(DijkstraNode(id: _nodeCounter++, size: nodeSize * window.devicePixelRatio, coordinates: coordinates));
   }
 
   /// Add arrow [from] [to] the passed nodes.

@@ -10,6 +10,7 @@ import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as vector;
@@ -65,6 +66,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Mouse listener to handle mouse events on the canvas.
   DijkstraNodeMouseListener mouseListener;
+
+  /// Manager for undoing / redoing steps.
+  SimpleUndoRedoManager _undoRedoManager = SimpleUndoRedoManager();
 
   /// Create animation.
   DijkstraAlgorithmAnimation() {
@@ -126,15 +130,21 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
 
     // Draw all normal arrows.
-    double headSize = _nodeSize / 3 * window.devicePixelRatio;
+    double headSize = _nodeSize / 2 * window.devicePixelRatio;
     double offset = _nodeSize;
     setFillColor(context, Colors.SLATE_GREY);
     setStrokeColor(context, Colors.SLATE_GREY);
     context.lineWidth = 2 * window.devicePixelRatio;
+
     for (DijkstraNode node in _nodes.sublist(0)) {
       if (node.connectedTo != null) {
-        for (DijkstraNode to in node.connectedTo.sublist(0)) {
-          _drawArrow(node.coordinates, to.coordinates, headSize, offset);
+        List<DijkstraNode> connectedTo = node.connectedTo.sublist(0);
+        List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+
+        for (DijkstraNode to in connectedTo) {
+          bool isBidirectional = connectedFrom?.contains(to) ?? false;
+
+          _drawArrow(node.coordinates, to.coordinates, headSize, offset, isBidirectional);
         }
       }
     }
@@ -147,10 +157,10 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     context.lineWidth = 2 * window.devicePixelRatio;
 
-    _drawArrow(arrow.item1, arrow.item2, _nodeSize / 3 * window.devicePixelRatio);
+    _drawArrow(arrow.item1, arrow.item2, _nodeSize / 2 * window.devicePixelRatio);
   }
 
-  void _drawArrow(Point<double> from, Point<double> to, double headSize, [double offset = 0.0]) {
+  void _drawArrow(Point<double> from, Point<double> to, double headSize, [double offset = 0.0, bool isBidirectional = false]) {
     Point<double> start = _coordinatesToPosition(from);
     Point<double> end = _coordinatesToPosition(to);
 
@@ -161,7 +171,30 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     context.beginPath();
 
     context.moveTo(start.x, start.y);
-    context.lineTo(start.x + direction.x, start.y + direction.y);
+    if (isBidirectional) {
+      vector.Vector2 lineVector = vector.Vector2(direction.x, direction.y);
+      vector.Vector2 perpendicular = lineVector.scaleOrthogonalInto(1.0, vector.Vector2.all(0.0));
+      perpendicular.length = 10 * window.devicePixelRatio;
+
+      double midX = (direction.x) / 2;
+      double midY = (direction.y) / 2;
+
+      perpendicular.add(vector.Vector2(midX, midY));
+
+      double controlPointX = start.x + perpendicular.x;
+      double controlPointY = start.y + perpendicular.y;
+
+      context.bezierCurveTo(
+        controlPointX,
+        controlPointY,
+        controlPointX,
+        controlPointY,
+        start.x + direction.x,
+        start.y + direction.y,
+      );
+    } else {
+      context.lineTo(start.x + direction.x, start.y + direction.y);
+    }
 
     context.stroke();
 
@@ -229,6 +262,14 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
         _removeNode(mouseListener.selectedNode);
       } else if (event.keyCode == _createModeKeyCode) {
         mouseListener.createMode = true;
+      } else if (event.ctrlKey) {
+        if (event.keyCode == 90) {
+          // Ctrl + Z
+          _undo();
+        } else if (event.keyCode == 89) {
+          // Ctrl + Y
+          _redo();
+        }
       }
     }
   }
@@ -254,5 +295,15 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     _nodes.remove(mouseListener.selectedNode);
     mouseListener.deselectNode();
+  }
+
+  /// Undo a step.
+  void _undo() {
+    _undoRedoManager.undo();
+  }
+
+  /// Redo a step.
+  void _redo() {
+    _undoRedoManager.redo();
   }
 }
