@@ -326,10 +326,10 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     if (event.ctrlKey) {
       if (event.keyCode == 26) {
         // Ctrl + z
-        _undo();
+        undo();
       } else if (event.keyCode == 25) {
         // Ctrl + y
-        _redo();
+        redo();
       }
     }
   }
@@ -352,14 +352,20 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   }
 
   /// Undo a step.
-  void _undo() {
+  void undo() {
     _undoRedoManager.undo();
   }
 
   /// Redo a step.
-  void _redo() {
+  void redo() {
     _undoRedoManager.redo();
   }
+
+  /// Whether undo is currently possible.
+  bool canUndo() => _undoRedoManager.canUndo();
+
+  /// Whether redo is currently possible.
+  bool canRedo() => _undoRedoManager.canRedo();
 
   /// Get a node by its id.
   DijkstraNode _getNodeById(int id) => _nodes.firstWhere((node) => node.id == id);

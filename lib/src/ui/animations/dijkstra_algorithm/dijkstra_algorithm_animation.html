@@ -14,6 +14,12 @@
 		<ul class="highlighted-fields">
 			<li class="labeled">
 				<label>Test</label>
+				<material-button raised [disabled]="!canUndo()" (click)="undo()">
+					<material-icon icon="undo"></material-icon>
+				</material-button>
+				<material-button raised [disabled]="!canRedo()" (click)="redo()">
+					<material-icon icon="redo"></material-icon>
+				</material-button>
 			</li>
 		</ul>
 	</div>
