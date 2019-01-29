@@ -12,14 +12,38 @@
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">
-			<li class="labeled">
-				<label>Test</label>
+			<li class="labeled" style="text-align: center">
+				<label>Wiederholen/Rückgängig</label>
 				<material-button raised [disabled]="!canUndo()" (click)="undo()">
 					<material-icon icon="undo"></material-icon>
 				</material-button>
 				<material-button raised [disabled]="!canRedo()" (click)="redo()">
 					<material-icon icon="redo"></material-icon>
 				</material-button>
+			</li>
+
+			<li class="labeled">
+				<label>Knoten Steuerung</label>
+				<div style="text-align: center">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="removeSelectedNode()">
+						<material-icon icon="delete_forever"></material-icon>
+						Knoten löschen
+					</material-button>
+				</div>
+
+				<div style="text-align: center">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="clearNodeConnections()">
+						<material-icon icon="link_off"></material-icon>
+						Knoten loslösen
+					</material-button>
+				</div>
+
+				<div style="text-align: center">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="clearSelection()">
+						<material-icon icon="layers_clear"></material-icon>
+						Auswahl aufheben
+					</material-button>
+				</div>
 			</li>
 		</ul>
 	</div>

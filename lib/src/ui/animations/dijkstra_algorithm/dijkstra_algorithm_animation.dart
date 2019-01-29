@@ -273,43 +273,48 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _keyEventFired = true;
 
       if (event.keyCode == _removeKeyCode && mouseListener.selectedNode != null) {
-        Point<double> removedNodeCoordinates = mouseListener.selectedNode.coordinates;
-        int removedNodeId = mouseListener.selectedNode.id;
-        List<DijkstraNode> connectedTo = mouseListener.selectedNode.connectedTo?.sublist(0);
-        List<DijkstraNode> connectedFrom = mouseListener.selectedNode.connectedFrom?.sublist(0);
-
-        _removeNode(mouseListener.selectedNode);
-
-        _undoRedoManager.addStep(UndoRedoStep(
-          undoFunction: () {
-            DijkstraNode node = DijkstraNode(
-              id: removedNodeId,
-              size: _nodeSize * window.devicePixelRatio,
-              coordinates: removedNodeCoordinates,
-            );
-
-            // Restore connections.
-            if (connectedTo != null) {
-              for (DijkstraNode to in connectedTo) {
-                node.connectTo(to);
-              }
-            }
-            if (connectedFrom != null) {
-              for (DijkstraNode from in connectedFrom) {
-                from.connectTo(node);
-              }
-            }
-
-            _nodes.add(node);
-          },
-          redoFunction: () {
-            _removeNode(_getNodeById(removedNodeId));
-          },
-        ));
+        _removeNodeAndAddUndoRedoStep(mouseListener.selectedNode);
       } else if (event.keyCode == _createModeKeyCode) {
         mouseListener.createMode = true;
       }
     }
+  }
+
+  /// Remove the passed [node] and add an undo/redo step.
+  void _removeNodeAndAddUndoRedoStep(DijkstraNode node) {
+    Point<double> removedNodeCoordinates = node.coordinates;
+    int removedNodeId = node.id;
+    List<DijkstraNode> connectedTo = node.connectedTo?.sublist(0);
+    List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+
+    _removeNode(node);
+
+    _undoRedoManager.addStep(UndoRedoStep(
+      undoFunction: () {
+        DijkstraNode node = DijkstraNode(
+          id: removedNodeId,
+          size: _nodeSize * window.devicePixelRatio,
+          coordinates: removedNodeCoordinates,
+        );
+
+        // Restore connections.
+        if (connectedTo != null) {
+          for (DijkstraNode to in connectedTo) {
+            node.connectTo(to);
+          }
+        }
+        if (connectedFrom != null) {
+          for (DijkstraNode from in connectedFrom) {
+            from.connectTo(node);
+          }
+        }
+
+        _nodes.add(node);
+      },
+      redoFunction: () {
+        _removeNode(_getNodeById(removedNodeId));
+      },
+    ));
   }
 
   /// What to do on window key up.
@@ -367,6 +372,58 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Whether redo is currently possible.
   bool canRedo() => _undoRedoManager.canRedo();
 
+  /// Whether a node is currently selected.
+  bool isNodeSelected() => mouseListener.selectedNode != null;
+
   /// Get a node by its id.
   DijkstraNode _getNodeById(int id) => _nodes.firstWhere((node) => node.id == id);
+
+  /// Remove the currently selected node.
+  void removeSelectedNode() {
+    if (isNodeSelected()) {
+      _removeNodeAndAddUndoRedoStep(mouseListener.selectedNode);
+    }
+  }
+
+  /// Clear all connections from or to the selected node.
+  void clearNodeConnections() {
+    if (isNodeSelected()) {
+      DijkstraNode node = mouseListener.selectedNode;
+
+      int nodeId = node.id;
+      List<DijkstraNode> connectedTo = node.connectedTo?.sublist(0);
+      List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+
+      node.disconnectAll();
+
+      _undoRedoManager.addStep(UndoRedoStep(
+        undoFunction: () {
+          DijkstraNode toModify = _getNodeById(nodeId);
+
+          if (connectedTo != null) {
+            for (final to in connectedTo) {
+              toModify.connectTo(to);
+            }
+          }
+
+          if (connectedFrom != null) {
+            for (final from in connectedFrom) {
+              from.connectTo(toModify);
+            }
+          }
+        },
+        redoFunction: () {
+          DijkstraNode toModify = _getNodeById(nodeId);
+          toModify.disconnectAll();
+        },
+      ));
+    }
+  }
+
+  /// Clear the current node selection.
+  void clearSelection() {
+    if (isNodeSelected()) {
+      mouseListener.deselectNode();
+    }
+  }
 }
