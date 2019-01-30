@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:angular/angular.dart';
 import 'package:angular_components/auto_dismiss/auto_dismiss.dart';
+import 'package:angular_components/focus/focus.dart';
 import 'package:angular_components/laminate/components/modal/modal.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_dialog/material_dialog.dart';
@@ -39,6 +40,7 @@ import 'package:vector_math/vector_math.dart' as vector;
     ModalComponent,
     materialInputDirectives,
     formDirectives,
+    AutoFocusDirective,
   ],
   pipes: [
     I18nPipe,
@@ -283,13 +285,15 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     String text = connection.weight.toString();
 
     double textHeight = defaultFontSize * 1.1;
-    double textWidth = context.measureText(text).width;
+    double textWidth = context.measureText(text).width * 1.2;
 
     Rectangle<double> bounds = Rectangle<double>(xOffset - textWidth / 2, yOffset - textHeight / 2, textWidth, textHeight);
 
     context.save();
     setFillColor(context, Colors.WHITE);
-    context.fillRect(bounds.left, bounds.top, bounds.width, bounds.height);
+    context.beginPath();
+    context.arc(xOffset, yOffset, textWidth / 2, 0, 2 * pi);
+    context.fill();
     context.restore();
 
     context.fillText(text, xOffset, yOffset);
@@ -407,6 +411,13 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       } else if (event.keyCode == 25) {
         // Ctrl + y
         redo();
+      }
+    }
+
+    if (showInputDialog) {
+      if (event.keyCode == 13) {
+        // Enter
+        showInputDialog = false;
       }
     }
   }
