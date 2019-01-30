@@ -79,6 +79,9 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   /// Set whether listener should be in create mode.
   void set createMode(bool createMode) => _isCreateMode = createMode;
 
+  /// Check whether is in create mode.
+  bool get isCreateMode => _isCreateMode;
+
   /// Get the currently selected node or null if none is selected.
   DijkstraNode get selectedNode => _selectedNode;
 

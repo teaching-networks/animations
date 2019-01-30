@@ -519,4 +519,14 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _currentlyEditingConnection.weight = value;
     }
   }
+
+  /// Switch between normal and create mode.
+  void switchMode() {
+    mouseListener.createMode = !mouseListener.isCreateMode;
+  }
+
+  /// Get the styles for the mode button.
+  Map<String, String> getModeButtonStyle() => {
+        "background-color": mouseListener.isCreateMode ? Colors.LIME.toCSSColorString() : Colors.WHITE.toCSSColorString(),
+      };
 }

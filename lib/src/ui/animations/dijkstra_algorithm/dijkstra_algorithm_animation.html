@@ -13,6 +13,12 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled" style="text-align: center">
+				<material-button (click)="switchMode()" [ngStyle]="getModeButtonStyle()">
+					MODE:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">Create</span><span *ngIf="!mouseListener.isCreateMode">Normal</span></b>
+				</material-button>
+			</li>
+
+			<li class="labeled" style="text-align: center">
 				<label>Wiederholen/Rückgängig</label>
 				<material-button raised [disabled]="!canUndo()" (click)="undo()">
 					<material-icon icon="undo"></material-icon>
