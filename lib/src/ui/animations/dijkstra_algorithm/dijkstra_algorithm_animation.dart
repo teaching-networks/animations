@@ -1,12 +1,20 @@
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/angular.dart';
+import 'package:angular_components/auto_dismiss/auto_dismiss.dart';
+import 'package:angular_components/laminate/components/modal/modal.dart';
 import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_dialog/material_dialog.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_components/material_input/material_input.dart';
+import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/mouse/dijkstra_node_mouse_listener.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
@@ -26,6 +34,11 @@ import 'package:vector_math/vector_math.dart' as vector;
     MaterialButtonComponent,
     MaterialIconComponent,
     CanvasComponent,
+    AutoDismissDirective,
+    MaterialDialogComponent,
+    ModalComponent,
+    materialInputDirectives,
+    formDirectives,
   ],
   pipes: [
     I18nPipe,
@@ -77,17 +90,35 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Manager for undoing / redoing steps.
   SimpleUndoRedoManager _undoRedoManager = SimpleUndoRedoManager();
 
+  /// Bounding boxes of the weights.
+  List<DijkstraArrow> _weightBoundingBoxes = List<DijkstraArrow>();
+
+  /// Whether to show the input dialog for new weights.
+  bool _showInputDialog = false;
+
+  StreamSubscription<DijkstraNodeConnection> _showInputDialogStreamSubscription;
+
+  /// Currently editing node connection.
+  DijkstraNodeConnection _currentlyEditingConnection;
+
   /// Create animation.
   DijkstraAlgorithmAnimation() {
     mouseListener = DijkstraNodeMouseListener(
       nodes: _nodes,
       nodeSize: _nodeSize,
       undoRedoManager: _undoRedoManager,
+      weightBounds: _weightBoundingBoxes,
     );
   }
 
   /// Get the default height of the canvas.
   int get canvasHeight => 500;
+
+  bool get showInputDialog => _showInputDialog;
+
+  set showInputDialog(bool value) {
+    _showInputDialog = value;
+  }
 
   @override
   void ngOnInit() {
@@ -107,6 +138,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _onWindowKeyPress(event);
     };
     window.addEventListener(_keyPressEventName, _windowKeyPressListener);
+
+    _showInputDialogStreamSubscription = mouseListener.showInputDialogStream.listen((connection) {
+      _showInputDialog = true;
+      _currentlyEditingConnection = connection;
+    });
   }
 
   @override
@@ -116,6 +152,8 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     window.removeEventListener(_keyDownEventName, _windowKeyDownListener);
     window.removeEventListener(_keyUpEventName, _windowKeyUpListener);
     window.removeEventListener(_keyPressEventName, _windowKeyPressListener);
+
+    _showInputDialogStreamSubscription.cancel();
 
     super.ngOnDestroy();
   }
@@ -129,6 +167,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   @override
   void render(num timestamp) {
+    _weightBoundingBoxes.clear();
     context.clearRect(0, 0, size.width, size.height);
 
     Rectangle<double> canvasRect = toRect(0, 0, size);
@@ -152,13 +191,13 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     for (DijkstraNode node in _nodes.sublist(0)) {
       if (node.connectedTo != null) {
-        List<DijkstraNode> connectedTo = node.connectedTo.sublist(0);
-        List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+        List<DijkstraNodeConnection> connectedTo = node.connectedTo.sublist(0);
+        List<DijkstraNodeConnection> connectedFrom = node.connectedFrom?.sublist(0);
 
-        for (DijkstraNode to in connectedTo) {
-          bool isBidirectional = connectedFrom?.contains(to) ?? false;
+        for (DijkstraNodeConnection to in connectedTo) {
+          bool isBidirectional = connectedFrom != null ? connectedFrom.where((connection) => connection.to == to.to).isNotEmpty : false;
 
-          _drawArrow(node.coordinates, to.coordinates, headSize, offset, isBidirectional);
+          _drawArrow(node.coordinates, to.to.coordinates, to, headSize, offset, isBidirectional);
         }
       }
     }
@@ -171,10 +210,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     context.lineWidth = 2 * window.devicePixelRatio;
 
-    _drawArrow(arrow.item1, arrow.item2, _nodeSize / 2 * window.devicePixelRatio);
+    _drawArrow(arrow.item1, arrow.item2, null, _nodeSize / 2 * window.devicePixelRatio);
   }
 
-  void _drawArrow(Point<double> from, Point<double> to, double headSize, [double offset = 0.0, bool isBidirectional = false]) {
+  void _drawArrow(Point<double> from, Point<double> to, DijkstraNodeConnection connection, double headSize,
+      [double offset = 0.0, bool isBidirectional = false]) {
     Point<double> start = _coordinatesToPosition(from);
     Point<double> end = _coordinatesToPosition(to);
 
@@ -182,6 +222,8 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     direction.length -= offset;
 
     // Draw line
+    context.textAlign = "center";
+    context.textBaseline = "middle";
     context.beginPath();
 
     context.moveTo(start.x, start.y);
@@ -206,11 +248,19 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
         start.x + direction.x,
         start.y + direction.y,
       );
+      context.stroke();
+
+      if (connection != null) {
+        _drawWeight(connection, controlPointX, controlPointY);
+      }
     } else {
       context.lineTo(start.x + direction.x, start.y + direction.y);
-    }
+      context.stroke();
 
-    context.stroke();
+      if (connection != null) {
+        _drawWeight(connection, start.x + direction.x / 2, start.y + direction.y / 2);
+      }
+    }
 
     // Draw head
     vector.Vector3 leftHead = _rotateLeft.rotated(direction);
@@ -226,6 +276,28 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     context.lineTo(start.x + direction.x + rightHead.x, start.y + direction.y + rightHead.y);
 
     context.fill();
+  }
+
+  /// Draw weight text.
+  void _drawWeight(DijkstraNodeConnection connection, double xOffset, double yOffset) {
+    String text = connection.weight.toString();
+
+    double textHeight = defaultFontSize * 1.1;
+    double textWidth = context.measureText(text).width;
+
+    Rectangle<double> bounds = Rectangle<double>(xOffset - textWidth / 2, yOffset - textHeight / 2, textWidth, textHeight);
+
+    context.save();
+    setFillColor(context, Colors.WHITE);
+    context.fillRect(bounds.left, bounds.top, bounds.width, bounds.height);
+    context.restore();
+
+    context.fillText(text, xOffset, yOffset);
+
+    _weightBoundingBoxes.add(DijkstraArrow(
+      connection: connection,
+      weightBounds: bounds,
+    ));
   }
 
   /// Draw all nodes.
@@ -284,8 +356,8 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   void _removeNodeAndAddUndoRedoStep(DijkstraNode node) {
     Point<double> removedNodeCoordinates = node.coordinates;
     int removedNodeId = node.id;
-    List<DijkstraNode> connectedTo = node.connectedTo?.sublist(0);
-    List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+    List<DijkstraNodeConnection> connectedTo = node.connectedTo?.sublist(0);
+    List<DijkstraNodeConnection> connectedFrom = node.connectedFrom?.sublist(0);
 
     _removeNode(node);
 
@@ -299,13 +371,13 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
         // Restore connections.
         if (connectedTo != null) {
-          for (DijkstraNode to in connectedTo) {
-            node.connectTo(to);
+          for (DijkstraNodeConnection to in connectedTo) {
+            node.connectTo(to.to);
           }
         }
         if (connectedFrom != null) {
-          for (DijkstraNode from in connectedFrom) {
-            from.connectTo(node);
+          for (DijkstraNodeConnection from in connectedFrom) {
+            from.to.connectTo(node);
           }
         }
 
@@ -391,8 +463,8 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       DijkstraNode node = mouseListener.selectedNode;
 
       int nodeId = node.id;
-      List<DijkstraNode> connectedTo = node.connectedTo?.sublist(0);
-      List<DijkstraNode> connectedFrom = node.connectedFrom?.sublist(0);
+      List<DijkstraNodeConnection> connectedTo = node.connectedTo?.sublist(0);
+      List<DijkstraNodeConnection> connectedFrom = node.connectedFrom?.sublist(0);
 
       node.disconnectAll();
 
@@ -402,13 +474,13 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
           if (connectedTo != null) {
             for (final to in connectedTo) {
-              toModify.connectTo(to);
+              toModify.connectTo(to.to);
             }
           }
 
           if (connectedFrom != null) {
             for (final from in connectedFrom) {
-              from.connectTo(toModify);
+              from.to.connectTo(toModify);
             }
           }
         },
@@ -424,6 +496,16 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   void clearSelection() {
     if (isNodeSelected()) {
       mouseListener.deselectNode();
+    }
+  }
+
+  String get inputDialogContent => _currentlyEditingConnection != null ? _currentlyEditingConnection.weight.toString() : "";
+
+  void setInputDialogContent(String content) {
+    int value = int.tryParse(content) ?? 0;
+
+    if (_currentlyEditingConnection != null) {
+      _currentlyEditingConnection.weight = value;
     }
   }
 }

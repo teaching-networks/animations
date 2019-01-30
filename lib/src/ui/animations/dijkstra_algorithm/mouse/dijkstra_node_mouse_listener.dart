@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 import 'package:hm_animations/src/ui/canvas/mouse/canvas_mouse_listener.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
@@ -50,17 +53,24 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   /// Undo redo manager used to undo / redo steps.
   final SimpleUndoRedoManager undoRedoManager;
 
+  /// Bounds of the weight labels.
+  final List<DijkstraArrow> weightBounds;
+
   /// Counter for nodes.
   int _nodeCounter = 0;
 
   /// Coordinates of the currently dragged node on the drag start.
   Point<double> _dragStartCoordinates;
 
+  /// Show input dialog.
+  StreamController _showInputDialogController = new StreamController<DijkstraNodeConnection>.broadcast();
+
   /// Create listener.
   DijkstraNodeMouseListener({
     @required this.nodes,
     @required this.nodeSize,
     @required this.undoRedoManager,
+    @required this.weightBounds,
   });
 
   /// Set the current canvas size.
@@ -167,18 +177,25 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
         _selectedNode = null;
 
         if (pos == _mouseDownStart) {
-          DijkstraNode newNode = _addNode(pos);
+          if (_isCreateMode) {
+            DijkstraNode newNode = _addNode(pos);
 
-          // Add undoable step.
-          undoRedoManager.addStep(UndoRedoStep(
-            undoFunction: () {
-              DijkstraNode nodeToRemove = _getNodeById(newNode.id);
-              _removeNode(nodeToRemove);
-            },
-            redoFunction: () {
-              _addNode(pos, id: newNode.id);
-            },
-          ));
+            // Add undoable step.
+            undoRedoManager.addStep(UndoRedoStep(
+              undoFunction: () {
+                DijkstraNode nodeToRemove = _getNodeById(newNode.id);
+                _removeNode(nodeToRemove);
+              },
+              redoFunction: () {
+                _addNode(pos, id: newNode.id);
+              },
+            ));
+          } else {
+            DijkstraArrow weightArrow = _getWeightArrowAtPos(pos);
+            if (weightArrow != null) {
+              _showInputDialogController.add(weightArrow.connection);
+            }
+          }
         }
       }
     }
@@ -241,9 +258,21 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
     if (nodeAtPos != null) {
       _hoverNode = nodeAtPos;
-    } else if (_hoverNode != null) {
-      _hoverNode = null;
+    } else {
+      if (_hoverNode != null) {
+        _hoverNode = null;
+      }
     }
+  }
+
+  DijkstraArrow _getWeightArrowAtPos(Point<double> pos) {
+    for (DijkstraArrow weight in weightBounds.sublist(0)) {
+      if (weight.weightBounds.containsPoint(pos)) {
+        return weight;
+      }
+    }
+
+    return null;
   }
 
   /// Get a node at the passed pos or null if no node could be found.
@@ -319,4 +348,6 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   void _removeArrow(DijkstraNode from, DijkstraNode to) {
     from.disconnect(to);
   }
+
+  Stream<DijkstraNodeConnection> get showInputDialogStream => _showInputDialogController.stream;
 }

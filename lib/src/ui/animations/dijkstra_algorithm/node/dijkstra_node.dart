@@ -2,11 +2,15 @@ import 'dart:html';
 
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:meta/meta.dart';
 
 /// Node of the dijkstra animation.
 class DijkstraNode extends CanvasDrawable {
+  /// Default weight of a connection between nodes.
+  static const int _defaultWeight = 50;
+
   /// Id of the node.
   final int id;
 
@@ -17,11 +21,11 @@ class DijkstraNode extends CanvasDrawable {
   /// The coordinates are given in range [0.0, 1.0].
   Point<double> _coordinates;
 
-  /// Connection to other nodes.
-  List<DijkstraNode> _connectedTo;
+  /// Connections to other nodes.
+  List<DijkstraNodeConnection> _connectedTo;
 
   /// Connected from other nodes.
-  List<DijkstraNode> _connectedFrom;
+  List<DijkstraNodeConnection> _connectedFrom;
 
   /// Create node.
   DijkstraNode({
@@ -57,46 +61,52 @@ class DijkstraNode extends CanvasDrawable {
   void set coordinates(Point<double> newCoords) => _coordinates = newCoords;
 
   /// Get all nodes this node is connected to.
-  List<DijkstraNode> get connectedTo => _connectedTo;
+  List<DijkstraNodeConnection> get connectedTo => _connectedTo;
 
   /// Get all nodes this node is connected from.
-  List<DijkstraNode> get connectedFrom => _connectedFrom;
+  List<DijkstraNodeConnection> get connectedFrom => _connectedFrom;
 
   /// Connect this node to the passed [node].
   void connectTo(DijkstraNode node) {
     if (_connectedTo == null) {
-      _connectedTo = List<DijkstraNode>();
+      _connectedTo = List<DijkstraNodeConnection>();
     }
-    _connectedTo.add(node);
+    _connectedTo.add(DijkstraNodeConnection(
+      to: node,
+      weight: _defaultWeight,
+    ));
 
     if (node._connectedFrom == null) {
-      node._connectedFrom = List<DijkstraNode>();
+      node._connectedFrom = List<DijkstraNodeConnection>();
     }
-    node._connectedFrom.add(this);
+    node._connectedFrom.add(DijkstraNodeConnection(
+      to: this,
+      weight: _defaultWeight,
+    ));
   }
 
   /// Disconnect the passed [node] from this node.
   void disconnect(DijkstraNode node) {
     if (_connectedTo != null) {
-      _connectedTo.remove(node);
+      _connectedTo.removeWhere((connection) => connection.to == node);
     }
 
     if (node._connectedFrom != null) {
-      node._connectedFrom.remove(this);
+      node._connectedFrom.removeWhere((connection) => connection.to == this);
     }
   }
 
   /// Disconnects this node from all other nodes.
   void disconnectAll() {
     if (_connectedTo != null) {
-      for (DijkstraNode to in _connectedTo) {
-        disconnect(to);
+      for (DijkstraNodeConnection to in _connectedTo) {
+        disconnect(to.to);
       }
     }
 
     if (_connectedFrom != null) {
-      for (DijkstraNode from in _connectedFrom.sublist(0)) {
-        from.disconnect(this);
+      for (DijkstraNodeConnection from in _connectedFrom.sublist(0)) {
+        from.to.disconnect(this);
       }
     }
   }
