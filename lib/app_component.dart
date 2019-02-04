@@ -14,6 +14,7 @@ import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
+import 'package:hm_animations/src/util/debug.dart';
 
 @Component(
     selector: 'net-app',
@@ -71,6 +72,8 @@ class AppComponent implements OnInit, OnDestroy {
 
   @override
   ngOnInit() {
+    print("Debug mode? ${Debug.isDebugMode}");
+
     _initTranslations();
 
     languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
