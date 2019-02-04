@@ -72,8 +72,6 @@ class AppComponent implements OnInit, OnDestroy {
 
   @override
   ngOnInit() {
-    print("Debug mode? ${Debug.isDebugMode}");
-
     _initTranslations();
 
     languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);

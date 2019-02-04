@@ -69,11 +69,11 @@ class AnimationService {
   }
 
   Future<Map<String, AnimationDescriptor>> getAnimationDescriptors() async {
-    List<Animation> animations = await getAnimations();
-
     if (_authService.isLoggedIn) {
       return _animationDescriptorLookup;
     } else {
+      List<Animation> animations = await getAnimations();
+
       var result = Map<String, AnimationDescriptor>();
 
       for (AnimationDescriptor descriptor in Animations.ANIMATIONS) {
