@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_state.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:meta/meta.dart';
 
@@ -26,6 +27,9 @@ class DijkstraNode extends CanvasDrawable {
 
   /// Connected from other nodes.
   List<DijkstraNodeConnection> _connectedFrom;
+
+  /// State of the node during the algorithm.
+  final DijkstraNodeState _state = DijkstraNodeState();
 
   /// Create node.
   DijkstraNode({
@@ -110,6 +114,9 @@ class DijkstraNode extends CanvasDrawable {
       }
     }
   }
+
+  /// Get the state during the algorithm.
+  DijkstraNodeState get state => _state;
 
   @override
   bool operator ==(Object other) => identical(this, other) || other is DijkstraNode && runtimeType == other.runtimeType && id == other.id;

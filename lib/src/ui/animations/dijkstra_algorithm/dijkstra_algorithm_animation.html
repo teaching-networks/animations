@@ -30,6 +30,14 @@
 
 			<li class="labeled">
 				<label>Knoten Steuerung</label>
+
+				<div style="text-align: center">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="selectNodeAsStart()">
+						<material-icon icon="location_on"></material-icon>
+						Als Start festlegen
+					</material-button>
+				</div>
+
 				<div style="text-align: center">
 					<material-button raised [disabled]="!isNodeSelected()" (click)="removeSelectedNode()">
 						<material-icon icon="delete_forever"></material-icon>
@@ -50,6 +58,14 @@
 						Auswahl aufheben
 					</material-button>
 				</div>
+			</li>
+
+			<li class="labeled">
+				<label>Dijkstra</label>
+
+				<material-button raised (click)="start()">
+					<material-icon icon="play_arrow"></material-icon>
+				</material-button>
 			</li>
 		</ul>
 	</div>

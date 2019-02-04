@@ -9,6 +9,7 @@ import 'package:angular_components/laminate/components/modal/modal.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_dialog/material_dialog.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:angular_components/material_input/material_input.dart';
 import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
@@ -41,6 +42,7 @@ import 'package:vector_math/vector_math.dart' as vector;
     materialInputDirectives,
     formDirectives,
     AutoFocusDirective,
+    MaterialIconToggleDirective
   ],
   pipes: [
     I18nPipe,
@@ -102,6 +104,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Currently editing node connection.
   DijkstraNodeConnection _currentlyEditingConnection;
+
+  /// The start node for the algorithm.
+  DijkstraNode _startNode;
 
   /// Create animation.
   DijkstraAlgorithmAnimation() {
@@ -317,11 +322,15 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _drawHoveredNode(hoverNode, canvasRect);
     }
 
+    if (_startNode != null) {
+      _drawStartNode(_startNode, canvasRect);
+    }
+
     // Draw normal nodes.
     setFillColor(context, Colors.DARK_GRAY);
     setStrokeColor(context, Colors.DARK_GRAY);
     for (DijkstraNode node in _nodes.sublist(0)) {
-      if (node != selectedNode && node != hoverNode) {
+      if (node != selectedNode && node != hoverNode && node != _startNode) {
         node.render(context, canvasRect);
       }
     }
@@ -339,6 +348,14 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   void _drawHoveredNode(DijkstraNode node, Rectangle<double> canvasRect) {
     setFillColor(context, Colors.GREY);
     setStrokeColor(context, Colors.GREY);
+
+    node.render(context, canvasRect);
+  }
+
+  /// Draw a node as start node.
+  void _drawStartNode(DijkstraNode node, Rectangle<double> canvasRect) {
+    setFillColor(context, Colors.GREY_GREEN);
+    setStrokeColor(context, Colors.GREY_GREEN);
 
     node.render(context, canvasRect);
   }
@@ -529,4 +546,16 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   Map<String, String> getModeButtonStyle() => {
         "background-color": mouseListener.isCreateMode ? Colors.LIME.toCSSColorString() : Colors.WHITE.toCSSColorString(),
       };
+
+  /// Select the currently selected node as start node.
+  void selectNodeAsStart() {
+    if (mouseListener.selectedNode != null) {
+      _startNode = mouseListener.selectedNode;
+    }
+  }
+
+  /// Start the animation.
+  void start() {
+    print("TEst");
+  }
 }
