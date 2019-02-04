@@ -14,6 +14,7 @@ import 'package:angular_components/material_input/material_input.dart';
 import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra/dijkstra.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/mouse/dijkstra_node_mouse_listener.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
@@ -65,7 +66,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   static const String _keyPressEventName = "keypress";
 
   /// Default node size.
-  static const double _nodeSize = 20.0;
+  static const double _nodeSize = 30.0;
 
   /// Quaternion used to rotate an arrow head vector to the left.
   static vector.Quaternion _rotateLeft = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), pi / 4 * 3);
@@ -107,6 +108,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// The start node for the algorithm.
   DijkstraNode _startNode;
+
+  /// Dijkstra algorithm implementation.
+  Dijkstra _dijkstra = Dijkstra();
 
   /// Create animation.
   DijkstraAlgorithmAnimation() {
@@ -556,6 +560,18 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Start the animation.
   void start() {
-    print("TEst");
+    _dijkstra.initialize(_startNode, _nodes);
+
+    _testScheduleNextStep();
+  }
+
+  void _testScheduleNextStep() {
+    Future.delayed(Duration(seconds: 5)).then((_) {
+      _dijkstra.nextStep();
+
+      if (!_dijkstra.isFinished) {
+        _testScheduleNextStep();
+      }
+    });
   }
 }

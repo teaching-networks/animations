@@ -8,6 +8,9 @@ class DijkstraNodeState {
   /// Current distance to the start node.
   int _distance;
 
+  /// Whether the node has already been visited.
+  bool _visited = false;
+
   List<DijkstraNode> get predecessors => _predecessors;
 
   set predecessors(List<DijkstraNode> value) {
@@ -24,5 +27,11 @@ class DijkstraNodeState {
   void reset() {
     _predecessors.clear();
     _distance = null;
+  }
+
+  bool get visited => _visited;
+
+  set visited(bool value) {
+    _visited = value;
   }
 }

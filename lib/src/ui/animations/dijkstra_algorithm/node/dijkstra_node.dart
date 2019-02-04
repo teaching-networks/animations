@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_state.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
 /// Node of the dijkstra animation.
@@ -46,14 +47,36 @@ class DijkstraNode extends CanvasDrawable {
     double x = _coordinates.x * rect.width;
     double y = _coordinates.y * rect.height;
 
+    if (state.distance != null) {
+      context.save();
+      setFillColor(context, Colors.WHITE);
+      context.beginPath();
+      context.arc(x, y, size / 2, 0, 2 * pi);
+      context.fill();
+      context.restore();
+
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+
+      context.font = "${defaultFontSize}px sans-serif";
+
+      final labelWidth = context.measureText(state.distance.toString()).width;
+      if (labelWidth > size) {
+        // Decrease font size accordingly
+        context.font = "${defaultFontSize * (size / labelWidth)}px sans-serif";
+      }
+
+      context.fillText(state.distance.toString(), x, y);
+    } else {
+      context.beginPath();
+      context.arc(x, y, size / 4, 0, 2 * pi);
+      context.fill();
+    }
+
     context.lineWidth = window.devicePixelRatio * 2;
     context.beginPath();
     context.arc(x, y, size / 2, 0, 2 * pi);
     context.stroke();
-
-    context.beginPath();
-    context.arc(x, y, size / 4, 0, 2 * pi);
-    context.fill();
 
     context.restore();
   }
