@@ -24,6 +24,7 @@ import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/serialize/mod
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/util/text_util.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
 import 'package:hm_animations/src/util/size.dart';
@@ -195,8 +196,36 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     Rectangle<double> canvasRect = toRect(0, 0, size);
 
-    _drawArrows();
-    _drawNodes(canvasRect);
+    if (_nodes.isNotEmpty) {
+      _drawArrows();
+      _drawNodes(canvasRect);
+    } else {
+      _drawHelp();
+    }
+  }
+
+  /// Draw a helping message.
+  void _drawHelp() {
+    if (size.width < 100) {
+      return;
+    }
+
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+
+    context.setFillColorRgb(100, 100, 100);
+    setFont(sizeFactor: 1.5, fontFamily: "Raleway");
+
+    String help =
+        "Use the `Ctrl` key or click on the `Mode` button on the right side to switch into \"Create\" mode where you can click here to add new nodes and drag arrows from one node to another. In \"Normal\" mode you can move nodes and select them in order to apply the actions listed on the right side. Once you are done modelling your graph you can click on \"Play\" to start the animation or just use the Arrow button to proceeed one step after another.";
+
+    List<String> lines = TextUtil.wrapText(context, help, size.width);
+
+    double offset = defaultFontSize * 1.5;
+    double startOffset = size.height / 2 - (lines.length * offset) / 2;
+    for (int i = 0; i < lines.length; i++) {
+      context.fillText(lines[i], size.width / 2, startOffset + offset * i);
+    }
   }
 
   /// Draw all arrows.
@@ -572,20 +601,32 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Start the animation.
   void start() {
-    _dijkstra.initialize(_startNode, _nodes);
-
     _testScheduleNextStep();
   }
 
   void _testScheduleNextStep() {
     Future.delayed(Duration(seconds: 5)).then((_) {
-      _dijkstra.nextStep();
+      nextStep();
 
       if (!_dijkstra.isFinished) {
         _testScheduleNextStep();
       }
     });
   }
+
+  /// Call the next step in the algorithm.
+  void nextStep() {
+    if (isFinished) {
+      _dijkstra.initialize(_startNode, _nodes);
+    }
+
+    _dijkstra.nextStep();
+
+    // TODO cancel a running animation.
+  }
+
+  /// Whether the algorithm finished.
+  bool get isFinished => _dijkstra.isFinished;
 
   /// Save the current model for later use.
   void saveModel() {

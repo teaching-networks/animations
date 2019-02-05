@@ -14,7 +14,8 @@
 		<ul class="highlighted-fields">
 			<li class="labeled" style="text-align: center">
 				<material-button (click)="switchMode()" [ngStyle]="getModeButtonStyle()">
-					MODE:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">Create</span><span *ngIf="!mouseListener.isCreateMode">Normal</span></b>
+					MODE:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">Create</span><span
+						*ngIf="!mouseListener.isCreateMode">Normal</span></b>
 				</material-button>
 			</li>
 
@@ -63,13 +64,21 @@
 			<li class="labeled" style="text-align: center">
 				<label>Dijkstra</label>
 
-				<material-button raised (click)="start()">
-					<material-icon icon="play_arrow"></material-icon>
-				</material-button>
+				<div>
+					<material-button raised (click)="start()">
+						<material-icon icon="play_arrow"></material-icon>
+					</material-button>
 
-				<material-button raised (click)="reset()">
-					<material-icon icon="delete_forever"></material-icon>
-				</material-button>
+					<material-button raised (click)="reset()">
+						<material-icon icon="delete_forever"></material-icon>
+					</material-button>
+				</div>
+
+				<div>
+					<material-button raised (click)="nextStep()">
+						<material-icon icon="navigate_next"></material-icon>
+					</material-button>
+				</div>
 			</li>
 
 			<li class="labeled" style="text-align: center">
@@ -115,7 +124,8 @@
 		</div>
 
 		<form>
-			<material-input autoFocus name="content" [ngModel]="inputDialogContent" (ngModelChange)="setInputDialogContent($event)"></material-input>
+			<material-input autoFocus name="content" [ngModel]="inputDialogContent"
+							(ngModelChange)="setInputDialogContent($event)"></material-input>
 		</form>
 
 	</material-dialog>
