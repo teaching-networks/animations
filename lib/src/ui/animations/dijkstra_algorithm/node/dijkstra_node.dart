@@ -94,13 +94,13 @@ class DijkstraNode extends CanvasDrawable {
   List<DijkstraNodeConnection> get connectedFrom => _connectedFrom;
 
   /// Connect this node to the passed [node].
-  void connectTo(DijkstraNode node) {
+  void connectTo(DijkstraNode node, {int weight = _defaultWeight}) {
     if (_connectedTo == null) {
       _connectedTo = List<DijkstraNodeConnection>();
     }
     _connectedTo.add(DijkstraNodeConnection(
       to: node,
-      weight: _defaultWeight,
+      weight: weight,
     ));
 
     if (node._connectedFrom == null) {
@@ -108,7 +108,7 @@ class DijkstraNode extends CanvasDrawable {
     }
     node._connectedFrom.add(DijkstraNodeConnection(
       to: this,
-      weight: _defaultWeight,
+      weight: weight,
     ));
   }
 

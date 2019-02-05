@@ -13,11 +13,14 @@ import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:angular_components/material_input/material_input.dart';
 import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra/dijkstra.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/mouse/dijkstra_node_mouse_listener.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/serialize/model_serializer.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
@@ -68,6 +71,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Default node size.
   static const double _nodeSize = 30.0;
 
+  /// Key under which a Dijkstra model can be stored.
+  static const String _storedModelKey = "dijkstra_algorithm.stored_model";
+
   /// Quaternion used to rotate an arrow head vector to the left.
   static vector.Quaternion _rotateLeft = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), pi / 4 * 3);
 
@@ -112,8 +118,14 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Dijkstra algorithm implementation.
   Dijkstra _dijkstra = Dijkstra();
 
+  /// Service to retrieve translations from.
+  final I18nService _i18n;
+
+  /// Store and retrieve things.
+  final StorageService _storage;
+
   /// Create animation.
-  DijkstraAlgorithmAnimation() {
+  DijkstraAlgorithmAnimation(this._i18n, this._storage) {
     mouseListener = DijkstraNodeMouseListener(
       nodes: _nodes,
       nodeSize: _nodeSize,
@@ -574,4 +586,27 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       }
     });
   }
+
+  /// Save the current model for later use.
+  void saveModel() {
+    String serialized = DijkstraModelSerializer.serialize(_nodes);
+
+    _storage.set(_storedModelKey, serialized);
+  }
+
+  /// Restore a previously stored model.
+  void restoreModel() {
+    if (!hasModelToRestore) {
+      return;
+    }
+
+    String serialized = _storage.get(_storedModelKey);
+    List<DijkstraNode> nodes = DijkstraModelSerializer.deserialize(serialized);
+
+    _nodes.clear();
+    _nodes.addAll(nodes);
+  }
+
+  /// Whether there is a model that can be restored.
+  bool get hasModelToRestore => _storage.contains(_storedModelKey);
 }

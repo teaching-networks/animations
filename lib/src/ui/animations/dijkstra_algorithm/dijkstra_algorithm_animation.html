@@ -60,11 +60,23 @@
 				</div>
 			</li>
 
-			<li class="labeled">
+			<li class="labeled" style="text-align: center">
 				<label>Dijkstra</label>
 
 				<material-button raised (click)="start()">
 					<material-icon icon="play_arrow"></material-icon>
+				</material-button>
+			</li>
+
+			<li class="labeled" style="text-align: center">
+				<label>Save &amp; Restore</label>
+
+				<material-button raised (click)="saveModel()">
+					<material-icon icon="save"></material-icon>
+				</material-button>
+
+				<material-button raised [disabled]="!hasModelToRestore" (click)="restoreModel()">
+					<material-icon icon="restore"></material-icon>
 				</material-button>
 			</li>
 		</ul>
