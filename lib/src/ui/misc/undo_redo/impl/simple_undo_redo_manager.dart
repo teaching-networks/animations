@@ -55,6 +55,12 @@ class SimpleUndoRedoManager implements UndoRedoManager {
     step.undo();
   }
 
+  /// Clear all undos and redos.
+  void clear() {
+    _steps.clear();
+    _position = 0;
+  }
+
   /// Whether an undo is possible.
   bool canUndo() => _steps.isNotEmpty && _position > 0;
 

@@ -603,10 +603,17 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     String serialized = _storage.get(_storedModelKey);
     List<DijkstraNode> nodes = DijkstraModelSerializer.deserialize(serialized);
 
-    _nodes.clear();
+    reset();
     _nodes.addAll(nodes);
   }
 
   /// Whether there is a model that can be restored.
   bool get hasModelToRestore => _storage.contains(_storedModelKey);
+
+  /// Reset the animation.
+  void reset() {
+    _nodes.clear();
+    _startNode = null;
+    _undoRedoManager.clear();
+  }
 }
