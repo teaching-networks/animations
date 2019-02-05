@@ -47,6 +47,11 @@ class DijkstraNode extends CanvasDrawable {
     double x = _coordinates.x * rect.width;
     double y = _coordinates.y * rect.height;
 
+    if (state.visited) {
+      setFillColor(context, Colors.PURPLE);
+      setStrokeColor(context, Colors.PURPLE);
+    }
+
     if (state.distance != null) {
       context.save();
       setFillColor(context, Colors.WHITE);

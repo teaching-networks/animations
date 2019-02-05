@@ -27,6 +27,7 @@ class DijkstraNodeState {
   void reset() {
     _predecessors.clear();
     _distance = null;
+    _visited = false;
   }
 
   bool get visited => _visited;
