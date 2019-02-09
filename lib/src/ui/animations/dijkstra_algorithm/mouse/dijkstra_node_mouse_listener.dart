@@ -56,9 +56,6 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   /// Bounds of the weight labels.
   final List<DijkstraArrow> weightBounds;
 
-  /// Counter for nodes.
-  int _nodeCounter = 0;
-
   /// Coordinates of the currently dragged node on the drag start.
   Point<double> _dragStartCoordinates;
 
@@ -92,7 +89,10 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   DijkstraNode get hoverNode => _hoverNode;
 
   /// Set the currently hovered node.
-  void set hoverNode(DijkstraNode node) => _hoverNode = node;
+  void set hoverNode(DijkstraNode node) {
+    _hoverNode = node;
+    _hoverNode.isHovered = true;
+  }
 
   /// Get the currently creating arrow (or null if not creating an arrow at the moment).
   Tuple2<Point<double>, Point<double>> get arrow => _arrow;
@@ -114,9 +114,15 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   /// Deselect the currently selected node.
   void deselectNode() {
     if (_selectedNode == _hoverNode) {
+      if (_hoverNode != null) {
+        _hoverNode.isHovered = false;
+      }
       _hoverNode = null;
     }
 
+    if (_selectedNode != null) {
+      _selectedNode.isSelected = false;
+    }
     _selectedNode = null;
   }
 
@@ -177,6 +183,9 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
       if (nodeAtPos != null) {
         _selectNode(nodeAtPos);
       } else {
+        if (_selectedNode != null) {
+          _selectedNode.isSelected = false;
+        }
         _selectedNode = null;
 
         if (pos == _mouseDownStart) {
@@ -261,8 +270,10 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
     if (nodeAtPos != null) {
       _hoverNode = nodeAtPos;
+      _hoverNode.isHovered = true;
     } else {
       if (_hoverNode != null) {
+        _hoverNode.isHovered = false;
         _hoverNode = null;
       }
     }
@@ -298,7 +309,12 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
   /// Select the passed node.
   void _selectNode(DijkstraNode node) {
+    if (_selectedNode != null) {
+      _selectedNode.isSelected = false;
+    }
+
     _selectedNode = node;
+    _selectedNode.isSelected = true;
   }
 
   /// Convert position to coordinates point.
@@ -313,8 +329,10 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   }) {
     Point<double> coordinates = _positionToCoordinates(pos);
 
+    int nextId = nodes.isEmpty ? 0 : _unusedId;
+
     DijkstraNode node = DijkstraNode(
-      id: id == null ? _nodeCounter++ : id,
+      id: id == null ? nextId : id,
       size: nodeSize * window.devicePixelRatio,
       coordinates: coordinates,
     );
@@ -322,6 +340,9 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
 
     return node;
   }
+
+  /// Get the next id not in use.
+  int get _unusedId => nodes.map((node) => node.id).fold(0, (int currentMax, int nextValue) => nextValue > currentMax ? nextValue : currentMax) + 1;
 
   /// Get a node by its id.
   DijkstraNode _getNodeById(int id) => nodes.firstWhere((node) => node.id == id);

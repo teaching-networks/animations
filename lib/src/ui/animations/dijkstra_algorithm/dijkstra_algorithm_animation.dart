@@ -356,53 +356,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// Draw all nodes.
   void _drawNodes(Rectangle<double> canvasRect) {
-    DijkstraNode selectedNode = mouseListener.selectedNode;
-    DijkstraNode hoverNode = mouseListener.hoverNode;
-
-    if (selectedNode != null) {
-      _drawSelectedNode(selectedNode, canvasRect);
-    }
-
-    if (hoverNode != null && hoverNode != selectedNode) {
-      _drawHoveredNode(hoverNode, canvasRect);
-    }
-
-    if (_startNode != null) {
-      _drawStartNode(_startNode, canvasRect);
-    }
-
-    // Draw normal nodes.
-    setFillColor(context, Colors.DARK_GRAY);
-    setStrokeColor(context, Colors.DARK_GRAY);
     for (DijkstraNode node in _nodes.sublist(0)) {
-      if (node != selectedNode && node != hoverNode && node != _startNode) {
-        node.render(context, canvasRect);
-      }
+      node.render(context, canvasRect);
     }
-  }
-
-  /// Draw a node as selected.
-  void _drawSelectedNode(DijkstraNode node, Rectangle<double> canvasRect) {
-    setFillColor(context, Colors.CORAL);
-    setStrokeColor(context, Colors.CORAL);
-
-    node.render(context, canvasRect);
-  }
-
-  /// Draw a node as hovered.
-  void _drawHoveredNode(DijkstraNode node, Rectangle<double> canvasRect) {
-    setFillColor(context, Colors.GREY);
-    setStrokeColor(context, Colors.GREY);
-
-    node.render(context, canvasRect);
-  }
-
-  /// Draw a node as start node.
-  void _drawStartNode(DijkstraNode node, Rectangle<double> canvasRect) {
-    setFillColor(context, Colors.GREY_GREEN);
-    setStrokeColor(context, Colors.GREY_GREEN);
-
-    node.render(context, canvasRect);
   }
 
   /// What to do on window key down.
@@ -595,7 +551,12 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Select the currently selected node as start node.
   void selectNodeAsStart() {
     if (mouseListener.selectedNode != null) {
+      if (_startNode != null) {
+        _startNode.isStartNode = false;
+      }
+
       _startNode = mouseListener.selectedNode;
+      _startNode.isStartNode = true;
     }
   }
 
@@ -646,6 +607,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     reset();
     _nodes.addAll(nodes);
+
+    List<DijkstraNode> startNodes = _nodes.where((node) => node.isStartNode).toList();
+    if (startNodes != null && startNodes.isNotEmpty) {
+      _startNode = startNodes.first;
+    }
   }
 
   /// Whether there is a model that can be restored.
@@ -654,6 +620,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Reset the animation.
   void reset() {
     _nodes.clear();
+    if (_startNode != null) {
+      _startNode.isStartNode = false;
+    }
     _startNode = null;
     _undoRedoManager.clear();
   }

@@ -20,6 +20,7 @@ class DijkstraModelSerializer {
   static Map<String, dynamic> _serializeNode(DijkstraNode node) => {
         "id": node.id,
         "size": node.size,
+        "is_start_node": node.isStartNode,
         "coordinates": {
           "x": node.coordinates.x,
           "y": node.coordinates.y,
@@ -78,11 +79,16 @@ class DijkstraModelSerializer {
     int id = serializedNode["id"];
     double size = serializedNode["size"];
     Point<double> coordinates = Point<double>(serializedNode["coordinates"]["x"], serializedNode["coordinates"]["y"]);
+    bool isStartNode = serializedNode["is_start_node"];
 
-    return DijkstraNode(
+    DijkstraNode node = DijkstraNode(
       id: id,
       size: size,
       coordinates: coordinates,
     );
+
+    node.isStartNode = isStartNode;
+
+    return node;
   }
 }

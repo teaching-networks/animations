@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_state.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
@@ -32,6 +33,15 @@ class DijkstraNode extends CanvasDrawable {
   /// State of the node during the algorithm.
   final DijkstraNodeState _state = DijkstraNodeState();
 
+  /// Whether the node is selected.
+  bool isSelected = false;
+
+  /// Whether the node is currently hovered.
+  bool isHovered = false;
+
+  /// Whether the node is the start node.
+  bool isStartNode = false;
+
   /// Create node.
   DijkstraNode({
     @required this.id,
@@ -47,10 +57,10 @@ class DijkstraNode extends CanvasDrawable {
     double x = _coordinates.x * rect.width;
     double y = _coordinates.y * rect.height;
 
-    if (state.visited) {
-      setFillColor(context, Colors.PURPLE);
-      setStrokeColor(context, Colors.PURPLE);
-    }
+    Color color = _nodeColor;
+
+    setFillColor(context, color);
+    setStrokeColor(context, color);
 
     if (state.distance != null) {
       context.save();
@@ -71,7 +81,10 @@ class DijkstraNode extends CanvasDrawable {
         context.font = "${defaultFontSize * (size / labelWidth)}px sans-serif";
       }
 
+      context.save();
+      setFillColor(context, Colors.BLACK);
       context.fillText(state.distance.toString(), x, y);
+      context.restore();
     } else {
       context.beginPath();
       context.arc(x, y, size / 4, 0, 2 * pi);
@@ -84,6 +97,26 @@ class DijkstraNode extends CanvasDrawable {
     context.stroke();
 
     context.restore();
+  }
+
+  /// Get the most appropriate node color.
+  Color get _nodeColor {
+    Color color;
+    if (isSelected) {
+      color = Colors.CORAL;
+    } else if (state.visited) {
+      color = Colors.LIME;
+    } else if (isStartNode) {
+      color = Colors.ORANGE;
+    } else {
+      color = Colors.BLACK;
+    }
+
+    if (isHovered) {
+      color = Color.brighten(color, 0.5);
+    }
+
+    return color;
   }
 
   /// Get the points coordinates.
