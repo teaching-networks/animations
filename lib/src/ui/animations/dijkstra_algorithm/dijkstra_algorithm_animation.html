@@ -13,7 +13,8 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled" style="text-align: center">
-				<material-button (click)="switchMode()" [ngStyle]="getModeButtonStyle()">
+				<material-button (click)="switchMode()" [ngStyle]="getModeButtonStyle()"
+								 materialTooltip="Change the mode of the editor. It can be either 'Create' or 'Normal' mode. In Create mode you are able to create new nodes by clicking on the white space and create arrows between them by dragging from one node to another. In Normal mode you can move nodes around.">
 					MODE:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">Create</span><span
 						*ngIf="!mouseListener.isCreateMode">Normal</span></b>
 				</material-button>
@@ -21,10 +22,10 @@
 
 			<li class="labeled" style="text-align: center">
 				<label>Wiederholen/Rückgängig</label>
-				<material-button raised [disabled]="!canUndo()" (click)="undo()">
+				<material-button raised [disabled]="!canUndo()" (click)="undo()" materialTooltip="Undo a step">
 					<material-icon icon="undo"></material-icon>
 				</material-button>
-				<material-button raised [disabled]="!canRedo()" (click)="redo()">
+				<material-button raised [disabled]="!canRedo()" (click)="redo()" materialTooltip="Redo a step">
 					<material-icon icon="redo"></material-icon>
 				</material-button>
 			</li>
@@ -33,28 +34,32 @@
 				<label>Knoten Steuerung</label>
 
 				<div style="text-align: center">
-					<material-button raised [disabled]="!isNodeSelected()" (click)="selectNodeAsStart()">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="selectNodeAsStart()"
+									 materialTooltip="Select the currently selected node as start node for the Dijkstra algorithm">
 						<material-icon icon="location_on"></material-icon>
 						Als Start festlegen
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
-					<material-button raised [disabled]="!isNodeSelected()" (click)="removeSelectedNode()">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="removeSelectedNode()"
+									 materialTooltip="Remove the currently selected node">
 						<material-icon icon="delete_forever"></material-icon>
 						Knoten löschen
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
-					<material-button raised [disabled]="!isNodeSelected()" (click)="clearNodeConnections()">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="clearNodeConnections()"
+									 materialTooltip="Remove all the connections from this node or to other nodes">
 						<material-icon icon="link_off"></material-icon>
 						Knoten loslösen
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
-					<material-button raised [disabled]="!isNodeSelected()" (click)="clearSelection()">
+					<material-button raised [disabled]="!isNodeSelected()" (click)="clearSelection()"
+									 materialTooltip="Clear the current selection">
 						<material-icon icon="layers_clear"></material-icon>
 						Auswahl aufheben
 					</material-button>
@@ -64,16 +69,17 @@
 			<li class="labeled" style="text-align: center">
 				<label>Dijkstra</label>
 
-				<material-button raised (click)="startOrPause()">
+				<material-button raised (click)="startOrPause()" materialTooltip="Start or pause the animation">
 					<material-icon [toggle]="isAnimationRunning()" icon="play_arrow"
 								   toggledIcon="pause"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="nextStep()">
+				<material-button raised (click)="nextStep()"
+								 materialTooltip="Show the next step of the Dijkstra algorithm">
 					<material-icon icon="navigate_next"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="reset()">
+				<material-button raised (click)="reset()" materialTooltip="Reset the Dijkstra algorithm">
 					<material-icon icon="clear"></material-icon>
 				</material-button>
 			</li>
@@ -84,7 +90,8 @@
 					<material-slider [min]="1"
 									 [max]="10"
 									 [step]="1"
-									 [(value)]="timeToNextStep">
+									 [(value)]="timeToNextStep"
+									 materialTooltip="Adjust how fast the animation is going">
 					</material-slider>
 					<div>
 						{{ timeToNextStep }} s
@@ -95,20 +102,47 @@
 			<li class="labeled" style="text-align: center">
 				<label>Save &amp; Restore</label>
 
-				<material-button raised (click)="saveModel()">
+				<material-button raised (click)="saveModel()"
+								 materialTooltip="Save the current graph so you can restore it later. You can even close your browser!">
 					<material-icon icon="save"></material-icon>
 				</material-button>
 
-				<material-button raised [disabled]="!hasModelToRestore" (click)="restoreModel()">
+				<material-button raised [disabled]="!hasModelToRestore" (click)="restoreModel()"
+								 materialTooltip="Restore a previously saved graph">
 					<material-icon icon="restore"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="clearModel()">
+				<material-button raised (click)="clearModel()" materialTooltip="Delete the current graph">
 					<material-icon icon="delete_forever"></material-icon>
 				</material-button>
 			</li>
 		</ul>
 	</div>
+</div>
+
+<div class="dijkstra-table-holder">
+	<table *ngIf="dijkstraNodes.isNotEmpty">
+		<tr>
+			<th>Visited</th>
+			<th>Node</th>
+			<th>Shortest distance to {{ startNodeName }}</th>
+			<th>Predecessors</th>
+		</tr>
+		<tr *ngFor="let node of dijkstraNodes">
+			<td>
+				<material-checkbox [checked]="node.state.visited" readOnly></material-checkbox>
+			</td>
+			<td>{{ node.nodeName }}</td>
+			<td>
+				<span *ngIf="node.state.distance != null">{{ node.state.distance }}</span>
+				<span *ngIf="node.state.distance == null" class="symbol">&infin;</span>
+			</td>
+			<td>
+				<span *ngIf="node.state.predecessors.isNotEmpty">{{ serializeNodeList(node.state.predecessors) }}</span>
+				<span *ngIf="node.state.predecessors.isEmpty" class="symbol">&empty;</span>
+			</td>
+		</tr>
+	</table>
 </div>
 
 <div class="description">
@@ -135,13 +169,20 @@
 				<material-icon icon="close"></material-icon>
 			</material-button>
 
-			<h1>Neues Gewicht</h1>
+			<h1>Edit Weight</h1>
 		</div>
 
-		<form>
+		<form style="text-align: center">
 			<material-input autoFocus name="content" [ngModel]="inputDialogContent"
 							(ngModelChange)="setInputDialogContent($event)"></material-input>
 		</form>
+
+		<div style="text-align: center">
+			<material-button raised style="background-color: lightcoral; color: white">
+				<material-icon icon="delete_forever"></material-icon>
+				Remove connection
+			</material-button>
+		</div>
 
 	</material-dialog>
 </modal>

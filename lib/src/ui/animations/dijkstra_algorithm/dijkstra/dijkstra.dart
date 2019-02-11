@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node_connection.dart';
 
@@ -44,6 +42,12 @@ class Dijkstra {
 
         if (oldDistance == null || newDistance < oldDistance) {
           connectedTo.to.state.distance = newDistance;
+
+          List<DijkstraNode> newPredecessors = List<DijkstraNode>();
+          newPredecessors.addAll(nodeToProcess.state.predecessors);
+          newPredecessors.add(nodeToProcess);
+
+          connectedTo.to.state.predecessors = newPredecessors;
         }
 
         if (!connectedTo.to.state.visited) {

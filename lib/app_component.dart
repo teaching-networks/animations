@@ -14,7 +14,6 @@ import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
-import 'package:hm_animations/src/util/debug.dart';
 
 @Component(
     selector: 'net-app',

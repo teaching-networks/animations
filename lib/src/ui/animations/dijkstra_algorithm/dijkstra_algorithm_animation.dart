@@ -7,11 +7,13 @@ import 'package:angular_components/auto_dismiss/auto_dismiss.dart';
 import 'package:angular_components/focus/focus.dart';
 import 'package:angular_components/laminate/components/modal/modal.dart';
 import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_checkbox/material_checkbox.dart';
 import 'package:angular_components/material_dialog/material_dialog.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:angular_components/material_input/material_input.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
+import 'package:angular_components/material_tooltip/material_tooltip.dart';
 import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
@@ -50,6 +52,8 @@ import 'package:vector_math/vector_math.dart' as vector;
     AutoFocusDirective,
     MaterialIconToggleDirective,
     MaterialSliderComponent,
+    MaterialCheckboxComponent,
+    MaterialTooltipDirective,
   ],
   pipes: [
     I18nPipe,
@@ -155,6 +159,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     _showInputDialog = value;
   }
 
+  /// The dijkstra start node name
+  String get startNodeName => _startNode != null ? _startNode.nodeName : "...";
+
   /// Get the time it takes to reach the next step in the animation.
   int get timeToNextStep => _nextStepDuration.inSeconds;
 
@@ -186,6 +193,10 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _showInputDialog = true;
       _currentlyEditingConnection = connection;
     });
+
+    if (hasModelToRestore) {
+      restoreModel();
+    }
   }
 
   @override
@@ -695,4 +706,10 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       node.state.reset();
     }
   }
+
+  /// Get all nodes.
+  List<DijkstraNode> get dijkstraNodes => _nodes;
+
+  /// Serialize a node list.
+  String serializeNodeList(List<DijkstraNode> nodes) => nodes.map((node) => node.nodeName).toString();
 }

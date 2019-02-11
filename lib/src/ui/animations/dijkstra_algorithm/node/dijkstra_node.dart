@@ -11,6 +11,9 @@ import 'package:meta/meta.dart';
 
 /// Node of the dijkstra animation.
 class DijkstraNode extends CanvasDrawable {
+  /// Alphabet to generate node names from.
+  static const String _alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
   /// Default weight of a connection between nodes.
   static const int _defaultWeight = 50;
 
@@ -42,6 +45,9 @@ class DijkstraNode extends CanvasDrawable {
   /// Whether the node is the start node.
   bool isStartNode = false;
 
+  /// Generated node name for this node.
+  String _tmpNodeName;
+
   /// Create node.
   DijkstraNode({
     @required this.id,
@@ -57,46 +63,64 @@ class DijkstraNode extends CanvasDrawable {
     double x = _coordinates.x * rect.width;
     double y = _coordinates.y * rect.height;
 
+    // Draw white background
+    context.save();
+    setFillColor(context, Colors.WHITE);
+    context.beginPath();
+    context.arc(x, y, size / 2, 0, 2 * pi);
+    context.fill();
+    context.restore();
+
     Color color = _nodeColor;
 
     setFillColor(context, color);
     setStrokeColor(context, color);
 
-    if (state.distance != null) {
-      context.save();
-      setFillColor(context, Colors.WHITE);
-      context.beginPath();
-      context.arc(x, y, size / 2, 0, 2 * pi);
-      context.fill();
-      context.restore();
-
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-
-      context.font = "${defaultFontSize}px sans-serif";
-
-      final labelWidth = context.measureText(state.distance.toString()).width;
-      if (labelWidth > size) {
-        // Decrease font size accordingly
-        context.font = "${defaultFontSize * (size / labelWidth)}px sans-serif";
-      }
-
-      context.save();
-      setFillColor(context, Colors.BLACK);
-      context.fillText(state.distance.toString(), x, y);
-      context.restore();
-    } else {
-      context.beginPath();
-      context.arc(x, y, size / 4, 0, 2 * pi);
-      context.fill();
-    }
-
+    // Draw round border
     context.lineWidth = window.devicePixelRatio * 2;
     context.beginPath();
     context.arc(x, y, size / 2, 0, 2 * pi);
     context.stroke();
 
+    // Draw node name and distance if any.
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.font = "${defaultFontSize}px sans-serif";
+    if (state.distance != null) {
+      context.font = "${getMatchingFontSize(context, state.distance.toString())}px sans-serif";
+
+      context.save();
+      setFillColor(context, Colors.BLACK);
+      context.fillText(state.distance.toString(), x, y);
+
+      double labelFontSize = getMatchingFontSize(context, nodeName);
+      context.font = "${labelFontSize}px sans-serif";
+      double nameWidth = context.measureText(nodeName).width;
+      setFillColor(context, Colors.WHITE);
+      context.fillRect(x - nameWidth / 2, y - size / 2 - labelFontSize / 2, nameWidth, labelFontSize);
+
+      setFillColor(context, Colors.SLATE_GREY);
+      context.fillText(nodeName, x, y - size / 2);
+      context.restore();
+    } else {
+      context.font = "${getMatchingFontSize(context, nodeName)}px sans-serif";
+      setFillColor(context, Colors.BLACK);
+      context.fillText(nodeName, x, y);
+    }
+
     context.restore();
+  }
+
+  /// Get the matching font size for the node.
+  double getMatchingFontSize(CanvasRenderingContext2D context, String text) {
+    final double textWidth = context.measureText(text).width;
+    final double maxSize = size - context.lineWidth * 2;
+
+    if (textWidth > maxSize) {
+      return defaultFontSize * (maxSize / textWidth);
+    }
+
+    return defaultFontSize;
   }
 
   /// Get the most appropriate node color.
@@ -184,4 +208,46 @@ class DijkstraNode extends CanvasDrawable {
 
   @override
   int get hashCode => id.hashCode;
+
+  /// Get a node name for this node.
+  String get nodeName {
+    if (_tmpNodeName != null) {
+      return _tmpNodeName;
+    }
+
+    List<int> alphabetIndices = List<int>();
+    int num = id;
+    int length = _alphabet.length;
+    bool first = true;
+
+    if (num == 0) {
+      alphabetIndices.add(num);
+    } else {
+      while (num > 0) {
+        int rest = num % length;
+        num ~/= length;
+
+        alphabetIndices.add(rest);
+
+        if (first) {
+          first = false;
+          length += 1;
+        }
+      }
+    }
+
+    String name = "";
+    List<int> reversed = alphabetIndices.reversed.toList(growable: false);
+    for (int i = 0; i < reversed.length; i++) {
+      if (i == reversed.length - 1) {
+        name += _alphabet[reversed[i]];
+      } else {
+        name += _alphabet[max(reversed[i] - 1, 0)];
+      }
+    }
+
+    _tmpNodeName = name;
+
+    return name;
+  }
 }
