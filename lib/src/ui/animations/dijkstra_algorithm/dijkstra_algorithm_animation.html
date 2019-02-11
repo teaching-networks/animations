@@ -65,7 +65,8 @@
 				<label>Dijkstra</label>
 
 				<material-button raised (click)="startOrPause()">
-					<material-icon [toggle]="isAnimationRunning()" icon="play_arrow" toggledIcon="pause"></material-icon>
+					<material-icon [toggle]="isAnimationRunning()" icon="play_arrow"
+								   toggledIcon="pause"></material-icon>
 				</material-button>
 
 				<material-button raised (click)="nextStep()">
@@ -75,6 +76,20 @@
 				<material-button raised (click)="reset()">
 					<material-icon icon="clear"></material-icon>
 				</material-button>
+			</li>
+
+			<li class="labeled">
+				<label>Time to next step</label>
+				<span class="slider-panel">
+					<material-slider [min]="1"
+									 [max]="10"
+									 [step]="1"
+									 [(value)]="timeToNextStep">
+					</material-slider>
+					<div>
+						{{ timeToNextStep }} s
+					</div>
+				</span>
 			</li>
 
 			<li class="labeled" style="text-align: center">
