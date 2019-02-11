@@ -54,6 +54,11 @@ class Dijkstra {
     }
   }
 
+  /// Reset the algorithm state.
+  void reset() {
+    _toProcess.clear();
+  }
+
   /// Whether the algorithm already finished.
   bool get isFinished => _toProcess.isEmpty;
 }

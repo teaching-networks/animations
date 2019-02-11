@@ -119,6 +119,15 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Dijkstra algorithm implementation.
   Dijkstra _dijkstra = Dijkstra();
 
+  /// Controller issuing the next steps in the animation.
+  StreamController<void> _nextStepController = StreamController<void>.broadcast(sync: true);
+
+  /// Listener listening for the next step.
+  StreamSubscription _nextStepSubscription;
+
+  /// Duration until the next step in the animation will be called.
+  Duration _nextStepDuration = Duration(seconds: 4);
+
   /// Service to retrieve translations from.
   final I18nService _i18n;
 
@@ -179,6 +188,12 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
     _showInputDialogStreamSubscription.cancel();
 
+    if (_nextStepSubscription != null) {
+      _nextStepSubscription.cancel();
+    }
+
+    _nextStepController.close();
+
     super.ngOnDestroy();
   }
 
@@ -214,7 +229,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     context.textBaseline = "middle";
 
     context.setFillColorRgb(100, 100, 100);
-    setFont(sizeFactor: 1.5, fontFamily: "Raleway");
+    setFont(sizeFactor: 1.5, fontFamily: "Raleway, sans-serif");
 
     String help =
         "Use the `Ctrl` key or click on the `Mode` button on the right side to switch into \"Create\" mode where you can click here to add new nodes and drag arrows from one node to another. In \"Normal\" mode you can move nodes and select them in order to apply the actions listed on the right side. Once you are done modelling your graph you can click on \"Play\" to start the animation or just use the Arrow button to proceeed one step after another.";
@@ -560,23 +575,52 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
   }
 
-  /// Start the animation.
-  void start() {
-    _testScheduleNextStep();
+  /// Whether the animation is currently running.
+  bool isAnimationRunning() => _nextStepSubscription != null;
+
+  /// Start or pause the animation.
+  void startOrPause() {
+    if (isAnimationRunning()) {
+      _nextStepSubscription.cancel();
+      _nextStepSubscription = null;
+    } else {
+      if (_dijkstra.isFinished) {
+        _dijkstra.initialize(_startNode, _nodes);
+      }
+
+      _nextStepSubscription = _nextStepController.stream.listen((_) {
+        nextStep(cancelAnimation: false);
+
+        if (!_dijkstra.isFinished) {
+          _scheduleNextStep();
+        } else {
+          _nextStepSubscription.cancel();
+          _nextStepSubscription = null;
+        }
+      });
+
+      _scheduleNextStep();
+    }
   }
 
-  void _testScheduleNextStep() {
-    Future.delayed(Duration(seconds: 5)).then((_) {
-      nextStep();
-
-      if (!_dijkstra.isFinished) {
-        _testScheduleNextStep();
+  /// Schedule the next animation step.
+  void _scheduleNextStep() {
+    Future.delayed(_nextStepDuration).then((_) {
+      if (!_nextStepController.isClosed) {
+        _nextStepController.add(null);
       }
     });
   }
 
   /// Call the next step in the algorithm.
-  void nextStep() {
+  void nextStep({
+    bool cancelAnimation = true,
+  }) {
+    if (_nextStepSubscription != null && cancelAnimation) {
+      _nextStepSubscription.cancel();
+      _nextStepSubscription = null;
+    }
+
     if (isFinished) {
       _dijkstra.initialize(_startNode, _nodes);
     }
@@ -605,7 +649,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     String serialized = _storage.get(_storedModelKey);
     List<DijkstraNode> nodes = DijkstraModelSerializer.deserialize(serialized);
 
-    reset();
+    clearModel();
     _nodes.addAll(nodes);
 
     List<DijkstraNode> startNodes = _nodes.where((node) => node.isStartNode).toList();
@@ -614,16 +658,31 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
   }
 
+  /// Clear the current model.
+  void clearModel() {
+    _nodes.clear();
+
+    if (_startNode != null) {
+      _startNode.isStartNode = false;
+    }
+    _startNode = null;
+
+    _undoRedoManager.clear();
+  }
+
   /// Whether there is a model that can be restored.
   bool get hasModelToRestore => _storage.contains(_storedModelKey);
 
   /// Reset the animation.
   void reset() {
-    _nodes.clear();
-    if (_startNode != null) {
-      _startNode.isStartNode = false;
+    if (isAnimationRunning()) {
+      startOrPause();
     }
-    _startNode = null;
-    _undoRedoManager.clear();
+
+    _dijkstra.reset();
+
+    for (DijkstraNode node in _nodes) {
+      node.state.reset();
+    }
   }
 }
