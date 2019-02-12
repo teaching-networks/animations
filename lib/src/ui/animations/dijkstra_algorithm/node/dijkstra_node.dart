@@ -161,6 +161,7 @@ class DijkstraNode extends CanvasDrawable {
       _connectedTo = List<DijkstraNodeConnection>();
     }
     _connectedTo.add(DijkstraNodeConnection(
+      from: this,
       to: node,
       weight: weight,
     ));
@@ -169,6 +170,7 @@ class DijkstraNode extends CanvasDrawable {
       node._connectedFrom = List<DijkstraNodeConnection>();
     }
     node._connectedFrom.add(DijkstraNodeConnection(
+      from: node,
       to: this,
       weight: weight,
     ));

@@ -3,6 +3,9 @@ import 'package:meta/meta.dart';
 
 /// Connection to a dijkstra node.
 class DijkstraNodeConnection {
+  /// Connected [from] this node.
+  final DijkstraNode from;
+
   /// Connected [to] this node.
   final DijkstraNode to;
 
@@ -11,6 +14,7 @@ class DijkstraNodeConnection {
 
   /// Create node connection.
   DijkstraNodeConnection({
+    @required this.from,
     @required this.to,
     @required int weight,
   }) : _weight = weight;

@@ -588,6 +588,35 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
   }
 
+  /// In case the remove button has been clicked within the input dialog.
+  void onInputDialogRemoveClicked() {
+    if (_currentlyEditingConnection != null) {
+      _currentlyEditingConnection.from.disconnect(_currentlyEditingConnection.to);
+
+      int fromId = _currentlyEditingConnection.from.id;
+      int toId = _currentlyEditingConnection.to.id;
+      int weight = _currentlyEditingConnection.weight;
+
+      _undoRedoManager.addStep(UndoRedoStep(
+        undoFunction: () {
+          DijkstraNode from = _getNodeById(fromId);
+          DijkstraNode to = _getNodeById(toId);
+
+          from.connectTo(to, weight: weight);
+        },
+        redoFunction: () {
+          DijkstraNode from = _getNodeById(fromId);
+          DijkstraNode to = _getNodeById(toId);
+
+          from.disconnect(to);
+        },
+      ));
+
+      showInputDialog = false;
+      _currentlyEditingConnection = null;
+    }
+  }
+
   /// Switch between normal and create mode.
   void switchMode() {
     mouseListener.createMode = !mouseListener.isCreateMode;

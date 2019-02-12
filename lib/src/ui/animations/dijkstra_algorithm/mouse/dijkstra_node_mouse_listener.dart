@@ -60,7 +60,7 @@ class DijkstraNodeMouseListener implements CanvasMouseListener {
   Point<double> _dragStartCoordinates;
 
   /// Show input dialog.
-  StreamController _showInputDialogController = new StreamController<DijkstraNodeConnection>.broadcast();
+  StreamController<DijkstraNodeConnection> _showInputDialogController = new StreamController<DijkstraNodeConnection>.broadcast();
 
   /// Create listener.
   DijkstraNodeMouseListener({
