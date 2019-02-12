@@ -173,7 +173,7 @@
 		</div>
 
 		<form style="text-align: center">
-			<material-input autoFocus name="content" [ngModel]="inputDialogContent"
+			<material-input autoFocus autoSelect #newWeightTextField name="content" [ngModel]="inputDialogContent"
 							(ngModelChange)="setInputDialogContent($event)"></material-input>
 		</form>
 

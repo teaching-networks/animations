@@ -28,6 +28,7 @@ import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/text_util.dart';
+import 'package:hm_animations/src/ui/misc/directives/auto_select_directive.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
 import 'package:hm_animations/src/util/size.dart';
@@ -54,6 +55,7 @@ import 'package:vector_math/vector_math.dart' as vector;
     MaterialSliderComponent,
     MaterialCheckboxComponent,
     MaterialTooltipDirective,
+    AutoSelectDirective,
   ],
   pipes: [
     I18nPipe,
@@ -134,6 +136,10 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Duration until the next step in the animation will be called.
   Duration _nextStepDuration = Duration(seconds: 4);
 
+  /// Text field where the user can set a new weight for a connection between nodes.
+  @ViewChild("newWeightTextField", read: HtmlElement)
+  HtmlElement newWeightTextField;
+
   /// Service to retrieve translations from.
   final I18nService _i18n;
 
@@ -157,6 +163,14 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   set showInputDialog(bool value) {
     _showInputDialog = value;
+
+    if (value) {
+      // Select all text in text field
+      final inputField = newWeightTextField.querySelector("input");
+      if (inputField != null && inputField is TextInputElement) {
+        inputField.setSelectionRange(0, inputField.text.length);
+      }
+    }
   }
 
   /// The dijkstra start node name
@@ -190,7 +204,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     window.addEventListener(_keyPressEventName, _windowKeyPressListener);
 
     _showInputDialogStreamSubscription = mouseListener.showInputDialogStream.listen((connection) {
-      _showInputDialog = true;
+      showInputDialog = true;
       _currentlyEditingConnection = connection;
     });
 
