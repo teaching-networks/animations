@@ -160,6 +160,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   Message saveModelTooltip;
   Message restoreModelTooltip;
   Message clearModelTooltip;
+  Message helpLabel;
 
   /// Create animation.
   DijkstraAlgorithmAnimation(this._i18n, this._storage) {
@@ -187,6 +188,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     saveModelTooltip = _i18n.get("dijkstra-algorithm-animation.save-model.tooltip");
     restoreModelTooltip = _i18n.get("dijkstra-algorithm-animation.restore-model.tooltip");
     clearModelTooltip = _i18n.get("dijkstra-algorithm-animation.clear-model.tooltip");
+    helpLabel = _i18n.get("dijkstra-algorithm-animation.help-label");
   }
 
   /// Get the default height of the canvas.
@@ -301,9 +303,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     context.setFillColorRgb(100, 100, 100);
     setFont(sizeFactor: 1.5, fontFamily: "Raleway, sans-serif");
 
-    String help =
-        "Use the `Ctrl` key or click on the `Mode` button on the right side to switch into \"Create\" mode where you can click here to add new nodes and drag arrows from one node to another. In \"Normal\" mode you can move nodes and select them in order to apply the actions listed on the right side. Once you are done modelling your graph you can click on \"Play\" to start the animation or just use the Arrow button to proceeed one step after another.";
-
+    String help = helpLabel.toString();
     List<String> lines = TextUtil.wrapText(context, help, size.width);
 
     double offset = defaultFontSize * 1.5;
