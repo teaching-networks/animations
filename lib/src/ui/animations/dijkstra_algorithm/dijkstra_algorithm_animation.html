@@ -14,84 +14,84 @@
 		<ul class="highlighted-fields">
 			<li class="labeled" style="text-align: center">
 				<material-button (click)="switchMode()" [ngStyle]="getModeButtonStyle()"
-								 materialTooltip="Change the mode of the editor. It can be either 'Create' or 'Normal' mode. In Create mode you are able to create new nodes by clicking on the white space and create arrows between them by dragging from one node to another. In Normal mode you can move nodes around.">
-					MODE:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">Create</span><span
-						*ngIf="!mouseListener.isCreateMode">Normal</span></b>
+								 [materialTooltip]="modeTooltip.toString()">
+					{{ "dijkstra-algorithm-animation.mode" | i18n }}:&nbsp;<b><span *ngIf="mouseListener.isCreateMode">{{ "dijkstra-algorithm-animation.mode.create" | i18n }}</span><span
+						*ngIf="!mouseListener.isCreateMode">{{ "dijkstra-algorithm-animation.mode.normal" | i18n }}</span></b>
 				</material-button>
 			</li>
 
 			<li class="labeled" style="text-align: center">
-				<label>Wiederholen/Rückgängig</label>
-				<material-button raised [disabled]="!canUndo()" (click)="undo()" materialTooltip="Undo a step">
+				<label>{{ "dijkstra-algorithm-animation.undo-redo" | i18n }}</label>
+				<material-button raised [disabled]="!canUndo()" (click)="undo()" [materialTooltip]="undoTooltip.toString()">
 					<material-icon icon="undo"></material-icon>
 				</material-button>
-				<material-button raised [disabled]="!canRedo()" (click)="redo()" materialTooltip="Redo a step">
+				<material-button raised [disabled]="!canRedo()" (click)="redo()" [materialTooltip]="redoTooltip.toString()">
 					<material-icon icon="redo"></material-icon>
 				</material-button>
 			</li>
 
 			<li class="labeled">
-				<label>Knoten Steuerung</label>
+				<label>{{ "dijkstra-algorithm-animation.node-control" | i18n }}</label>
 
 				<div style="text-align: center">
 					<material-button raised [disabled]="!isNodeSelected()" (click)="selectNodeAsStart()"
-									 materialTooltip="Select the currently selected node as start node for the Dijkstra algorithm">
+									 [materialTooltip]="selectNodeAsStartTooltip.toString()">
 						<material-icon icon="location_on"></material-icon>
-						Als Start festlegen
+						{{ "dijkstra-algorithm-animation.select-node-as-start" | i18n }}
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
 					<material-button raised [disabled]="!isNodeSelected()" (click)="removeSelectedNode()"
-									 materialTooltip="Remove the currently selected node">
+									 [materialTooltip]="removeNodeTooltip.toString()">
 						<material-icon icon="delete_forever"></material-icon>
-						Knoten löschen
+						{{ "dijkstra-algorithm-animation.remove-node" | i18n }}
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
 					<material-button raised [disabled]="!isNodeSelected()" (click)="clearNodeConnections()"
-									 materialTooltip="Remove all the connections from this node or to other nodes">
+									 [materialTooltip]="disconnectNodeTooltip.toString()">
 						<material-icon icon="link_off"></material-icon>
-						Knoten loslösen
+						{{ "dijkstra-algorithm-animation.disconnect-node" | i18n }}
 					</material-button>
 				</div>
 
 				<div style="text-align: center">
 					<material-button raised [disabled]="!isNodeSelected()" (click)="clearSelection()"
-									 materialTooltip="Clear the current selection">
+									 [materialTooltip]="clearSelectionTooltip.toString()">
 						<material-icon icon="layers_clear"></material-icon>
-						Auswahl aufheben
+						{{ "dijkstra-algorithm-animation.clear-selection" | i18n }}
 					</material-button>
 				</div>
 			</li>
 
 			<li class="labeled" style="text-align: center">
-				<label>Dijkstra</label>
+				<label>{{ "dijkstra-algorithm-animation.dijkstra-control" | i18n }}</label>
 
-				<material-button raised (click)="startOrPause()" materialTooltip="Start or pause the animation">
+				<material-button raised (click)="startOrPause()" [materialTooltip]="startOrPauseTooltip.toString()">
 					<material-icon [toggle]="isAnimationRunning()" icon="play_arrow"
 								   toggledIcon="pause"></material-icon>
 				</material-button>
 
 				<material-button raised (click)="nextStep()"
-								 materialTooltip="Show the next step of the Dijkstra algorithm">
+								 [materialTooltip]="nextStepTooltip.toString()">
 					<material-icon icon="navigate_next"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="reset()" materialTooltip="Reset the Dijkstra algorithm">
+				<material-button raised (click)="reset()" [materialTooltip]="resetAlgorithmTooltip.toString()">
 					<material-icon icon="clear"></material-icon>
 				</material-button>
 			</li>
 
 			<li class="labeled">
-				<label>Time to next step</label>
+				<label>{{ "dijkstra-algorithm-animation.time-to-next-step" | i18n }}</label>
 				<span class="slider-panel">
 					<material-slider [min]="1"
 									 [max]="10"
 									 [step]="1"
 									 [(value)]="timeToNextStep"
-									 materialTooltip="Adjust how fast the animation is going">
+									 [materialTooltip]="timeToNextStepTooltip.toString()">
 					</material-slider>
 					<div>
 						{{ timeToNextStep }} s
@@ -100,19 +100,19 @@
 			</li>
 
 			<li class="labeled" style="text-align: center">
-				<label>Save &amp; Restore</label>
+				<label>{{ "dijkstra-algorithm-animation.save-and-restore" | i18n }}</label>
 
 				<material-button raised (click)="saveModel()"
-								 materialTooltip="Save the current graph so you can restore it later. You can even close your browser!">
+								 [materialTooltip]="saveModelTooltip.toString()">
 					<material-icon icon="save"></material-icon>
 				</material-button>
 
 				<material-button raised [disabled]="!hasModelToRestore" (click)="restoreModel()"
-								 materialTooltip="Restore a previously saved graph">
+								 [materialTooltip]="restoreModelTooltip.toString()">
 					<material-icon icon="restore"></material-icon>
 				</material-button>
 
-				<material-button raised (click)="clearModel()" materialTooltip="Delete the current graph">
+				<material-button raised (click)="clearModel()" [materialTooltip]="clearModelTooltip.toString()">
 					<material-icon icon="delete_forever"></material-icon>
 				</material-button>
 			</li>
@@ -123,10 +123,10 @@
 <div class="dijkstra-table-holder">
 	<table *ngIf="dijkstraNodes.isNotEmpty">
 		<tr>
-			<th>Visited</th>
-			<th>Node</th>
-			<th>Shortest distance to {{ startNodeName }}</th>
-			<th>Predecessors</th>
+			<th>{{ "dijkstra-algorithm-animation.table.visited" | i18n }}</th>
+			<th>{{ "dijkstra-algorithm-animation.table.node" | i18n }}</th>
+			<th>{{ "dijkstra-algorithm-animation.table.shortest-distance-to" | i18n }} {{ startNodeName }}</th>
+			<th>{{ "dijkstra-algorithm-animation.table.predecessors" | i18n }}</th>
 		</tr>
 		<tr *ngFor="let node of dijkstraNodes">
 			<td>
@@ -169,7 +169,7 @@
 				<material-icon icon="close"></material-icon>
 			</material-button>
 
-			<h1>Edit Weight</h1>
+			<h1>{{ "dijkstra-algorithm-animation.dialog.edit-weight" | i18n }}</h1>
 		</div>
 
 		<form style="text-align: center">
@@ -178,9 +178,10 @@
 		</form>
 
 		<div style="text-align: center">
-			<material-button raised style="background-color: lightcoral; color: white" (click)="onInputDialogRemoveClicked()">
+			<material-button raised style="background-color: lightcoral; color: white"
+							 (click)="onInputDialogRemoveClicked()">
 				<material-icon icon="delete_forever"></material-icon>
-				Remove connection
+				{{ "dijkstra-algorithm-animation.dialog.remove-connection" | i18n }}
 			</material-button>
 		</div>
 

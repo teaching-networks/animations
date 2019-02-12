@@ -146,6 +146,21 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Store and retrieve things.
   final StorageService _storage;
 
+  Message modeTooltip;
+  Message undoTooltip;
+  Message redoTooltip;
+  Message selectNodeAsStartTooltip;
+  Message removeNodeTooltip;
+  Message disconnectNodeTooltip;
+  Message clearSelectionTooltip;
+  Message startOrPauseTooltip;
+  Message nextStepTooltip;
+  Message resetAlgorithmTooltip;
+  Message timeToNextStepTooltip;
+  Message saveModelTooltip;
+  Message restoreModelTooltip;
+  Message clearModelTooltip;
+
   /// Create animation.
   DijkstraAlgorithmAnimation(this._i18n, this._storage) {
     mouseListener = DijkstraNodeMouseListener(
@@ -154,6 +169,24 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       undoRedoManager: _undoRedoManager,
       weightBounds: _weightBoundingBoxes,
     );
+  }
+
+  /// Initialize all translations needed by the animation.
+  void _initTranslations() {
+    modeTooltip = _i18n.get("dijkstra-algorithm-animation.mode.tooltip");
+    undoTooltip = _i18n.get("dijkstra-algorithm-animation.undo.tooltip");
+    redoTooltip = _i18n.get("dijkstra-algorithm-animation.redo.tooltip");
+    selectNodeAsStartTooltip = _i18n.get("dijkstra-algorithm-animation.select-node-as-start.tooltip");
+    removeNodeTooltip = _i18n.get("dijkstra-algorithm-animation.remove-node.tooltip");
+    disconnectNodeTooltip = _i18n.get("dijkstra-algorithm-animation.disconnect-node.tooltip");
+    clearSelectionTooltip = _i18n.get("dijkstra-algorithm-animation.clear-selection.tooltip");
+    startOrPauseTooltip = _i18n.get("dijkstra-algorithm-animation.start-or-pause.tooltip");
+    nextStepTooltip = _i18n.get("dijkstra-algorithm-animation.next-step.tooltip");
+    resetAlgorithmTooltip = _i18n.get("dijkstra-algorithm-animation.reset-algorithm.tooltip");
+    timeToNextStepTooltip = _i18n.get("dijkstra-algorithm-animation.time-to-next-step.tooltip");
+    saveModelTooltip = _i18n.get("dijkstra-algorithm-animation.save-model.tooltip");
+    restoreModelTooltip = _i18n.get("dijkstra-algorithm-animation.restore-model.tooltip");
+    clearModelTooltip = _i18n.get("dijkstra-algorithm-animation.clear-model.tooltip");
   }
 
   /// Get the default height of the canvas.
@@ -211,6 +244,8 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     if (hasModelToRestore) {
       restoreModel();
     }
+
+    _initTranslations();
   }
 
   @override
