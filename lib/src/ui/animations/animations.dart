@@ -104,7 +104,7 @@ class Animations {
       ID_COUNTER++,
       dijkstra.DijkstraAlgorithmAnimationNgFactory,
       "dijkstra-algorithm-animation",
-      "", // TODO Add preview image
+      "img/animation/preview/dijkstra-preview.png",
       "dijkstra",
     ),
   ];
