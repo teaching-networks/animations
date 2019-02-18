@@ -12,6 +12,7 @@
 	"cancel": "Abbrechen",
 	"create": "Erstellen",
 	"update": "Aktualisieren",
+	"ok": "OK",
 	"goto-animation": "Ansehen",
 	"fullscreen": "Vollbild",
 	"logged-in-as": "Angemeldet als",
@@ -216,6 +217,8 @@
 	"dijkstra-algorithm-animation.table.predecessors": "Vorgänger",
 	"dijkstra-algorithm-animation.dialog.edit-weight": "Gewicht editieren",
 	"dijkstra-algorithm-animation.dialog.remove-connection": "Verbindung löschen",
+	"dijkstra-algorithm-animation.dialog.remove-connection.security-question": "Sind Sie sicher? (Erneut klicken)",
 	"dijkstra-algorithm-animation.mode": "Modus",
-	"dijkstra-algorithm-animation.help-label": "Benutze die `Strg` Taste oder klicke auf den 'Modus' Knopf um in den 'Erstellen' Modus zu wechseln. Im 'Erstellen' Modus kannst du auf einen leeren Bereich klicken um neue Knoten zu erstellen. Des Weiteren kannst du zwischen Knoten eine Verbindung ziehen. Im 'Normalen' Modus kannst du schließlich die Knoten bewegen, indem du sie mit der Maus ziehst. Wenn du fertig bist mit der Modellierung, kannst du auf den 'Start' Knopf drücken um die Animation zu starten."
+	"dijkstra-algorithm-animation.help": "Hilfe",
+	"dijkstra-algorithm-animation.help-label": "Benutze die `Strg` Taste oder klicke auf den 'Modus' Knopf um in den 'Erstellen' Modus zu wechseln. Im 'Erstellen' Modus kannst du auf einen leeren Bereich klicken um neue Knoten zu erstellen. Des Weiteren kannst du zwischen Knoten eine Verbindung ziehen. Im 'Normalen' Modus kannst du schließlich die Knoten bewegen, indem du sie mit der Maus ziehst und Knoten selektieren um die rechts aufgelisteten Aktionen auszuführen. Um Verbindungsgewichte zu editieren musst du auf diese klicken im 'Normalen' Modus. Wenn du fertig bist mit der Modellierung, kannst du auf den 'Start' Knopf drücken um die Animation zu starten."
 }

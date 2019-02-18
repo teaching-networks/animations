@@ -116,6 +116,12 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Whether to show the input dialog for new weights.
   bool _showInputDialog = false;
 
+  /// Whether to show the connection deletion security question.
+  bool _showDeleteConnectionSecurityQuestion = false;
+
+  /// Whether to show the help dialog.
+  bool _showHelpDialog = false;
+
   StreamSubscription<DijkstraNodeConnection> _showInputDialogStreamSubscription;
 
   /// Currently editing node connection.
@@ -192,11 +198,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
   }
 
   /// Get the default height of the canvas.
-  int get canvasHeight => 500;
+  int get canvasHeight => 600;
 
   bool get showInputDialog => _showInputDialog;
 
-  set showInputDialog(bool value) {
+  void set showInputDialog(bool value) {
     _showInputDialog = value;
 
     if (value) {
@@ -205,7 +211,26 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       if (inputField != null && inputField is TextInputElement) {
         inputField.setSelectionRange(0, inputField.text.length);
       }
+    } else {
+      // Reset the dialog.
+      showDeleteConnectionSecurityQuestion = false;
     }
+  }
+
+  /// Whether the help dialog is shown.
+  bool get showHelpDialog => _showHelpDialog;
+
+  /// Set whether to show the help dialog.
+  void set showHelpDialog(bool value) {
+    _showHelpDialog = value;
+  }
+
+  /// Whether the delete connection security question is shown.
+  bool get showDeleteConnectionSecurityQuestion => _showDeleteConnectionSecurityQuestion;
+
+  /// Set whether to show the delete connection security question.
+  void set showDeleteConnectionSecurityQuestion(bool value) {
+    _showDeleteConnectionSecurityQuestion = value;
   }
 
   /// The dijkstra start node name
@@ -625,6 +650,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
 
   /// In case the remove button has been clicked within the input dialog.
   void onInputDialogRemoveClicked() {
+    if (!_showDeleteConnectionSecurityQuestion) {
+      _showDeleteConnectionSecurityQuestion = true;
+      return;
+    }
+
     if (_currentlyEditingConnection != null) {
       _currentlyEditingConnection.from.disconnect(_currentlyEditingConnection.to);
 
