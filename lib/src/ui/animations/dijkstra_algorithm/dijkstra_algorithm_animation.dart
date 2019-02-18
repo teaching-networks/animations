@@ -765,8 +765,6 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
 
     _dijkstra.nextStep();
-
-    // TODO cancel a running animation.
   }
 
   /// Whether the algorithm finished.

@@ -7,6 +7,7 @@
 
 ### 1.5.0
 - Added Dijkstra Shortest Path animation
+- Some minor bugs were fixed
 
 #### 1.4.1
 - pause button added to the CSMA/CD animation
