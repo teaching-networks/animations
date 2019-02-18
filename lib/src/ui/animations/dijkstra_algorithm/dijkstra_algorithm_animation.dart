@@ -714,6 +714,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
       _nextStepSubscription = null;
     } else {
       if (_dijkstra.isFinished) {
+        if (_startNode == null) {
+          _startNode = _nodes.first;
+          _startNode.isStartNode = true;
+        }
+
         _dijkstra.initialize(_startNode, _nodes);
       }
 
@@ -751,6 +756,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDe
     }
 
     if (isFinished) {
+      if (_startNode == null) {
+        _startNode = _nodes.first;
+        _startNode.isStartNode = true;
+      }
+
       _dijkstra.initialize(_startNode, _nodes);
     }
 
