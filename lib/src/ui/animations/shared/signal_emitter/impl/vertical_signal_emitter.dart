@@ -2,23 +2,23 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/signal_emitter.dart';
+import 'package:hm_animations/src/ui/animations/shared/signal_emitter/signal_emitter.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
-/// Signal emitter emitting horizontally.
-class HorizontalSignalEmitter extends SignalEmitter {
+/// Signal emitter emitting signal vertically.
+class VerticalSignalEmitter extends SignalEmitter {
   /// Color of the signal.
-  Color color = Colors.CORAL;
+  Color color;
 
   /// Create signal emitter.
-  HorizontalSignalEmitter({
+  VerticalSignalEmitter({
     @required double start,
     @required Duration signalDuration,
     @required double propagationSpeed,
-    this.color,
+    this.color = Colors.CORAL,
     Function onEnd,
     RangeListener listen,
   }) : super(
@@ -35,10 +35,10 @@ class HorizontalSignalEmitter extends SignalEmitter {
 
     setFillColor(context, color);
 
-    double x = range.item1 * rect.width;
-    double y = range.item2 * rect.width;
+    double x = range.item1 * rect.height;
+    double y = range.item2 * rect.height;
 
-    context.fillRect(rect.left + x, rect.top, y - x, rect.height);
+    context.fillRect(rect.left, rect.top + x, rect.width, y - x);
 
     context.restore();
   }

@@ -4,9 +4,9 @@ import 'dart:math';
 
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
+import 'package:hm_animations/src/ui/animations/shared/signal_emitter/impl/vertical_signal_emitter.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
