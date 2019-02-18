@@ -2,7 +2,7 @@
 
 <dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
 
-<div class="centered-panel info-box">
+<div class="centered-panel info-box" *ngIf="isLoading || notVisible || isError">
 	<material-spinner *ngIf="isLoading"></material-spinner>
 	<div *ngIf="notVisible">
 		{{ "animation-not-visible" | i18n }}

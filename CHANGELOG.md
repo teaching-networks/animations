@@ -5,6 +5,10 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 1.5.0
+- Added Dijkstra Shortest Path animation
+- Some minor bugs were fixed
+
 #### 1.4.1
 - pause button added to the CSMA/CD animation
 
