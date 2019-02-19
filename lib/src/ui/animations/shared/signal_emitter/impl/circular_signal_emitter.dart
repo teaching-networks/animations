@@ -15,10 +15,17 @@ class CircularSignalEmitter extends SignalEmitter {
   /// The default propagation speed in case none is provided.
   static const double _defaultPropagationSpeed = 0.25;
 
+  /// The default color in case none is provided.
+  static const Color _defaultColor = Colors.BLACK;
+
+  /// The color of the signal.
+  final Color color;
+
   /// Create signal emitter.
   CircularSignalEmitter({
     Duration signalDuration = _defaultSignalDuration,
     double propagationSpeed = _defaultPropagationSpeed,
+    this.color = _defaultColor,
   }) : super(
           start: 0.0,
           signalDuration: signalDuration,
@@ -36,8 +43,8 @@ class CircularSignalEmitter extends SignalEmitter {
     final gradient = context.createRadialGradient(0.0, 0.0, 0.0, 0.0, 0.0, radius);
     gradient.addColorStop(0.0, "transparent");
     gradient.addColorStop(range.item1, "transparent");
-    gradient.addColorStop(range.item1, "red");
-    gradient.addColorStop(range.item2, "red");
+    gradient.addColorStop(range.item1, color.toCSSColorString());
+    gradient.addColorStop(range.item2, color.toCSSColorString());
     gradient.addColorStop(range.item2, "transparent");
     gradient.addColorStop(1.0, "transparent");
     context.fillStyle = gradient;

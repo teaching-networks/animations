@@ -8,6 +8,8 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/shared/signal_emitter/impl/circular_signal_emitter.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// Animation showing the hidden node problem (RTS/CTS).
 @Component(
@@ -30,7 +32,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation implements OnInit, OnDe
   /// Service to get translations from.
   final I18nService _i18n;
 
-  CircularSignalEmitter _test = CircularSignalEmitter();
+  CircularSignalEmitter _test = CircularSignalEmitter(color: Color.opacity(Colors.CORAL, 0.5));
+  CircularSignalEmitter _test2 = CircularSignalEmitter(color: Color.opacity(Colors.CORAL, 0.5));
 
   /// Create animation.
   HiddenNodeProblemAnimation(this._i18n);
@@ -49,6 +52,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation implements OnInit, OnDe
 
     double radius = 200.0;
     _test.render(context, Rectangle<double>(size.width / 2, size.height / 2, radius, radius), timestamp);
+    _test2.render(context, Rectangle<double>(size.width / 2 - 100, size.height / 2 - 100, radius, radius), timestamp);
   }
 
   /// Get the height of the canvas.
