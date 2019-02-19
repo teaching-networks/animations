@@ -13,7 +13,12 @@ import 'package:hm_animations/src/util/size.dart';
  * which leads to unsharp graphics. To fix this the canvas component utilizes the window.deviceAspectRatio property
  * to properly scale the canvas content while setting the width and height css properties to the unscaled width and height.
  */
-@Component(selector: "canvas-comp", templateUrl: "canvas_component.html", styleUrls: const ["canvas_component.css"], directives: const [coreDirectives])
+@Component(
+  selector: "canvas-comp",
+  templateUrl: "canvas_component.html",
+  styleUrls: const ["canvas_component.css"],
+  directives: const [coreDirectives],
+)
 class CanvasComponent implements OnInit, OnDestroy {
   @ViewChild("canvasWrapper", read: HtmlElement)
   HtmlElement canvasWrapper;
@@ -269,5 +274,4 @@ class CanvasComponent implements OnInit, OnDestroy {
 
     return point;
   }
-
 }

@@ -16,6 +16,12 @@ class WirelessNode extends CanvasDrawable {
   /// The ratio of the nodes range to its node circle size.
   static const double _rangeToNodeCircleRatio = 10.0;
 
+  /// The ratio of the nodes range to its node hover circle size.
+  static const double rangeToHoverCircleRatio = _rangeToNodeCircleRatio / 2;
+
+  /// Color shown as hover circle.
+  static const Color _hoverColor = Color.rgba(100, 100, 100, 0.2);
+
   /// Name of the node to display.
   final String nodeName;
 
@@ -31,6 +37,12 @@ class WirelessNode extends CanvasDrawable {
 
   /// Signal emitter currently displaying a signal.
   CircularSignalEmitter _signalEmitter;
+
+  /// The last rendered center point.
+  Point<double> _lastRenderedCenter;
+
+  /// Whether the node is currently hovered.
+  bool _isHovered = false;
 
   /// Create node.
   WirelessNode({
@@ -59,6 +71,14 @@ class WirelessNode extends CanvasDrawable {
     context.arc(0.0, 0.0, radius, 0, 2 * pi);
     context.stroke();
 
+    if (_isHovered) {
+      // Draw hover circle
+      setFillColor(context, _hoverColor);
+      context.beginPath();
+      context.arc(0.0, 0.0, radius / rangeToHoverCircleRatio, 0, 2 * pi);
+      context.fill();
+    }
+
     // Draw node circle
     setFillColor(context, nodeCircleColor);
     context.beginPath();
@@ -66,12 +86,14 @@ class WirelessNode extends CanvasDrawable {
     context.fill();
 
     // Draw node name
-    setFillColor(context, Color.brighten(nodeCircleColor, 0.5));
+    setFillColor(context, Color.brighten(nodeCircleColor, 0.7));
     context.textAlign = "center";
     context.textBaseline = "middle";
     context.fillText(nodeName, 0.0, 0.0);
 
     context.restore();
+
+    _lastRenderedCenter = Point<double>(rect.left, rect.top);
   }
 
   /// Emit signal with the passed [duration] and [color].
@@ -82,4 +104,13 @@ class WirelessNode extends CanvasDrawable {
       color: color,
     );
   }
+
+  /// Get the distance from the passed [pos] to the center of the last rendered wireless node or null if not yet rendered.
+  double distanceFromCenter(Point<double> pos) => _lastRenderedCenter != null ? _lastRenderedCenter.distanceTo(pos) : null;
+
+  /// Set whether the node is hovered.
+  void set hovered(bool value) => _isHovered = value;
+
+  /// Get whether the node is currently hovered.
+  bool get hovered => _isHovered;
 }

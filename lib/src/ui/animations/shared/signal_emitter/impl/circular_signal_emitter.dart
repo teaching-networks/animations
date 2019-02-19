@@ -15,18 +15,29 @@ class CircularSignalEmitter extends SignalEmitter {
   /// The default propagation speed in case none is provided.
   static const double _defaultPropagationSpeed = 0.25;
 
+  /// Default opacity at the border of the emitted signal.
+  static const double _defaultEndOpacity = 0.2;
+
   /// The default color in case none is provided.
   static const Color _defaultColor = Colors.BLACK;
 
   /// The color of the signal.
   final Color color;
 
+  /// Opacity of the color at the border of the emitted signal.
+  final double endOpacity;
+
+  /// End color is the color at the border of the signal emitter.
+  final Color _endColor;
+
   /// Create signal emitter.
   CircularSignalEmitter({
     Duration signalDuration = _defaultSignalDuration,
     double propagationSpeed = _defaultPropagationSpeed,
     this.color = _defaultColor,
-  }) : super(
+    this.endOpacity = _defaultEndOpacity,
+  })  : _endColor = Color.opacity(color, endOpacity),
+        super(
           start: 0.0,
           signalDuration: signalDuration,
           propagationSpeed: propagationSpeed,
@@ -44,7 +55,7 @@ class CircularSignalEmitter extends SignalEmitter {
     gradient.addColorStop(0.0, "transparent");
     gradient.addColorStop(range.item1, "transparent");
     gradient.addColorStop(range.item1, color.toCSSColorString());
-    gradient.addColorStop(range.item2, color.toCSSColorString());
+    gradient.addColorStop(range.item2, _endColor.toCSSColorString());
     gradient.addColorStop(range.item2, "transparent");
     gradient.addColorStop(1.0, "transparent");
     context.fillStyle = gradient;
