@@ -17,7 +17,7 @@ typedef double Modifier(double p);
 /// It now will take the lazy progress a second to change its progress to 1.0.
 ///
 /// This may be tremendously useful with animations.
-class LazyProgress extends CanvasPausableMixin implements Progress {
+class LazyProgress with CanvasPausableMixin implements Progress {
   /// Progress in range [0.0; 1.0]
   double _progress;
 

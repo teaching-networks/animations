@@ -224,5 +224,8 @@
 	"hidden-node-problem-animation.name": "Hidden Node Problem (RTS/CTS)",
 	"hidden-node-problem-animation.short-description": "No description yet",
 	"hidden-node-problem-animation.description": "No description yet",
-	"hidden-node-problem-animation.credits": "No credits yet"
+	"hidden-node-problem-animation.credits": "No credits yet",
+	"hidden-node-problem-animation.status-bar-label": "Status",
+	"hidden-node-problem-animation.value-bar-label": "Client",
+	"hidden-node-problem-animation.access-point": "Zugriffspunkt"
 }

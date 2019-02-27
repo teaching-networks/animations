@@ -36,11 +36,15 @@ class CircularSignalEmitter extends SignalEmitter {
     double propagationSpeed = _defaultPropagationSpeed,
     this.color = _defaultColor,
     this.endOpacity = _defaultEndOpacity,
+    RangeListener listener,
+    Function onEnd,
   })  : _endColor = Color.opacity(color, endOpacity),
         super(
           start: 0.0,
           signalDuration: signalDuration,
           propagationSpeed: propagationSpeed,
+          listen: listener,
+          onEnd: onEnd,
         );
 
   @override

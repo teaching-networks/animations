@@ -7,9 +7,12 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
+import 'package:tuple/tuple.dart';
+
+typedef void NodeSignalRangeListener<T>(Tuple2<double, double> range, T data);
 
 /// A node capable of emitting and receiving signals wirelessly.
-class WirelessNode extends CanvasDrawable {
+class WirelessNode<T> extends CanvasDrawable {
   /// Signal emission propagation speed of the underlying signal emitter.
   static const double _signalEmissionPropagationSpeed = 300000000.0;
 
@@ -35,6 +38,9 @@ class WirelessNode extends CanvasDrawable {
   /// The color of the node circle.
   final Color nodeCircleColor;
 
+  /// Range listener to listen for signal emission range changes.
+  final NodeSignalRangeListener<T> rangeListener;
+
   /// Signal emitter currently displaying a signal.
   CircularSignalEmitter _signalEmitter;
 
@@ -44,25 +50,37 @@ class WirelessNode extends CanvasDrawable {
   /// Whether the node is currently hovered.
   bool _isHovered = false;
 
+  /// Coordinates of the point (relative).
+  Point<double> _coordinates;
+
   /// Create node.
   WirelessNode({
     @required this.nodeName,
+    @required Point<double> initialCoordinates,
     this.scale = 100000000,
     this.rangeCircleColor = Colors.BLACK,
     this.nodeCircleColor = Colors.SLATE_GREY,
-  });
+    this.rangeListener,
+  }) : _coordinates = initialCoordinates;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
     context.save();
 
-    if (_signalEmitter != null) {
-      _signalEmitter.render(context, rect, timestamp);
-    }
-
-    context.translate(rect.left, rect.top);
+    double canvasWidth = rect.left;
+    double canvasHeight = rect.top;
 
     double radius = min(rect.width, rect.height);
+
+    double xPos = canvasWidth * _coordinates.x;
+    double yPos = canvasHeight * _coordinates.y;
+
+    context.translate(xPos, yPos);
+
+    // Render signal emitter in the background.
+    if (_signalEmitter != null) {
+      _signalEmitter.render(context, Rectangle<double>(0.0, 0.0, rect.width, rect.height), timestamp);
+    }
 
     // Draw range circle
     setStrokeColor(context, rangeCircleColor);
@@ -93,15 +111,32 @@ class WirelessNode extends CanvasDrawable {
 
     context.restore();
 
-    _lastRenderedCenter = Point<double>(rect.left, rect.top);
+    _lastRenderedCenter = Point<double>(xPos, yPos);
   }
 
   /// Emit signal with the passed [duration] and [color].
-  void emitSignal(Duration duration, Color color) {
+  void emitSignal(
+    Duration duration,
+    Color color, {
+    T data,
+    Function onEnd,
+  }) {
     _signalEmitter = CircularSignalEmitter(
       signalDuration: duration,
       propagationSpeed: _signalEmissionPropagationSpeed / scale,
       color: color,
+      listener: (_, range) {
+        if (rangeListener != null) {
+          rangeListener(range, data);
+        }
+      },
+      onEnd: () {
+        _signalEmitter = null;
+
+        if (onEnd != null) {
+          onEnd();
+        }
+      },
     );
   }
 
@@ -113,4 +148,14 @@ class WirelessNode extends CanvasDrawable {
 
   /// Get whether the node is currently hovered.
   bool get hovered => _isHovered;
+
+  /// Get the nodes coordinates.
+  Point<double> get coordinates => _coordinates;
+
+  /// Switch pause of the signal emitter.
+  void switchPause() {
+    if (_signalEmitter != null) {
+      _signalEmitter.switchPause();
+    }
+  }
 }
