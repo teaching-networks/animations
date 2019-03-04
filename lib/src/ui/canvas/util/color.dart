@@ -4,7 +4,6 @@ import 'dart:math';
  * Color utility class.
  */
 class Color {
-
   /// Random number generator for random color constructor.
   static Random rng = new Random();
 
@@ -40,7 +39,11 @@ class Color {
   const Color.rgba(this.red, this.green, this.blue, this.alpha);
 
   /// Create new random color.
-  Color.random() : red = rng.nextInt(255), green = rng.nextInt(255), blue = rng.nextInt(255), alpha = 1.0;
+  Color.random()
+      : red = rng.nextInt(255),
+        green = rng.nextInt(255),
+        blue = rng.nextInt(255),
+        alpha = 1.0;
 
   static Color opacity(Color color, double alpha) {
     return new Color.rgba(color.red, color.green, color.blue, alpha);
@@ -58,4 +61,11 @@ class Color {
 
   String toCSSColorString() => "rgba(${red},${green},${blue},${alpha})";
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Color && runtimeType == other.runtimeType && red == other.red && green == other.green && blue == other.blue && alpha == other.alpha;
+
+  @override
+  int get hashCode => red.hashCode ^ green.hashCode ^ blue.hashCode ^ alpha.hashCode;
 }

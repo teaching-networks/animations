@@ -1,5 +1,7 @@
+import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/medium_status_type.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/node/wireless_node.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/signal_type.dart';
 import 'package:hm_animations/src/ui/animations/shared/medium_allocation_chart/medium_allocation_chart.dart';
@@ -22,8 +24,19 @@ class HiddenNodeProblemClient {
   /// Number of signals to ignore due to collisions.
   int _signalsToIgnore = 0;
 
+  SignalType _backoffSignalType;
+  SignalType _backoffAnticipatedSignalType;
+
+  /// Amount of milliseconds to wait in case of backoff or null if no backoff.
+  int _backoffMilliseconds;
+
   /// Signal type the client awaits as answer to a previously sent signal.
   SignalType _anticipatedSignalType;
+
+  MediumStatusType _mediumStatusType = MediumStatusType.FREE;
+
+  /// Since when the channel is idle.
+  num _channelIdleSince;
 
   /// Create client.
   HiddenNodeProblemClient({
@@ -43,6 +56,30 @@ class HiddenNodeProblemClient {
 
   void set signalsToIgnore(int value) => _signalsToIgnore = value;
 
+  int get backoffMilliseconds => _backoffMilliseconds;
+
+  set backoffMilliseconds(int value) {
+    _backoffMilliseconds = value;
+  }
+
+  MediumStatusType get mediumStatusType => _mediumStatusType;
+
+  set mediumStatusType(MediumStatusType value) {
+    _mediumStatusType = value;
+  }
+
+  num get channelIdleSince => _channelIdleSince;
+
+  set channelIdleSince(num value) {
+    _channelIdleSince = value;
+  }
+
+  SignalType get backoffSignalType => _backoffSignalType;
+
+  set backoffSignalType(SignalType value) {
+    _backoffSignalType = value;
+  }
+
   /// Whether from the nodes perception the channel is idle.
   bool isChannelIdle() => _signalCount == 0;
 
@@ -50,12 +87,18 @@ class HiddenNodeProblemClient {
   void setChannelIdle(bool isIdle) {
     if (isIdle) {
       _signalCount = max(0, _signalCount - 1);
+
+      if (isChannelIdle()) {
+        _channelIdleSince = window.performance.now();
+      }
     } else {
       _signalCount++;
 
       if (hasCollision) {
         _signalsToIgnore = max(_signalsToIgnore, _signalCount);
       }
+
+      _channelIdleSince = null;
     }
   }
 
@@ -64,4 +107,10 @@ class HiddenNodeProblemClient {
 
   /// Set whether the channel is visually idle.
   bool setChannelVisuallyIdle(bool isIdle) => _channelIdleVisually = isIdle;
+
+  SignalType get backoffAnticipatedSignalType => _backoffAnticipatedSignalType;
+
+  set backoffAnticipatedSignalType(SignalType value) {
+    _backoffAnticipatedSignalType = value;
+  }
 }

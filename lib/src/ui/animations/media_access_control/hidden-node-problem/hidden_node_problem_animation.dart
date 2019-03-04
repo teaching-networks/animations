@@ -58,8 +58,14 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Delay due to an interframe spacing.
   static const Duration _interframeSpacingDelay = Duration(milliseconds: 100);
 
-  /// The duration the clients will wait after not receiving an answer for their signal.
-  static const Duration _timeoutDuration = Duration(seconds: 2);
+  /// The maximum backoff duration.
+  static const Duration _maxBackoffDuration = Duration(seconds: 2);
+
+  /// The minimum backoff duration.
+  static const Duration _minBackoffDuration = Duration(milliseconds: 200);
+
+  /// Random number generator.
+  static Random _rng = Random();
 
   /// Service to get translations from.
   final I18nService _i18n;
@@ -196,6 +202,37 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
     if (!isPaused) {
       _executeScheduledFunctions(timestamp);
+      _checkForIdleClientChannels(timestamp);
+    }
+  }
+
+  /// Check for all idle client channels.
+  void _checkForIdleClientChannels(num timestamp) {
+    _checkForIdleClientChannel(_accessPoint, timestamp);
+    for (final client in _clients) {
+      _checkForIdleClientChannel(client, timestamp);
+    }
+  }
+
+  void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
+    if (client.isChannelIdle() && client.channelIdleSince != null) {
+      if (client.channelIdleSince <= timestamp - _interframeSpacingDelay.inMilliseconds) {
+        // Check for backoff to make
+        if (client.backoffMilliseconds != null) {
+          int backoffMs = client.backoffMilliseconds;
+          SignalType type = client.backoffSignalType;
+          SignalType answerType = client.backoffAnticipatedSignalType;
+
+          client.backoffMilliseconds = null;
+          client.backoffSignalType = null;
+          client.backoffAnticipatedSignalType = null;
+
+          client.chart.setValueColor(Colors.LIGHTGREY);
+          _schedule(timestamp + backoffMs, () {
+            _emitSignalFrom(client, type, answerSignalType: answerType);
+          });
+        }
+      }
     }
   }
 
@@ -261,7 +298,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     Color color = _getColorForSignalType(type);
     List<HiddenNodeProblemClient> nodesInRange = _getAllNodesInRangeOf(client);
 
-    if (client.isChannelIdle()) {
+    if (client.isChannelIdle() && client.mediumStatusType != MediumStatusType.NAV) {
       // Wait for the interframe spacing delay and then try again!
       _schedule(window.performance.now() + _interframeSpacingDelay.inMilliseconds, () {
         // Recheck if channel still idle.
@@ -273,12 +310,17 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         client.setChannelIdle(false);
 
         client.chart.setValueColor(color);
+        client.mediumStatusType = MediumStatusType.BUSY;
         client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.BUSY));
 
         // Set all nodes in range to busy.
         for (final clientInRange in nodesInRange) {
           clientInRange.setChannelIdle(false);
-          clientInRange.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.BUSY));
+
+          if (clientInRange.mediumStatusType != MediumStatusType.NAV) {
+            clientInRange.mediumStatusType = MediumStatusType.BUSY;
+            clientInRange.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.BUSY));
+          }
         }
 
         Duration signalDuration = _getDurationForSignalType(type);
@@ -292,10 +334,14 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         _schedule(window.performance.now() + signalDuration.inMilliseconds, () {
           // Reset chart and client
           client.setChannelIdle(true);
+          client.mediumStatusType = MediumStatusType.FREE;
           client.chart.setValueColor(Colors.WHITE);
+
           if (client == _accessPoint) {
+            client.mediumStatusType = MediumStatusType.FREE;
             client.chart.setStateColor(Colors.WHITE);
           } else {
+            client.mediumStatusType = MediumStatusType.FREE;
             client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
           }
 
@@ -303,9 +349,13 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
           for (final anotherClient in nodesInRange) {
             anotherClient.setChannelIdle(true);
             if (anotherClient == _accessPoint) {
+              anotherClient.mediumStatusType = MediumStatusType.FREE;
               anotherClient.chart.setStateColor(Colors.WHITE);
             } else {
-              anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+              if (anotherClient.mediumStatusType != MediumStatusType.NAV) {
+                anotherClient.mediumStatusType = MediumStatusType.FREE;
+                anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+              }
             }
           }
 
@@ -320,9 +370,9 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
           if (answerSignalType != null) {
             // Schedule timeout for the signal.
-            _schedule(window.performance.now() + _timeoutDuration.inMilliseconds, () {
-              if (client.anticipatesSignal) {
-                _onTimeoutAtNode(client, type);
+            _schedule(window.performance.now() + _getDurationForSignalType(answerSignalType).inMilliseconds * 2, () {
+              if (client.anticipatesSignal && client.anticipatedSignalType == answerSignalType) {
+                _onTimeoutAtNode(client, type, client.anticipatedSignalType);
               }
             });
           }
@@ -334,13 +384,21 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// What should happen in case a timeout happened on the passed [client] node.
-  void _onTimeoutAtNode(HiddenNodeProblemClient client, SignalType type) {
+  void _onTimeoutAtNode(HiddenNodeProblemClient client, SignalType type, SignalType answerType) {
     print("Timeout happened at client ${client.wirelessNode.nodeName}");
+
+    _backoff(client, type);
   }
 
   /// Backoff the passed [client].
   void _backoff(HiddenNodeProblemClient client, SignalType type) {
-    print("Now ${client.wirelessNode.nodeName} should backoff!"); // TODO
+    client.backoffMilliseconds = max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds).round());
+    client.backoffSignalType = type;
+    client.backoffAnticipatedSignalType = client.anticipatedSignalType;
+
+    client.anticipatedSignalType = null; // Clear anticipated signal
+
+    print("Now ${client.wirelessNode.nodeName} should backoff ${client.backoffMilliseconds} ms after the channel is free the next time!");
   }
 
   /// Schedule a function to be executed later.
@@ -463,7 +521,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
 
     if (type == SignalType.RTS) {
-      _emitSignalFrom(_accessPoint, SignalType.CTS);
+      _emitSignalFrom(_accessPoint, SignalType.CTS, answerSignalType: SignalType.DATA);
     } else if (type == SignalType.DATA) {
       _emitSignalFrom(_accessPoint, SignalType.ACK);
     }
@@ -473,27 +531,40 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   void _onReceivedAtClient(HiddenNodeProblemClient client, SignalType type) {
     print("Received with $type at client");
 
+    final SignalType anticipated = client.anticipatedSignalType;
+    client.anticipatedSignalType = null;
+
     // Ignore collided signals.
     if (client.signalsToIgnore > 0) {
       client.signalsToIgnore--;
       return;
     }
 
-    final SignalType anticipated = client.anticipatedSignalType;
-
     if (anticipated != null && anticipated == type) {
-      client.anticipatedSignalType = null;
-
       if (type == SignalType.CTS) {
-        _emitSignalFrom(client, SignalType.DATA);
+        _emitSignalFrom(client, SignalType.DATA, answerSignalType: SignalType.ACK);
       } else if (type == SignalType.ACK) {
+        client.mediumStatusType = MediumStatusType.FREE;
         client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
       }
     } else {
       if (type == SignalType.CTS) {
+        client.mediumStatusType = MediumStatusType.NAV;
         client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.NAV));
+        _schedule(window.performance.now() + _getDurationForSignalType(SignalType.DATA).inMilliseconds * 1.15, () {
+          if (client.isChannelIdle()) {
+            client.mediumStatusType = MediumStatusType.FREE;
+            client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+          } else {
+            client.mediumStatusType = MediumStatusType.BUSY;
+            client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.BUSY));
+          }
+        });
       } else if (type == SignalType.ACK) {
-        client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+        if (client.mediumStatusType != MediumStatusType.NAV) {
+          client.mediumStatusType = MediumStatusType.FREE;
+          client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+        }
       }
     }
   }
@@ -558,6 +629,15 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     // Update timestamps in scheduled functions.
     for (_ScheduledFunction function in _scheduled) {
       function.atTimestamp += timestampDifference;
+    }
+
+    if (_accessPoint.isChannelIdle() && _accessPoint.channelIdleSince != null) {
+      _accessPoint.channelIdleSince += timestampDifference;
+    }
+    for (final client in _clients) {
+      if (client.isChannelIdle() && client.channelIdleSince != null) {
+        client.channelIdleSince += timestampDifference;
+      }
     }
   }
 
