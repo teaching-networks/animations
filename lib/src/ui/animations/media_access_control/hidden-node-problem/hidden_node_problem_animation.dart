@@ -215,7 +215,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
-    if (client.isChannelIdle() && client.channelIdleSince != null) {
+    if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV) {
       if (client.channelIdleSince <= timestamp - _interframeSpacingDelay.inMilliseconds) {
         // Check for backoff to make
         if (client.backoffMilliseconds != null) {
@@ -228,7 +228,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
           client.backoffAnticipatedSignalType = null;
 
           client.chart.setValueColor(Colors.LIGHTGREY);
-          _schedule(timestamp + backoffMs, () {
+          client.scheduledBackoffEndId = _schedule(timestamp + backoffMs, () {
             _emitSignalFrom(client, type, answerSignalType: answerType);
           });
         }
@@ -387,7 +387,9 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   void _onTimeoutAtNode(HiddenNodeProblemClient client, SignalType type, SignalType answerType) {
     print("Timeout happened at client ${client.wirelessNode.nodeName}");
 
-    _backoff(client, type);
+    if (client != _accessPoint) {
+      _backoff(client, type);
+    }
   }
 
   /// Backoff the passed [client].
@@ -401,14 +403,23 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     print("Now ${client.wirelessNode.nodeName} should backoff ${client.backoffMilliseconds} ms after the channel is free the next time!");
   }
 
-  /// Schedule a function to be executed later.
-  void _schedule(num atTimestamp, Function toExecute) {
-    _scheduled.add(
-      _ScheduledFunction(
-        atTimestamp: isPaused ? pauseTimestamp : atTimestamp,
-        toExecute: toExecute,
-      ),
+  /// Schedule a function to be executed later and return the id of the scheduled function.
+  int _schedule(num atTimestamp, Function toExecute) {
+    final function = _ScheduledFunction(
+      atTimestamp: isPaused ? pauseTimestamp : atTimestamp,
+      toExecute: toExecute,
     );
+
+    _scheduled.add(function);
+
+    return function.id;
+  }
+
+  /// Cancel a scheduled function by its [id] and return milliseconds left.
+  int _cancelScheduled(int id) {
+    _ScheduledFunction removed = _scheduled.removeAt(_scheduled.indexWhere((function) => function.id == id));
+
+    return removed.atTimestamp - window.performance.now();
   }
 
   /// Get all functions which are scheduled to be executed now (or in the past).

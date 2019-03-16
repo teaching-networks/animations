@@ -30,6 +30,9 @@ class HiddenNodeProblemClient {
   /// Amount of milliseconds to wait in case of backoff or null if no backoff.
   int _backoffMilliseconds;
 
+  /// Id of the scheduled backoff end.
+  int _scheduledBackoffEndId;
+
   /// Signal type the client awaits as answer to a previously sent signal.
   SignalType _anticipatedSignalType;
 
@@ -112,5 +115,11 @@ class HiddenNodeProblemClient {
 
   set backoffAnticipatedSignalType(SignalType value) {
     _backoffAnticipatedSignalType = value;
+  }
+
+  int get scheduledBackoffEndId => _scheduledBackoffEndId;
+
+  set scheduledBackoffEndId(int value) {
+    _scheduledBackoffEndId = value;
   }
 }
