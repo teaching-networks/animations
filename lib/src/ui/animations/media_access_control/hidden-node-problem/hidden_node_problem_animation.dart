@@ -57,13 +57,13 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   static const double _relativeRadiusSize = 0.25;
 
   /// Delay due to an interframe spacing.
-  static const Duration _interframeSpacingDelay = Duration(milliseconds: 100);
+  static const Duration _interframeSpacingDelay = Duration(milliseconds: 150);
 
   /// The maximum backoff duration.
   static const Duration _maxBackoffDuration = Duration(seconds: 2);
 
   /// The minimum backoff duration.
-  static const Duration _minBackoffDuration = Duration(milliseconds: 2000);
+  static const Duration _minBackoffDuration = Duration(milliseconds: 200);
 
   /// Random number generator.
   static Random _rng = Random();
@@ -278,10 +278,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
-    if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV && !client.inBackoff) {
+    if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV) {
       if (client.channelIdleSince <= timestamp - _interframeSpacingDelay.inMilliseconds) {
         // Check for backoff to make
-        if (client.backoffMilliseconds != null) {
+        if (client.backoffMilliseconds != null && !client.inBackoff) {
           int backoffMs = client.backoffMilliseconds;
           SignalType type = client.backoffSignalType;
           SignalType answerType = client.backoffAnticipatedSignalType;
@@ -291,6 +291,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
           client.chart.setValueColor(Colors.LIGHTGREY);
           client.scheduledBackoffEndId = _schedule(timestamp + backoffMs, () {
             client.scheduledBackoffEndId = null;
+            client.chart.setValueColor(Colors.WHITE);
             _emitSignalFrom(client, type, answerSignalType: answerType);
           });
         }
@@ -460,6 +461,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// Backoff the passed [client].
   void _backoff(HiddenNodeProblemClient client, SignalType type) {
+    if (client.inBackoff || client.backoffMilliseconds != null) {
+      return;
+    }
+
     client.backoffMilliseconds = max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds).round());
     client.backoffSignalType = type;
     client.backoffAnticipatedSignalType = client.anticipatedSignalType;
@@ -675,16 +680,15 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   Duration _getDurationForSignalType(SignalType type) {
-    /// TODO Scale by factor for controlling the animation speed.
     switch (type) {
       case SignalType.RTS:
-        return Duration(milliseconds: 400);
+        return Duration(milliseconds: 500);
       case SignalType.CTS:
-        return Duration(milliseconds: 400);
+        return Duration(milliseconds: 500);
       case SignalType.DATA:
-        return Duration(seconds: 3);
+        return Duration(seconds: 4);
       case SignalType.ACK:
-        return Duration(milliseconds: 400);
+        return Duration(milliseconds: 500);
       default:
         throw Exception("Unknown signal type");
     }
