@@ -63,7 +63,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   static const Duration _maxBackoffDuration = Duration(seconds: 2);
 
   /// The minimum backoff duration.
-  static const Duration _minBackoffDuration = Duration(milliseconds: 200);
+  static const Duration _minBackoffDuration = Duration(milliseconds: 2000);
 
   /// Random number generator.
   static Random _rng = Random();
@@ -104,7 +104,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   Message _signalRangeTooltipLabel;
 
   /// Scheduled functions which will be executed some time in the future.
-  List<_ScheduledFunction> _scheduled = List<_ScheduledFunction>();
+  List<_ScheduledFunction> _scheduled;
 
   /// Whether to show the help tooltip.
   bool _showHelpTooltips = true;
@@ -126,6 +126,17 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
     _initTranslations();
     _updateHelpTooltips();
+
+    reset();
+  }
+
+  /// Reset the animation.
+  void reset() {
+    _scheduled = List<_ScheduledFunction>();
+    _showHelpTooltips = true;
+    if (isPaused) {
+      switchPause(pauseAnimation: false);
+    }
 
     _accessPoint = HiddenNodeProblemClient(
       wirelessNode: WirelessNode<SignalType>(
@@ -267,7 +278,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
-    if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV) {
+    if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV && !client.inBackoff) {
       if (client.channelIdleSince <= timestamp - _interframeSpacingDelay.inMilliseconds) {
         // Check for backoff to make
         if (client.backoffMilliseconds != null) {
@@ -276,11 +287,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
           SignalType answerType = client.backoffAnticipatedSignalType;
 
           client.backoffMilliseconds = null;
-          client.backoffSignalType = null;
-          client.backoffAnticipatedSignalType = null;
 
           client.chart.setValueColor(Colors.LIGHTGREY);
           client.scheduledBackoffEndId = _schedule(timestamp + backoffMs, () {
+            client.scheduledBackoffEndId = null;
             _emitSignalFrom(client, type, answerSignalType: answerType);
           });
         }
@@ -472,7 +482,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// Cancel a scheduled function by its [id] and return milliseconds left.
-  int _cancelScheduled(int id) {
+  double _cancelScheduled(int id) {
     _ScheduledFunction removed = _scheduled.removeAt(_scheduled.indexWhere((function) => function.id == id));
 
     return removed.atTimestamp - window.performance.now();

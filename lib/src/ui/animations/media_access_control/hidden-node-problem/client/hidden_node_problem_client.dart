@@ -122,4 +122,6 @@ class HiddenNodeProblemClient {
   set scheduledBackoffEndId(int value) {
     _scheduledBackoffEndId = value;
   }
+
+  bool get inBackoff => _scheduledBackoffEndId != null;
 }
