@@ -33,6 +33,8 @@ class HiddenNodeProblemClient {
   /// Id of the scheduled backoff end.
   int _scheduledBackoffEndId;
 
+  int _numberOfCollisions = 0;
+
   /// Signal type the client awaits as answer to a previously sent signal.
   SignalType _anticipatedSignalType;
 
@@ -124,4 +126,10 @@ class HiddenNodeProblemClient {
   }
 
   bool get inBackoff => _scheduledBackoffEndId != null;
+
+  int get numberOfCollisions => _numberOfCollisions;
+
+  set numberOfCollisions(int value) {
+    _numberOfCollisions = value;
+  }
 }

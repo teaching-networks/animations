@@ -278,6 +278,14 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
+    if (!client.isChannelIdle() && client.inBackoff) {
+      // Pause backing off and continue after the channel is idle again.
+      double restMs = _cancelScheduled(client.scheduledBackoffEndId);
+      client.scheduledBackoffEndId = null;
+      client.backoffMilliseconds = restMs.toInt();
+      client.chart.setValueColor(Colors.WHITE);
+    }
+
     if (client.isChannelIdle() && client.channelIdleSince != null && client.mediumStatusType != MediumStatusType.NAV) {
       if (client.channelIdleSince <= timestamp - _interframeSpacingDelay.inMilliseconds) {
         // Check for backoff to make
@@ -461,11 +469,14 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// Backoff the passed [client].
   void _backoff(HiddenNodeProblemClient client, SignalType type) {
-    if (client.inBackoff || client.backoffMilliseconds != null) {
+    if (client == _accessPoint || client.inBackoff || client.backoffMilliseconds != null) {
       return;
     }
 
-    client.backoffMilliseconds = max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds).round());
+    client.numberOfCollisions++;
+
+    client.backoffMilliseconds =
+        max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds * client.numberOfCollisions).round());
     client.backoffSignalType = type;
     client.backoffAnticipatedSignalType = client.anticipatedSignalType;
 
@@ -628,6 +639,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
       } else if (type == SignalType.ACK) {
         client.mediumStatusType = MediumStatusType.FREE;
         client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+        client.numberOfCollisions = 0; // Reset number of collisions in case of successful transmission.
       }
     } else {
       if (type == SignalType.CTS) {
