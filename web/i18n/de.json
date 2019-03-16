@@ -221,11 +221,13 @@
 	"dijkstra-algorithm-animation.mode": "Modus",
 	"dijkstra-algorithm-animation.help": "Hilfe",
 	"dijkstra-algorithm-animation.help-label": "Benutze die `Strg` Taste oder klicke auf den 'Modus' Knopf um in den 'Erstellen' Modus zu wechseln. Im 'Erstellen' Modus kannst du auf einen leeren Bereich klicken um neue Knoten zu erstellen. Des Weiteren kannst du zwischen Knoten eine Verbindung ziehen. Im 'Normalen' Modus kannst du schließlich die Knoten bewegen, indem du sie mit der Maus ziehst und Knoten selektieren um die rechts aufgelisteten Aktionen auszuführen. Um Verbindungsgewichte zu editieren musst du auf diese klicken im 'Normalen' Modus. Wenn du fertig bist mit der Modellierung, kannst du auf den 'Start' Knopf drücken um die Animation zu starten.",
-	"hidden-node-problem-animation.name": "Hidden Node Problem (RTS/CTS)",
+	"hidden-node-problem-animation.name": "CSMA/CA",
 	"hidden-node-problem-animation.short-description": "No description yet",
 	"hidden-node-problem-animation.description": "No description yet",
 	"hidden-node-problem-animation.credits": "No credits yet",
 	"hidden-node-problem-animation.status-bar-label": "Status",
 	"hidden-node-problem-animation.value-bar-label": "Client",
-	"hidden-node-problem-animation.access-point": "Zugriffspunkt"
+	"hidden-node-problem-animation.access-point": "Zugriffspunkt",
+	"hidden-node-problem-animation.click-here-tooltip": "Hier klicken!",
+	"hidden-node-problem-animation.signal-range-tooltip": "Signal Reichweite"
 }

@@ -84,7 +84,7 @@ class WirelessNode<T> extends CanvasDrawable {
 
     // Draw range circle
     setStrokeColor(context, rangeCircleColor);
-    context.lineWidth = 2 * window.devicePixelRatio;
+    context.lineWidth = window.devicePixelRatio;
     context.beginPath();
     context.arc(0.0, 0.0, radius, 0, 2 * pi);
     context.stroke();

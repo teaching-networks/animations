@@ -220,11 +220,13 @@
 	"dijkstra-algorithm-animation.mode": "Mode",
 	"dijkstra-algorithm-animation.help": "Help",
 	"dijkstra-algorithm-animation.help-label": "Use the `Ctrl` key or click on the `Mode` button on the right side to switch into 'Create' mode where you can click here to add new nodes and drag arrows from one node to another. In 'Normal' mode you can move nodes and select them in order to apply the actions listed on the right side. In order to modify connection weights, just click on them in 'Normal' mode. Once you are done modelling your graph you can click on 'Play' to start the animation or just use the Arrow button to proceeed one step after another.",
-	"hidden-node-problem-animation.name": "Hidden Node Problem (RTS/CTS)",
+	"hidden-node-problem-animation.name": "CSMA/CA",
 	"hidden-node-problem-animation.short-description": "No description yet",
 	"hidden-node-problem-animation.description": "No description yet",
 	"hidden-node-problem-animation.credits": "No credits yet",
 	"hidden-node-problem-animation.status-bar-label": "Status",
 	"hidden-node-problem-animation.value-bar-label": "Client",
-	"hidden-node-problem-animation.access-point": "Access Point"
+	"hidden-node-problem-animation.access-point": "Access Point",
+	"hidden-node-problem-animation.click-here-tooltip": "Click here!",
+	"hidden-node-problem-animation.signal-range-tooltip": "Signal range"
 }

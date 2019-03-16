@@ -15,6 +15,7 @@ import 'package:hm_animations/src/ui/animations/shared/medium_allocation_chart/m
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
@@ -94,13 +95,22 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     "cursor": "default",
   };
 
-  LanguageChangedListener _languageChangedListener;
+  LanguageLoadedListener _languageChangedListener;
 
   Message _valueBarLabel;
   Message _statusBarLabel;
   Message _accessPointLabel;
+  Message _clickHereTooltipLabel;
+  Message _signalRangeTooltipLabel;
 
+  /// Scheduled functions which will be executed some time in the future.
   List<_ScheduledFunction> _scheduled = List<_ScheduledFunction>();
+
+  /// Whether to show the help tooltip.
+  bool _showHelpTooltips = true;
+
+  Bubble _clickHereTooltip;
+  Bubble _signalRangeTooltip;
 
   /// Create animation.
   HiddenNodeProblemAnimation(this._i18n, this.changeDetector);
@@ -108,17 +118,20 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   @override
   void ngOnInit() {
     _languageChangedListener = (_) {
+      _updateHelpTooltips();
+
       changeDetector.markForCheck(); // Update labels.
     };
-    this._i18n.addLanguageChangedListener(_languageChangedListener);
+    this._i18n.addLanguageLoadedListener(_languageChangedListener);
 
     _initTranslations();
+    _updateHelpTooltips();
 
     _accessPoint = HiddenNodeProblemClient(
       wirelessNode: WirelessNode<SignalType>(
         nodeName: "X",
         initialCoordinates: _accessPointCoordinates,
-        scale: 300000000,
+        scale: 100000000,
         nodeCircleColor: Colors.PINK_RED,
         rangeCircleColor: Colors.LIME,
       ),
@@ -143,7 +156,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "A",
           initialCoordinates: client1Pos,
-          scale: 300000000,
+          scale: 100000000,
           nodeCircleColor: Colors.BLUE_GRAY,
           rangeCircleColor: _rangeCircleColor,
         ),
@@ -153,8 +166,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "B",
           initialCoordinates: client2Pos,
-          scale: 300000000,
-          nodeCircleColor: Colors.GREY_GREEN,
+          scale: 100000000,
+          nodeCircleColor: Colors.CORAL,
           rangeCircleColor: _rangeCircleColor,
         ),
         chart: MediumAllocationChart(id: "B", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
@@ -163,7 +176,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "C",
           initialCoordinates: client3Pos,
-          scale: 300000000,
+          scale: 100000000,
           nodeCircleColor: Colors.BORDEAUX,
           rangeCircleColor: _rangeCircleColor,
         ),
@@ -177,16 +190,24 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
   }
 
+  /// Update the help tooltip.
+  void _updateHelpTooltips() {
+    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel.toString().length);
+    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel.toString().length);
+  }
+
   /// Initialize translations needed for the animation.
   void _initTranslations() {
     _valueBarLabel = _i18n.get("hidden-node-problem-animation.value-bar-label");
     _statusBarLabel = _i18n.get("hidden-node-problem-animation.status-bar-label");
     _accessPointLabel = _i18n.get("hidden-node-problem-animation.access-point");
+    _clickHereTooltipLabel = _i18n.get("hidden-node-problem-animation.click-here-tooltip");
+    _signalRangeTooltipLabel = _i18n.get("hidden-node-problem-animation.signal-range-tooltip");
   }
 
   @override
   ngOnDestroy() {
-    this._i18n.removeLanguageChangedListener(_languageChangedListener);
+    this._i18n.removeLanguageLoadedListener(_languageChangedListener);
 
     super.ngOnDestroy();
   }
@@ -200,10 +221,41 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     _drawMap(timestamp, size.width / 2 - mapOffset / 2, 0.0, mapOffset, mapOffset);
     _drawChartTable(timestamp, 0.0, mapOffset, size.width, size.height - mapOffset);
 
+    if (_showHelpTooltips) {
+      _renderTooltips(context, size.width / 2 - mapOffset / 2, 0.0, mapOffset, mapOffset);
+    }
+
     if (!isPaused) {
       _executeScheduledFunctions(timestamp);
       _checkForIdleClientChannels(timestamp);
     }
+  }
+
+  void _renderTooltips(CanvasRenderingContext2D context, double x, double y, double width, double height) {
+    if (_clickHereTooltip.text == null || _signalRangeTooltip.text == null) {
+      _updateHelpTooltips();
+    }
+
+    Point<double> coordinates = _clients[1].wirelessNode.coordinates;
+    _clickHereTooltip.render(
+      context,
+      Rectangle<double>(
+        x + coordinates.x * width,
+        y + coordinates.y * height - _lastRenderRadius / WirelessNode.rangeToHoverCircleRatio,
+        0,
+        0,
+      ),
+    );
+
+    _signalRangeTooltip.render(
+      context,
+      Rectangle<double>(
+        x + coordinates.x * width,
+        y + coordinates.y * height - _lastRenderRadius,
+        0,
+        0,
+      ),
+    );
   }
 
   /// Check for all idle client channels.
@@ -289,6 +341,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// Send an RTS signal (Request to send) to the access point.
   void _sendRequestToSend(HiddenNodeProblemClient client) {
+    if (_showHelpTooltips) {
+      _showHelpTooltips = false;
+    }
+
     _emitSignalFrom(client, SignalType.RTS, answerSignalType: SignalType.CTS);
   }
 
