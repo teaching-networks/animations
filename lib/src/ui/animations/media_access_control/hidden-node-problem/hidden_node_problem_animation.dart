@@ -65,6 +65,9 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// The minimum backoff duration.
   static const Duration _minBackoffDuration = Duration(milliseconds: 200);
 
+  /// Maximum amount of pixels the mouse has to be moved to be recognized as a drag rather than a click.
+  static const double _dragDistanceThreshold = 2.0;
+
   /// Random number generator.
   static Random _rng = Random();
 
@@ -84,8 +87,23 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// The x offset of the map in the last rendering cycle.
   double _lastMapRenderXOffset;
 
+  /// The y offset of the map in the last rendering cycle.
+  double _lastMapRenderYOffset;
+
+  /// The size of the map in the last rendering cycle.
+  double _lastMapRenderSize;
+
   /// The currently hovered node.
   WirelessNode _hoveredNode;
+
+  /// The currently dragged node.
+  WirelessNode _draggedNode;
+
+  /// Start coordinates of a drag.
+  Point<double> _dragStart;
+
+  /// Whether a node if currently dragged.
+  bool _isDraggingNode = false;
 
   /// Boolean used to debounce the mouse move events.
   bool _canConsumeMoreMouseMoveEvents = true;
@@ -321,6 +339,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
 
     _lastRenderRadius = radius;
+    _lastMapRenderSize = width;
+    _lastMapRenderYOffset = top;
     _lastMapRenderXOffset = left;
 
     context.restore();
@@ -352,9 +372,23 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// How to react to a mouse up event.
   void onMouseUp(Point<double> pos) {
     HiddenNodeProblemClient client = _checkHoveredClient(pos);
+    double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
+
+    if (client != null && _draggedNode != null && client.wirelessNode == _draggedNode && dragDistance < _dragDistanceThreshold && !_isDraggingNode) {
+      _sendRequestToSend(client);
+    }
+
+    _dragStart = null;
+    _isDraggingNode = false;
+  }
+
+  /// How to react to a mouse down event.
+  void onMouseDown(Point<double> pos) {
+    HiddenNodeProblemClient client = _checkHoveredClient(pos);
 
     if (client != null) {
-      _sendRequestToSend(client);
+      _draggedNode = client.wirelessNode;
+      _dragStart = pos;
     }
   }
 
@@ -561,6 +595,22 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
           setCursorType("pointer");
         } else {
           setCursorType("default");
+        }
+
+        // Check if drag.
+        if (!_isDraggingNode) {
+          double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
+
+          if (dragDistance > _dragDistanceThreshold) {
+            _isDraggingNode = true;
+          }
+        }
+
+        if (_isDraggingNode) {
+          double xCoord = (pos.x - _lastMapRenderXOffset) / _lastMapRenderSize;
+          double yCoord = (pos.y - _lastMapRenderYOffset) / _lastMapRenderSize;
+
+          _draggedNode.coordinates = Point<double>(xCoord, yCoord);
         }
 
         _canConsumeMoreMouseMoveEvents = true;

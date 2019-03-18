@@ -152,6 +152,8 @@ class WirelessNode<T> extends CanvasDrawable {
   /// Get the nodes coordinates.
   Point<double> get coordinates => _coordinates;
 
+  void set coordinates(Point<double> value) => _coordinates = value;
+
   /// Switch pause of the signal emitter.
   void switchPause() {
     if (_signalEmitter != null) {
