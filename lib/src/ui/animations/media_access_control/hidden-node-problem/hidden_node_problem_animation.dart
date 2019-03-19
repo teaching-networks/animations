@@ -20,6 +20,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
+import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as v;
 
 /// Animation showing the hidden node problem (RTS/CTS).
@@ -138,6 +139,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Whether the animation is in its initial state.
   bool _isInitState = true;
 
+  List<Tuple2<String, Color>> _legendItems;
+
   /// Create animation.
   HiddenNodeProblemAnimation(this._i18n, this.changeDetector);
 
@@ -152,8 +155,22 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
     _initTranslations();
     _updateHelpTooltips();
+    _initLegendItems();
 
     reset();
+  }
+
+  /// Initialized legend items display in the animations legend.
+  void _initLegendItems() {
+    _legendItems = [
+      Tuple2<String, Color>("RTS", _getColorForSignalType(SignalType.RTS)),
+      Tuple2<String, Color>("CTS", _getColorForSignalType(SignalType.CTS)),
+      Tuple2<String, Color>("DATA", _getColorForSignalType(SignalType.DATA)),
+      Tuple2<String, Color>("ACK", _getColorForSignalType(SignalType.ACK)),
+      Tuple2<String, Color>("FREE", _getColorForMediumStatusType(MediumStatusType.FREE)),
+      Tuple2<String, Color>("BUSY", _getColorForMediumStatusType(MediumStatusType.BUSY)),
+      Tuple2<String, Color>("NAV", _getColorForMediumStatusType(MediumStatusType.NAV)),
+    ];
   }
 
   /// Reset the animation.
@@ -258,7 +275,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     double mapOffset = size.height * 0.6;
 
     _drawMap(timestamp, size.width / 2 - mapOffset / 2, 0.0, mapOffset, mapOffset);
-    _drawChartTable(timestamp, 0.0, mapOffset, size.width, size.height - mapOffset);
+    double legendWidth = _drawLegend(mapOffset, size.height - mapOffset);
+    _drawChartTable(timestamp, 0.0, mapOffset, size.width - legendWidth, size.height - mapOffset);
 
     if (_showHelpTooltips) {
       _renderTooltips(context, size.width / 2 - mapOffset / 2, 0.0, mapOffset, mapOffset);
@@ -374,6 +392,47 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     _accessPoint.chart.render(context, Rectangle<double>(0.0, offset, width, heightPerChart), timestamp);
 
     context.restore();
+  }
+
+  /// Draw the color legend. Returns the legend width.
+  double _drawLegend(double top, double height) {
+    context.textAlign = "left";
+    context.textBaseline = "middle";
+
+    double fontSize = defaultFontSize;
+    context.font = "${fontSize}px sans-serif";
+
+    double offset = fontSize * 1.5;
+    double boxSize = offset * 0.8;
+    double padding = boxSize * 0.1;
+
+    // Get maximum font length
+    double maxItemWidth = 0.0;
+    for (final item in _legendItems) {
+      double labelWidth = context.measureText(item.item1).width;
+      if (labelWidth > maxItemWidth) {
+        maxItemWidth = labelWidth;
+      }
+    }
+    maxItemWidth += boxSize + 3 * padding;
+
+    double yOffset = 0.0;
+
+    for (final item in _legendItems) {
+      _drawLegendItem(item.item1, item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
+
+      yOffset += offset;
+    }
+
+    return maxItemWidth;
+  }
+
+  void _drawLegendItem(String text, Color color, double boxSize, double padding, double left, double top, double width, double height) {
+    setFillColor(context, color);
+    context.fillRect(left + padding, top + padding, boxSize, boxSize);
+
+    setFillColor(context, Colors.DARK_GRAY);
+    context.fillText(text, left + padding * 2 + boxSize, top + height / 2);
   }
 
   /// Get the height of the canvas.
