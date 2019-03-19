@@ -5,6 +5,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_icon/material_icon_toggle.dart';
+import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/client/hidden_node_problem_client.dart';
@@ -34,6 +35,7 @@ import 'package:vector_math/vector_math.dart' as v;
     MaterialButtonComponent,
     MaterialIconComponent,
     MaterialIconToggleDirective,
+    MaterialToggleComponent,
   ],
   pipes: [
     I18nPipe,
@@ -130,6 +132,12 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   Bubble _clickHereTooltip;
   Bubble _signalRangeTooltip;
 
+  /// Whether RTS/CTS is enabled for CSMA/CD.
+  bool rtsCtsOn = true;
+
+  /// Whether the animation is in its initial state.
+  bool _isInitState = true;
+
   /// Create animation.
   HiddenNodeProblemAnimation(this._i18n, this.changeDetector);
 
@@ -217,6 +225,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     for (final client in _clients) {
       client.chart.setStateColor(Colors.GREY_GREEN);
     }
+
+    _isInitState = true;
   }
 
   /// Update the help tooltip.
@@ -371,6 +381,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// How to react to a mouse up event.
   void onMouseUp(Point<double> pos) {
+    if (_isInitState) {
+      _isInitState = false;
+    }
+
     HiddenNodeProblemClient client = _checkHoveredClient(pos);
     double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
 
@@ -398,7 +412,11 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
       _showHelpTooltips = false;
     }
 
-    _emitSignalFrom(client, SignalType.RTS, answerSignalType: SignalType.CTS);
+    if (rtsCtsOn) {
+      _emitSignalFrom(client, SignalType.RTS, answerSignalType: SignalType.CTS);
+    } else {
+      _emitSignalFrom(client, SignalType.DATA, answerSignalType: SignalType.ACK);
+    }
   }
 
   void _emitSignalFrom(HiddenNodeProblemClient client, SignalType type, {SignalType answerSignalType}) {
@@ -784,9 +802,13 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
   }
 
-  void test() {
-    setCursorType("pointer");
+  /// Enable or disable RTS/CTS.
+  void setRtsCtsEnabled(bool enable) {
+    rtsCtsOn = enable;
   }
+
+  /// Whether the animation is in its initial state.
+  bool get isInitState => _isInitState;
 }
 
 class _ScheduledFunction {

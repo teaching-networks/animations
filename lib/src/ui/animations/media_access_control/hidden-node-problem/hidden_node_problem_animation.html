@@ -11,14 +11,15 @@
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">
-			<li class="labeled">
-				<label>Test</label>
-				<material-button raised (click)="test()">
-					Test
-				</material-button>
+			<li class="labeled centered">
+				<label>Settings</label>
+				<div>
+					<material-toggle [disabled]="!isInitState" [checked]="rtsCtsOn" label="RTS/CTS"
+									 (checkedChange)="setRtsCtsEnabled($event)"></material-toggle>
+				</div>
 			</li>
 
-			<li class="labeled">
+			<li class="labeled centered">
 				<label>Control</label>
 				<material-button raised (click)="switchPause()">
 					<material-icon [toggle]="isPaused" icon="pause" toggledIcon="play_arrow"></material-icon>
