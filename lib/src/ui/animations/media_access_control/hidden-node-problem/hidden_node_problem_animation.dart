@@ -139,7 +139,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Whether the animation is in its initial state.
   bool _isInitState = true;
 
-  List<Tuple2<String, Color>> _legendItems;
+  List<Tuple2<Message, Color>> _legendItems;
 
   /// Create animation.
   HiddenNodeProblemAnimation(this._i18n, this.changeDetector);
@@ -163,13 +163,13 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Initialized legend items display in the animations legend.
   void _initLegendItems() {
     _legendItems = [
-      Tuple2<String, Color>("RTS", _getColorForSignalType(SignalType.RTS)),
-      Tuple2<String, Color>("CTS", _getColorForSignalType(SignalType.CTS)),
-      Tuple2<String, Color>("DATA", _getColorForSignalType(SignalType.DATA)),
-      Tuple2<String, Color>("ACK", _getColorForSignalType(SignalType.ACK)),
-      Tuple2<String, Color>("FREE", _getColorForMediumStatusType(MediumStatusType.FREE)),
-      Tuple2<String, Color>("BUSY", _getColorForMediumStatusType(MediumStatusType.BUSY)),
-      Tuple2<String, Color>("NAV", _getColorForMediumStatusType(MediumStatusType.NAV)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.rts"), _getColorForSignalType(SignalType.RTS)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
+      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
     ];
   }
 
@@ -409,7 +409,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     // Get maximum font length
     double maxItemWidth = 0.0;
     for (final item in _legendItems) {
-      double labelWidth = context.measureText(item.item1).width;
+      double labelWidth = context.measureText(item.item1.toString()).width;
       if (labelWidth > maxItemWidth) {
         maxItemWidth = labelWidth;
       }
@@ -419,7 +419,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     double yOffset = 0.0;
 
     for (final item in _legendItems) {
-      _drawLegendItem(item.item1, item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
+      _drawLegendItem(item.item1.toString(), item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
 
       yOffset += offset;
     }

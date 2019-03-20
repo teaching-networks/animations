@@ -221,12 +221,19 @@
 	"dijkstra-algorithm-animation.help": "Help",
 	"dijkstra-algorithm-animation.help-label": "Use the `Ctrl` key or click on the `Mode` button on the right side to switch into 'Create' mode where you can click here to add new nodes and drag arrows from one node to another. In 'Normal' mode you can move nodes and select them in order to apply the actions listed on the right side. In order to modify connection weights, just click on them in 'Normal' mode. Once you are done modelling your graph you can click on 'Play' to start the animation or just use the Arrow button to proceeed one step after another.",
 	"hidden-node-problem-animation.name": "CSMA/CA",
-	"hidden-node-problem-animation.short-description": "No description yet",
-	"hidden-node-problem-animation.description": "No description yet",
-	"hidden-node-problem-animation.credits": "No credits yet",
+	"hidden-node-problem-animation.short-description": "Carrier Sense Multiple Access/Collision Avoidance is trying to avoid collisions when multiple network devices are communicating over the same medium",
+	"hidden-node-problem-animation.description": "In this situation we have three clients (A, B and C) trying to communicate with the access point X. Try to click on a node (A, B or C) to emit a signal. CSMA/CA with RTS/CTS trys to avoid signal collisions by first sending a short RTS (Request to send) signal followed by a CTS (Clear to send) from the access point. All other clients in range of the access point are notified by the CTS the anticipated duration the data will take to be sent and thus depict the medium as allocated for that duration (NAV). You can move the nodes around to change the behavior.",
+	"hidden-node-problem-animation.credits": "This animation was inspired by another animation (See https://media.pearsoncmg.com/aw/ecs_kurose_compnetwork_7/cw/content/interactiveanimations/csma-ca-with-hidden/index.html). While the animation has been written from scratch and does not contain any source code of the original animation, we would still like to thank the original Applet author(s) for making it publicly available.",
 	"hidden-node-problem-animation.status-bar-label": "Status",
 	"hidden-node-problem-animation.value-bar-label": "Client",
 	"hidden-node-problem-animation.access-point": "Access Point",
 	"hidden-node-problem-animation.click-here-tooltip": "Click here!",
-	"hidden-node-problem-animation.signal-range-tooltip": "Signal range"
+	"hidden-node-problem-animation.signal-range-tooltip": "Signal range",
+	"hidden-node-problem-animation.legend.rts": "RTS (Request to send)",
+	"hidden-node-problem-animation.legend.cts": "CTS (Clear to send)",
+	"hidden-node-problem-animation.legend.data": "Data",
+	"hidden-node-problem-animation.legend.ack": "ACK",
+	"hidden-node-problem-animation.legend.free": "Free medium",
+	"hidden-node-problem-animation.legend.busy": "Busy medium",
+	"hidden-node-problem-animation.legend.nav": "NAV (Network allocation vector)"
 }
