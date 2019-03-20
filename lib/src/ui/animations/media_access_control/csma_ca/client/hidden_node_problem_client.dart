@@ -1,14 +1,14 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/medium_status_type.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/node/wireless_node.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/signal_type.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/medium_status_type.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/node/wireless_node.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/signal_type.dart';
 import 'package:hm_animations/src/ui/animations/shared/medium_allocation_chart/medium_allocation_chart.dart';
 import 'package:meta/meta.dart';
 
 /// Client in the hidden node problem animation.
-class HiddenNodeProblemClient {
+class CSMACAClient {
   /// Node of the client.
   final WirelessNode wirelessNode;
 
@@ -44,7 +44,7 @@ class HiddenNodeProblemClient {
   num _channelIdleSince;
 
   /// Create client.
-  HiddenNodeProblemClient({
+  CSMACAClient({
     @required this.wirelessNode,
     @required this.chart,
   });

@@ -12,15 +12,14 @@
 	<div class="right">
 		<ul class="highlighted-fields">
 			<li class="labeled centered">
-				<label>Settings</label>
+				<label>{{ "csma-ca-animation.settings" | i18n }}</label>
 				<div>
-					<material-toggle [disabled]="!isInitState" [checked]="rtsCtsOn" label="RTS/CTS"
+					<material-toggle [disabled]="!isInitState" [checked]="rtsCtsOn" [label]="rtsCtsLabel"
 									 (checkedChange)="setRtsCtsEnabled($event)"></material-toggle>
 				</div>
 			</li>
 
 			<li class="labeled centered">
-				<label>Control</label>
 				<material-button raised (click)="switchPause()">
 					<material-icon [toggle]="isPaused" icon="pause" toggledIcon="play_arrow"></material-icon>
 				</material-button>
@@ -35,13 +34,13 @@
 <div class="description">
 	<h3>{{ "description" | i18n }}:</h3>
 	<p>
-		{{ "hidden-node-problem-animation.description" | i18n }}
+		{{ "csma-ca-animation.description" | i18n }}
 	</p>
 </div>
 
 <div class="animation-credits">
 	<hr>
 	<p>
-		{{ "hidden-node-problem-animation.credits" | i18n }}
+		{{ "csma-ca-animation.credits" | i18n }}
 	</p>
 </div>

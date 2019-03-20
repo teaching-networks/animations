@@ -8,10 +8,10 @@ import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/client/hidden_node_problem_client.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/medium_status_type.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/node/wireless_node.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/hidden-node-problem/signal_type.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/client/hidden_node_problem_client.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/medium_status_type.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/node/wireless_node.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/signal_type.dart';
 import 'package:hm_animations/src/ui/animations/shared/medium_allocation_chart/medium_allocation_chart.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
@@ -25,11 +25,11 @@ import 'package:vector_math/vector_math.dart' as v;
 
 /// Animation showing the hidden node problem (RTS/CTS).
 @Component(
-  selector: "hidden-node-problem-animation",
+  selector: "csma-ca-animation",
   styleUrls: [
-    "hidden_node_problem_animation.css",
+    "csma_ca_animation.css",
   ],
-  templateUrl: "hidden_node_problem_animation.html",
+  templateUrl: "csma_ca_animation.html",
   directives: [
     coreDirectives,
     CanvasComponent,
@@ -43,7 +43,7 @@ import 'package:vector_math/vector_math.dart' as v;
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 )
-class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
   /// Color of the range circle around nodes.
   static const Color _rangeCircleColor = Color.rgba(100, 100, 100, 0.4);
 
@@ -80,9 +80,9 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Change detector to update angular component with.
   final ChangeDetectorRef changeDetector;
 
-  HiddenNodeProblemClient _accessPoint;
+  CSMACAClient _accessPoint;
 
-  List<HiddenNodeProblemClient> _clients;
+  List<CSMACAClient> _clients;
 
   /// The radius of nodes in the last render cycle.
   double _lastRenderRadius;
@@ -123,6 +123,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   Message _accessPointLabel;
   Message _clickHereTooltipLabel;
   Message _signalRangeTooltipLabel;
+  Message _rtsCtsSettingsLabel;
 
   /// Scheduled functions which will be executed some time in the future.
   List<_ScheduledFunction> _scheduled;
@@ -142,7 +143,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   List<Tuple2<Message, Color>> _legendItems;
 
   /// Create animation.
-  HiddenNodeProblemAnimation(this._i18n, this.changeDetector);
+  CSMACAAnimation(this._i18n, this.changeDetector);
 
   @override
   void ngOnInit() {
@@ -163,13 +164,13 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   /// Initialized legend items display in the animations legend.
   void _initLegendItems() {
     _legendItems = [
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.rts"), _getColorForSignalType(SignalType.RTS)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
-      Tuple2<Message, Color>(_i18n.get("hidden-node-problem-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.rts"), _getColorForSignalType(SignalType.RTS)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
     ];
   }
 
@@ -181,7 +182,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
       switchPause(pauseAnimation: false);
     }
 
-    _accessPoint = HiddenNodeProblemClient(
+    _accessPoint = CSMACAClient(
       wirelessNode: WirelessNode<SignalType>(
         nodeName: "X",
         initialCoordinates: _accessPointCoordinates,
@@ -205,8 +206,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     final Point<double> client3Pos =
         Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
 
-    _clients = <HiddenNodeProblemClient>[
-      HiddenNodeProblemClient(
+    _clients = <CSMACAClient>[
+      CSMACAClient(
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "A",
           initialCoordinates: client1Pos,
@@ -216,7 +217,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         ),
         chart: MediumAllocationChart(id: "A", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
       ),
-      HiddenNodeProblemClient(
+      CSMACAClient(
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "B",
           initialCoordinates: client2Pos,
@@ -226,7 +227,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
         ),
         chart: MediumAllocationChart(id: "B", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
       ),
-      HiddenNodeProblemClient(
+      CSMACAClient(
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "C",
           initialCoordinates: client3Pos,
@@ -254,11 +255,12 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// Initialize translations needed for the animation.
   void _initTranslations() {
-    _valueBarLabel = _i18n.get("hidden-node-problem-animation.value-bar-label");
-    _statusBarLabel = _i18n.get("hidden-node-problem-animation.status-bar-label");
-    _accessPointLabel = _i18n.get("hidden-node-problem-animation.access-point");
-    _clickHereTooltipLabel = _i18n.get("hidden-node-problem-animation.click-here-tooltip");
-    _signalRangeTooltipLabel = _i18n.get("hidden-node-problem-animation.signal-range-tooltip");
+    _valueBarLabel = _i18n.get("csma-ca-animation.value-bar-label");
+    _statusBarLabel = _i18n.get("csma-ca-animation.status-bar-label");
+    _accessPointLabel = _i18n.get("csma-ca-animation.access-point");
+    _clickHereTooltipLabel = _i18n.get("csma-ca-animation.click-here-tooltip");
+    _signalRangeTooltipLabel = _i18n.get("csma-ca-animation.signal-range-tooltip");
+    _rtsCtsSettingsLabel = _i18n.get("csma-ca-animation.label.rts-cts");
   }
 
   @override
@@ -323,7 +325,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
   }
 
-  void _checkForIdleClientChannel(HiddenNodeProblemClient client, num timestamp) {
+  void _checkForIdleClientChannel(CSMACAClient client, num timestamp) {
     if (!client.isChannelIdle() && client.inBackoff) {
       // Pause backing off and continue after the channel is idle again.
       double restMs = _cancelScheduled(client.scheduledBackoffEndId);
@@ -444,7 +446,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
       _isInitState = false;
     }
 
-    HiddenNodeProblemClient client = _checkHoveredClient(pos);
+    CSMACAClient client = _checkHoveredClient(pos);
     double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
 
     if (client != null && _draggedNode != null && client.wirelessNode == _draggedNode && dragDistance < _dragDistanceThreshold && !_isDraggingNode) {
@@ -457,7 +459,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// How to react to a mouse down event.
   void onMouseDown(Point<double> pos) {
-    HiddenNodeProblemClient client = _checkHoveredClient(pos);
+    CSMACAClient client = _checkHoveredClient(pos);
 
     if (client != null) {
       _draggedNode = client.wirelessNode;
@@ -466,7 +468,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// Send an RTS signal (Request to send) to the access point.
-  void _sendRequestToSend(HiddenNodeProblemClient client) {
+  void _sendRequestToSend(CSMACAClient client) {
     if (_showHelpTooltips) {
       _showHelpTooltips = false;
     }
@@ -478,11 +480,11 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
     }
   }
 
-  void _emitSignalFrom(HiddenNodeProblemClient client, SignalType type, {SignalType answerSignalType}) {
+  void _emitSignalFrom(CSMACAClient client, SignalType type, {SignalType answerSignalType}) {
     client.anticipatedSignalType = answerSignalType;
 
     Color color = _getColorForSignalType(type);
-    List<HiddenNodeProblemClient> nodesInRange = _getAllNodesInRangeOf(client);
+    List<CSMACAClient> nodesInRange = _getAllNodesInRangeOf(client);
 
     if (client.isChannelIdle() && client.mediumStatusType != MediumStatusType.NAV) {
       // Wait for the interframe spacing delay and then try again!
@@ -570,7 +572,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// What should happen in case a timeout happened on the passed [client] node.
-  void _onTimeoutAtNode(HiddenNodeProblemClient client, SignalType type, SignalType answerType) {
+  void _onTimeoutAtNode(CSMACAClient client, SignalType type, SignalType answerType) {
     print("Timeout happened at client ${client.wirelessNode.nodeName}");
 
     if (client != _accessPoint) {
@@ -579,7 +581,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// Backoff the passed [client].
-  void _backoff(HiddenNodeProblemClient client, SignalType type) {
+  void _backoff(CSMACAClient client, SignalType type) {
     if (client == _accessPoint || client.inBackoff || client.backoffMilliseconds != null) {
       return;
     }
@@ -641,10 +643,10 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// Get all the nodes in the range of the passed [client].
-  List<HiddenNodeProblemClient> _getAllNodesInRangeOf(HiddenNodeProblemClient client) {
+  List<CSMACAClient> _getAllNodesInRangeOf(CSMACAClient client) {
     WirelessNode node = client.wirelessNode;
 
-    List<HiddenNodeProblemClient> nodesInRange = List<HiddenNodeProblemClient>();
+    List<CSMACAClient> nodesInRange = List<CSMACAClient>();
 
     for (final otherClient in _clients) {
       if (otherClient != client && node.coordinates.distanceTo(otherClient.wirelessNode.coordinates) <= _relativeRadiusSize) {
@@ -666,7 +668,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
       _canConsumeMoreMouseMoveEvents = false;
 
       window.animationFrame.then((timestamp) {
-        HiddenNodeProblemClient client = _checkHoveredClient(pos);
+        CSMACAClient client = _checkHoveredClient(pos);
 
         if (client != null) {
           setCursorType("pointer");
@@ -696,7 +698,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// Check whether there is a node hovered.
-  HiddenNodeProblemClient _checkHoveredClient(Point<double> pos) {
+  CSMACAClient _checkHoveredClient(Point<double> pos) {
     if (_lastRenderRadius == null || _lastMapRenderXOffset == null) {
       return null;
     }
@@ -748,7 +750,7 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
   }
 
   /// When a signal has been received at a client.
-  void _onReceivedAtClient(HiddenNodeProblemClient client, SignalType type) {
+  void _onReceivedAtClient(CSMACAClient client, SignalType type) {
     print("Received with $type at client");
 
     final SignalType anticipated = client.anticipatedSignalType;
@@ -868,6 +870,8 @@ class HiddenNodeProblemAnimation extends CanvasAnimation with CanvasPausableMixi
 
   /// Whether the animation is in its initial state.
   bool get isInitState => _isInitState;
+
+  String get rtsCtsLabel => _rtsCtsSettingsLabel.toString();
 }
 
 class _ScheduledFunction {
