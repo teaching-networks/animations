@@ -5,6 +5,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_icon/material_icon_toggle.dart';
+import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
@@ -37,6 +38,7 @@ import 'package:vector_math/vector_math.dart' as v;
     MaterialIconComponent,
     MaterialIconToggleDirective,
     MaterialToggleComponent,
+    MaterialSliderComponent,
   ],
   pipes: [
     I18nPipe,
@@ -142,6 +144,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   List<Tuple2<Message, Color>> _legendItems;
 
+  /// Animation speed factor.
+  double animationSpeedFactor = 1.0;
+
   /// Create animation.
   CSMACAAnimation(this._i18n, this.changeDetector);
 
@@ -186,7 +191,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
       wirelessNode: WirelessNode<SignalType>(
         nodeName: "X",
         initialCoordinates: _accessPointCoordinates,
-        scale: 100000000,
+        scale: 100000000 ~/ animationSpeedFactor,
         nodeCircleColor: Colors.PINK_RED,
         rangeCircleColor: Colors.LIME,
       ),
@@ -198,20 +203,20 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     v.Quaternion quaternion = v.Quaternion.axisAngle(v.Vector3(0.0, 0.0, 1.0), radiusOffset);
 
     final Point<double> client1Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client2Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client3Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
 
     _clients = <CSMACAClient>[
       CSMACAClient(
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "A",
           initialCoordinates: client1Pos,
-          scale: 100000000,
+          scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.BLUE_GRAY,
           rangeCircleColor: _rangeCircleColor,
         ),
@@ -221,7 +226,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "B",
           initialCoordinates: client2Pos,
-          scale: 100000000,
+          scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.CORAL,
           rangeCircleColor: _rangeCircleColor,
         ),
@@ -231,7 +236,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
         wirelessNode: WirelessNode<SignalType>(
           nodeName: "C",
           initialCoordinates: client3Pos,
-          scale: 100000000,
+          scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.BORDEAUX,
           rangeCircleColor: _rangeCircleColor,
         ),
@@ -249,8 +254,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// Update the help tooltip.
   void _updateHelpTooltips() {
-    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel.toString().length);
-    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel.toString().length);
+    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel
+        .toString()
+        .length);
+    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel
+        .toString()
+        .length);
   }
 
   /// Initialize translations needed for the animation.
@@ -411,7 +420,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     // Get maximum font length
     double maxItemWidth = 0.0;
     for (final item in _legendItems) {
-      double labelWidth = context.measureText(item.item1.toString()).width;
+      double labelWidth = context
+          .measureText(item.item1.toString())
+          .width;
       if (labelWidth > maxItemWidth) {
         maxItemWidth = labelWidth;
       }
@@ -421,7 +432,15 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     double yOffset = 0.0;
 
     for (final item in _legendItems) {
-      _drawLegendItem(item.item1.toString(), item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
+      _drawLegendItem(
+          item.item1.toString(),
+          item.item2,
+          boxSize,
+          padding,
+          size.width - maxItemWidth,
+          top + yOffset,
+          maxItemWidth,
+          offset);
 
       yOffset += offset;
     }
@@ -573,8 +592,6 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// What should happen in case a timeout happened on the passed [client] node.
   void _onTimeoutAtNode(CSMACAClient client, SignalType type, SignalType answerType) {
-    print("Timeout happened at client ${client.wirelessNode.nodeName}");
-
     if (client != _accessPoint) {
       _backoff(client, type);
     }
@@ -589,13 +606,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     client.numberOfCollisions++;
 
     client.backoffMilliseconds =
-        max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds * client.numberOfCollisions).round());
+        max(_minBackoffDuration.inMilliseconds, (_rng.nextDouble() * _maxBackoffDuration.inMilliseconds * client.numberOfCollisions).round()) ~/
+            animationSpeedFactor;
     client.backoffSignalType = type;
     client.backoffAnticipatedSignalType = client.anticipatedSignalType;
 
     client.anticipatedSignalType = null; // Clear anticipated signal
-
-    print("Now ${client.wirelessNode.nodeName} should backoff ${client.backoffMilliseconds} ms after the channel is free the next time!");
   }
 
   /// Schedule a function to be executed later and return the id of the scheduled function.
@@ -734,8 +750,6 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// When a signal has been received at access point.
   void _onReceivedAtAccessPoint(SignalType type) {
-    print("Received with $type at access point ${_accessPoint.signalsToIgnore}");
-
     // Ignore collided signals.
     if (_accessPoint.signalsToIgnore > 0) {
       _accessPoint.signalsToIgnore--;
@@ -751,8 +765,6 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// When a signal has been received at a client.
   void _onReceivedAtClient(CSMACAClient client, SignalType type) {
-    print("Received with $type at client");
-
     final SignalType anticipated = client.anticipatedSignalType;
     client.anticipatedSignalType = null;
 
@@ -821,18 +833,26 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
   }
 
   Duration _getDurationForSignalType(SignalType type) {
+    var ms = 0;
+
     switch (type) {
       case SignalType.RTS:
-        return Duration(milliseconds: 500);
+        ms = 500;
+        break;
       case SignalType.CTS:
-        return Duration(milliseconds: 500);
+        ms = 500;
+        break;
       case SignalType.DATA:
-        return Duration(seconds: 4);
+        ms = 4000;
+        break;
       case SignalType.ACK:
-        return Duration(milliseconds: 500);
+        ms = 500;
+        break;
       default:
         throw Exception("Unknown signal type");
     }
+
+    return Duration(milliseconds: (ms / animationSpeedFactor).round());
   }
 
   @override

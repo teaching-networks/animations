@@ -238,5 +238,6 @@
 	"csma-ca-animation.legend.busy": "Belegtes Medium",
 	"csma-ca-animation.legend.nav": "NAV (Network allocation vector)",
 	"csma-ca-animation.settings": "Einstellungen",
-	"csma-ca-animation.label.rts-cts": "RTS/CTS"
+	"csma-ca-animation.label.rts-cts": "RTS/CTS",
+	"csma-ca-animation.animation-speed": "Geschwindigkeit"
 }
