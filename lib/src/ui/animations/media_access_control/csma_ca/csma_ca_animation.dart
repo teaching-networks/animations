@@ -74,7 +74,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
   static const double _dragDistanceThreshold = 2.0;
 
   /// Amount of retransmissions (after a timeout) a client is able to attempt before aborting the operation.
-  static const int _maxRetransmissions = 3;
+  static const int _maxRetransmissions = 5;
 
   /// Random number generator.
   static Random _rng = Random();
