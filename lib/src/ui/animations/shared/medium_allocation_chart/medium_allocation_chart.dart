@@ -107,16 +107,42 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
   void _drawChanges(
       CanvasRenderingContext2D context, List<ChangeMarker<Color>> changes, num timestamp, int duration, double xOffset, double height, double width) {
     double lastX = 0.0;
+
+    context.save();
+
+    context.textAlign = "center";
+    context.textBaseline = "top";
+    context.font = "${defaultFontSize * 0.75}px sans-serif";
+
     for (ChangeMarker<Color> marker in changes.reversed) {
       double relativeX = getRelativeXPosForTimestamp(marker.timestamp, timestamp, duration);
       double x = width * relativeX;
 
+      double rectX = lastX + xOffset;
+      double rectWidth = x - lastX;
+
       setFillColor(context, marker.change);
-      context.fillRect(lastX + xOffset, 0.0, x - lastX, height);
+      context.fillRect(rectX, 0.0, rectWidth, height);
+
+      if (marker.showUntilLabel && marker.untilTimestamp != null) {
+        context.save();
+
+        context.translate(rectX + rectWidth - 2.0 * window.devicePixelRatio, height / 2);
+        context.rotate(pi / 2);
+
+        setFillColor(context, Colors.BLACK);
+        context.fillText(_getUntilLabel(marker.untilTimestamp, timestamp), 0, 0);
+
+        context.restore();
+      }
 
       lastX = x;
     }
+
+    context.restore();
   }
+
+  String _getUntilLabel(num untilTimestamp, num timestamp) => "${max(0, (untilTimestamp - timestamp).round())}";
 
   /// Get the relative x position (Value in range [0.0, 1.0]) of the passed [timestamp] in the range from [minTimestamp] to [minTimestamp] + duration.
   double getRelativeXPosForTimestamp(num timestamp, num minTimestamp, num duration) {
@@ -141,7 +167,10 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
   }
 
   /// Set the current value color.
-  setValueColor(Color color) {
+  setValueColor(
+    Color color, {
+    num untilTimestamp,
+  }) {
     if (_valueChanges.isNotEmpty && _valueChanges.last.change == color) {
       // The change would be nonsense -> Ignore it.
       return;
@@ -149,10 +178,7 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
 
     num timestamp = isPaused ? _lastRenderTimestamp : window.performance.now();
 
-    _valueChanges.add(ChangeMarker<Color>(
-      change: color,
-      timestamp: timestamp,
-    ));
+    _valueChanges.add(ChangeMarker<Color>(change: color, timestamp: timestamp, showUntilLabel: untilTimestamp != null, untilTimestamp: untilTimestamp));
   }
 
   /// Clean all old changes older than [minTimestamp].
@@ -203,6 +229,8 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
       newChangeMarkers.add(ChangeMarker<Color>(
         timestamp: marker.timestamp + addToTimestamp,
         change: marker.change,
+        untilTimestamp: marker.untilTimestamp != null ? marker.untilTimestamp + addToTimestamp : null,
+        showUntilLabel: marker.showUntilLabel,
       ));
     }
 
