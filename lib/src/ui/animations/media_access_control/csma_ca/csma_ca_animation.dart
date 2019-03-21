@@ -203,13 +203,13 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     v.Quaternion quaternion = v.Quaternion.axisAngle(v.Vector3(0.0, 0.0, 1.0), radiusOffset);
 
     final Point<double> client1Pos =
-    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client2Pos =
-    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client3Pos =
-    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
 
     _clients = <CSMACAClient>[
       CSMACAClient(
@@ -246,20 +246,17 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
     // Set start color for the status bar of the clients.
     for (final client in _clients) {
-      client.chart.setStateColor(Colors.GREY_GREEN);
+      client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
     }
+    _accessPoint.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
 
     _isInitState = true;
   }
 
   /// Update the help tooltip.
   void _updateHelpTooltips() {
-    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel
-        .toString()
-        .length);
-    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel
-        .toString()
-        .length);
+    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel.toString().length);
+    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel.toString().length);
   }
 
   /// Initialize translations needed for the animation.
@@ -420,9 +417,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     // Get maximum font length
     double maxItemWidth = 0.0;
     for (final item in _legendItems) {
-      double labelWidth = context
-          .measureText(item.item1.toString())
-          .width;
+      double labelWidth = context.measureText(item.item1.toString()).width;
       if (labelWidth > maxItemWidth) {
         maxItemWidth = labelWidth;
       }
@@ -432,15 +427,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     double yOffset = 0.0;
 
     for (final item in _legendItems) {
-      _drawLegendItem(
-          item.item1.toString(),
-          item.item2,
-          boxSize,
-          padding,
-          size.width - maxItemWidth,
-          top + yOffset,
-          maxItemWidth,
-          offset);
+      _drawLegendItem(item.item1.toString(), item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
 
       yOffset += offset;
     }
@@ -541,23 +528,18 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
         _schedule(window.performance.now() + signalDuration.inMilliseconds, () {
           // Reset chart and client
           client.setChannelIdle(true);
-          client.mediumStatusType = MediumStatusType.FREE;
+
           client.chart.setValueColor(Colors.WHITE);
 
-          if (client == _accessPoint) {
-            client.mediumStatusType = MediumStatusType.FREE;
-            client.chart.setStateColor(Colors.WHITE);
-          } else {
-            client.mediumStatusType = MediumStatusType.FREE;
-            client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
-          }
+          client.mediumStatusType = MediumStatusType.FREE;
+          client.chart.setStateColor(_getColorForMediumStatusType(client.mediumStatusType));
 
           // Set all nodes in range to free.
           for (final anotherClient in nodesInRange) {
             anotherClient.setChannelIdle(true);
             if (anotherClient == _accessPoint) {
               anotherClient.mediumStatusType = MediumStatusType.FREE;
-              anotherClient.chart.setStateColor(Colors.WHITE);
+              anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
             } else {
               if (anotherClient.mediumStatusType != MediumStatusType.NAV) {
                 anotherClient.mediumStatusType = MediumStatusType.FREE;
