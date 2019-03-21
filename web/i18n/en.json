@@ -233,6 +233,7 @@
 	"csma-ca-animation.legend.cts": "CTS (Clear to send)",
 	"csma-ca-animation.legend.data": "Data",
 	"csma-ca-animation.legend.ack": "ACK",
+	"csma-ca-animation.legend.backoff": "Backoff",
 	"csma-ca-animation.legend.free": "Free medium",
 	"csma-ca-animation.legend.busy": "Busy medium",
 	"csma-ca-animation.legend.nav": "NAV (Network allocation vector)",

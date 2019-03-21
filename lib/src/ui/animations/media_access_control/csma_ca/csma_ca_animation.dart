@@ -173,6 +173,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
+      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.backoff"), Colors.LIGHTGREY),
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
       Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
