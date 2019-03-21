@@ -73,6 +73,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
   /// Maximum amount of pixels the mouse has to be moved to be recognized as a drag rather than a click.
   static const double _dragDistanceThreshold = 2.0;
 
+  /// Amount of retransmissions (after a timeout) a client is able to attempt before aborting the operation.
+  static const int _maxRetransmissions = 3;
+
   /// Random number generator.
   static Random _rng = Random();
 
@@ -204,13 +207,13 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     v.Quaternion quaternion = v.Quaternion.axisAngle(v.Vector3(0.0, 0.0, 1.0), radiusOffset);
 
     final Point<double> client1Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client2Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client3Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
 
     _clients = <CSMACAClient>[
       CSMACAClient(
@@ -256,8 +259,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// Update the help tooltip.
   void _updateHelpTooltips() {
-    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel.toString().length);
-    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel.toString().length);
+    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel
+        .toString()
+        .length);
+    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel
+        .toString()
+        .length);
   }
 
   /// Initialize translations needed for the animation.
@@ -317,8 +324,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     String valueLabel = chart.valueLabelString;
     String statusLabel = chart.statusLabelString;
 
-    double valueLabelWidth = context.measureText(valueLabel).width;
-    double statusLabelWidth = context.measureText(statusLabel).width;
+    double valueLabelWidth = context
+        .measureText(valueLabel)
+        .width;
+    double statusLabelWidth = context
+        .measureText(statusLabel)
+        .width;
 
     return max(valueLabelWidth, statusLabelWidth);
   }
@@ -457,7 +468,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     // Get maximum font length
     double maxItemWidth = 0.0;
     for (final item in _legendItems) {
-      double labelWidth = context.measureText(item.item1.toString()).width;
+      double labelWidth = context
+          .measureText(item.item1.toString())
+          .width;
       if (labelWidth > maxItemWidth) {
         maxItemWidth = labelWidth;
       }
@@ -467,7 +480,15 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     double yOffset = 0.0;
 
     for (final item in _legendItems) {
-      _drawLegendItem(item.item1.toString(), item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
+      _drawLegendItem(
+          item.item1.toString(),
+          item.item2,
+          boxSize,
+          padding,
+          size.width - maxItemWidth,
+          top + yOffset,
+          maxItemWidth,
+          offset);
 
       yOffset += offset;
     }
@@ -518,6 +539,8 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     if (_showHelpTooltips) {
       _showHelpTooltips = false;
     }
+
+    client.numberOfTimeouts = 0;
 
     if (rtsCtsOn) {
       _emitSignalFrom(client, SignalType.RTS, answerSignalType: SignalType.CTS);
@@ -614,8 +637,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// What should happen in case a timeout happened on the passed [client] node.
   void _onTimeoutAtNode(CSMACAClient client, SignalType type, SignalType answerType) {
+    client.numberOfTimeouts++;
+
     if (client != _accessPoint) {
-      _backoff(client, type);
+      if (client.numberOfTimeouts <= _maxRetransmissions) {
+        _backoff(client, type);
+      }
     }
   }
 

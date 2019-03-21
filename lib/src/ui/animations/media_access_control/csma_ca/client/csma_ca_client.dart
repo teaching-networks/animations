@@ -35,6 +35,8 @@ class CSMACAClient {
 
   int _numberOfCollisions = 0;
 
+  int _numberOfTimeouts = 0;
+
   /// Signal type the client awaits as answer to a previously sent signal.
   SignalType _anticipatedSignalType;
 
@@ -132,4 +134,12 @@ class CSMACAClient {
   set numberOfCollisions(int value) {
     _numberOfCollisions = value;
   }
+
+  int get numberOfTimeouts => _numberOfTimeouts;
+
+  set numberOfTimeouts(int value) {
+    _numberOfTimeouts = value;
+  }
+
+
 }
