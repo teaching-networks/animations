@@ -9,7 +9,7 @@ import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
-import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/client/hidden_node_problem_client.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/client/csma_ca_client.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/medium_status_type.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/node/wireless_node.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/signal_type.dart';
@@ -297,6 +297,41 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     }
   }
 
+  /// Calculate the max label width for the medium allocation charts.
+  double _calculateMaxLabelWidth(CanvasRenderingContext2D context, List<MediumAllocationChart> charts) {
+    double maxLabelWidth = 0;
+
+    for (final chart in charts) {
+      double width = _calculateChartLabelWidth(context, chart);
+
+      if (width > maxLabelWidth) {
+        maxLabelWidth = width;
+      }
+    }
+
+    return maxLabelWidth;
+  }
+
+  /// Calculate the charts label width of the passed [chart].
+  double _calculateChartLabelWidth(CanvasRenderingContext2D context, MediumAllocationChart chart) {
+    String valueLabel = chart.valueLabelString;
+    String statusLabel = chart.statusLabelString;
+
+    double valueLabelWidth = context.measureText(valueLabel).width;
+    double statusLabelWidth = context.measureText(statusLabel).width;
+
+    return max(valueLabelWidth, statusLabelWidth);
+  }
+
+  /// Update the allocation chart tables label width of the passed [charts].
+  void _updateChartTableLabelWidth(List<MediumAllocationChart> charts, double paddingFactor) {
+    double labelWidth = _calculateMaxLabelWidth(context, charts) * paddingFactor;
+
+    for (final chart in charts) {
+      chart.labelWidth = labelWidth;
+    }
+  }
+
   void _renderTooltips(CanvasRenderingContext2D context, double x, double y, double width, double height) {
     if (_clickHereTooltip.text == null || _signalRangeTooltip.text == null) {
       _updateHelpTooltips();
@@ -385,20 +420,24 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
 
   /// Draw the chart table.
   void _drawChartTable(num timestamp, double left, double top, double width, double height) {
-    context.save();
+    List<MediumAllocationChart> charts = _clients.map((client) => client.chart).toList(growable: true);
+    charts.add(_accessPoint.chart);
 
+    if (charts[0].labelWidth == null) {
+      _updateChartTableLabelWidth(charts, 1.2);
+    }
+
+    context.save();
     context.translate(left, top);
 
-    final double heightPerChart = height / (_clients.length + 1);
+    final double heightPerChart = height / charts.length;
     double offset = 0.0;
 
-    for (final client in _clients) {
-      client.chart.render(context, Rectangle<double>(0.0, offset, width, heightPerChart), timestamp);
+    for (final chart in charts) {
+      chart.render(context, Rectangle<double>(0.0, offset, width, heightPerChart), timestamp);
 
       offset += heightPerChart;
     }
-
-    _accessPoint.chart.render(context, Rectangle<double>(0.0, offset, width, heightPerChart), timestamp);
 
     context.restore();
   }

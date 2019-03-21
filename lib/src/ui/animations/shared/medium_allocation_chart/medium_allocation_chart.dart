@@ -39,6 +39,9 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
   /// Timestamp of the last rendering cycle.
   num _lastRenderTimestamp;
 
+  /// Width of the labels.
+  double _labelWidth;
+
   /// Create medium allocation chart.
   MediumAllocationChart({
     @required this.id,
@@ -67,22 +70,22 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
 
     context.save();
 
-    double barWidth = width * 0.8;
-    double barOffset = width - barWidth;
+    double barWidth = width - _labelWidth;
+    double barOffset = _labelWidth;
 
     double barHeight = height * 0.7;
     _drawChanges(context, _valueChanges, timestamp, duration, barOffset, barHeight, barWidth);
-    _drawLabel(context, id == null ? valueBarLabel.toString() : "${valueBarLabel.toString()} $id", barOffset, barHeight);
+    _drawLabel(context, valueLabelString, barOffset, barHeight);
 
     context.translate(0.0, barHeight + _valueStateOffset);
     barHeight = height * 0.3 - _valueStateOffset;
     _drawChanges(context, _stateChanges, timestamp, duration, barOffset, barHeight, barWidth);
-    _drawLabel(context, statusBarLabel.toString(), barOffset, barHeight);
+    _drawLabel(context, statusLabelString, barOffset, barHeight);
 
     context.restore();
 
     // Render border
-    setStrokeColor(context, Colors.DARK_GRAY);
+    setStrokeColor(context, Colors.GREY);
     context.lineWidth = window.devicePixelRatio;
     context.strokeRect(barOffset, 0.0, barWidth, height);
 
@@ -205,4 +208,13 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
 
     return newChangeMarkers;
   }
+
+  String get valueLabelString => id == null ? valueBarLabel.toString() : "${valueBarLabel.toString()} $id";
+
+  String get statusLabelString => statusBarLabel.toString();
+
+  /// Set the labels width.
+  void set labelWidth(double width) => _labelWidth = width;
+
+  double get labelWidth => _labelWidth;
 }
