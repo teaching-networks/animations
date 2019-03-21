@@ -582,13 +582,16 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
           // Set all nodes in range to free.
           for (final anotherClient in nodesInRange) {
             anotherClient.setChannelIdle(true);
-            if (anotherClient == _accessPoint) {
-              anotherClient.mediumStatusType = MediumStatusType.FREE;
-              anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
-            } else {
-              if (anotherClient.mediumStatusType != MediumStatusType.NAV) {
+
+            if (anotherClient.isChannelIdle()) {
+              if (anotherClient == _accessPoint) {
                 anotherClient.mediumStatusType = MediumStatusType.FREE;
                 anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+              } else {
+                if (anotherClient.mediumStatusType != MediumStatusType.NAV) {
+                  anotherClient.mediumStatusType = MediumStatusType.FREE;
+                  anotherClient.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
+                }
               }
             }
           }
