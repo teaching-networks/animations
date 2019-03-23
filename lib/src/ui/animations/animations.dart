@@ -1,6 +1,8 @@
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.template.dart' as httpDelay;
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.dart';
+import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.template.dart' as CSMACA;
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/tcp_flow_control_animation.dart';
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/tcp_flow_control_animation.template.dart' as tcpFlowControl;
 import 'package:hm_animations/src/ui/animations/transmission/transmission_animation.dart';
@@ -106,6 +108,13 @@ class Animations {
       "dijkstra-algorithm-animation",
       "img/animation/preview/dijkstra-preview.png",
       "dijkstra",
+    ),
+    new AnimationDescriptor<CSMACAAnimation>(
+      ID_COUNTER++,
+      CSMACA.CSMACAAnimationNgFactory,
+      "csma-ca-animation",
+      "img/animation/preview/csma-ca-preview.png",
+      "hidden-node-problem",
     ),
   ];
 }

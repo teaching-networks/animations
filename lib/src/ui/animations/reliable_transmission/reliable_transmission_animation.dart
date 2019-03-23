@@ -30,7 +30,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
   I18nService _i18n;
 
-  LanguageChangedListener _languageChangedListener;
+  LanguageLoadedListener _languageChangedListener;
 
   /// Protocol to use
   ReliableTransmissionProtocol _protocol;
@@ -72,7 +72,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   @override
   ngOnDestroy() {
     super.ngOnDestroy();
-    _i18n.removeLanguageChangedListener(_languageChangedListener);
+    _i18n.removeLanguageLoadedListener(_languageChangedListener);
   }
 
   void onCanvasClick(Point<double> pos) {

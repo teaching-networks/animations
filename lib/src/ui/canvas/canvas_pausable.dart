@@ -3,7 +3,7 @@ import 'dart:html';
 /**
  * Pausable canvas.
  */
-abstract class CanvasPausableMixin {
+mixin CanvasPausableMixin {
   /**
    * Whether the animation is paused.
    */

@@ -61,47 +61,55 @@ abstract class SignalEmitter extends CanvasDrawable with CanvasPausableMixin {
       return;
     }
 
-    final diff = timestamp - _startTimestamp;
+    double signalProgress = 0.0;
 
-    final propagationProgress = diff / 1000 * propagationSpeed;
-    final signalProgress = diff / _signalDuration.inMilliseconds;
+    if (!isPaused) {
+      final diff = timestamp - _startTimestamp;
 
-    double propagationProgressSinceSignalEnd = 0.0;
-    if (signalProgress >= 1.0) {
-      propagationProgressSinceSignalEnd = (diff - _signalDuration.inMilliseconds) / 1000 * propagationSpeed;
+      final propagationProgress = diff / 1000 * propagationSpeed;
+      signalProgress = diff / _signalDuration.inMilliseconds;
+
+      double propagationProgressSinceSignalEnd = 0.0;
+      if (signalProgress >= 1.0) {
+        propagationProgressSinceSignalEnd = (diff - _signalDuration.inMilliseconds) / 1000 * propagationSpeed;
+      }
+
+      Tuple2<double, double> range1 = _calculateSignalRange(
+        propagationProgress: propagationProgress,
+        signalProgress: signalProgress,
+        extrema: 0.0,
+        propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
+      );
+
+      Tuple2<double, double> range2 = _calculateSignalRange(
+        propagationProgress: propagationProgress,
+        signalProgress: signalProgress,
+        extrema: 1.0,
+        propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
+      );
+
+      _lastRange1 = range1;
+      _lastRange2 = range2;
     }
 
-    Tuple2<double, double> range1 = _calculateSignalRange(
-      propagationProgress: propagationProgress,
-      signalProgress: signalProgress,
-      extrema: 0.0,
-      propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
-    );
+    if (_lastRange1 == null || _lastRange2 == null) {
+      return;
+    }
 
-    Tuple2<double, double> range2 = _calculateSignalRange(
-      propagationProgress: propagationProgress,
-      signalProgress: signalProgress,
-      extrema: 1.0,
-      propagationProgressSinceSignalEnd: propagationProgressSinceSignalEnd,
-    );
-
-    _lastRange1 = range1;
-    _lastRange2 = range2;
-
-    bool isEnd = _isOutOfVisible(range1) && _isOutOfVisible(range2) && signalProgress >= 1.0;
+    bool isEnd = _isOutOfVisible(_lastRange1) && _isOutOfVisible(_lastRange2) && signalProgress >= 1.0;
 
     if (!isEnd) {
       if (listen != null) {
-        listen(range1, range2);
+        listen(_lastRange1, _lastRange2);
       }
 
       // Draw ranges.
-      if (range1.item2 == range2.item1) {
+      if (_lastRange1.item2 == _lastRange2.item1) {
         // Merge range.
-        drawRange(context, Tuple2<double, double>(range1.item1, range2.item2), rect);
+        drawRange(context, Tuple2<double, double>(_lastRange1.item1, _lastRange2.item2), rect);
       } else {
-        drawRange(context, range1, rect);
-        drawRange(context, range2, rect);
+        drawRange(context, _lastRange1, rect);
+        drawRange(context, _lastRange2, rect);
       }
     } else if (onEnd != null) {
       _isEnd = true;

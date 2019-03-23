@@ -6,7 +6,7 @@ import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import "package:intl/intl_browser.dart";
 
-typedef void LanguageChangedListener(String newLocale);
+typedef void LanguageLoadedListener(String newLocale);
 
 /**
  * I18n service is a service where you can fetch translations for a specific locale.
@@ -57,9 +57,9 @@ class I18nService {
   final StorageService _storage;
 
   /**
-   * List of listeners which want to be notified when the language changes.
+   * List of listeners which want to be notified when the language has been loaded (or changed).
    */
-  List<LanguageChangedListener> _languageChangedListener;
+  List<LanguageLoadedListener> _languageLoadedListener;
 
   /**
    * I18n Service constructor.
@@ -80,7 +80,7 @@ class I18nService {
   void _reload() {
     _loadLangFile(_currentLocale).then((jsonMap) {
       _initLookup(jsonMap);
-      _notifyLanguageChanged(_currentLocale);
+      _notifyLanguageLoaded(_currentLocale);
     });
   }
 
@@ -211,34 +211,34 @@ class I18nService {
   }
 
   /**
-   * Add a listener which should be notified when the language changes.
+   * Add a listener which should be notified when a language has been loaded.
    */
-  void addLanguageChangedListener(LanguageChangedListener listener) {
-    if (_languageChangedListener == null) {
-      _languageChangedListener = new List<LanguageChangedListener>();
+  void addLanguageLoadedListener(LanguageLoadedListener listener) {
+    if (_languageLoadedListener == null) {
+      _languageLoadedListener = List<LanguageLoadedListener>();
     }
 
-    _languageChangedListener.add(listener);
+    _languageLoadedListener.add(listener);
   }
 
   /**
-   * Remove a listener which should be notified when the language changes.
+   * Remove a listener which should be notified when the language loaded.
    * Returns whether the listener could be removed.
    */
-  bool removeLanguageChangedListener(LanguageChangedListener listener) {
-    if (_languageChangedListener != null) {
-      return _languageChangedListener.remove(listener);
+  bool removeLanguageLoadedListener(LanguageLoadedListener listener) {
+    if (_languageLoadedListener != null) {
+      return _languageLoadedListener.remove(listener);
     }
 
     return false;
   }
 
   /**
-   * Notify all language changed listeners that the language has changed.
+   * Notify all language changed listeners that the language has been loaded.
    */
-  void _notifyLanguageChanged(String newLocale) {
-    if (_languageChangedListener != null) {
-      for (LanguageChangedListener listener in _languageChangedListener) {
+  void _notifyLanguageLoaded(String newLocale) {
+    if (_languageLoadedListener != null) {
+      for (LanguageLoadedListener listener in _languageLoadedListener) {
         listener.call(newLocale);
       }
     }
