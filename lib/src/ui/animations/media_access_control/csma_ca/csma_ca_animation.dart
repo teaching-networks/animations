@@ -158,6 +158,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implement
     _languageChangedListener = (_) {
       _updateHelpTooltips();
 
+      if (context != null) {
+        List<MediumAllocationChart> charts = _clients.map((client) => client.chart).toList(growable: true);
+        charts.add(_accessPoint.chart);
+        _updateChartTableLabelWidth(charts, 1.2);
+      }
+
       changeDetector.markForCheck(); // Update labels.
     };
     this._i18n.addLanguageLoadedListener(_languageChangedListener);
