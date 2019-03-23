@@ -5,6 +5,9 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 1.7.0
+- TODO
+
 ### 1.6.0
 - Added Hidden Node Problem (RTS/CTS) animations
 
