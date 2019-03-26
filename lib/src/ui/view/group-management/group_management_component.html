@@ -4,7 +4,7 @@
 	<div class="sidebar">
 
 		<material-list width="3">
-			<div group>
+			<div group class="actions">
 				<material-list-item>
 					<material-icon icon="create"></material-icon>
 					Create group
@@ -19,27 +19,39 @@
 			<template [ngIf]="!isLoadingGroups">
 				<template [ngIf]="groups == null">
 					<material-list-item class="centered-list-item">
-						An error occurred while loading groups
+						<material-icon icon="error"></material-icon>
+						<span>An error occurred while loading groups</span>
 					</material-list-item>
 				</template>
 				<template [ngIf]="groups != null">
 					<material-select-item *ngFor="let group of groups" (trigger)="selectGroup(group)"
 										  [selected]="isGroupSelected(group)">
-						{{ group.name }}
+						{{ getItemLabel(group) }}
 					</material-select-item>
 				</template>
 			</template>
 
 		</material-list>
 	</div>
-	<div class="content">
+	<div class="content" [ngClass]="{'disabled': !hasGroupSelected}">
 		<template [ngIf]="!hasGroupSelected">
 			<div class="placeholder">
 				Please select a group to the left
 			</div>
 		</template>
 		<template [ngIf]="hasGroupSelected">
-			Group is selected .. TODO!
+
+			<form class="group-form">
+				<div>
+					<label>Name</label>
+					<material-input [(ngModel)]="selectedGroup.name" name="group-name"></material-input>
+					<i style="color: #999999">&nbsp;(URL: .../group/<b>{{ getUrlFormat(selectedGroup) }}</b>)</i>
+				</div>
+				<div>
+					{{ selectedGroup.animationIds }}
+				</div>
+			</form>
+
 		</template>
 	</div>
 </div>
