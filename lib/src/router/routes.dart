@@ -6,20 +6,40 @@ import 'package:hm_animations/src/ui/view/animation-view/detail/detail_animation
 import 'package:hm_animations/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
 import 'package:hm_animations/src/ui/view/overview/overview_component.template.dart' as overviewComp;
 import 'package:hm_animations/src/ui/view/user-management/user_management_component.template.dart' as userManagementComp;
+import 'package:hm_animations/src/ui/view/group-management/group_management_component.template.dart' as groupManagementComp;
 
 @Injectable()
 class Routes {
-  static final RouteDefinition _overview =
-      new RouteDefinition(routePath: paths.overview, component: overviewComp.OverviewComponentNgFactory, useAsDefault: true);
+  static final RouteDefinition _overview = new RouteDefinition(
+    routePath: paths.overview,
+    component: overviewComp.OverviewComponentNgFactory,
+    useAsDefault: true,
+  );
 
-  static final RouteDefinition _animation =
-      new RouteDefinition(routePath: paths.animation, component: defaultAnimationComp.DefaultAnimationViewComponentNgFactory);
+  static final RouteDefinition _animation = new RouteDefinition(
+    routePath: paths.animation,
+    component: defaultAnimationComp.DefaultAnimationViewComponentNgFactory,
+  );
 
-  static final RouteDefinition _detail = new RouteDefinition(routePath: paths.detail, component: detailAnimationComp.DetailAnimationViewComponentNgFactory);
+  static final RouteDefinition _detail = new RouteDefinition(
+    routePath: paths.detail,
+    component: detailAnimationComp.DetailAnimationViewComponentNgFactory,
+  );
 
-  static final RouteDefinition _user = new RouteDefinition(routePath: paths.user, component: userManagementComp.UserManagementComponentNgFactory);
+  static final RouteDefinition _user = new RouteDefinition(
+    routePath: paths.user,
+    component: userManagementComp.UserManagementComponentNgFactory,
+  );
 
-  static final RouteDefinition _notFound = new RouteDefinition(routePath: paths.notFound, component: notFoundComp.NotFoundComponentNgFactory);
+  static final RouteDefinition _groupManagement = new RouteDefinition(
+    routePath: paths.groupManagement,
+    component: groupManagementComp.GroupManagementComponentNgFactory,
+  );
+
+  static final RouteDefinition _notFound = new RouteDefinition(
+    routePath: paths.notFound,
+    component: notFoundComp.NotFoundComponentNgFactory,
+  );
 
   RouteDefinition get overview => _overview;
 

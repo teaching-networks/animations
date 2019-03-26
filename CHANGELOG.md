@@ -6,7 +6,7 @@
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
 ### 1.7.0
-- TODO
+- New Admin interfaces for editing animation title, short description and description as well as one for adding animation groups
 
 ### 1.6.0
 - Added Hidden Node Problem (RTS/CTS) animations

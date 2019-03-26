@@ -164,8 +164,9 @@ class AppComponent implements OnInit, OnDestroy {
    */
   int get year => new DateTime.now().year;
 
-  String get languageSelectionLabel =>
-      languageSelectionModel.selectedValues.isNotEmpty ? languageSelectionModel.selectedValues.first.toString() : _i18n.get("languageSelectionLabel").toString();
+  String get languageSelectionLabel => languageSelectionModel.selectedValues.isNotEmpty
+      ? languageSelectionModel.selectedValues.first.toString()
+      : _i18n.get("languageSelectionLabel").toString();
 
   /**
    * Get component factory for components that display the language items in the language selection dropdown.
