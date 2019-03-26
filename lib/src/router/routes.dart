@@ -51,5 +51,7 @@ class Routes {
 
   RouteDefinition get notFound => _notFound;
 
-  final List<RouteDefinition> all = [_overview, _animation, _detail, _user, _notFound];
+  RouteDefinition get groupManagement => _groupManagement;
+
+  final List<RouteDefinition> all = [_overview, _animation, _detail, _user, _groupManagement, _notFound];
 }

@@ -1,0 +1,45 @@
+<h1>Group Management</h1>
+
+<div class="manage-wrapper">
+	<div class="sidebar">
+
+		<material-list width="3">
+			<div group>
+				<material-list-item>
+					<material-icon icon="create"></material-icon>
+					Create group
+				</material-list-item>
+			</div>
+
+			<template [ngIf]="isLoadingGroups">
+				<material-list-item class="centered-list-item">
+					<material-spinner></material-spinner>
+				</material-list-item>
+			</template>
+			<template [ngIf]="!isLoadingGroups">
+				<template [ngIf]="groups == null">
+					<material-list-item class="centered-list-item">
+						An error occurred while loading groups
+					</material-list-item>
+				</template>
+				<template [ngIf]="groups != null">
+					<material-select-item *ngFor="let group of groups" (trigger)="selectGroup(group)"
+										  [selected]="isGroupSelected(group)">
+						{{ group.name }}
+					</material-select-item>
+				</template>
+			</template>
+
+		</material-list>
+	</div>
+	<div class="content">
+		<template [ngIf]="!hasGroupSelected">
+			<div class="placeholder">
+				Please select a group to the left
+			</div>
+		</template>
+		<template [ngIf]="hasGroupSelected">
+			Group is selected .. TODO!
+		</template>
+	</div>
+</div>
