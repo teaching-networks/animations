@@ -14,7 +14,7 @@ class Group implements Serializable<Group> {
 
   /// Create group.
   Group({
-    this.id = -1,
+    this.id,
     @required this.name,
     @required this.animationIds,
   });
@@ -40,9 +40,16 @@ class Group implements Serializable<Group> {
   }
 
   @override
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "animationIds": animationIds,
-      };
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> result = Map<String, dynamic>();
+
+    if (id != null) {
+      result["id"] = id;
+    }
+
+    result["name"] = name;
+    result["animationIds"] = animationIds;
+
+    return result;
+  }
 }

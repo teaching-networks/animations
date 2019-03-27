@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/animation_service/model/animation.dart';
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
@@ -13,7 +14,7 @@ import 'package:hm_animations/src/util/network/network_util.dart';
 /// Service holding all animations.
 @Injectable()
 class AnimationService {
-  Map<String, AnimationDescriptor> _animationDescriptorLookup = new Map<String, AnimationDescriptor>();
+  Map<String, AnimationDescriptor<dynamic>> _animationDescriptorLookup = new Map<String, AnimationDescriptor<dynamic>>();
 
   final AuthenticationService _authService;
   NetworkClient _http;
@@ -68,7 +69,7 @@ class AnimationService {
     return [];
   }
 
-  Future<Map<String, AnimationDescriptor>> getAnimationDescriptors() async {
+  Future<Map<String, AnimationDescriptor<dynamic>>> getAnimationDescriptors() async {
     if (_authService.isLoggedIn) {
       return _animationDescriptorLookup;
     } else {

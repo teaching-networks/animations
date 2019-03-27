@@ -1,16 +1,41 @@
-<h1>Group Management</h1>
+<h1>{{ "group-management.title" | i18n }}</h1>
 
 <div class="manage-wrapper">
 	<div class="sidebar">
 
 		<material-list width="3">
 			<div group class="actions">
-				<material-list-item>
+				<div label class="group-sidebar-label">
+					<material-icon size="x-small" icon="build"></material-icon>
+					{{ "group-management.menu.actions" | i18n }}
+				</div>
+				<material-list-item (trigger)="createGroup()">
 					<material-icon icon="create"></material-icon>
-					Create group
+					{{ "group-management.menu.create-group" | i18n }}
+				</material-list-item>
+
+				<material-list-item [ngClass]="{'updated': recentlySaved}"
+									[disabled]="!hasGroupSelected || saveInProgress"
+									(trigger)="saveGroup(selectedGroup)">
+					<material-spinner *ngIf="saveInProgress"></material-spinner>
+					<material-icon *ngIf="!saveInProgress && !hasSaveError" icon="save"></material-icon>
+					<material-icon *ngIf="hasSaveError" icon="error"></material-icon>
+					{{ getSaveButtonLabel() }}
+				</material-list-item>
+				<material-list-item [ngClass]="{'updated': recentlyDeleted}"
+									[disabled]="!hasGroupSelected || deleteInProgress"
+									(trigger)="deleteGroup(selectedGroup)">
+					<material-spinner *ngIf="deleteInProgress"></material-spinner>
+					<material-icon *ngIf="!deleteInProgress && !hasDeleteError" icon="delete_forever"></material-icon>
+					<material-icon *ngIf="hasDeleteError" icon="error"></material-icon>
+					{{ getDeleteButtonLabel() }}
 				</material-list-item>
 			</div>
 
+			<div label class="group-sidebar-label">
+				<material-icon size="x-small" icon="playlist_play"></material-icon>
+				{{ "group-management.menu.groups" | i18n }}
+			</div>
 			<template [ngIf]="isLoadingGroups">
 				<material-list-item class="centered-list-item">
 					<material-spinner></material-spinner>
@@ -20,7 +45,7 @@
 				<template [ngIf]="groups == null">
 					<material-list-item class="centered-list-item">
 						<material-icon icon="error"></material-icon>
-						<span>An error occurred while loading groups</span>
+						<span>{{ "group-management.error-group-loading" | i18n }}</span>
 					</material-list-item>
 				</template>
 				<template [ngIf]="groups != null">
@@ -36,19 +61,37 @@
 	<div class="content" [ngClass]="{'disabled': !hasGroupSelected}">
 		<template [ngIf]="!hasGroupSelected">
 			<div class="placeholder">
-				Please select a group to the left
+				{{ "group-management.placeholder" | i18n }}
 			</div>
 		</template>
 		<template [ngIf]="hasGroupSelected">
 
 			<form class="group-form">
 				<div>
-					<label>Name</label>
+					<label>{{ "group-management.group-name" | i18n }}</label>
 					<material-input [(ngModel)]="selectedGroup.name" name="group-name"></material-input>
-					<i style="color: #999999">&nbsp;(URL: .../group/<b>{{ getUrlFormat(selectedGroup) }}</b>)</i>
+					<i style="color: lightslategray">&nbsp;(URL: {{ getExampleUrl(selectedGroup) }})</i>
 				</div>
-				<div>
-					{{ selectedGroup.animationIds }}
+				<div class="animation-list">
+					<div style="margin-bottom: 0.5em">
+						<label>{{ "group-management.animations-to-display" | i18n }}</label>
+					</div>
+					<div>
+						<div *ngIf="isLoadingAnimations" class="progress">
+							<material-spinner></material-spinner>
+						</div>
+						<ul *ngIf="!isLoadingAnimations" class="animation-item-list">
+							<li *ngFor="let descriptor of animationDescriptors">
+								<material-button (click)="toggleAnimationInGroup(selectedGroup, descriptor.id)">
+									<material-checkbox
+											[checked]="groupContainsAnimation(selectedGroup, descriptor.id)">
+									</material-checkbox>
+									<img src="{{ descriptor.previewImagePath }}" height="48">
+									<span>&nbsp;{{ getAnimationName(descriptor) }}</span>
+								</material-button>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</form>
 

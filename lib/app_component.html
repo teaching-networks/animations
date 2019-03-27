@@ -11,6 +11,9 @@
 			<a *restricted [routerLink]="routes.user.toUrl()">
 				<material-icon icon="person" class="animated"></material-icon>
 				{{ "user-management" | i18n }}</a>
+			<a *restricted [routerLink]="routes.groupManagement.toUrl()">
+				<material-icon icon="playlist_play" class="animated"></material-icon>
+				{{ "group-management" | i18n }}</a>
 		</nav>
 	</div>
 </header>

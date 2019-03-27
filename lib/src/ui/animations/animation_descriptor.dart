@@ -1,10 +1,12 @@
 import 'package:angular/angular.dart';
+import 'package:meta/meta.dart';
 
 class AnimationDescriptor<T> {
   /**
    * Id of the animation.
    */
   final int id;
+
   /**
    * Type of the animation (e. g. the Animation components class).
    */
@@ -25,5 +27,11 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
-  const AnimationDescriptor(this.id, this.componentFactory, this.baseTranslationKey, this.previewImagePath, this.path);
+  const AnimationDescriptor({
+    @required this.id,
+    @required this.componentFactory,
+    @required this.baseTranslationKey,
+    @required this.previewImagePath,
+    @required this.path,
+  });
 }
