@@ -70,23 +70,7 @@ class AnimationService {
   }
 
   Future<Map<String, AnimationDescriptor<dynamic>>> getAnimationDescriptors() async {
-    if (_authService.isLoggedIn) {
-      return _animationDescriptorLookup;
-    } else {
-      List<Animation> animations = await getAnimations();
-
-      var result = Map<String, AnimationDescriptor>();
-
-      for (AnimationDescriptor descriptor in Animations.ANIMATIONS) {
-        Animation animation = _findAnimationForId(animations, descriptor.id);
-
-        if (animation == null || animation.visible) {
-          result[descriptor.path] = descriptor;
-        }
-      }
-
-      return result;
-    }
+    return _animationDescriptorLookup;
   }
 
   Animation _findAnimationForId(List<Animation> animations, int id) {

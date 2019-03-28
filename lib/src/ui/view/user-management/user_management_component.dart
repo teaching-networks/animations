@@ -81,7 +81,7 @@ class UserManagementComponent implements OnInit, OnDestroy {
     _loggedInSub = _authenticationService.loggedIn.listen((loggedIn) {
       if (!loggedIn) {
         // If logged out while on user management page.
-        _router.navigate(_routes.overview.path);
+        _router.navigate(_routes.groups.path);
       }
     });
 
