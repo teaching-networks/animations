@@ -65,7 +65,7 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   Set<int> _animationsInGroup;
 
   /// All animations.
-  Map<String, AnimationDescriptor<dynamic>> animationDescriptors;
+  List<AnimationDescriptor<dynamic>> animationDescriptors;
 
   LanguageLoadedListener _languageLoadedListener;
 
@@ -127,11 +127,23 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
       group = _getGroupById(groups, groupId);
       _animationsInGroup = Set.of(group.animationIds);
 
-      animationDescriptors = await _animationService.getAnimationDescriptors();
-      if (animationDescriptors == null) {
+      Map<String, AnimationDescriptor<dynamic>> descriptors = await _animationService.getAnimationDescriptors();
+      if (descriptors == null) {
         state = _CompState.ERROR;
         return;
       }
+
+      // Sort animation descriptors by the group order.
+      List<AnimationDescriptor<dynamic>> descriptorList = descriptors.values.toList();
+      descriptorList.sort((descriptor1, descriptor2) {
+        if (!group.animationIdOrder.contains(descriptor1.id) || !group.animationIdOrder.contains(descriptor2.id)) {
+          return 0;
+        } else {
+          return group.animationIdOrder.indexOf(descriptor1.id) - group.animationIdOrder.indexOf(descriptor2.id);
+        }
+      });
+
+      animationDescriptors = descriptorList;
 
       state = _CompState.SUCCESS;
     } catch (e) {
@@ -193,7 +205,7 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   }
 
   Iterable<AnimationDescriptor<dynamic>> get animationDescriptorsToShow =>
-      !_isLoggedIn ? animationDescriptors.values.where((descriptor) => _animationsInGroup.contains(descriptor.id)) : animationDescriptors.values;
+      !_isLoggedIn ? animationDescriptors.where((descriptor) => _animationsInGroup.contains(descriptor.id)) : animationDescriptors;
 
   _CompState get loadingState => _CompState.LOADING;
 

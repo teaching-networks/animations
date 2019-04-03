@@ -18,6 +18,10 @@ import 'package:hm_animations/src/services/group_service/model/group.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/ui/misc/dnd_list/dnd_list_component.dart';
+import 'package:hm_animations/src/ui/view/group-management/animation_list_item/animation_list_item_component.dart';
+import 'package:hm_animations/src/ui/view/group-management/animation_list_item/animation_list_item_component.template.dart' as animationListItemRenderer;
+import 'package:hm_animations/src/ui/view/group-management/selected_group.service.dart';
 import 'package:hm_animations/src/util/name_util.dart';
 import 'package:hm_animations/src/util/network/network_util.dart';
 
@@ -38,9 +42,14 @@ import 'package:hm_animations/src/util/network/network_util.dart';
     materialInputDirectives,
     MaterialButtonComponent,
     MaterialCheckboxComponent,
+    DnDListComponent,
+    AnimationListItemComponent,
   ],
   pipes: [
     I18nPipe,
+  ],
+  providers: [
+    ClassProvider(SelectedGroupService),
   ],
 )
 class GroupManagementComponent implements OnInit, OnDestroy {
@@ -68,17 +77,20 @@ class GroupManagementComponent implements OnInit, OnDestroy {
   /// Change detector reference used to update the component.
   final ChangeDetectorRef _cd;
 
+  /// Group allowing communication with the animation items in the drag and drop list.
+  final SelectedGroupService _selectedGroupService;
+
   /// Groups to display.
   List<Group> _groups;
-
-  /// The currently selected group.
-  Group _selectedGroup;
 
   /// Whether currently loading groups.
   bool _isLoadingGroups = true;
 
   /// Descriptors of available animations.
   List<AnimationDescriptor<dynamic>> _animationDescriptors;
+
+  /// View of the animation descriptors which will be sorted by the drag and drop list.
+  List<AnimationDescriptor<dynamic>> currentAnimationsDescriptorsView;
 
   /// Whether animations are currently loading.
   bool _isLoadingAnimations = true;
@@ -122,6 +134,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
     this._authenticationService,
     this._router,
     this._routes,
+    this._selectedGroupService,
   );
 
   @override
@@ -192,7 +205,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
   }
 
   /// Check if a group is selected.
-  bool get hasGroupSelected => _selectedGroup != null;
+  bool get hasGroupSelected => _selectedGroupService.selectedGroup != null;
 
   /// Whether we are currently loading groups.
   bool get isLoadingGroups => _isLoadingGroups;
@@ -219,7 +232,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
   bool get recentlyDeleted => _recentlyDeleted;
 
   /// Get the currently selected group.
-  Group get selectedGroup => _selectedGroup;
+  Group get selectedGroup => _selectedGroupService.selectedGroup;
 
   /// Get all groups to display.
   List<Group> get groups => _groups;
@@ -227,11 +240,34 @@ class GroupManagementComponent implements OnInit, OnDestroy {
   /// Get all animation descriptors to display.
   List<AnimationDescriptor<dynamic>> get animationDescriptors => _animationDescriptors;
 
+  /// Get the item renderer for the animation descriptor items.
+  ComponentFactory<AnimationListItemComponent> get animationItemRenderer => animationListItemRenderer.AnimationListItemComponentNgFactory;
+
   /// Select the passed [group] in the list.
-  void selectGroup(Group group) => _selectedGroup = group;
+  void selectGroup(Group group) {
+    // First and foremost save the current animation order.
+    if (hasGroupSelected) {
+      group.animationIdOrder = currentAnimationsDescriptorsView.map((descriptor) => descriptor.id).toList();
+    }
+
+    _selectedGroupService.selectedGroup = group;
+
+    if (group != null) {
+      currentAnimationsDescriptorsView = _animationDescriptors.sublist(0);
+
+      // Sort descriptors by the order stored in the group.
+      currentAnimationsDescriptorsView.sort((descriptor1, descriptor2) {
+        if (!group.animationIdOrder.contains(descriptor1.id) || !group.animationIdOrder.contains(descriptor2.id)) {
+          return 0;
+        } else {
+          return group.animationIdOrder.indexOf(descriptor1.id) - group.animationIdOrder.indexOf(descriptor2.id);
+        }
+      });
+    }
+  }
 
   /// Check if group is selected.
-  bool isGroupSelected(Group group) => group == _selectedGroup;
+  bool isGroupSelected(Group group) => group == _selectedGroupService.selectedGroup;
 
   /// Get a groups name for a list item.
   String getItemLabel(Group group) => group.name != null && group.name.length > 0 ? group.name : _emptyNameLabel.toString();
@@ -266,7 +302,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
 
     groups.add(newGroup);
 
-    _selectedGroup = newGroup;
+    selectGroup(newGroup);
   }
 
   /// Delete the passed group.
@@ -285,7 +321,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
           _hasDeleteError = true;
         } else {
           groups.remove(group);
-          _selectedGroup = null;
+          selectGroup(null);
         }
       } catch (e) {
         _hasDeleteError = true;
@@ -295,7 +331,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
       }
     } else {
       groups.remove(group);
-      _selectedGroup = null;
+      selectGroup(null);
     }
   }
 
@@ -306,6 +342,11 @@ class GroupManagementComponent implements OnInit, OnDestroy {
     _cd.markForCheck();
 
     int index = groups.indexOf(group);
+
+    // First and foremost save the current animation order.
+    if (hasGroupSelected) {
+      group.animationIdOrder = currentAnimationsDescriptorsView.map((descriptor) => descriptor.id).toList();
+    }
 
     try {
       bool success = false;

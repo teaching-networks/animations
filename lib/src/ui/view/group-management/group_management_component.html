@@ -80,17 +80,10 @@
 						<div *ngIf="isLoadingAnimations" class="progress">
 							<material-spinner></material-spinner>
 						</div>
-						<ul *ngIf="!isLoadingAnimations" class="animation-item-list">
-							<li *ngFor="let descriptor of animationDescriptors">
-								<material-button (click)="toggleAnimationInGroup(selectedGroup, descriptor.id)">
-									<material-checkbox
-											[checked]="groupContainsAnimation(selectedGroup, descriptor.id)">
-									</material-checkbox>
-									<img src="{{ descriptor.previewImagePath }}" height="48">
-									<span>&nbsp;{{ getAnimationName(descriptor) }}</span>
-								</material-button>
-							</li>
-						</ul>
+						<div *ngIf="!isLoadingAnimations">
+							<dnd-list [items]="currentAnimationsDescriptorsView"
+									  [itemRenderer]="animationItemRenderer"></dnd-list>
+						</div>
 					</div>
 				</div>
 			</form>

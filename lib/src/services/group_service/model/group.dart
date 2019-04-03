@@ -12,11 +12,15 @@ class Group implements Serializable<Group> {
   /// List of animation ids to associate with the group.
   List<int> animationIds;
 
+  /// All animation ids in the correct order.
+  List<int> animationIdOrder;
+
   /// Create group.
   Group({
     this.id,
     @required this.name,
     @required this.animationIds,
+    @required this.animationIdOrder,
   });
 
   /// Create an empty group.
@@ -36,6 +40,12 @@ class Group implements Serializable<Group> {
     }
     animationIds = animIds;
 
+    List<int> animIdsOrder = List<int>();
+    for (dynamic value in json["animationIdOrder"]) {
+      animIdsOrder.add(value);
+    }
+    animationIdOrder = animIdsOrder;
+
     return this;
   }
 
@@ -49,6 +59,7 @@ class Group implements Serializable<Group> {
 
     result["name"] = name;
     result["animationIds"] = animationIds;
+    result["animationIdOrder"] = animationIdOrder;
 
     return result;
   }

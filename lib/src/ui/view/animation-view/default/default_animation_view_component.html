@@ -1,6 +1,6 @@
 <h1 *ngIf="animationTitle != null">{{ animationTitle.toString() }}</h1>
 
-<dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
+<dynamic-content *ngIf="componentToShow != null" [componentFactory]="componentToShow"></dynamic-content>
 
 <div class="centered-panel info-box" *ngIf="isLoading || notVisible || isError">
 	<material-spinner *ngIf="isLoading"></material-spinner>
