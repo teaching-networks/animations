@@ -1,0 +1,20 @@
+.group-form {
+  & label {
+    margin-right: 1.0em;
+    color: white;
+    background-color: slategray;
+    border-radius: 1.0em;
+    padding: 0.1em 0.5em;
+    font-weight: bold;
+  }
+}
+
+.animation-list {
+  .progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    width: 100%;
+  }
+}

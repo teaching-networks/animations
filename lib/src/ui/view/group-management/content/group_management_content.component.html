@@ -1,0 +1,21 @@
+<form class="group-form" *ngIf="group != null">
+	<div>
+		<label>{{ "group-management.group-name" | i18n }}</label>
+		<material-input [(ngModel)]="group.name" name="group-name"></material-input>
+		<i style="color: lightslategray">&nbsp;(URL: {{ getExampleUrl(group) }})</i>
+	</div>
+	<div class="animation-list">
+		<div style="margin-bottom: 0.5em">
+			<label>{{ "group-management.animations-to-display" | i18n }}</label>
+		</div>
+		<div>
+			<div *ngIf="isLoadingAnimations" class="progress">
+				<material-spinner></material-spinner>
+			</div>
+			<div *ngIf="!isLoadingAnimations">
+				<dnd-list [items]="currentAnimationsDescriptorsView"
+						  [itemRenderer]="animationItemRenderer"></dnd-list>
+			</div>
+		</div>
+	</div>
+</form>

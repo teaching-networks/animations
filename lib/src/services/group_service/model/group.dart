@@ -63,4 +63,9 @@ class Group implements Serializable<Group> {
 
     return result;
   }
+
+  @override
+  String toString() {
+    return name;
+  }
 }
