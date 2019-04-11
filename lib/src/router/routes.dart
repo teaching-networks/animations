@@ -7,7 +7,7 @@ import 'package:hm_animations/src/ui/view/group-management/group_management_comp
 import 'package:hm_animations/src/ui/view/group_list/group_list.component.template.dart' as groupListComponent;
 import 'package:hm_animations/src/ui/view/animation_list/animation_list.component.template.dart' as animationListComponent;
 import 'package:hm_animations/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
-import 'package:hm_animations/src/ui/view/user-management/user_management_component.template.dart' as userManagementComp;
+import 'package:hm_animations/src/ui/view/user_management/user_management_component.template.dart' as userManagementComp;
 
 @Injectable()
 class Routes {
@@ -32,8 +32,8 @@ class Routes {
     component: detailAnimationComp.DetailAnimationViewComponentNgFactory,
   );
 
-  static final RouteDefinition _user = new RouteDefinition(
-    routePath: paths.user,
+  static final RouteDefinition _userManagement = new RouteDefinition(
+    routePath: paths.userManagement,
     component: userManagementComp.UserManagementComponentNgFactory,
   );
 
@@ -55,7 +55,7 @@ class Routes {
 
   RouteDefinition get detail => _detail;
 
-  RouteDefinition get user => _user;
+  RouteDefinition get userManagement => _userManagement;
 
   RouteDefinition get notFound => _notFound;
 
@@ -66,7 +66,7 @@ class Routes {
     _group,
     _animation,
     _detail,
-    _user,
+    _userManagement,
     _groupManagement,
     _notFound,
   ];

@@ -6,7 +6,7 @@ final groups = new RoutePath(path: "groups");
 final group = new RoutePath(path: "group/:$idParam");
 final animation = new RoutePath(path: "animation/:$idParam");
 final detail = new RoutePath(path: "detail/:$idParam");
-final user = new RoutePath(path: "user");
+final userManagement = new RoutePath(path: "manage-users");
 final groupManagement = new RoutePath(path: "manage-groups");
 final notFound = new RoutePath(path: ".+");
 

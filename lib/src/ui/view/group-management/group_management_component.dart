@@ -114,10 +114,13 @@ class GroupManagementComponent implements OnInit, OnDestroy {
     }
   }
 
+  /// The future loading all groups.
   Future<List<Group>> get loadFuture => _loadFuture;
 
+  /// Factory producing the content component showing a group.
   ComponentFactory<GroupManagementContentComponent> get contentComponentFactory => groupManagementContentComponent.GroupManagementContentComponentNgFactory;
 
+  /// Factory producing groups.
   EntityFactory<Group> get groupFactory => () => Group(
         name: _newGroupLabel.toString(),
         animationIds: [],

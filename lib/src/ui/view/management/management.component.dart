@@ -288,6 +288,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     T saved = await _contentComponent.onSave();
     if (saved != null) {
       entities[index] = saved;
+      selectEntity(saved);
 
       _recentlySaved = true;
       Future.delayed(_waitDuration).then((_) {
@@ -303,7 +304,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   }
 
   /// Get an entity name.
-  String getLabel(T entity) => entity != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
+  String getLabel(T entity) => entity != null && entity.toString() != null &&  entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
 
   /// Get the label for the delete button.
   String getDeleteButtonLabel() {
