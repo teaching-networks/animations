@@ -81,6 +81,12 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   /// Whether an entity has been recently saved.
   bool _recentlySaved = false;
 
+  /// Whether creating entities is enabled.
+  bool _createEnabled = true;
+
+  /// Whether deleting entities is enabled.
+  bool _deleteEnabled = true;
+
   /// Container where to inject the content component.
   @ViewChild("content", read: ViewContainerRef)
   ViewContainerRef contentContainer;
@@ -181,6 +187,24 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   void set entityFactory(EntityFactory<T> value) {
     _entityFactory = value;
   }
+
+  /// Set whether entity creation is enabled.
+  @Input("create-enabled")
+  set createEnabled(bool value) {
+    _createEnabled = value;
+  }
+
+  /// Whether entities can be created.
+  bool get createEnabled => _createEnabled;
+
+  /// Set whether entity deletion is enabled.
+  @Input("delete-enabled")
+  set deleteEnabled(bool value) {
+    _deleteEnabled = value;
+  }
+
+  /// Whether entities can be deleted.
+  bool get deleteEnabled => _deleteEnabled;
 
   /// Get all entities to show.
   List<T> get entities => _entities;
@@ -304,7 +328,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   }
 
   /// Get an entity name.
-  String getLabel(T entity) => entity != null && entity.toString() != null &&  entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
+  String getLabel(T entity) => entity != null && entity.toString() != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
 
   /// Get the label for the delete button.
   String getDeleteButtonLabel() {

@@ -8,6 +8,7 @@ import 'package:hm_animations/src/ui/view/group_list/group_list.component.templa
 import 'package:hm_animations/src/ui/view/animation_list/animation_list.component.template.dart' as animationListComponent;
 import 'package:hm_animations/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
 import 'package:hm_animations/src/ui/view/user_management/user_management_component.template.dart' as userManagementComp;
+import 'package:hm_animations/src/ui/view/animation_management/animation_management.component.template.dart' as animationManagementComponent;
 
 @Injectable()
 class Routes {
@@ -37,6 +38,11 @@ class Routes {
     component: userManagementComp.UserManagementComponentNgFactory,
   );
 
+  static final RouteDefinition _animationManagement = new RouteDefinition(
+    routePath: paths.animationManagement,
+    component: animationManagementComponent.AnimationManagementComponentNgFactory,
+  );
+
   static final RouteDefinition _groupManagement = new RouteDefinition(
     routePath: paths.groupManagement,
     component: groupManagementComp.GroupManagementComponentNgFactory,
@@ -61,6 +67,8 @@ class Routes {
 
   RouteDefinition get groupManagement => _groupManagement;
 
+  RouteDefinition get animationManagement => _animationManagement;
+
   final List<RouteDefinition> all = [
     _groups,
     _group,
@@ -68,6 +76,7 @@ class Routes {
     _detail,
     _userManagement,
     _groupManagement,
+    _animationManagement,
     _notFound,
   ];
 }

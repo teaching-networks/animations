@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/animation_service/model/animation.dart';
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/network_service/network_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animations.dart';
@@ -17,9 +18,14 @@ class AnimationService {
   Map<String, AnimationDescriptor<dynamic>> _animationDescriptorLookup = new Map<String, AnimationDescriptor<dynamic>>();
 
   final AuthenticationService _authService;
+  final I18nService _i18n;
   NetworkClient _http;
 
-  AnimationService(this._authService, NetworkService networkService) {
+  AnimationService(
+    this._authService,
+    this._i18n,
+    NetworkService networkService,
+  ) {
     _http = networkService.client;
 
     _initAnimationDescriptorLookup();
@@ -95,5 +101,54 @@ class AnimationService {
     }
 
     return result;
+  }
+
+  /// Retrieve a property for an animation or null if not found.
+  Future<String> getProperty(int animationId, String key) async {
+    final response = await _http.get(NetworkUtil.getURL("api/animation/property/${animationId}/${_i18n.getCurrentLocale()}/?key=$key"));
+
+    if (response.statusCode == NetworkStatusCode.OK) {
+      Map<String, dynamic> result = json.decode(response.body);
+
+      return result["value"];
+    }
+
+    return null;
+  }
+
+  /// Set a property for an animation.
+  /// Return whether the operation was successful.
+  Future<bool> setProperty(int animationId, String key, String value) async {
+    final response = await _http.post(NetworkUtil.getURL("api/animation/property/${animationId}/${_i18n.getCurrentLocale()}/?key=$key"), body: value);
+
+    return response.statusCode == NetworkStatusCode.OK;
+  }
+
+  /// Retrieve all properties for an animation or null if nothing is found.
+  Future<Map<String, String>> getProperties(int animationId) async {
+    final response = await _http.get(NetworkUtil.getURL("api/animation/property/${animationId}/${_i18n.getCurrentLocale()}/"));
+
+    if (response.statusCode == NetworkStatusCode.OK) {
+      List<dynamic> result = json.decode(response.body);
+
+      if (result == null || result.isEmpty) {
+        return null;
+      }
+
+      Map<String, String> properties = Map<String, String>();
+      for (int i = 0; i < result.length; i++) {
+        if (!(result[i] is Map<String, dynamic>)) {
+          return null;
+        }
+
+        Map<String, dynamic> map = result[i];
+
+        properties[map["key"]] = map["value"];
+      }
+
+      return properties;
+    }
+
+    return null;
   }
 }

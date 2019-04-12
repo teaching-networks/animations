@@ -8,12 +8,19 @@
 			<a [routerLink]="routes.groups.toUrl()">
 				<material-icon icon="home" class="animated"></material-icon>
 				{{ "overview" | i18n }}</a>
-			<a *restricted [routerLink]="routes.userManagement.toUrl()">
-				<material-icon icon="person" class="animated"></material-icon>
-				{{ "user-management" | i18n }}</a>
-			<a *restricted [routerLink]="routes.groupManagement.toUrl()">
-				<material-icon icon="playlist_play" class="animated"></material-icon>
-				{{ "group-management" | i18n }}</a>
+
+			<span *restricted>
+				<a [routerLink]="routes.userManagement.toUrl()">
+					<material-icon icon="person" class="animated"></material-icon>
+					{{ "user-management" | i18n }}</a>
+				<a [routerLink]="routes.animationManagement.toUrl()">
+					<material-icon icon="play_arrow" class="animated"></material-icon>
+					{{ "animation-management" | i18n }}</a>
+				<a [routerLink]="routes.groupManagement.toUrl()">
+					<material-icon icon="playlist_play" class="animated"></material-icon>
+					{{ "group-management" | i18n }}</a>
+			</span>
+
 		</nav>
 	</div>
 </header>

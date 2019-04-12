@@ -7,7 +7,9 @@
 					<material-icon size="x-small" icon="build"></material-icon>
 					{{ "management-component.menu.actions" | i18n }}
 				</div>
-				<material-list-item [disabled]="!canCreateEntity" (trigger)="createEntity()">
+				<material-list-item *ngIf="createEnabled"
+									[disabled]="!canCreateEntity"
+									(trigger)="createEntity()">
 					<material-icon icon="create"></material-icon>
 					{{ "management-component.menu.create" | i18n }}
 				</material-list-item>
@@ -20,7 +22,8 @@
 					<material-icon *ngIf="hasSaveError" icon="error"></material-icon>
 					{{ getSaveButtonLabel() }}
 				</material-list-item>
-				<material-list-item [ngClass]="{'updated': hasRecentlyDeleted}"
+				<material-list-item *ngIf="deleteEnabled"
+									[ngClass]="{'updated': hasRecentlyDeleted}"
 									[disabled]="!hasEntitySelected || isDeleteInProgress"
 									(trigger)="deleteEntity(selectedEntity)">
 					<material-spinner *ngIf="isDeleteInProgress"></material-spinner>
