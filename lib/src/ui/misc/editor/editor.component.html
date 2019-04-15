@@ -1,0 +1,20 @@
+<material-tab-strip (tabChange)="onTabChange($event)"
+                    [tabLabels]="tabLabels">
+</material-tab-strip>
+
+<div [ngSwitch]="tabIndex" class="editor">
+    <div *ngSwitchCase="0">
+        <material-input multiline
+                        [floatingLabel]="true"
+                        [label]="label"
+                        [rows]="16"
+                        [showCharacterCount]="true"
+                        [maxCount]="maxCount"
+                        [ngModel]="text"
+                        (ngModelChange)="onTextChange($event)"
+                        name="editor">
+        </material-input>
+    </div>
+    <div *ngSwitchCase="1" [innerHTML]="previewHTML">
+    </div>
+</div>

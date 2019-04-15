@@ -261,5 +261,7 @@
 	"csma-ca-animation.legend.nav": "NAV (Network allocation vector)",
 	"csma-ca-animation.settings": "Settings",
 	"csma-ca-animation.label.rts-cts": "RTS/CTS",
-	"csma-ca-animation.animation-speed": "Animation speed"
+	"csma-ca-animation.animation-speed": "Animation speed",
+	"editor.edit": "Edit",
+	"editor.preview": "Preview"
 }

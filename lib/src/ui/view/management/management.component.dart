@@ -14,6 +14,9 @@ import 'package:hm_animations/src/ui/view/management/content/management_componen
 /// Factory for entities.
 typedef T EntityFactory<T>();
 
+/// Factory for item labels.
+typedef String LabelFactory<T>(T entity);
+
 /// Component to manage remote entities.
 @Component(
   selector: "management-component",
@@ -53,6 +56,9 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
 
   /// Factory for producing fresh entities.
   EntityFactory<T> _entityFactory;
+
+  /// Factory for producing item labels.
+  LabelFactory<T> _labelFactory;
 
   /// Entities to show.
   List<T> _entities;
@@ -109,7 +115,9 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     this._cd,
     this._i18n,
     this._componentLoader,
-  );
+  ) {
+    _labelFactory = (entity) => entity != null && entity.toString() != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
+  }
 
   @override
   void ngOnInit() {
@@ -186,6 +194,12 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   @Input("entity-factory")
   void set entityFactory(EntityFactory<T> value) {
     _entityFactory = value;
+  }
+
+  /// Set the label factory producing item labels.
+  @Input("label-factory")
+  void set labelFactory(LabelFactory<T> value) {
+    _labelFactory = value;
   }
 
   /// Set whether entity creation is enabled.
@@ -328,7 +342,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   }
 
   /// Get an entity name.
-  String getLabel(T entity) => entity != null && entity.toString() != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
+  String getLabel(T entity) => _labelFactory(entity);
 
   /// Get the label for the delete button.
   String getDeleteButtonLabel() {
@@ -337,7 +351,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     } else if (hasDeleteError) {
       return _errorLabel.toString();
     } else if (hasEntitySelected) {
-      return "${_deleteLabel.toString()} \"${_selectedEntity.toString()}\"";
+      return "${_deleteLabel.toString()} \"${getLabel(_selectedEntity)}\"";
     } else {
       return _deleteLabel.toString();
     }
@@ -350,7 +364,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     } else if (hasSaveError) {
       return _errorLabel.toString();
     } else if (hasEntitySelected) {
-      return "${_saveLabel.toString()} \"${_selectedEntity.toString()}\"";
+      return "${_saveLabel.toString()} \"${getLabel(_selectedEntity)}\"";
     } else {
       return _saveLabel.toString();
     }

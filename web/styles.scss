@@ -1,6 +1,5 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto);
 @import url(https://fonts.googleapis.com/css?family=Raleway:300);
-
 @import 'package:angular_components/css/material/material';
 @import 'package:angular_components/material_dialog/mixins';
 
@@ -44,6 +43,22 @@ html, body {
 
 h1, h2, h3, h4, h5 {
   font-family: Raleway, Roboto, Helvetica, Arial, sans-serif;
+}
+
+code {
+  border-radius: 2px;
+  background-color: lightcoral;
+  color: white;
+  padding: 0 0.2em;
+}
+
+blockquote {
+  margin-left: 1.5em;
+
+  p {
+    box-shadow: -2px 0 0 0 slategrey;
+    padding-left: 0.5em;
+  }
 }
 
 * {
@@ -187,7 +202,7 @@ ul.highlighted-fields {
       border: none;
       background-color: transparent;
     }
-    
+
     &.labeled > label {
       text-transform: uppercase;
       display: block;

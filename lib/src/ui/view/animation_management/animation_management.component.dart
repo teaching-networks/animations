@@ -10,6 +10,8 @@ import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/view/animation_management/content/animation_management_content.component.dart';
+import 'package:hm_animations/src/ui/view/animation_management/content/animation_management_content.component.template.dart'
+    as animationManagementContent;
 import 'package:hm_animations/src/ui/view/management/management.component.dart';
 
 /// Component used to manage animation details.
@@ -68,7 +70,8 @@ class AnimationManagementComponent implements OnInit, OnDestroy {
   @override
   void ngOnInit() {
     if (!_authenticationService.isLoggedIn) {
-      _router.navigateByUrl("/"); // Redirect to start page because user cannot see group management.
+      _router.navigateByUrl(
+          "/"); // Redirect to start page because user cannot see group management.
     }
 
     _loggedInSub = _authenticationService.loggedIn.listen((loggedIn) {
@@ -103,5 +106,11 @@ class AnimationManagementComponent implements OnInit, OnDestroy {
   Future<List<AnimationDescriptor<dynamic>>> get loadFuture => _loadFuture;
 
   /// Get the component factory producing the content component to display the animation info.
-  ComponentFactory<AnimationManagementContentComponent> get contentComponentFactory => animationManagementContent.AnimationManagementContentComponentNgFactory;
+  ComponentFactory<AnimationManagementContentComponent>
+      get contentComponentFactory => animationManagementContent
+          .AnimationManagementContentComponentNgFactory;
+
+  /// Get the label factory producing item labels.
+  LabelFactory<dynamic> get labelFactory =>
+      (animDesc) => _i18n.get("${animDesc.baseTranslationKey}.name").toString();
 }

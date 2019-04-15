@@ -1,1 +1,8 @@
-<h2>Test :)</h2>
+<h2>Edit Animation</h2>
+
+<div *ngIf="animationDescriptor != null">
+    <editor-component label="Beschreibung"
+                      [maxCount]="maxDescriptionLength"
+                      [(text)]="description">
+    </editor-component>
+</div>
