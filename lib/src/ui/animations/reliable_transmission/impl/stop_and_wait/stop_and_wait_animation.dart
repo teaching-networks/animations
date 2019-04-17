@@ -1,5 +1,6 @@
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/stop_and_wait_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/reliable_transmission_animation.dart';
@@ -10,15 +11,13 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/reliable_t
     styleUrls: const ["stop_and_wait_animation.css"],
     directives: const [ReliableTransmissionAnimation]
 )
-class StopAndWaitAnimation {
+class StopAndWaitAnimation with AnimationUI {
 
   I18nService _i18n;
   ReliableTransmissionProtocol protocol;
-  Message description;
 
   StopAndWaitAnimation(this._i18n) {
     protocol = new StopAndWaitProtocol(_i18n);
-    description = _i18n.get("reliable-transmission-animation.protocol.stop-and-wait.description");
   }
 
 }

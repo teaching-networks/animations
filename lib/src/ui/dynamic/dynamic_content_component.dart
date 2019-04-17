@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:angular/angular.dart';
 
 /// Component showing arbitrary angular components.
@@ -7,7 +9,7 @@ import 'package:angular/angular.dart';
   styleUrls: ["dynamic_content_component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 )
-class DynamicContentComponent<T> {
+class DynamicContentComponent<T> implements OnDestroy {
   /// Container where to inject the angular component.
   @ViewChild("placeholder", read: ViewContainerRef)
   ViewContainerRef placeholder;
@@ -21,8 +23,16 @@ class DynamicContentComponent<T> {
   /// Instance of the currently loaded component.
   T _loadedComponent;
 
+  /// Stream controller emitting events once the component has been loaded.
+  StreamController<T> _compLoadedStreamController = StreamController<T>(sync: false);
+
   /// Create dynamic content instance.
   DynamicContentComponent(this._componentLoader);
+
+  @override
+  void ngOnDestroy() {
+    _compLoadedStreamController.close();
+  }
 
   /// Show the passed component.
   @Input()
@@ -32,9 +42,17 @@ class DynamicContentComponent<T> {
 
       // Load component.
       _loadedComponent = _componentLoader.loadNextToLocation(_componentFactory, placeholder).instance;
+
+      if (_loadedComponent != null) {
+        _compLoadedStreamController.add(_loadedComponent);
+      }
     }
   }
 
   /// Get the currently loaded component.
   T get loadedComponent => _loadedComponent;
+
+  /// Register to this stream to get notified about loaded components.
+  @Output()
+  Stream<T> get loaded => _compLoadedStreamController.stream;
 }

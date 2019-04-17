@@ -98,7 +98,7 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
     _cd.markForCheck();
 
     try {
-      Map<String, AnimationDescriptor<dynamic>> animationDescriptorLookup = await _animationService.getAnimationDescriptors();
+      Map<int, AnimationDescriptor<dynamic>> animationDescriptorLookup = _animationService.getAnimationDescriptors();
       _animationDescriptors = animationDescriptorLookup.values.toList(growable: false);
     } finally {
       _isLoadingAnimations = false;

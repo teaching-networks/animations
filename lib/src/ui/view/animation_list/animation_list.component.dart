@@ -127,7 +127,7 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
       group = _getGroupById(groups, groupId);
       _animationsInGroup = Set.of(group.animationIds);
 
-      Map<String, AnimationDescriptor<dynamic>> descriptors = await _animationService.getAnimationDescriptors();
+      Map<int, AnimationDescriptor<dynamic>> descriptors = _animationService.getAnimationDescriptors();
       if (descriptors == null) {
         state = _CompState.ERROR;
         return;

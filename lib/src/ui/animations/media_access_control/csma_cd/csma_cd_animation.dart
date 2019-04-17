@@ -8,12 +8,14 @@ import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:angular_components/material_icon/material_icon_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/bus_shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 /// Animation showing the CSMA/CD media-access-control protocol.
 @Component(
@@ -30,12 +32,13 @@ import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
     MaterialIconComponent,
     MaterialSliderComponent,
     MaterialIconToggleDirective,
+    DescriptionComponent,
   ],
   pipes: [
     I18nPipe,
   ],
 )
-class CSMACDAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+class CSMACDAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy {
   /// Peers to display in the animation.
   static const int _peerCount = 3;
 

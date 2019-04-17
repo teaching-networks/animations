@@ -15,7 +15,7 @@ import 'package:hm_animations/src/util/network/network_util.dart';
 /// Service holding all animations.
 @Injectable()
 class AnimationService {
-  Map<String, AnimationDescriptor<dynamic>> _animationDescriptorLookup = new Map<String, AnimationDescriptor<dynamic>>();
+  Map<int, AnimationDescriptor<dynamic>> _animationDescriptorLookup = new Map<int, AnimationDescriptor<dynamic>>();
 
   final AuthenticationService _authService;
   final I18nService _i18n;
@@ -35,7 +35,7 @@ class AnimationService {
     _animationDescriptorLookup.clear();
 
     for (AnimationDescriptor descriptor in Animations.ANIMATIONS) {
-      _animationDescriptorLookup[descriptor.path] = descriptor;
+      _animationDescriptorLookup[descriptor.id] = descriptor;
     }
   }
 
@@ -75,7 +75,7 @@ class AnimationService {
     return [];
   }
 
-  Future<Map<String, AnimationDescriptor<dynamic>>> getAnimationDescriptors() async {
+  Map<int, AnimationDescriptor<dynamic>> getAnimationDescriptors() {
     return _animationDescriptorLookup;
   }
 
@@ -131,7 +131,7 @@ class AnimationService {
     if (response.statusCode == NetworkStatusCode.OK) {
       List<dynamic> result = json.decode(response.body);
 
-      if (result == null || result.isEmpty) {
+      if (result == null) {
         return null;
       }
 

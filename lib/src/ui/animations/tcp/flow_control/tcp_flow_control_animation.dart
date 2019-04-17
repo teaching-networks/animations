@@ -6,6 +6,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/shared/packet_line/packet_line.dart';
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/buffer_window.dart';
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/receiver_buffer_window.dart';
@@ -15,15 +16,27 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 /// Animation showing the TCP flow control mechanism.
 @Component(
-    selector: "tcp-flow-control-animation",
-    templateUrl: "tcp_flow_control_animation.html",
-    styleUrls: ["tcp_flow_control_animation.css"],
-    directives: [coreDirectives, CanvasComponent, MaterialButtonComponent, MaterialIconComponent, MaterialAutoSuggestInputComponent, MaterialSliderComponent],
-    pipes: [I18nPipe])
-class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+  selector: "tcp-flow-control-animation",
+  templateUrl: "tcp_flow_control_animation.html",
+  styleUrls: ["tcp_flow_control_animation.css"],
+  directives: [
+    coreDirectives,
+    CanvasComponent,
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    MaterialAutoSuggestInputComponent,
+    MaterialSliderComponent,
+    DescriptionComponent,
+  ],
+  pipes: [
+    I18nPipe,
+  ],
+)
+class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy {
   final I18nService _i18n;
 
   /// Buffer window of the sender.

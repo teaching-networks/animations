@@ -1,51 +1,58 @@
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_query_type.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_scenario.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server_type.dart';
-import 'package:hm_animations/src/ui/animations/dns/dns_system/waypoint_route_drawable.dart';
-import 'package:hm_animations/src/ui/canvas/util/color.dart';
-import 'package:tuple/tuple.dart';
+
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_query_type.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_scenario.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server_type.dart';
+import 'package:hm_animations/src/ui/animations/dns/dns_system/waypoint_route_drawable.dart';
 import 'package:hm_animations/src/ui/animations/shared/location_dot/location_dot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/progress/mutable_progress.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:tuple/tuple.dart';
 
 @Component(
-    selector: "dns-animation",
-    styleUrls: ["dns_animation.css"],
-    templateUrl: "dns_animation.html",
-    directives: [
-      coreDirectives,
-      MaterialButtonComponent,
-      MaterialIconComponent,
-      MaterialDropdownSelectComponent,
-      MaterialCheckboxComponent,
-      MaterialRadioComponent,
-      MaterialRadioGroupComponent,
-      NgModel,
-      CanvasComponent
-    ],
-    pipes: [I18nPipe])
-class DNSAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+  selector: "dns-animation",
+  styleUrls: ["dns_animation.css"],
+  templateUrl: "dns_animation.html",
+  directives: [
+    coreDirectives,
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    MaterialDropdownSelectComponent,
+    MaterialCheckboxComponent,
+    MaterialRadioComponent,
+    MaterialRadioGroupComponent,
+    NgModel,
+    CanvasComponent,
+    DescriptionComponent,
+  ],
+  pipes: [
+    I18nPipe,
+  ],
+)
+class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, OnDestroy {
   static final int _WRAP_BUBBLE_TEXT_AT = 20;
 
   /// Aspect ratio of the world map SVG -> width / height.
-  static final double _MAP_ASPECT_RATIO = 1000 / 1360.0;
+  static final double _MAP_ASPECT_RATIO = 176.6 / 239.5;
 
   final I18nService _i18n;
 
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  final ImageElement _worldMap = new ImageElement(src: "img/animation/germany_map.svg");
+  final ImageElement _worldMap = new ImageElement(src: "img/animation/germany.svg");
 
   static final Point<double> _ORIGIN_LOCATION = Point(0.457, 0.21);
   LocationDot _originDot = LocationDot(color: Colors.SPACE_BLUE);

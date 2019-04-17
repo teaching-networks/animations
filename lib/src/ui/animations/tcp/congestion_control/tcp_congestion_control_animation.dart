@@ -12,6 +12,7 @@ import 'package:angular_components/model/selection/selection_options.dart';
 import 'package:angular_components/model/ui/has_renderer.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_reno.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/impl/tcp_tahoe.dart';
 import 'package:hm_animations/src/ui/animations/tcp/congestion_control/algorithm/tcp_congestion_control_algorithm.dart';
@@ -20,8 +21,8 @@ import 'package:hm_animations/src/ui/animations/tcp/congestion_control/controlle
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_function.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
+import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_function.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
@@ -30,22 +31,28 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 /// Animation showing the TCP congestion control mechanism.
-@Component(selector: "tcp-congestion-control-animation", templateUrl: "tcp_congestion_control_animation.html", styleUrls: [
-  "tcp_congestion_control_animation.css"
-], directives: [
-  coreDirectives,
-  CanvasComponent,
-  MaterialSliderComponent,
-  MaterialButtonComponent,
-  MaterialIconComponent,
-  MaterialTooltipDirective,
-  MaterialDropdownSelectComponent
-], pipes: [
-  I18nPipe
-])
-class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+@Component(
+  selector: "tcp-congestion-control-animation",
+  templateUrl: "tcp_congestion_control_animation.html",
+  styleUrls: ["tcp_congestion_control_animation.css"],
+  directives: [
+    coreDirectives,
+    CanvasComponent,
+    MaterialSliderComponent,
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    MaterialTooltipDirective,
+    MaterialDropdownSelectComponent,
+    DescriptionComponent,
+  ],
+  pipes: [
+    I18nPipe,
+  ],
+)
+class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy {
   /// How many ACKs fit on the x-axis of the graph.
   static const int ACKS_ON_GRAPH_X = 500;
 

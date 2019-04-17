@@ -97,7 +97,7 @@ class AnimationManagementComponent implements OnInit, OnDestroy {
 
   /// Load all available animations.
   Future<List<AnimationDescriptor<dynamic>>> _loadAnimations() async {
-    final map = await _animationService.getAnimationDescriptors();
+    final map = _animationService.getAnimationDescriptors();
 
     return map.values.toList();
   }

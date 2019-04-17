@@ -1,17 +1,17 @@
 import 'package:hm_animations/src/util/serialize/serializable.dart';
 
 class Animation implements Serializable<Animation> {
-
   int id;
-  bool visible;
+  String url;
 
-  Animation(this.id, this.visible);
+  Animation(this.id, this.url);
+
   Animation.empty();
 
   @override
   Animation fromJson(Map<String, dynamic> json) {
     id = json["id"];
-    visible = json["visible"];
+    url = json["url"];
 
     return this;
   }
@@ -21,9 +21,8 @@ class Animation implements Serializable<Animation> {
     var result = Map<String, dynamic>();
 
     result["id"] = id;
-    result["visible"] = visible;
+    result["url"] = url;
 
     return result;
   }
-
 }

@@ -5,17 +5,30 @@ import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 @Component(
-    selector: "reliable-transmission-animation",
-    templateUrl: "reliable_transmission_animation.html",
-    styleUrls: const ["reliable_transmission_animation.css"],
-    directives: const [coreDirectives, MaterialButtonComponent, MaterialIconComponent, MaterialToggleComponent, MaterialSliderComponent, CanvasComponent],
-    pipes: const [I18nPipe])
+  selector: "reliable-transmission-animation",
+  templateUrl: "reliable_transmission_animation.html",
+  styleUrls: const ["reliable_transmission_animation.css"],
+  directives: const [
+    coreDirectives,
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    MaterialToggleComponent,
+    MaterialSliderComponent,
+    CanvasComponent,
+    DescriptionComponent,
+  ],
+  pipes: const [
+    I18nPipe,
+  ],
+)
 class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy, AfterViewChecked {
   /**
    * Sender and Receiver window for transmission.
@@ -36,7 +49,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   ReliableTransmissionProtocol _protocol;
 
   @Input()
-  Message description;
+  AnimationDescriptor<dynamic> descriptor;
 
   List<String> logMessages = new List<String>();
   bool logChanged = false;
@@ -112,5 +125,4 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   }
 
   ReliableTransmissionProtocol get protocol => _protocol;
-
 }
