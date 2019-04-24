@@ -50,9 +50,6 @@ class GroupManagementComponent implements OnInit, OnDestroy {
   /// Change detector reference used to update the component.
   final ChangeDetectorRef _cd;
 
-  /// Group allowing communication with the animation items in the drag and drop list.
-  final SelectedGroupService _selectedGroupService;
-
   LanguageLoadedListener _languageLoadedListener;
 
   StreamSubscription<bool> _loggedInSub;
@@ -69,7 +66,6 @@ class GroupManagementComponent implements OnInit, OnDestroy {
     this._authenticationService,
     this._router,
     this._routes,
-    this._selectedGroupService,
   );
 
   @override

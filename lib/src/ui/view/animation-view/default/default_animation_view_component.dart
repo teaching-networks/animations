@@ -8,7 +8,7 @@ import 'package:hm_animations/src/services/animation_service/model/animation.dar
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
-import 'package:hm_animations/src/ui/animations/animation_property.dart';
+import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
 
@@ -105,10 +105,17 @@ class DefaultAnimationViewComponent implements OnActivate, OnInit, OnDestroy {
       return;
     }
 
-    animationTitle = await _animationService.getProperty(_descriptor.id, AnimationProperty.titleKey);
-    if (animationTitle == null || animationTitle.isEmpty) {
+    final animTitleProp = await _animationService.getProperty(
+      locale: _i18n.getCurrentLocale(),
+      animationId: _descriptor.id,
+      key: AnimationPropertyKeys.titleKey,
+    );
+
+    if (animTitleProp == null || animTitleProp.value.isEmpty) {
       // Fallback to translations.
       animationTitle = _i18n.get("${_descriptor.baseTranslationKey}.name").toString();
+    } else {
+      animationTitle = animTitleProp.value;
     }
 
     _cd.markForCheck();

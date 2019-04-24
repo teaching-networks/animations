@@ -11,7 +11,7 @@ import 'package:hm_animations/src/ui/misc/dnd_list/renderer/list_item_renderer.d
   styleUrls: ["dnd_list_item.component.css"],
   encapsulation: ViewEncapsulation.None,
 )
-class DnDListItemComponent<T, R extends ListItemRenderer<T>> {
+class DnDListItemComponent<T> {
   /// Container where to inject the item renderer.
   @ViewChild("container", read: ViewContainerRef)
   ViewContainerRef container;
@@ -23,7 +23,7 @@ class DnDListItemComponent<T, R extends ListItemRenderer<T>> {
   final Element element;
 
   /// Factory of the item renderer component.
-  ComponentFactory<R> _itemRenderer;
+  ComponentFactory<ListItemRenderer<T>> _itemRenderer;
 
   /// The currently shown renderer instance.
   ListItemRenderer<T> _currentRenderer;
@@ -36,7 +36,7 @@ class DnDListItemComponent<T, R extends ListItemRenderer<T>> {
 
   /// Set the correct item renderer to display the item with.
   @Input()
-  void set itemRenderer(ComponentFactory<R> factory) {
+  void set itemRenderer(ComponentFactory<ListItemRenderer<T>> factory) {
     if (factory != _itemRenderer) {
       _itemRenderer = factory;
 

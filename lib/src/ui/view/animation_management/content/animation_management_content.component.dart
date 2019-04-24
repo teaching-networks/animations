@@ -1,12 +1,14 @@
 import 'package:angular/angular.dart';
 import 'package:angular/core.dart';
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_input/material_input.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
 import 'package:hm_animations/src/services/animation_service/model/animation.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
-import 'package:hm_animations/src/ui/animations/animation_property.dart';
+import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/misc/editor/editor.component.dart';
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
 import 'package:hm_animations/src/util/name_util.dart';
@@ -22,6 +24,8 @@ import 'package:hm_animations/src/util/network/network_util.dart';
     coreDirectives,
     materialInputDirectives,
     EditorComponent,
+    MaterialButtonComponent,
+    MaterialIconComponent,
   ],
   pipes: [
     I18nPipe,
@@ -103,27 +107,36 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
       url = _animation.url;
     }
 
-    _properties = await _animationService.getProperties(_animationDescriptor.id);
-    if (_properties != null) {
-      if (_properties[AnimationProperty.descriptionKey] == null) {
+    final animProps = await _animationService.getProperties(
+      locale: _i18n.getCurrentLocale(),
+      animationId: _animationDescriptor.id,
+    );
+
+    if (animProps != null) {
+      _properties = Map<String, String>();
+      for (final animProp in animProps) {
+        _properties[animProp.key] = animProp.value;
+      }
+
+      if (_properties[AnimationPropertyKeys.descriptionKey] == null) {
         // Load from translations instead
         description = _i18n.get("${_animationDescriptor.baseTranslationKey}.description").toString();
       } else {
-        description = _properties[AnimationProperty.descriptionKey];
+        description = _properties[AnimationPropertyKeys.descriptionKey];
       }
 
-      if (_properties[AnimationProperty.shortDescriptionKey] == null) {
+      if (_properties[AnimationPropertyKeys.shortDescriptionKey] == null) {
         // Load from translations instead
         shortDescription = _i18n.get("${_animationDescriptor.baseTranslationKey}.short-description").toString();
       } else {
-        shortDescription = _properties[AnimationProperty.shortDescriptionKey];
+        shortDescription = _properties[AnimationPropertyKeys.shortDescriptionKey];
       }
 
-      if (_properties[AnimationProperty.titleKey] == null) {
+      if (_properties[AnimationPropertyKeys.titleKey] == null) {
         // Load from translations instead
         title = _i18n.get("${_animationDescriptor.baseTranslationKey}.name").toString();
       } else {
-        title = _properties[AnimationProperty.titleKey];
+        title = _properties[AnimationPropertyKeys.titleKey];
       }
     }
 
@@ -146,21 +159,24 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
 
     // Save description
     if (description != null) {
-      success = await _animationService.setProperty(_animationDescriptor.id, AnimationProperty.descriptionKey, description) && success;
+      success =
+          await _animationService.setProperty(_i18n.getCurrentLocale(), _animationDescriptor.id, AnimationPropertyKeys.descriptionKey, description) && success;
     }
 
     // Save short description
     if (shortDescription != null) {
-      success = await _animationService.setProperty(_animationDescriptor.id, AnimationProperty.shortDescriptionKey, shortDescription) && success;
+      success =
+          await _animationService.setProperty(_i18n.getCurrentLocale(), _animationDescriptor.id, AnimationPropertyKeys.shortDescriptionKey, shortDescription) &&
+              success;
     }
 
     // Save title
     if (title != null) {
-      success = await _animationService.setProperty(_animationDescriptor.id, AnimationProperty.titleKey, title) && success;
+      success = await _animationService.setProperty(_i18n.getCurrentLocale(), _animationDescriptor.id, AnimationPropertyKeys.titleKey, title) && success;
     }
 
     // Save url
-    if (url != null && url.isNotEmpty) {
+    if (url != null) {
       url = getCompliantURL();
 
       if (_animation != null) {
@@ -214,4 +230,12 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
 
   /// The maximum URL character length.
   int get maxURLLength => _maxURLLength;
+
+  /// Reset all fields to default values.
+  void resetToDefaults() {
+    title = _i18n.get("${_animationDescriptor.baseTranslationKey}.name").toString();
+    shortDescription = _i18n.get("${_animationDescriptor.baseTranslationKey}.short-description").toString();
+    description = _i18n.get("${_animationDescriptor.baseTranslationKey}.description").toString();
+    url = "";
+  }
 }

@@ -1,5 +1,5 @@
 /// All animation properties are gathered here.
-class AnimationProperty {
+class AnimationPropertyKeys {
   /// Key of the description property.
   static const String descriptionKey = "description";
 

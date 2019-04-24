@@ -3,7 +3,7 @@ import 'package:angular/core.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
-import 'package:hm_animations/src/ui/animations/animation_property.dart';
+import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:markdown/markdown.dart';
 
 /// Component displaying an animations description.
@@ -36,7 +36,7 @@ class DescriptionComponent implements OnInit, OnDestroy {
   bool _hasPropertyDescription = false;
 
   /// Description to display.
-  String _description = "";
+  String _description;
 
   /// Create component.
   DescriptionComponent(
@@ -66,11 +66,15 @@ class DescriptionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    _description = await _animationService.getProperty(_descriptor.id, AnimationProperty.descriptionKey);
+    final descProp = await _animationService.getProperty(
+      locale: _i18n.getCurrentLocale(),
+      animationId: _descriptor.id,
+      key: AnimationPropertyKeys.descriptionKey,
+    );
 
-    if (_description != null) {
+    if (descProp != null) {
       _hasPropertyDescription = true;
-      _description = markdownToHtml(_description, inlineSyntaxes: [InlineHtmlSyntax()]);
+      _description = markdownToHtml(descProp.value, inlineSyntaxes: [InlineHtmlSyntax()]);
     } else {
       // Load from translations as a fallback.
       _description = _i18n.get("${_descriptor.baseTranslationKey}.description").toString();

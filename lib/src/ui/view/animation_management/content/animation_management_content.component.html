@@ -1,38 +1,47 @@
-<h2>Edit Animation</h2>
+<h2>{{ "animation-management.editor.headline" | i18n }}</h2>
 
 <div *ngIf="animationDescriptor != null">
-    <div>
-        <material-input style="width: 100%"
-                        label="{{ 'animation-management.editor.title' | i18n }}"
-                        [floatingLabel]="true"
-                        [showCharacterCount]="true"
-                        [maxCount]="maxTitleLength"
-                        [(ngModel)]="title">
-        </material-input>
-    </div>
-    <div>
-        <material-input style="width: 250px"
-                        label="{{ 'animation-management.editor.url' | i18n }}"
-                        [floatingLabel]="true"
-                        [showCharacterCount]="true"
-                        [maxCount]="maxURLLength"
-                        [(ngModel)]="url">
-        </material-input>
-        <i style="color: lightslategray">&nbsp;(URL: {{ getExampleUrl() }})</i>
-    </div>
-    <div>
-        <material-input style="width: 100%"
-                        label="{{ 'animation-management.editor.short-description' | i18n }}"
-                        [floatingLabel]="true"
-                        [showCharacterCount]="true"
-                        [maxCount]="maxShortDescriptionLength"
-                        [(ngModel)]="shortDescription">
-        </material-input>
-    </div>
-    <div>
-        <editor-component label="{{ 'animation-management.editor.description' | i18n }}"
-                          [maxCount]="maxDescriptionLength"
-                          [(text)]="description">
-        </editor-component>
-    </div>
+	<div>
+		<material-input style="width: 100%"
+						label="{{ 'animation-management.editor.title' | i18n }}"
+						[floatingLabel]="true"
+						[showCharacterCount]="true"
+						[maxCount]="maxTitleLength"
+						[(ngModel)]="title">
+		</material-input>
+	</div>
+	<div>
+		<material-input style="width: 250px"
+						label="{{ 'animation-management.editor.url' | i18n }}"
+						[floatingLabel]="true"
+						[showCharacterCount]="true"
+						[maxCount]="maxURLLength"
+						[(ngModel)]="url">
+		</material-input>
+		<i style="color: lightslategray">&nbsp;(URL: {{ getExampleUrl() }})</i>
+	</div>
+	<div>
+		<material-input style="width: 100%"
+						label="{{ 'animation-management.editor.short-description' | i18n }}"
+						[floatingLabel]="true"
+						[showCharacterCount]="true"
+						[maxCount]="maxShortDescriptionLength"
+						[(ngModel)]="shortDescription">
+		</material-input>
+	</div>
+	<div>
+		<editor-component label="{{ 'animation-management.editor.description' | i18n }}"
+						  [maxCount]="maxDescriptionLength"
+						  [(text)]="description">
+		</editor-component>
+	</div>
+
+	<hr>
+
+	<div>
+		<material-button raised style="background-color: lightcoral; color: white" (click)="resetToDefaults()">
+			<material-icon icon="delete_forever"></material-icon>
+			{{ "animation-management.editor.reset-to-default" | i18n }}
+		</material-button>
+	</div>
 </div>

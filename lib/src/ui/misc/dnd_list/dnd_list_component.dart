@@ -16,7 +16,7 @@ import 'package:hm_animations/src/ui/misc/dnd_list/renderer/list_item_renderer.d
     DnDListItemComponent,
   ],
 )
-class DnDListComponent<T, R extends ListItemRenderer> implements AfterViewInit, AfterViewChecked, OnDestroy {
+class DnDListComponent<T> implements AfterViewInit, AfterViewChecked, OnDestroy {
   /// The default component factory to use in case no item renderer is defined.
   static ComponentFactory<DefaultItemRendererComponent> _defaultItemRenderer = defaultItemRenderer.DefaultItemRendererComponentNgFactory;
 
@@ -27,7 +27,7 @@ class DnDListComponent<T, R extends ListItemRenderer> implements AfterViewInit, 
   List<T> _items;
 
   /// Renderer for each item.
-  ComponentFactory<R> _itemRenderer;
+  ComponentFactory<ListItemRenderer<T>> _itemRenderer;
 
   /// All sortable item elements..
   @ViewChildren(DnDListItemComponent)
@@ -75,11 +75,11 @@ class DnDListComponent<T, R extends ListItemRenderer> implements AfterViewInit, 
   List<T> get items => _items;
 
   /// Get the item factory to use as item renderer.
-  ComponentFactory<R> get itemRenderer => _itemRenderer != null ? _itemRenderer : _defaultItemRenderer;
+  ComponentFactory<ListItemRenderer<T>> get itemRenderer => _itemRenderer != null ? _itemRenderer : _defaultItemRenderer;
 
   /// Set the item factory to use as item renderer.
   @Input()
-  void set itemRenderer(ComponentFactory<R> value) {
+  void set itemRenderer(ComponentFactory<ListItemRenderer<T>> value) {
     _itemRenderer = value;
   }
 

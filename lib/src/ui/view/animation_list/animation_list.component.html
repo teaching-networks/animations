@@ -36,10 +36,10 @@
 						<div class="mdc-card__media mdc-card__media--16-9 animation-card-image"
 							 [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + '), linear-gradient(to bottom, #EAEAEA 0%, transparent 100%)'}"></div>
 						<div class="animation-card-primary">
-							<h2 class="animation-card-title">{{ getAnimationName(anim.baseTranslationKey) }}</h2>
+							<h2 class="animation-card-title">{{ getAnimationName(anim) }}</h2>
 						</div>
 						<div class="animation-card-secondary">
-							{{ getAnimationDescription(anim.baseTranslationKey) }}
+							{{ getAnimationDescription(anim) }}
 						</div>
 						<div class="mdc-card__actions">
 							<div class="mdc-card__action-buttons">
