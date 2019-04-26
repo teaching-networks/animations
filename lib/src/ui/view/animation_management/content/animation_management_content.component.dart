@@ -105,6 +105,8 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
 
     if (_animation != null) {
       url = _animation.url;
+    } else {
+      url = "";
     }
 
     final animProps = await _animationService.getProperties(
