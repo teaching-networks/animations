@@ -1,19 +1,34 @@
 import 'dart:html';
 import 'dart:math';
+
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 @Component(
-    selector: "transmission-animation",
-    templateUrl: "transmission_animation.html",
-    styleUrls: const ["transmission_animation.css"],
-    directives: const [coreDirectives, MaterialAutoSuggestInputComponent, MaterialButtonComponent, MaterialDropdownSelectComponent, MaterialDropdownSelectComponent, MaterialIconComponent, CanvasComponent],
-    pipes: const [I18nPipe])
-class TransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+  selector: "transmission-animation",
+  templateUrl: "transmission_animation.html",
+  styleUrls: const ["transmission_animation.css"],
+  directives: const [
+    coreDirectives,
+    MaterialAutoSuggestInputComponent,
+    MaterialButtonComponent,
+    MaterialDropdownSelectComponent,
+    MaterialDropdownSelectComponent,
+    MaterialIconComponent,
+    CanvasComponent,
+    DescriptionComponent,
+  ],
+  pipes: const [
+    I18nPipe,
+  ],
+)
+class TransmissionAnimation extends CanvasAnimation with AnimationUI implements OnInit, OnDestroy {
   /**
    * Propagation speed on the connection.
    */

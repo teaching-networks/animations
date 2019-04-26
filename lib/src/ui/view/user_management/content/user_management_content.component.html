@@ -1,0 +1,15 @@
+<form class="user-form" *ngIf="user != null">
+	<div>
+		<material-input [(ngModel)]="user.name" hintText="{{ 'login.username' | i18n }}"
+						name="username"></material-input>
+	</div>
+	<div>
+		<material-input [(ngModel)]="user.password" type="password" hintText="{{ 'login.password' | i18n }}"
+						[label]="passwordLabel"
+						name="password"></material-input>
+	</div>
+
+	<div *ngIf="isEditing">
+		<span>{{ "user-management.edit-user.note" | i18n }}</span>
+	</div>
+</form>

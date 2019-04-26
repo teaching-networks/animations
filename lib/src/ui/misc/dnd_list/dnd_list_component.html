@@ -1,0 +1,7 @@
+<ul class="dnd-list">
+	<dnd-list-item *ngFor="let item of items; let i = index"
+				   [attr.data-index]="i"
+				   [itemRenderer]="itemRenderer"
+				   [item]="item">
+	</dnd-list-item>
+</ul>

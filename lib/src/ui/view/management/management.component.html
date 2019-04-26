@@ -1,0 +1,77 @@
+<div class="manage-wrapper">
+	<div class="sidebar">
+
+		<material-list width="3">
+			<div group class="actions">
+				<div label class="group-sidebar-label">
+					<material-icon size="x-small" icon="build"></material-icon>
+					{{ "management-component.menu.actions" | i18n }}
+				</div>
+				<material-list-item *ngIf="createEnabled"
+									[disabled]="!canCreateEntity"
+									(trigger)="createEntity()">
+					<material-icon icon="create"></material-icon>
+					{{ "management-component.menu.create" | i18n }}
+				</material-list-item>
+
+				<material-list-item [ngClass]="{'updated': hasRecentlySaved}"
+									[disabled]="!hasEntitySelected || isSaveInProgress"
+									(trigger)="saveEntity(selectedEntity)">
+					<material-spinner *ngIf="isSaveInProgress"></material-spinner>
+					<material-icon *ngIf="!isSaveInProgress && !hasSaveError" icon="save"></material-icon>
+					<material-icon *ngIf="hasSaveError" icon="error"></material-icon>
+					{{ getSaveButtonLabel() }}
+				</material-list-item>
+				<material-list-item *ngIf="deleteEnabled"
+									[ngClass]="{'updated': hasRecentlyDeleted}"
+									[disabled]="!hasEntitySelected || isDeleteInProgress"
+									(trigger)="deleteEntity(selectedEntity)">
+					<material-spinner *ngIf="isDeleteInProgress"></material-spinner>
+					<material-icon *ngIf="!isDeleteInProgress && !hasDeleteError" icon="delete_forever"></material-icon>
+					<material-icon *ngIf="hasDeleteError" icon="error"></material-icon>
+					{{ getDeleteButtonLabel() }}
+				</material-list-item>
+			</div>
+
+			<div label class="group-sidebar-label">
+				<material-icon size="x-small" icon="playlist_play"></material-icon>
+				{{ "management-component.menu.items" | i18n }}
+			</div>
+			<template [ngIf]="isLoading">
+				<material-list-item class="centered-list-item">
+					<material-spinner></material-spinner>
+				</material-list-item>
+			</template>
+			<template [ngIf]="!isLoading">
+				<template [ngIf]="entities == null">
+					<material-list-item class="centered-list-item">
+						<material-icon icon="error"></material-icon>
+						<span>{{ "management-component.error-loading" | i18n }}</span>
+					</material-list-item>
+				</template>
+				<template [ngIf]="entities != null">
+					<material-select-item *ngFor="let entity of entities"
+										  (trigger)="selectEntity(entity)"
+										  [selected]="isEntitySelected(entity)">
+						{{ getLabel(entity) }}
+					</material-select-item>
+				</template>
+			</template>
+
+		</material-list>
+	</div>
+	<div class="content" [ngClass]="{'disabled': !hasEntitySelected}">
+		<template [ngIf]="!hasEntitySelected">
+			<div class="placeholder">
+				{{ "management-component.placeholder" | i18n }}
+			</div>
+		</template>
+		<div [ngClass]="{'hidden': !hasEntitySelected}">
+
+			<template #content>
+				<!-- Will be filled by the content component factory -->
+			</template>
+
+		</div>
+	</div>
+</div>

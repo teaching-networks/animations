@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/animation_service/model/animation.dart';
-import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
+import 'package:hm_animations/src/services/animation_service/model/animation_property.dart';
 import 'package:hm_animations/src/services/network_service/network_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animations.dart';
@@ -13,12 +14,13 @@ import 'package:hm_animations/src/util/network/network_util.dart';
 /// Service holding all animations.
 @Injectable()
 class AnimationService {
-  Map<String, AnimationDescriptor> _animationDescriptorLookup = new Map<String, AnimationDescriptor>();
+  Map<int, AnimationDescriptor<dynamic>> _animationDescriptorLookup = new Map<int, AnimationDescriptor<dynamic>>();
 
-  final AuthenticationService _authService;
   NetworkClient _http;
 
-  AnimationService(this._authService, NetworkService networkService) {
+  AnimationService(
+    NetworkService networkService,
+  ) {
     _http = networkService.client;
 
     _initAnimationDescriptorLookup();
@@ -28,7 +30,7 @@ class AnimationService {
     _animationDescriptorLookup.clear();
 
     for (AnimationDescriptor descriptor in Animations.ANIMATIONS) {
-      _animationDescriptorLookup[descriptor.path] = descriptor;
+      _animationDescriptorLookup[descriptor.id] = descriptor;
     }
   }
 
@@ -68,34 +70,8 @@ class AnimationService {
     return [];
   }
 
-  Future<Map<String, AnimationDescriptor>> getAnimationDescriptors() async {
-    if (_authService.isLoggedIn) {
-      return _animationDescriptorLookup;
-    } else {
-      List<Animation> animations = await getAnimations();
-
-      var result = Map<String, AnimationDescriptor>();
-
-      for (AnimationDescriptor descriptor in Animations.ANIMATIONS) {
-        Animation animation = _findAnimationForId(animations, descriptor.id);
-
-        if (animation == null || animation.visible) {
-          result[descriptor.path] = descriptor;
-        }
-      }
-
-      return result;
-    }
-  }
-
-  Animation _findAnimationForId(List<Animation> animations, int id) {
-    for (Animation animation in animations) {
-      if (id == animation.id) {
-        return animation;
-      }
-    }
-
-    return null;
+  Map<int, AnimationDescriptor<dynamic>> getAnimationDescriptors() {
+    return _animationDescriptorLookup;
   }
 
   List<Animation> _parseAnimations(String json) {
@@ -110,5 +86,79 @@ class AnimationService {
     }
 
     return result;
+  }
+
+  /// Retrieve a property for an animation or null if not found.
+  Future<AnimationProperty> getProperty({
+    String locale,
+    int animationId,
+    String key,
+  }) async {
+    final result = await getProperties(
+      locale: locale,
+      animationId: animationId,
+      key: key,
+    );
+
+    if (result != null && result.length == 1) {
+      return result.first;
+    }
+
+    return null;
+  }
+
+  /// Set a property for an animation.
+  /// Return whether the operation was successful.
+  Future<bool> setProperty(String locale, int animationId, String key, String value) async {
+    final response = await _http.post(
+        NetworkUtil.getURLWithParams("api/animation/property", {
+          "locale": locale,
+          "animationid": animationId,
+          "key": key,
+        }),
+        body: value);
+
+    return response.statusCode == NetworkStatusCode.OK;
+  }
+
+  /// Retrieve all properties for an animation or null if nothing is found.
+  Future<List<AnimationProperty>> getProperties({
+    String locale,
+    int animationId,
+    String key,
+  }) async {
+    final response = await _http.get(NetworkUtil.getURLWithParams("api/animation/property", {
+      "locale": locale,
+      "animationid": animationId,
+      "key": key,
+    }));
+
+    if (response.statusCode == NetworkStatusCode.OK) {
+      dynamic result = json.decode(response.body);
+
+      if (result == null) {
+        return null;
+      }
+
+      List<AnimationProperty> properties = List<AnimationProperty>();
+
+      if (result is Map<String, dynamic>) {
+        properties.add(AnimationProperty.empty().fromJson(result));
+      } else if (result is List<dynamic>) {
+        for (int i = 0; i < result.length; i++) {
+          if (!(result[i] is Map<String, dynamic>)) {
+            return null;
+          }
+
+          Map<String, dynamic> map = result[i];
+
+          properties.add(AnimationProperty.empty().fromJson(map));
+        }
+      }
+
+      return properties;
+    }
+
+    return null;
   }
 }

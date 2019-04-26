@@ -6,6 +6,7 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http/connection_type/connection_step.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http/connection_type/non_persistent_http_connection.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http/connection_type/persistent_http_connection.dart';
@@ -16,6 +17,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/progress/mutable_progress.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 @Component(
   selector: "http-delay-animation",
@@ -29,12 +31,14 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
     MaterialIconComponent,
     MaterialCheckboxComponent,
     MaterialIconTooltipComponent,
-    CanvasComponent
+    CanvasComponent,
+    DescriptionComponent,
   ],
-  pipes: [I18nPipe]
+  pipes: [
+    I18nPipe,
+  ],
 )
-class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
-
+class HttpDelayAnimation extends CanvasAnimation with AnimationUI implements OnDestroy {
   static const double TEXT_PADDING = 10.0;
 
   MutableProgress progress;
@@ -75,17 +79,17 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   HttpDelayAnimation(this._i18n) {
     initTranslations();
   }
-  
+
   void initTranslations() {
     _connectionStepLabels = new List<Message>();
-    
+
     for (int i = 0; i < ConnectionStepType.values.length; i++) {
       _connectionStepLabels.add(_i18n.get("http-delay-animation.connection-step.$i"));
     }
 
     _infoLabel = _i18n.get("http-delay-animation.info");
   }
-  
+
   @override
   ngOnDestroy() {
     super.ngOnDestroy();
@@ -95,7 +99,7 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   void render(num timestamp) {
     context.textBaseline = "middle";
     context.clearRect(0, 0, size.width, size.height);
-    
+
     if (roundTrips.isNotEmpty) {
       context.textAlign = "left";
 
@@ -123,7 +127,8 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
         double stepHeight = rtts * rttHeight;
 
         roundTrip.render(context, Rectangle(0.0, heightCounter, stepWidth, stepHeight));
-        context.fillText(_connectionStepLabels[steps[i].type.index].toString(), stepWidth + (TEXT_PADDING * window.devicePixelRatio), heightCounter + stepHeight / 2);
+        context.fillText(
+            _connectionStepLabels[steps[i].type.index].toString(), stepWidth + (TEXT_PADDING * window.devicePixelRatio), heightCounter + stepHeight / 2);
 
         heightCounter += stepHeight;
       }
@@ -165,11 +170,7 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
     currentStepIndex = -1;
 
     config = HttpConnectionConfiguration(
-        objectCount: numberOfObjects,
-        objectTransmissionDelay: transmissionDelay,
-        parallelConnectionCount: parallelConnections,
-        withPipelining: usePipelining
-    );
+        objectCount: numberOfObjects, objectTransmissionDelay: transmissionDelay, parallelConnectionCount: parallelConnections, withPipelining: usePipelining);
 
     if (isPersistentConnection) {
       steps = persistentHttpConnection.generate(config);
@@ -238,5 +239,4 @@ class HttpDelayAnimation extends CanvasAnimation implements OnDestroy {
   int get canvasHeight => (windowHeight * 0.8).round();
 
   String get connectionTypeLabel => "Connection type";
-
 }

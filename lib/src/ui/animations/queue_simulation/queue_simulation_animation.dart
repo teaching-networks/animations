@@ -6,21 +6,31 @@ import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/router/queue_router.dart';
 import 'package:hm_animations/src/ui/animations/shared/packet_line/packet_line.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 
 @Component(
   selector: "queue-simulation-animation",
   styleUrls: const ["queue_simulation_animation.css"],
   templateUrl: "queue_simulation_animation.html",
-  directives: const [coreDirectives, MaterialButtonComponent, MaterialSliderComponent, MaterialIconComponent, CanvasComponent],
-  pipes: const [I18nPipe]
+  directives: const [
+    coreDirectives,
+    MaterialButtonComponent,
+    MaterialSliderComponent,
+    MaterialIconComponent,
+    CanvasComponent,
+    DescriptionComponent,
+  ],
+  pipes: const [
+    I18nPipe,
+  ],
 )
-class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
-
+class QueueSimulationAnimation extends CanvasAnimation with AnimationUI implements OnDestroy {
   /// Proportions for the pre router line, router queue and post router line.
   static const List<double> COMPONENT_SIZE_PROPORTIONS = const <double>[0.3, 0.5, 0.20];
 
@@ -124,11 +134,13 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
       _postRouterLine = new PacketLine(duration: const Duration(seconds: 5));
       _queueRouter = new QueueRouter(queueLength);
 
-      _preRouterLine = new PacketLine(duration: const Duration(seconds: 5), onArrival: (packetId, packetColor, forward, data) {
-        if (!_queueRouter.addToQueue(color: packetColor)) {
-          _droppedPackets++;
-        }
-      });
+      _preRouterLine = new PacketLine(
+          duration: const Duration(seconds: 5),
+          onArrival: (packetId, packetColor, forward, data) {
+            if (!_queueRouter.addToQueue(color: packetColor)) {
+              _droppedPackets++;
+            }
+          });
     } else {
       _postRouterLine.clear();
       _preRouterLine.clear();
@@ -173,7 +185,8 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
         context.textBaseline = "top";
         context.fillText("${_droppedPacketsLabel}: $_droppedPackets", 0.0, routerY + routerHeight + textPadding);
 
-        context.fillText("${_timePassedLabel}: ${((timestamp - _startTimestamp) / _secondScale).floor()} ms", 0.0, routerY + routerHeight + textPadding * 2 + defaultFontSize);
+        context.fillText("${_timePassedLabel}: ${((timestamp - _startTimestamp) / _secondScale).floor()} ms", 0.0,
+            routerY + routerHeight + textPadding * 2 + defaultFontSize);
       }
       context.restore();
 
@@ -194,5 +207,4 @@ class QueueSimulationAnimation extends CanvasAnimation implements OnDestroy {
 
     deregisterSubscriptions();
   }
-
 }

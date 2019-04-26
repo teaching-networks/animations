@@ -1,6 +1,6 @@
 <div class="fullscreen">
 	<div class="content">
-		<dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
+		<dynamic-content *ngIf="componentToShow != null" [componentFactory]="componentToShow" (loaded)="onAnimationComponentLoaded($event)"></dynamic-content>
 
 		<div class="centered-panel info-box" *ngIf="isLoading || notVisible || isError">
 			<material-spinner *ngIf="isLoading"></material-spinner>

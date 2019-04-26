@@ -9,6 +9,7 @@ import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/client/csma_ca_client.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/medium_status_type.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/node/wireless_node.dart';
@@ -20,6 +21,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as v;
@@ -39,13 +41,14 @@ import 'package:vector_math/vector_math.dart' as v;
     MaterialIconToggleDirective,
     MaterialToggleComponent,
     MaterialSliderComponent,
+    DescriptionComponent,
   ],
   pipes: [
     I18nPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 )
-class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin implements OnInit, OnDestroy {
+class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy {
   /// Color of the range circle around nodes.
   static const Color _rangeCircleColor = Color.rgba(100, 100, 100, 0.4);
 

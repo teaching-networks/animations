@@ -1,0 +1,45 @@
+<h1>{{ "group-list.title" | i18n }}</h1>
+
+<div [ngSwitch]="state">
+
+	<template [ngSwitchCase]="loadingState">
+		<!-- In loading state -->
+
+		<div class="centered-panel info-box">
+			<material-spinner></material-spinner>
+		</div>
+	</template>
+
+	<template [ngSwitchCase]="errorState">
+		<!-- In error state -->
+
+		<div class="centered-panel info-box">
+			{{ "group-list.error" | i18n }}
+		</div>
+	</template>
+
+	<template [ngSwitchCase]="successState">
+		<!-- In success state -->
+		<!-- Display all groups -->
+
+		<template [ngIf]="groups.isEmpty">
+			<!-- No groups to display -->
+
+			<div class="centered-panel info-box">
+				{{ "group-list.no-groups-available" | i18n }}
+			</div>
+		</template>
+		<template [ngIf]="!groups.isEmpty">
+
+			<div class="group-list">
+				<span *ngFor="let group of groups" class="group-item">
+				<material-button raised [routerLink]="groupUrl(group)">
+					{{ group.name }}
+				</material-button>
+			</span>
+			</div>
+
+		</template>
+	</template>
+
+</div>

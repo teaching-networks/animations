@@ -1,0 +1,6 @@
+<div [ngSwitch]="hasPropertyDescription">
+    <div *ngSwitchCase="true" [innerHTML]="description"></div>
+    <div *ngSwitchCase="false">
+        {{ description }}
+    </div>
+</div>

@@ -1,6 +1,6 @@
 <h1 *ngIf="animationTitle != null">{{ animationTitle.toString() }}</h1>
 
-<dynamic-content *ngIf="componentToShow != null" [componentToShow]="componentToShow"></dynamic-content>
+<dynamic-content *ngIf="componentToShow != null" [componentFactory]="componentToShow" (loaded)="onAnimationComponentLoaded($event)"></dynamic-content>
 
 <div class="centered-panel info-box" *ngIf="isLoading || notVisible || isError">
 	<material-spinner *ngIf="isLoading"></material-spinner>
@@ -13,7 +13,7 @@
 </div>
 
 <div>
-	<material-button [routerLink]="routes.overview.toUrl()">
+	<material-button [routerLink]="routes.groups.toUrl()">
 		<material-icon icon="arrow_back"></material-icon>
 		{{ "back" | i18n }}
 	</material-button>

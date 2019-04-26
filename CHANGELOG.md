@@ -5,6 +5,11 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+## 2.0.0
+- Overhauled the user management interface
+- New Admin interface for editing animation title, short description and description
+- New Admin interface for adding animation groups
+
 ### 1.6.0
 - Added Hidden Node Problem (RTS/CTS) animations
 

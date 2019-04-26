@@ -1,11 +1,13 @@
 import "package:angular/angular.dart";
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:angular_router/angular_router.dart';
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
+import 'package:hm_animations/src/services/animation_service/model/animation.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
-import 'package:hm_animations/src/router/route_paths.dart' as paths;
 
 /**
  * Detail component showing an animation in detail (Fullscreen).
@@ -25,6 +27,10 @@ class DetailAnimationViewComponent implements OnActivate {
   bool notVisible = false;
   bool isError = false;
 
+  AnimationDescriptor<dynamic> _descriptor;
+  Animation _animation;
+
+  /// Create component.
   DetailAnimationViewComponent(this._animationService);
 
   @override
@@ -32,18 +38,49 @@ class DetailAnimationViewComponent implements OnActivate {
     final String id = paths.getId(current.parameters);
 
     if (id != null) {
-      _animationService.getAnimationDescriptors().then((animations) {
-        AnimationDescriptor descriptor = animations[id];
+      int idNum = int.tryParse(id, radix: 10);
+      bool isLookupByIdNumber = idNum != null;
 
-        if (descriptor != null) {
-          componentToShow = descriptor.componentFactory;
+      _animationService.getAnimations().then((animations) async {
+        for (final anim in animations) {
+          if (isLookupByIdNumber ? anim.id == idNum : anim.url == id) {
+            _animation = anim;
+            break;
+          }
+        }
+
+        Map<int, AnimationDescriptor<dynamic>> descriptors = _animationService.getAnimationDescriptors();
+
+        if (_animation == null) {
+          // Maybe not yet saved on the server-side -> check all animation descriptors
+          for (final descriptor in descriptors.values) {
+            if (isLookupByIdNumber ? descriptor.id == idNum : descriptor.path == id) {
+              _descriptor = descriptor;
+              break;
+            }
+          }
+        } else {
+          _descriptor = _animationService.getAnimationDescriptors()[_animation.id];
+        }
+
+        if (_descriptor != null) {
+          componentToShow = _descriptor.componentFactory;
         } else {
           notVisible = true;
         }
       }).catchError((e) {
         isError = true;
         return null;
-      }).whenComplete(() => isLoading = false);
+      }).whenComplete(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  /// What to do when the animation component has been loaded.
+  void onAnimationComponentLoaded(dynamic loadedAnimationComponent) {
+    if (loadedAnimationComponent is AnimationUI) {
+      loadedAnimationComponent.descriptor = _descriptor;
     }
   }
 }

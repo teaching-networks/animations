@@ -18,6 +18,7 @@ import 'package:angular_forms/angular_forms.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
+import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra/dijkstra.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/mouse/dijkstra_node_mouse_listener.dart';
@@ -28,6 +29,7 @@ import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/text_util.dart';
+import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 import 'package:hm_animations/src/ui/misc/directives/auto_select_directive.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
@@ -56,12 +58,13 @@ import 'package:vector_math/vector_math.dart' as vector;
     MaterialCheckboxComponent,
     MaterialTooltipDirective,
     AutoSelectDirective,
+    DescriptionComponent,
   ],
   pipes: [
     I18nPipe,
   ],
 )
-class DijkstraAlgorithmAnimation extends CanvasAnimation implements OnInit, OnDestroy {
+class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implements OnInit, OnDestroy {
   /// Key code of the key which will remove a selected node.
   static const int _removeKeyCode = 46;
 

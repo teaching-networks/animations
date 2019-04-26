@@ -1,28 +1,58 @@
+import 'dart:async';
+
 import 'package:angular/angular.dart';
 
-/**
- * Component
- */
-@Component(selector: "dynamic-content", templateUrl: "dynamic_content_component.html", styleUrls: const ["dynamic_content_component.css"])
-class DynamicContentComponent {
+/// Component showing arbitrary angular components.
+@Component(
+  selector: "dynamic-content",
+  templateUrl: "dynamic_content_component.html",
+  styleUrls: ["dynamic_content_component.css"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+)
+class DynamicContentComponent<T> implements OnDestroy {
+  /// Container where to inject the angular component.
   @ViewChild("placeholder", read: ViewContainerRef)
   ViewContainerRef placeholder;
 
-  /**
-   * Resolver resolves components.
-   */
+  /// Loader to resolve the correct Angular component.
   final ComponentLoader _componentLoader;
 
-  /**
-   * Create new dynamic content component instance.
-   */
+  /// Factory of the component to display.
+  ComponentFactory<T> _componentFactory;
+
+  /// Instance of the currently loaded component.
+  T _loadedComponent;
+
+  /// Stream controller emitting events once the component has been loaded.
+  StreamController<T> _compLoadedStreamController = StreamController<T>(sync: false);
+
+  /// Create dynamic content instance.
   DynamicContentComponent(this._componentLoader);
 
-  /**
-   * Called when the component to show changes.
-   */
-  @Input("componentToShow")
-  void set showComponent(dynamic factory) {
-    _componentLoader.loadNextToLocation(factory, placeholder);
+  @override
+  void ngOnDestroy() {
+    _compLoadedStreamController.close();
   }
+
+  /// Show the passed component.
+  @Input()
+  void set componentFactory(ComponentFactory<T> factory) {
+    if (factory != _componentFactory) {
+      _componentFactory = factory;
+
+      // Load component.
+      _loadedComponent = _componentLoader.loadNextToLocation(_componentFactory, placeholder).instance;
+
+      if (_loadedComponent != null) {
+        _compLoadedStreamController.add(_loadedComponent);
+      }
+    }
+  }
+
+  /// Get the currently loaded component.
+  T get loadedComponent => _loadedComponent;
+
+  /// Register to this stream to get notified about loaded components.
+  @Output()
+  Stream<T> get loaded => _compLoadedStreamController.stream;
 }

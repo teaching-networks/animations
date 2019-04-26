@@ -1,12 +1,12 @@
 import 'package:hm_animations/src/util/serialize/serializable.dart';
 
 class User implements Serializable<User> {
-
   int id;
   String name;
   String password;
 
   User(this.id, this.name, this.password);
+
   User.empty();
 
   @override
@@ -35,4 +35,8 @@ class User implements Serializable<User> {
     return result;
   }
 
+  @override
+  String toString() {
+    return name;
+  }
 }
