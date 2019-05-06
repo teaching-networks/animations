@@ -15,6 +15,9 @@ import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
 
+import 'version.dart';
+import 'package:hm_animations/version.dart';
+
 @Component(
     selector: 'net-app',
     styleUrls: ['app_component.css'],
@@ -177,6 +180,8 @@ class AppComponent implements OnInit, OnDestroy {
   void ngOnDestroy() {
     _loggedInStreamSub.cancel();
   }
+
+  String get version => Version.version;
 }
 
 class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {

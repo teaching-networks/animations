@@ -41,7 +41,7 @@
 		</material-dropdown-select>
 	</span>
 
-	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
+	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }} | {{ version }}</span>
 
 	<span class="aligned-footer">
 		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }}&nbsp;<b>{{ authenticatedUser.name }}</b></span>
