@@ -30,6 +30,9 @@ import 'package:hm_animations/src/ui/misc/description/description.component.dart
   ],
 )
 class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, OnDestroy, AfterViewChecked {
+  /// Change detector reference.
+  final ChangeDetectorRef _cd;
+
   /**
    * Sender and Receiver window for transmission.
    */
@@ -55,7 +58,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   bool logChanged = false;
   StreamSubscription<String> _messageStreamSub;
 
-  ReliableTransmissionAnimation(this._i18n);
+  ReliableTransmissionAnimation(this._i18n, this._cd);
 
   @override
   ngOnInit() {
@@ -63,7 +66,7 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
     _listenToProtocolMessages(_protocol);
 
-    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: _protocol);
+    transmissionWindow = new TransmissionWindow(senderLabel: _senderLabel, receiverLabel: _receiverLabel, protocol: _protocol, changeDetector: _cd);
   }
 
   void _listenToProtocolMessages(ReliableTransmissionProtocol p) {
@@ -108,6 +111,8 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
 
     // Reset log messages.
     logMessages.clear();
+
+    _cd.markForCheck();
   }
 
   @override

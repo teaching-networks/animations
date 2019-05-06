@@ -41,7 +41,19 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   @override
   bool canEmitPacket(List<PacketSlot> packetSlots) {
-    return _outstanding < windowSize;
+    int diff = 0;
+    bool count = false;
+    for (final slot in packetSlots) {
+      if (count && slot.isFinished) {
+        diff++;
+      }
+
+      if (!slot.isFinished) {
+        count = true;
+      }
+    }
+
+    return _outstanding + diff < windowSize;
   }
 
   @override
