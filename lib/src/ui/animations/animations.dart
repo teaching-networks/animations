@@ -9,6 +9,8 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csm
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.template.dart' as CSMACA;
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.template.dart' as CSMACD;
+import 'package:hm_animations/src/ui/animations/onion_router/onion_router_animation.dart';
+import 'package:hm_animations/src/ui/animations/onion_router/onion_router_animation.template.dart' as onionRouter;
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.template.dart' as queueSimulation;
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.dart';
@@ -115,6 +117,13 @@ class Animations {
       baseTranslationKey: "csma-ca-animation",
       previewImagePath: "img/animation/preview/csma-ca-preview.png",
       path: "hidden-node-problem",
+    ),
+    new AnimationDescriptor<OnionRouterAnimation>(
+      id: ID_COUNTER++,
+      componentFactory: onionRouter.OnionRouterAnimationNgFactory,
+      baseTranslationKey: "onion-router",
+      previewImagePath: "", // TODO
+      path: "onion-router",
     ),
   ];
 }

@@ -1,0 +1,32 @@
+<div class="split-layout">
+	<div class="left">
+		<canvas-comp
+				[height]="canvasHeight"
+				(onResized)="onCanvasResize($event)"
+				(onReady)="onCanvasReady($event)"
+		>
+		</canvas-comp>
+	</div>
+	<div class="right">
+		<ul class="highlighted-fields">
+			<li class="labeled" style="text-align: center">
+				<label>Test</label>
+				<material-button raised (click)="test()">
+					<material-icon icon="help"></material-icon>
+				</material-button>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div class="description">
+	<h3>{{ "description" | i18n }}:</h3>
+	<description-component [descriptor]="descriptor"></description-component>
+</div>
+
+<div class="animation-credits">
+	<hr>
+	<p>
+		Keine Credits
+	</p>
+</div>
