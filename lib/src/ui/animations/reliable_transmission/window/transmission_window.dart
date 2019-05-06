@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
+
+import 'package:angular/core.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
@@ -45,6 +47,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    * Actual length of the window array.
    */
   final int _length;
+
+  /// Change detector of the parent component.
+  final ChangeDetectorRef changeDetector;
 
   /**
    * Sender label.
@@ -91,9 +96,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Create new transmission window.
    */
-  TransmissionWindow(
-      {int length = DEFAULT_LENGTH, ReliableTransmissionProtocol protocol, this.senderLabel, this.receiverLabel})
-      : _length = length {
+  TransmissionWindow({
+    int length = DEFAULT_LENGTH,
+    ReliableTransmissionProtocol protocol,
+    this.senderLabel,
+    this.receiverLabel,
+    this.changeDetector,
+  }) : _length = length {
     _senderSpace = new WindowSpaceDrawable(1);
     _receiverSpace = new WindowSpaceDrawable(1);
 
@@ -249,7 +258,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
    * Emit new packet from sender to receiver.
    */
   void emitPacket() {
-    emitPacketByIndex(_packetSlots.length, false);
+    if (canEmitPacket()) {
+      emitPacketByIndex(_packetSlots.length, false);
+    }
   }
 
   Packet emitPacketByIndex(int index, bool timeout, [bool sentConcurrently = false]) {
@@ -305,6 +316,13 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   }
 
   @override
+  void switchPause({bool pauseAnimation}) {
+    super.switchPause(pauseAnimation: pauseAnimation);
+
+    changeDetector.markForCheck();
+  }
+
+  @override
   void switchPauseSubAnimations() {
     for (var slot in _packetSlots) {
       for (var packet in slot.activePackets) {
@@ -357,6 +375,9 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
       }
 
       _senderSpace.setOffset(count);
+
+      // Tell parent component that it needs to recheck its view for changes (Send button disabled or not?)
+      changeDetector.markForCheck();
     }
   }
 
@@ -393,5 +414,4 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   }
 
   List<PacketSlot> get packetSlots => _packetSlots;
-
 }

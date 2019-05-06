@@ -1,9 +1,10 @@
 :host {
-    /* This is equivalent of the 'body' selector of a page. */
+  /* This is equivalent of the 'body' selector of a page. */
 }
 
 section.main-section {
   padding: 2.0em 3.0em;
+  background-color: white;
 }
 
 nav.main-navigation {
@@ -27,8 +28,8 @@ nav.main-navigation {
 }
 
 header.header {
+  background-color: white;
   border-bottom: 0.2em solid #F6F6F6;
-  margin-bottom: 1em;
 
   padding: 0 2.0em;
 
@@ -63,16 +64,20 @@ header.header {
 }
 
 footer.footer {
-  padding: 1em;
+  padding: 1em 1em 5em 1em;
   border-top: 0.2em solid #F6F6F6;
-  margin-top: 1em;
 
   display: flex;
   flex-flow: row;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
 
   text-align: center;
+
+  .footer-text {
+    color: slategray;
+    font-size: 0.8em;
+  }
 
   .aligned-footer {
     display: flex;

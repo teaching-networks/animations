@@ -41,7 +41,21 @@
 		</material-dropdown-select>
 	</span>
 
-	<span>{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}</span>
+	<span class="footer-text">
+		<p style="font-size: 1.1em">
+			{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}
+		</p>
+		<p>
+			{{ "imprint-info" | i18n }} <a href="https://www.hm.edu"
+										   target="_blank">{{ "munichUniversityName" | i18n }}</a>
+		</p>
+		<p>
+			<a href="mailto:lars.wischhof@hm.edu">{{ "contact" | i18n }}</a>
+		</p>
+		<p>
+			{{ "version" | i18n }}: {{ version }}
+		</p>
+	</span>
 
 	<span class="aligned-footer">
 		<span *ngIf="isLoggedIn && authenticatedUser != null">{{ "logged-in-as" | i18n }}&nbsp;<b>{{ authenticatedUser.name }}</b></span>

@@ -1,4 +1,7 @@
 {
+  "version": "Application version",
+  "contact": "Contact us",
+  "imprint-info": "Information regarding privacy and imprint can be found on the main page of the",
   "title": "Animations",
   "overview": "Overview",
   "user-management": "User",
