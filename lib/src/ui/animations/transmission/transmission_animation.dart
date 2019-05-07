@@ -9,6 +9,8 @@ import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/ui/misc/image/image_info.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
 
 @Component(
   selector: "transmission-animation",
@@ -72,7 +74,8 @@ class TransmissionAnimation extends CanvasAnimation with AnimationUI implements 
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  ImageElement computer = new ImageElement(src: "img/animation/computer.svg", width: 415, height: 290);
+  final ImageInfo _computer = Images.computerIconImage;
+  ImageElement _computerImage;
 
   /**
    * Whether to send a packet (Do the animation).
@@ -154,6 +157,10 @@ class TransmissionAnimation extends CanvasAnimation with AnimationUI implements 
     _senderMessage = _i18n.get("packetTransmission.sender");
     _receiverMessage = _i18n.get("packetTransmission.receiver");
     _propagationSpeed = _i18n.get("packetTransmission.propagationSpeed");
+
+    _computer.load().then((image) {
+      _computerImage = image;
+    });
   }
 
   @override
@@ -170,13 +177,15 @@ class TransmissionAnimation extends CanvasAnimation with AnimationUI implements 
 
     // Draw sender and receiver
     double boxSize = wUnit * 10;
-    double computerRatio = computer.width / computer.height;
+    double computerRatio = _computer.aspectRatio;
     double computerHeight = boxSize / computerRatio;
     double yOffset = hUnit * 50 - computerHeight / 2;
 
     context.setFillColorRgb(0, 0, 255);
-    context.drawImageScaled(computer, inset, yOffset, boxSize, computerHeight); // Sender box
-    context.drawImageScaled(computer, size.width - inset - boxSize, yOffset, boxSize, computerHeight); // Receiver box
+    if (_computerImage != null) {
+      context.drawImageScaled(_computerImage, inset, yOffset, boxSize, computerHeight); // Sender box
+      context.drawImageScaled(_computerImage, size.width - inset - boxSize, yOffset, boxSize, computerHeight); // Receiver box
+    }
 
     context.setFillColorRgb(0, 0, 0);
     context.textAlign = "center";

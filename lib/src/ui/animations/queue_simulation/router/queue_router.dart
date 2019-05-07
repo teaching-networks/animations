@@ -8,6 +8,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/particles/generator/burst_particle_generator.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
 
 class QueueRouter extends CanvasDrawable {
 
@@ -15,11 +16,17 @@ class QueueRouter extends CanvasDrawable {
 
   Queue<QueuePacket> _queue = new Queue<QueuePacket>();
 
-  ImageElement router = new ImageElement(src: "img/animation/router.svg", width: 536, height: 221);
+  CanvasImageSource router;
 
   BurstParticleGenerator _particleGenerator = new BurstParticleGenerator(opacity: 0.1, minRadius: 3.0, maxRadius: 30.0, count: 50, gravity: 1.0);
 
-  QueueRouter(this.queueSize);
+  QueueRouter(this.queueSize) {
+    _loadImages();
+  }
+
+  void _loadImages() async {
+    router = await Images.routerIconImage.load();
+  }
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -66,11 +73,13 @@ class QueueRouter extends CanvasDrawable {
 
       // Draw router image.
       double routerWidth = rect.width * 0.3 - padding;
-      double routerRatio = router.width / router.height;
+      double routerRatio = Images.routerIconImage.aspectRatio;
       double routerHeight = 1 / routerRatio * routerWidth;
       double yOffset = rect.height / 2 - routerHeight / 2;
 
-      context.drawImageScaled(router, queueWidth + padding, yOffset, routerWidth, routerHeight); // Sender box
+      if (router != null) {
+        context.drawImageScaled(router, queueWidth + padding, yOffset, routerWidth, routerHeight); // Sender box
+      }
     }
 
     context.restore();

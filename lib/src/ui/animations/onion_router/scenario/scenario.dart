@@ -1,20 +1,7 @@
-import 'package:meta/meta.dart';
-
-class Scenario {
-  /// Id of the scenario.
-  final int id;
+abstract class Scenario {
+  /// ID of the scenario.
+  int get id;
 
   /// Name of the scenario.
-  String name;
-
-  /// Create scenario.
-  Scenario({
-    @required this.id,
-    this.name = "",
-  });
-
-  @override
-  String toString() {
-    return name;
-  }
+  String get name;
 }
