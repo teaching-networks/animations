@@ -9,6 +9,16 @@
 	</div>
 	<div class="right">
 		<ul class="highlighted-fields">
+			<li class="labeled">
+				<label>Szenarioauswahl</label>
+				<material-dropdown-select
+						[buttonText]="scenarioSelectionLabel"
+						[selection]="scenarioSelectionModel"
+						[options]="scenarioSelectionOptions"
+						[itemRenderer]="scenarioSelectionItemRenderer"
+						[deselectOnActivate]="false">
+				</material-dropdown-select>
+			</li>
 			<li class="labeled" style="text-align: center">
 				<label>Test</label>
 				<material-button raised (click)="test()">
