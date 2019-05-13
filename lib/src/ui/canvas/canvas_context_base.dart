@@ -1,10 +1,17 @@
 import 'dart:html';
 
+import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/image/layout/fill_layout.dart';
+import 'package:hm_animations/src/ui/canvas/image/layout/image_layout.dart';
+import 'package:hm_animations/src/ui/canvas/image/layout/stretch_layout.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 abstract class CanvasContextBase {
   /// Default font size - will be scaled using window.devicePixelRatio.
   static const DEFAULT_FONT_SIZE_PX = 16;
+
+  static const ImageLayout _stretchLayout = StretchImageLayout();
+  static const ImageLayout _fillLayout = FillImageLayout();
 
   /// Convenience method to set a color as fill color of a context.
   void setFillColor(CanvasRenderingContext2D context, Color color) {
@@ -23,25 +30,32 @@ abstract class CanvasContextBase {
   void drawImageOnCanvas(
     CanvasRenderingContext2D context,
     CanvasImageSource src, {
-    double x = 0,
-    double y = 0,
     double width,
     double height,
-    double aspectRatio = 1.0,
+    double aspectRatio,
+    double x = 0,
+    double y = 0,
+    ImageDrawMode mode = ImageDrawMode.STRETCH,
+    ImageAlignment alignment = ImageAlignment.START,
   }) {
-    double w = 0;
-    double h = 0;
-    if (width != null && height != null) {
-      w = width;
-      h = height;
-    } else if (width != null) {
-      w = width;
-      h = width / aspectRatio;
-    } else if (height != null) {
-      h = height;
-      w = height * aspectRatio;
+    Rectangle<double> bounds;
+    switch (mode) {
+      case ImageDrawMode.STRETCH:
+        bounds = _stretchLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
+        break;
+      case ImageDrawMode.FILL:
+        bounds = _fillLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
+        break;
+      default:
+        throw Exception("Image draw mode unknown");
     }
 
-    context.drawImageToRect(src, Rectangle<double>(x, y, w, h));
+    context.drawImageToRect(src, bounds);
   }
+}
+
+/// Modes how to draw an image.
+enum ImageDrawMode {
+  FILL,
+  STRETCH,
 }
