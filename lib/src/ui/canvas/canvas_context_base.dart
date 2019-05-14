@@ -27,7 +27,7 @@ abstract class CanvasContextBase {
   double get defaultFontSize => window.devicePixelRatio * DEFAULT_FONT_SIZE_PX;
 
   /// Draw image on the canvas.
-  void drawImageOnCanvas(
+  Rectangle<double> drawImageOnCanvas(
     CanvasRenderingContext2D context,
     CanvasImageSource src, {
     double width,
@@ -51,6 +51,8 @@ abstract class CanvasContextBase {
     }
 
     context.drawImageToRect(src, bounds);
+
+    return bounds;
   }
 }
 

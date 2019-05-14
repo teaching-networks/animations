@@ -19,7 +19,6 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/misc/angular_components/selection_options.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
-import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:hm_animations/src/util/size.dart';
 
 typedef String ItemRenderer<T>(T t);
@@ -54,12 +53,6 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   /// Whether to repaint the canvas next render cycle.
   bool _repaint = true;
 
-  /// Icon of a host computer.
-  ImageElement _hostIcon;
-
-  /// Icon of a router.
-  ImageElement _routerIcon;
-
   /// Selection model for scenario.
   SelectionModel<Scenario> scenarioSelectionModel;
 
@@ -72,6 +65,8 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   /// Subscription to scenario selection changes.
   StreamSubscription _scenarioSelectionChanges;
 
+  BuildInfo _buildInfo = BuildInfo(rebuild: true);
+
   /// Create animation.
   OnionRouterAnimation(
     this._cd,
@@ -81,7 +76,6 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   @override
   void ngOnInit() {
     _initTranslations();
-    _initImages();
     _initScenarioDropDown();
   }
 
@@ -91,12 +85,6 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
       _cd.markForCheck();
     };
     _i18n.addLanguageLoadedListener(_languageLoadedListener);
-  }
-
-  /// Initialize images.
-  void _initImages() async {
-    _hostIcon = await Images.hostIconImage.load();
-    _routerIcon = await Images.routerIconImage.load();
   }
 
   /// Initialize the scenario dropdown selection.
@@ -127,7 +115,9 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
     }
     _repaint = false;
 
-    context.clearRect(0, 0, size.width, size.height);
+    if (getBuildInfo().rebuild) {
+      context.clearRect(0, 0, size.width, size.height);
+    }
 
     if (scenarioSelectionModel.selectedValues.isNotEmpty) {
       final selectedScenario = scenarioSelectionModel.selectedValues.first;
@@ -136,6 +126,8 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
         (selectedScenario as CanvasDrawable).render(context, Rectangle<double>(0.0, 0.0, size.width, size.height), timestamp);
       }
     }
+
+    _buildInfo.reset();
   }
 
   @override
@@ -146,8 +138,10 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   }
 
   /// Invalidate the canvas.
-  void invalidate() {
+  BuildInfo invalidate() {
     _repaint = true;
+
+    return getBuildInfo();
   }
 
   String get scenarioSelectionLabel => scenarioSelectionModel.selectedValues.isNotEmpty ? scenarioSelectionModel.selectedValues.first.name : "";
@@ -155,6 +149,9 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   int get canvasHeight => 500;
 
   void test() {
-    invalidate();
+    invalidate()..rebuild = false;
   }
+
+  @override
+  BuildInfo getBuildInfo() => _buildInfo;
 }

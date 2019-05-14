@@ -37,23 +37,17 @@ class FillImageLayout implements ImageLayout {
       double iW = height * aspectRatio;
       double iH = width / aspectRatio;
 
-      print("Need to align image with w: $iW and h: $iH}");
-
       if (iW > width) {
         double shrink = width / iW;
         iW = iW * shrink;
-
-        print("Shrank image width to $iW");
       }
 
       if (iH > height) {
         double shrink = height / iH;
         iH = iH * shrink;
-
-        print("Shrank image height to $iH");
       }
 
-      var vertical = height >= width;
+      var vertical = height >= iH;
 
       // Align
       switch (alignment) {
