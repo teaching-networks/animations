@@ -1,17 +1,12 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/animations/onion_router/animation_controller.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
+import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 
 /// Scenario where the service is routed only within the onion network.
-class HiddenService extends CanvasDrawable implements Scenario {
-  final AnimationController _controller;
-
-  /// Create scenario.
-  HiddenService(this._controller);
-
+class HiddenService extends CanvasDrawable with Repaintable implements Scenario {
   @override
   int get id => 2;
 
@@ -20,7 +15,11 @@ class HiddenService extends CanvasDrawable implements Scenario {
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
-    // TODO: implement render
+    if (!needsRepaint) {
+      return;
+    }
+
+    validate();
   }
 
   @override

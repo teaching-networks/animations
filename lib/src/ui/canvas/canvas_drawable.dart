@@ -7,13 +7,12 @@ import 'package:hm_animations/src/util/size.dart';
  * Defines a object which is drawable on a canvas.
  */
 abstract class CanvasDrawable extends CanvasContextBase {
-  /**
-   * Render your graphics on the canvas.
-   *
-   * @param context to draw on
-   * @param rect which defines the offset and size of the drawable
-   * @param timestamp of the rendering process
-   */
+  /// Before rendering.
+  void preRender([num timestamp = -1]) {
+    // Do nothing.
+  }
+
+  /// Render your graphics on the canvas.
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]);
 
   /**

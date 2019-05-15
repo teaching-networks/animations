@@ -10,11 +10,11 @@ import 'package:angular_components/model/selection/selection_model.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_ui.dart';
-import 'package:hm_animations/src/ui/animations/onion_router/animation_controller.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/internet_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
+import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/misc/angular_components/selection_options.dart';
@@ -40,7 +40,7 @@ typedef String ItemRenderer<T>(T t);
     I18nPipe,
   ],
 )
-class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements OnInit, OnDestroy, AnimationController {
+class OnionRouterAnimation extends CanvasAnimation with AnimationUI, Repaintable implements OnInit, OnDestroy {
   /// Component change detector reference.
   final ChangeDetectorRef _cd;
 
@@ -49,9 +49,6 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
 
   /// Listener getting events when the language changes.
   LanguageLoadedListener _languageLoadedListener;
-
-  /// Whether to repaint the canvas next render cycle.
-  bool _repaint = true;
 
   /// Selection model for scenario.
   SelectionModel<Scenario> scenarioSelectionModel;
@@ -64,8 +61,6 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
 
   /// Subscription to scenario selection changes.
   StreamSubscription _scenarioSelectionChanges;
-
-  BuildInfo _buildInfo = BuildInfo(rebuild: true);
 
   /// Create animation.
   OnionRouterAnimation(
@@ -90,8 +85,8 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   /// Initialize the scenario dropdown selection.
   void _initScenarioDropDown() {
     scenarioSelectionOptions = SelectionOptions([
-      InternetService(this),
-      HiddenService(this),
+      InternetService(),
+      HiddenService(),
     ]);
     scenarioSelectionModel = SelectionModel.single(selected: scenarioSelectionOptions.optionsList.first, keyProvider: (scenario) => scenario.id);
     scenarioSelectionItemRenderer = (dynamic scenario) => scenario.toString();
@@ -109,15 +104,25 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
   }
 
   @override
+  void preRender(num timestamp) {
+    super.preRender(timestamp);
+
+    if (scenarioSelectionModel.selectedValues.isNotEmpty) {
+      final selectedScenario = scenarioSelectionModel.selectedValues.first;
+
+      if (selectedScenario is CanvasDrawable) {
+        (selectedScenario as CanvasDrawable).preRender(timestamp);
+      }
+    }
+  }
+
+  @override
   void render(num timestamp) {
-    if (!_repaint) {
+    if (!needsRepaint) {
       return;
     }
-    _repaint = false;
 
-    if (getBuildInfo().rebuild) {
-      context.clearRect(0, 0, size.width, size.height);
-    }
+    context.clearRect(0, 0, size.width, size.height);
 
     if (scenarioSelectionModel.selectedValues.isNotEmpty) {
       final selectedScenario = scenarioSelectionModel.selectedValues.first;
@@ -127,8 +132,11 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
       }
     }
 
-    _buildInfo.reset();
+    validate();
   }
+
+  @override
+  bool get needsRepaint => super.needsRepaint || (scenarioSelectionModel.selectedValues.first as Repaintable).needsRepaint;
 
   @override
   void onCanvasResize(Size newSize) {
@@ -137,21 +145,15 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI implements O
     invalidate();
   }
 
-  /// Invalidate the canvas.
-  BuildInfo invalidate() {
-    _repaint = true;
-
-    return getBuildInfo();
-  }
-
   String get scenarioSelectionLabel => scenarioSelectionModel.selectedValues.isNotEmpty ? scenarioSelectionModel.selectedValues.first.name : "";
 
   int get canvasHeight => 500;
 
   void test() {
-    invalidate()..rebuild = false;
+    (scenarioSelectionModel.selectedValues.first as InternetService).testEncrypt();
   }
 
-  @override
-  BuildInfo getBuildInfo() => _buildInfo;
+  void test2() {
+    (scenarioSelectionModel.selectedValues.first as InternetService).testDecrypt();
+  }
 }

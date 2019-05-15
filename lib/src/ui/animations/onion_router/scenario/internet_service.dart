@@ -1,8 +1,9 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/animations/onion_router/animation_controller.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
+import 'package:hm_animations/src/ui/animations/shared/encrypted_packet/encrypted_packet.dart';
+import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
@@ -11,14 +12,12 @@ import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
 
 /// Scenario  where the server to contact is routed in the "normal" internet.
-class InternetService extends CanvasDrawable implements Scenario {
+class InternetService extends CanvasDrawable with Repaintable implements Scenario {
   /// Count of router rows to draw.
   static const int _routerRows = 3;
 
   /// Count of router columns to draw.
   static const int _routerColumns = 3;
-
-  final AnimationController _controller;
 
   ImageInfo _hostImageInfo;
   CanvasImageSource _hostImage;
@@ -33,8 +32,18 @@ class InternetService extends CanvasDrawable implements Scenario {
   Point<double> _serviceCoordinates;
   List<Point<double>> _routerCoordinates = List<Point<double>>();
 
+  EncryptedPacket _test = EncryptedPacket();
+
+  void testEncrypt() {
+    _test.encrypt();
+  }
+
+  void testDecrypt() {
+    _test.decrypt();
+  }
+
   /// Create scenario.
-  InternetService(this._controller) {
+  InternetService() {
     _loadImages();
   }
 
@@ -48,7 +57,7 @@ class InternetService extends CanvasDrawable implements Scenario {
     _routerImageInfo = Images.routerIconImage;
     _routerImage = await _routerImageInfo.load();
 
-    _controller.invalidate();
+    invalidate();
   }
 
   @override
@@ -58,34 +67,46 @@ class InternetService extends CanvasDrawable implements Scenario {
   String get name => "Dienst im Internet geroutet";
 
   @override
+  bool get needsRepaint => super.needsRepaint || _test.needsRepaint;
+
+  @override
+  void preRender([num timestamp = -1]) {
+    super.preRender(timestamp);
+
+    _test.preRender(timestamp);
+  }
+
+  @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
-    BuildInfo buildInfo = _controller.getBuildInfo();
+    if (!needsRepaint) {
+      return;
+    }
 
     context.save();
     context.translate(rect.left, rect.top);
 
-    context.fillText(timestamp.toString(), 100, 100);
+    print("Render test");
+    _test.render(context, Rectangle<double>(100, 100, 50, 50), timestamp);
 
-    if (buildInfo.rebuild) {
-      // Calculate table layout with 6 columns and one row.
-      int columns = 6;
-      double cellW = rect.width / columns;
-      double cellH = rect.height;
+    // Calculate table layout with 6 columns and one row.
+    int columns = 6;
+    double cellW = rect.width / columns;
+    double cellH = rect.height;
 
-      double xOffset = 0.0;
-      // In the first cell, draw the host image.
-      _drawHost(context, Rectangle<double>(0, 0, cellW, cellH));
-      xOffset += cellW;
+    double xOffset = 0.0;
+    // In the first cell, draw the host image.
+    _drawHost(context, Rectangle<double>(0, 0, cellW, cellH));
+    xOffset += cellW;
 
-      // In the intermediate cells, draw the routers.
-      _drawRouters(context, Rectangle<double>(xOffset, 0, cellW * (columns - 2), cellH));
-      xOffset += cellW * (columns - 2);
+    // In the intermediate cells, draw the routers.
+    _drawRouters(context, Rectangle<double>(xOffset, 0, cellW * (columns - 2), cellH));
+    xOffset += cellW * (columns - 2);
 
-      // In the last cell, draw the service image.
-      _drawService(context, Rectangle<double>(xOffset, 0, cellW, cellH));
-    }
+    // In the last cell, draw the service image.
+    _drawService(context, Rectangle<double>(xOffset, 0, cellW, cellH));
 
     if (_hasCoordinates) {
+      // Draw lines
       context.lineWidth = window.devicePixelRatio * 3;
       setStrokeColor(context, Colors.CORAL);
 
@@ -96,26 +117,27 @@ class InternetService extends CanvasDrawable implements Scenario {
       context.lineTo(_serviceCoordinates.x, _serviceCoordinates.y);
       context.stroke();
 
-      if (buildInfo.rebuild) {
-        setFillColor(context, Colors.CORAL);
+      setFillColor(context, Colors.CORAL);
 
+      // Draw some dots
+      context.beginPath();
+      context.ellipse(_hostCoordinates.x, _hostCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
+      context.fill();
+
+      context.beginPath();
+      context.ellipse(_serviceCoordinates.x, _serviceCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
+      context.fill();
+
+      for (final p in _routerCoordinates) {
         context.beginPath();
-        context.ellipse(_hostCoordinates.x, _hostCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
+        context.ellipse(p.x, p.y, 12, 12, 2 * pi, 0, 2 * pi, false);
         context.fill();
-
-        context.beginPath();
-        context.ellipse(_serviceCoordinates.x, _serviceCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
-        context.fill();
-
-        for (final p in _routerCoordinates) {
-          context.beginPath();
-          context.ellipse(p.x, p.y, 12, 12, 2 * pi, 0, 2 * pi, false);
-          context.fill();
-        }
       }
     }
 
     context.restore();
+
+    validate();
   }
 
   void _drawHost(CanvasRenderingContext2D context, Rectangle<double> rectangle) {

@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:math';
+
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
@@ -18,7 +19,6 @@ import 'package:hm_animations/src/util/size.dart';
  * <canvas-comp (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
  */
 abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
-
   /**
    * Whether to show FPS for development.
    */
@@ -87,6 +87,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   void _renderLoop(num timestamp) {
     _initContextForIteration(context);
 
+    preRender(timestamp);
     render(timestamp);
 
     if (SHOW_FPS && _lastTimestamp != -1) {
@@ -136,6 +137,11 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
     context.restore();
   }
 
+  /// Called before rendering.
+  void preRender(num timestamp) {
+    // Do nothing.
+  }
+
   /**
    * Render your graphics on the canvas.
    */
@@ -181,10 +187,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   /// Set the font for the canvas.
   /// Font size is set using [sizeFactor] where 1.0 is the [defaultFontSize].
   /// Font Family is set using [fontFamily] where "sans-serif" is the default font family.
-  void setFont({
-    double sizeFactor = 1.0,
-    String fontFamily = "sans-serif"
-  }) {
+  void setFont({double sizeFactor = 1.0, String fontFamily = "sans-serif"}) {
     context.font = "${defaultFontSize * sizeFactor}px $fontFamily";
   }
 
