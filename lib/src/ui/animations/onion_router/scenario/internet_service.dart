@@ -85,8 +85,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     context.save();
     context.translate(rect.left, rect.top);
 
-    print("Render test");
-    _test.render(context, Rectangle<double>(100, 100, 50, 50), timestamp);
+    _test.render(context, Rectangle<double>(100, 100, 200, 200), timestamp);
 
     // Calculate table layout with 6 columns and one row.
     int columns = 6;
