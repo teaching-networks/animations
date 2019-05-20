@@ -189,6 +189,14 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
     _startAnimation();
   }
 
+  /// Reset the packet.
+  void reset() {
+    _encryptionLayers = 0;
+    _encryptionLayerColors.clear();
+    _animationEncryption = false;
+    _animationStartTS = null;
+  }
+
   /// Start the animation next render cycle.
   void _startAnimation() {
     _animationStarted = true;

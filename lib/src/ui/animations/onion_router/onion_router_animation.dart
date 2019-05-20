@@ -150,11 +150,7 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI, Repaintable
   int get canvasHeight => 500;
 
   void test() {
-    (scenarioSelectionModel.selectedValues.first as InternetService).testEncrypt();
-  }
-
-  void test2() {
-    (scenarioSelectionModel.selectedValues.first as InternetService).testDecrypt();
+    (scenarioSelectionModel.selectedValues.first as InternetService).test();
   }
 
   // Find a new route in the onion router network.

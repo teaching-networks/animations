@@ -9,6 +9,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
 
@@ -19,6 +20,9 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   /// Count of router columns to draw.
   static const int _routerColumns = 3;
+
+  /// Duration of the packet transmission (from one point to another).
+  static const Duration _packetTransmissionDuration = Duration(seconds: 3);
 
   static Random _rng = Random();
 
@@ -38,7 +42,11 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Route from the host and the routers in the onion router network to the server.
   List<Point<double>> _route = List<Point<double>>();
 
-  EncryptedPacket _test = EncryptedPacket();
+  EncryptedPacket _packet = EncryptedPacket();
+  int _packetPosition = 0;
+  num _packetTransitionTS;
+  bool _startPacketTransition = false;
+  double _packetTransitionProgress;
 
   /// The currently cached canvas.
   CanvasElement _cachedCanvas = CanvasElement();
@@ -49,19 +57,22 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Bounds of the currently cached canvas.
   Rectangle<double> _cachedCanvasRect;
 
-  void testEncrypt() {
-    _test.encrypt(color: Colors.CORAL);
-  }
-
-  void testDecrypt() {
-    _test.decrypt();
-  }
-
   /// Create scenario.
   InternetService() {
     _loadImages();
 
     _cachedCanvasContext = _cachedCanvas.getContext("2d");
+  }
+
+  void test() {
+    _packet.reset();
+    _packetPosition = 0;
+
+    _packet.encrypt(color: Colors.AMBER);
+    _packet.encrypt(color: Colors.BORDEAUX);
+    _packet.encrypt(color: Colors.CORAL);
+
+    _startPacketTransition = true;
   }
 
   void _loadImages() async {
@@ -84,14 +95,56 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   String get name => "Dienst im Internet geroutet";
 
   @override
-  bool get needsRepaint => super.needsRepaint || _test.needsRepaint;
+  bool get needsRepaint => super.needsRepaint || _packet.needsRepaint;
 
   @override
   void preRender([num timestamp = -1]) {
     super.preRender(timestamp);
 
-    _test.preRender(timestamp);
+    _checkTimestamp(timestamp);
+    _updateAnimations(timestamp);
+
+    _packet.preRender(timestamp);
   }
+
+  /// Check the current timestamp for events.
+  void _checkTimestamp(num timestamp) {
+    if (_startPacketTransition) {
+      _startPacketTransition = false;
+      _packetTransitionTS = timestamp;
+
+      invalidate();
+    }
+  }
+
+  /// Update running animations (if any).
+  void _updateAnimations(num timestamp) {
+    if (_packetTransitionRunning) {
+      // Update transition progress.
+      _packetTransitionProgress = Curves.easeInOutCubic(_getProgress(timestamp, _packetTransitionTS, _packetTransmissionDuration));
+
+      if (_packetTransitionProgress > 1.0) {
+        if (_packetPosition + 1 < _route.length - 1) {
+          _packetPosition++;
+
+          // Start transition all over again!
+          _packetTransitionTS = timestamp;
+          _packetTransitionProgress = 0.0;
+          _packet.decrypt();
+        } else {
+          _packetTransitionTS = null; // End transition
+        }
+      }
+
+      invalidate();
+    }
+  }
+
+  /// Get progress of an animation using its start timestamp and the duration.
+  double _getProgress(num curTS, num startTS, Duration duration) => (curTS - startTS) / duration.inMilliseconds;
+
+  /// Whether the packet transition is currently running.
+  bool get _packetTransitionRunning => _packetTransitionTS != null;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -112,8 +165,6 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   /// Repaint scene on the passed canvas context.
   void repaint(CanvasRenderingContext2D context, double width, double height, num timestamp) {
-    _test.render(context, Rectangle<double>(100, 100, 200, 200), timestamp);
-
     // Calculate table layout with 6 columns and one row.
     int columns = 6;
     double cellW = width / columns;
@@ -135,7 +186,23 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
       if (_route.isNotEmpty) {
         _drawRoute(context, _route);
       }
+
+      if (_packetTransitionProgress != null) {
+        _drawPacket(context, _packet, _packetTransitionProgress, _route, _packetPosition, timestamp);
+      }
     }
+  }
+
+  /// Draw the passed encrypted packet in the correct [positionInRoute] with the passed transition [progress].
+  void _drawPacket(CanvasRenderingContext2D context, EncryptedPacket packet, double progress, List<Point<double>> route, int positionInRoute, num timestamp) {
+    Point<double> startPt = route[positionInRoute];
+    Point<double> endPt = route[positionInRoute + 1];
+
+    Point<double> curPt = startPt + (endPt - startPt) * progress;
+
+    double size = 75.0 * window.devicePixelRatio;
+
+    _packet.render(context, Rectangle<double>(curPt.x - size / 2, curPt.y - size / 2, size, size), timestamp);
   }
 
   /// Draw route from the host to the service over several onion routers.
