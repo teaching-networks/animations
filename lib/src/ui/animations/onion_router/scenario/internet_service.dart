@@ -7,6 +7,7 @@ import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
@@ -18,6 +19,8 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   /// Count of router columns to draw.
   static const int _routerColumns = 3;
+
+  static Random _rng = Random();
 
   ImageInfo _hostImageInfo;
   CanvasImageSource _hostImage;
@@ -32,10 +35,22 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   Point<double> _serviceCoordinates;
   List<Point<double>> _routerCoordinates = List<Point<double>>();
 
+  /// Route from the host and the routers in the onion router network to the server.
+  List<Point<double>> _route = List<Point<double>>();
+
   EncryptedPacket _test = EncryptedPacket();
 
+  /// The currently cached canvas.
+  CanvasElement _cachedCanvas = CanvasElement();
+
+  /// Context of the currently cached canvas.
+  CanvasRenderingContext2D _cachedCanvasContext;
+
+  /// Bounds of the currently cached canvas.
+  Rectangle<double> _cachedCanvasRect;
+
   void testEncrypt() {
-    _test.encrypt();
+    _test.encrypt(color: Colors.CORAL);
   }
 
   void testDecrypt() {
@@ -45,6 +60,8 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Create scenario.
   InternetService() {
     _loadImages();
+
+    _cachedCanvasContext = _cachedCanvas.getContext("2d");
   }
 
   void _loadImages() async {
@@ -78,19 +95,29 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
-    if (!needsRepaint) {
-      return;
+    if (needsRepaint || rect != _cachedCanvasRect) {
+      _cachedCanvas.width = rect.width.toInt();
+      _cachedCanvas.height = rect.height.toInt();
+
+      _cachedCanvasContext.clearRect(0, 0, rect.width, rect.height);
+      _cachedCanvasRect = rect;
+
+      repaint(_cachedCanvasContext, rect.width, rect.height, timestamp);
+
+      validate();
     }
 
-    context.save();
-    context.translate(rect.left, rect.top);
+    context.drawImageToRect(_cachedCanvas, rect);
+  }
 
+  /// Repaint scene on the passed canvas context.
+  void repaint(CanvasRenderingContext2D context, double width, double height, num timestamp) {
     _test.render(context, Rectangle<double>(100, 100, 200, 200), timestamp);
 
     // Calculate table layout with 6 columns and one row.
     int columns = 6;
-    double cellW = rect.width / columns;
-    double cellH = rect.height;
+    double cellW = width / columns;
+    double cellH = height;
 
     double xOffset = 0.0;
     // In the first cell, draw the host image.
@@ -105,38 +132,33 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     _drawService(context, Rectangle<double>(xOffset, 0, cellW, cellH));
 
     if (_hasCoordinates) {
-      // Draw lines
-      context.lineWidth = window.devicePixelRatio * 3;
-      setStrokeColor(context, Colors.CORAL);
-
-      context.beginPath();
-      context.moveTo(_hostCoordinates.x, _hostCoordinates.y);
-      context.lineTo(_routerCoordinates[2].x, _routerCoordinates[2].y);
-      context.lineTo(_routerCoordinates[6].x, _routerCoordinates[6].y);
-      context.lineTo(_serviceCoordinates.x, _serviceCoordinates.y);
-      context.stroke();
-
-      setFillColor(context, Colors.CORAL);
-
-      // Draw some dots
-      context.beginPath();
-      context.ellipse(_hostCoordinates.x, _hostCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
-      context.fill();
-
-      context.beginPath();
-      context.ellipse(_serviceCoordinates.x, _serviceCoordinates.y, 12, 12, 2 * pi, 0, 2 * pi, false);
-      context.fill();
-
-      for (final p in _routerCoordinates) {
-        context.beginPath();
-        context.ellipse(p.x, p.y, 12, 12, 2 * pi, 0, 2 * pi, false);
-        context.fill();
+      if (_route.isNotEmpty) {
+        _drawRoute(context, _route);
       }
     }
+  }
 
-    context.restore();
+  /// Draw route from the host to the service over several onion routers.
+  void _drawRoute(CanvasRenderingContext2D context, List<Point<double>> route) {
+    context.lineWidth = window.devicePixelRatio * 3;
+    setStrokeColor(context, Colors.SPACE_BLUE);
 
-    validate();
+    context.beginPath();
+
+    context.moveTo(route.first.x, route.first.y);
+    for (int i = 1; i < route.length; i++) {
+      context.lineTo(route[i].x, route[i].y);
+    }
+
+    context.stroke();
+
+    setFillColor(context, Color.brighten(Colors.SPACE_BLUE, 0.3));
+    double radius = 8 * window.devicePixelRatio;
+    for (final coords in route) {
+      context.beginPath();
+      context.ellipse(coords.x, coords.y, radius, radius, 2 * pi, 0, 2 * pi, false);
+      context.fill();
+    }
   }
 
   void _drawHost(CanvasRenderingContext2D context, Rectangle<double> rectangle) {
@@ -155,7 +177,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
       mode: ImageDrawMode.FILL,
       alignment: ImageAlignment.MID,
     );
-    _hostCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+    _hostCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height);
   }
 
   void _drawService(CanvasRenderingContext2D context, Rectangle<double> rectangle) {
@@ -174,7 +196,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
       mode: ImageDrawMode.FILL,
       alignment: ImageAlignment.MID,
     );
-    _serviceCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+    _serviceCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height);
   }
 
   void _drawRouters(CanvasRenderingContext2D context, Rectangle<double> rectangle) {
@@ -209,7 +231,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
           alignment: ImageAlignment.MID,
         );
 
-        _routerCoordinates.add(Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2));
+        _routerCoordinates.add(Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height));
 
         xOffset += xPad * 2;
       }
@@ -219,6 +241,27 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   }
 
   bool get _hasCoordinates => _hostCoordinates != null && _serviceCoordinates != null && _routerCoordinates.isNotEmpty;
+
+  // Find a new route in the onion router network.
+  void reroute() {
+    if (!_hasCoordinates) {
+      return;
+    }
+
+    _route.clear();
+
+    _route.add(_hostCoordinates);
+
+    for (int i = 0; i < _routerColumns; i++) {
+      int row = _rng.nextInt(_routerRows);
+
+      _route.add(_routerCoordinates[row * _routerColumns + i]);
+    }
+
+    _route.add(_serviceCoordinates);
+
+    invalidate();
+  }
 
   @override
   String toString() {

@@ -156,4 +156,9 @@ class OnionRouterAnimation extends CanvasAnimation with AnimationUI, Repaintable
   void test2() {
     (scenarioSelectionModel.selectedValues.first as InternetService).testDecrypt();
   }
+
+  // Find a new route in the onion router network.
+  void reroute() {
+    (scenarioSelectionModel.selectedValues.first as InternetService).reroute();
+  }
 }

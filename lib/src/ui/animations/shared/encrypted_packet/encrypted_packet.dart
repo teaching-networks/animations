@@ -51,6 +51,9 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   CanvasElement _cacheCanvas = CanvasElement();
   CanvasRenderingContext2D _cacheContext;
 
+  /// Rectangle of the last drawn canvas.
+  Rectangle<double> _cachedCanvasRect;
+
   /// Create encrypted packet.
   EncryptedPacket({
     int encryptionLayers = 0,
@@ -73,7 +76,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
-    if (needsRepaint) {
+    if (needsRepaint || rect != _cachedCanvasRect) {
       // Refresh cached canvas content
       _cacheCanvas.width = rect.width.toInt();
       _cacheCanvas.height = rect.height.toInt();
@@ -81,6 +84,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
       _cacheContext.clearRect(0, 0, rect.width, rect.height);
 
       _drawPacket(_cacheContext, max(rect.width, rect.height));
+      _cachedCanvasRect = rect;
 
       validate();
     }
