@@ -26,9 +26,9 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   /// Colors for the encryption layers of the packet.
   static const List<Color> _encryptionLayerColors = [
-    Colors.NAVY,
-    Colors.BORDEAUX,
-    Colors.DARK_GRAY,
+    Color.hex(0xFFFF3366),
+    Color.hex(0xFF66CC99),
+    Color.hex(0xFFFFCC33),
   ];
 
   static Random _rng = Random();
@@ -46,8 +46,8 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   Point<double> _serviceCoordinates;
   List<Point<double>> _routerCoordinates = List<Point<double>>();
 
-  /// Route from the host and the routers in the onion router network to the server.
-  List<Point<double>> _route = List<Point<double>>();
+  /// Route through the routers in the onion router network to the server.
+  List<int> _route = List<int>();
 
   EncryptedPacket _packet = EncryptedPacket();
   int _packetPosition = 0;
@@ -141,7 +141,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
       if (_packetTransitionProgress > 1.0) {
         if (_packetTransitionForward) {
-          if (_packetPosition + 1 < _route.length - 1) {
+          if (_packetPosition + 1 < _route.length + 1) {
             _packetPosition++;
 
             // Start transition all over again!
@@ -218,12 +218,19 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     _drawService(context, Rectangle<double>(xOffset, 0, cellW, cellH));
 
     if (_hasCoordinates) {
+      List<Point<double>> routeCoordinates = List<Point<double>>();
+      routeCoordinates.add(_hostCoordinates);
+      for (int i in _route) {
+        routeCoordinates.add(_routerCoordinates[i]);
+      }
+      routeCoordinates.add(_serviceCoordinates);
+
       if (_route.isNotEmpty) {
-        _drawRoute(context, _route);
+        _drawRoute(context, routeCoordinates);
       }
 
       if (_packetTransitionProgress != null) {
-        _drawPacket(context, _packet, _packetTransitionProgress, _route, _packetPosition, timestamp);
+        _drawPacket(context, _packet, _packetTransitionProgress, routeCoordinates, _packetPosition, timestamp);
       }
     }
   }
@@ -352,15 +359,11 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
     _route.clear();
 
-    _route.add(_hostCoordinates);
-
     for (int i = 0; i < _routerColumns; i++) {
       int row = _rng.nextInt(_routerRows);
 
-      _route.add(_routerCoordinates[row * _routerColumns + i]);
+      _route.add(row * _routerColumns + i);
     }
-
-    _route.add(_serviceCoordinates);
 
     invalidate();
   }
