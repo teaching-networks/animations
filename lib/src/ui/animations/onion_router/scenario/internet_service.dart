@@ -27,7 +27,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Colors for the encryption layers of the packet.
   static const List<Color> _encryptionLayerColors = [
     Color.hex(0xFFFF3366),
-    Color.hex(0xFF66CC99),
+    Color.hex(0xFF6699FF),
     Color.hex(0xFFFFCC33),
   ];
 
@@ -70,6 +70,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     _loadImages();
 
     _cachedCanvasContext = _cachedCanvas.getContext("2d");
+    reroute();
   }
 
   void test() {
@@ -217,7 +218,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     // In the last cell, draw the service image.
     _drawService(context, Rectangle<double>(xOffset, 0, cellW, cellH));
 
-    if (_hasCoordinates) {
+    if (_hasCoordinates && _route.isNotEmpty) {
       List<Point<double>> routeCoordinates = List<Point<double>>();
       routeCoordinates.add(_hostCoordinates);
       for (int i in _route) {
@@ -353,10 +354,6 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   // Find a new route in the onion router network.
   void reroute() {
-    if (!_hasCoordinates) {
-      return;
-    }
-
     _route.clear();
 
     for (int i = 0; i < _routerColumns; i++) {
