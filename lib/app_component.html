@@ -46,14 +46,18 @@
 			{{ "copyright" | i18n }} &copy; <b>{{year}}</b> {{ "munichUniversityName" | i18n }}
 		</p>
 		<p>
-			{{ "imprint-info" | i18n }} <a href="https://www.hm.edu"
-										   target="_blank">{{ "munichUniversityName" | i18n }}</a>
-		</p>
-		<p>
-			<a href="mailto:lars.wischhof@hm.edu">{{ "contact" | i18n }}</a>
-		</p>
-		<p>
-			{{ "version" | i18n }}: {{ version }}
+			<span>
+				{{ "imprint-info" | i18n }} <a href="https://www.hm.edu"
+											   target="_blank">{{ "munichUniversityName" | i18n }}</a>
+			</span>
+			&bull;
+			<span>
+				<a href="mailto:lars.wischhof@hm.edu">{{ "contact" | i18n }}</a>
+			</span>
+			&bull;
+			<span>
+				{{ version }}
+			</span>
 		</p>
 	</span>
 

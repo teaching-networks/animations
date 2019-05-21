@@ -24,6 +24,13 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Duration of the packet transmission (from one point to another).
   static const Duration _packetTransmissionDuration = Duration(seconds: 3);
 
+  /// Colors for the encryption layers of the packet.
+  static const List<Color> _encryptionLayerColors = [
+    Colors.NAVY,
+    Colors.BORDEAUX,
+    Colors.DARK_GRAY,
+  ];
+
   static Random _rng = Random();
 
   ImageInfo _hostImageInfo;
@@ -46,6 +53,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   int _packetPosition = 0;
   num _packetTransitionTS;
   bool _startPacketTransition = false;
+  bool _packetTransitionForward = true;
   double _packetTransitionProgress;
 
   /// The currently cached canvas.
@@ -65,12 +73,19 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   }
 
   void test() {
+    if (_route.isEmpty) {
+      return;
+    }
+
     _packet.reset();
     _packetPosition = 0;
 
-    _packet.encrypt(color: Colors.AMBER);
-    _packet.encrypt(color: Colors.BORDEAUX);
-    _packet.encrypt(color: Colors.CORAL);
+    for (final color in _encryptionLayerColors) {
+      _packet.encrypt(
+        color: color,
+        withAnimation: false,
+      );
+    }
 
     _startPacketTransition = true;
   }
@@ -112,6 +127,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     if (_startPacketTransition) {
       _startPacketTransition = false;
       _packetTransitionTS = timestamp;
+      _packetTransitionForward = true;
 
       invalidate();
     }
@@ -124,16 +140,35 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
       _packetTransitionProgress = Curves.easeInOutCubic(_getProgress(timestamp, _packetTransitionTS, _packetTransmissionDuration));
 
       if (_packetTransitionProgress > 1.0) {
-        if (_packetPosition + 1 < _route.length - 1) {
-          _packetPosition++;
+        if (_packetTransitionForward) {
+          if (_packetPosition + 1 < _route.length - 1) {
+            _packetPosition++;
 
-          // Start transition all over again!
-          _packetTransitionTS = timestamp;
-          _packetTransitionProgress = 0.0;
-          _packet.decrypt();
+            // Start transition all over again!
+            _packetTransitionTS = timestamp;
+            _packetTransitionProgress = 0;
+            _packet.decrypt();
+          } else {
+            _packetTransitionForward = false; // Reverse transition direction
+            _packetTransitionTS = timestamp;
+            _packetTransitionProgress = 0;
+          }
         } else {
-          _packetTransitionTS = null; // End transition
+          if (_packetPosition > 0) {
+            _packetPosition--;
+
+            // Restart transition progress
+            _packetTransitionTS = timestamp;
+            _packetTransitionProgress = 0;
+            _packet.encrypt(color: _encryptionLayerColors[_encryptionLayerColors.length - 1 - _packetPosition]);
+          } else {
+            _packetTransitionTS = null; // End transition
+          }
         }
+      }
+
+      if (!_packetTransitionForward) {
+        _packetTransitionProgress = 1 - _packetTransitionProgress; // Reverse transition
       }
 
       invalidate();
@@ -200,7 +235,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
     Point<double> curPt = startPt + (endPt - startPt) * progress;
 
-    double size = 75.0 * window.devicePixelRatio;
+    double size = 100 * window.devicePixelRatio;
 
     _packet.render(context, Rectangle<double>(curPt.x - size / 2, curPt.y - size / 2, size, size), timestamp);
   }

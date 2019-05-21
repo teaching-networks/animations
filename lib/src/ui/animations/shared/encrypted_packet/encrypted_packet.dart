@@ -45,7 +45,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   double _animationAngle;
 
   /// Start angle of the encryptin/decryption layer in the animation.
-  double _animationStartAngle;
+  double _animationStartAngle = 0;
 
   /// Cached image of the previously drawn packet.
   CanvasElement _cacheCanvas = CanvasElement();
@@ -97,10 +97,10 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   void _drawPacket(CanvasRenderingContext2D context, double size) {
     double offset = size / 2;
     double radius = size / 6;
-    double layerLineWidth = radius * 0.1;
+    double layerLineWidth = radius * 0.2;
 
     // Draw packet sphere
-    setFillColor(context, Colors.SLATE_GREY);
+    setFillColor(context, Colors.CORAL);
     context.beginPath();
     context.arc(offset, offset, radius, 0, _maxAngle);
     context.fill();
@@ -167,17 +167,20 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   /// Encrypt the packet once more.
   void encrypt({
     Color color = Colors.SLATE_GREY,
+    bool withAnimation = true,
   }) {
     _encryptionLayers++;
     _lastEncryptionLayerColor = color;
     _encryptionLayerColors.add(color);
     _animationEncryption = true;
 
-    _startAnimation();
+    if (withAnimation) _startAnimation();
   }
 
   /// Decrypt the packet.
-  void decrypt() {
+  void decrypt({
+    bool withAnimation = true,
+  }) {
     if (_encryptionLayers <= 0) {
       return;
     }
@@ -186,7 +189,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
     _lastEncryptionLayerColor = _encryptionLayerColors.removeLast();
     _animationEncryption = false;
 
-    _startAnimation();
+    if (withAnimation) _startAnimation();
   }
 
   /// Reset the packet.
