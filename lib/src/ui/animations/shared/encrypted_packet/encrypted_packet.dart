@@ -97,7 +97,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   void _drawPacket(CanvasRenderingContext2D context, double size) {
     double offset = size / 2;
     double radius = size / 6;
-    double layerLineWidth = radius * 0.2;
+    double layerLineWidth = radius * 0.5;
 
     // Draw packet sphere
     setFillColor(context, Colors.CORAL);
@@ -110,17 +110,17 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
     // Draw encryption layers (except the last one).
     context.lineWidth = layerLineWidth;
     for (int i = 0; i < layers; i++) {
-      _drawEncryptionLayer(context, _encryptionLayerColors[i], i, offset, radius, _maxAngle);
+      _drawEncryptionLayer(context, _encryptionLayerColors[i], i, offset, radius, _maxAngle, layerLineWidth);
     }
 
     if (animationInProgress) {
-      _drawEncryptionLayer(context, _lastEncryptionLayerColor, layers, offset, radius, _animationAngle);
+      _drawEncryptionLayer(context, _lastEncryptionLayerColor, layers, offset, radius, _animationAngle, layerLineWidth);
     }
   }
 
   /// Draw an encryption layer.
-  void _drawEncryptionLayer(CanvasRenderingContext2D context, Color color, int encryptionLayerIndex, double offset, double baseSize, double endAngle) {
-    double layerRadius = baseSize + (window.devicePixelRatio * 5) * (encryptionLayerIndex + 1);
+  void _drawEncryptionLayer(CanvasRenderingContext2D context, Color color, int encryptionLayerIndex, double offset, double baseSize, double endAngle, double layerLineWidth) {
+    double layerRadius = baseSize + layerLineWidth * encryptionLayerIndex;
 
     setStrokeColor(context, color);
     context.beginPath();

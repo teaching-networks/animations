@@ -27,7 +27,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Colors for the encryption layers of the packet.
   static const List<Color> _encryptionLayerColors = [
     Color.hex(0xFFFF3366),
-    Color.hex(0xFF6699FF),
+    Color.hex(0xFFFF9955),
     Color.hex(0xFFFFCC33),
   ];
 
@@ -251,16 +251,15 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Draw route from the host to the service over several onion routers.
   void _drawRoute(CanvasRenderingContext2D context, List<Point<double>> route) {
     context.lineWidth = window.devicePixelRatio * 3;
-    setStrokeColor(context, Colors.SPACE_BLUE);
 
-    context.beginPath();
+    for (int i = 0; i < route.length - 1; i++) {
+      setStrokeColor(context, _encryptionLayerColors.length > i ? _encryptionLayerColors[_encryptionLayerColors.length - 1 - i] : Colors.SPACE_BLUE);
 
-    context.moveTo(route.first.x, route.first.y);
-    for (int i = 1; i < route.length; i++) {
-      context.lineTo(route[i].x, route[i].y);
+      context.beginPath();
+      context.moveTo(route[i].x, route[i].y);
+      context.lineTo(route[i + 1].x, route[i + 1].y);
+      context.stroke();
     }
-
-    context.stroke();
 
     setFillColor(context, Color.brighten(Colors.SPACE_BLUE, 0.3));
     double radius = 8 * window.devicePixelRatio;
