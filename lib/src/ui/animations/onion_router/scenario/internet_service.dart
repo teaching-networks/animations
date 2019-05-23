@@ -1,12 +1,14 @@
 import 'dart:html';
 import 'dart:math';
 
+import 'package:angular_components/laminate/enums/alignment.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
 import 'package:hm_animations/src/ui/animations/shared/encrypted_packet/encrypted_packet.dart';
 import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
@@ -65,6 +67,9 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Bounds of the currently cached canvas.
   Rectangle<double> _cachedCanvasRect;
 
+  Bubble _infoBubble;
+  int _infoBubblePosIndex;
+
   /// Create scenario.
   InternetService() {
     _loadImages();
@@ -87,6 +92,13 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
         withAnimation: false,
       );
     }
+
+    _infoBubble = Bubble(
+      "Für jeden Onion Router auf dem Web zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+      30,
+      alignment: Alignment.Start,
+    );
+    _infoBubblePosIndex = 0;
 
     _startPacketTransition = true;
   }
@@ -233,6 +245,21 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
       if (_packetTransitionProgress != null) {
         _drawPacket(context, _packet, _packetTransitionProgress, routeCoordinates, _packetPosition, timestamp);
       }
+
+      if (_infoBubble != null) {
+        Point<double> coords = _getCoordinatesForIndex(_infoBubblePosIndex);
+        _infoBubble.render(context, Rectangle<double>(coords.x, coords.y, 0, 0), timestamp);
+      }
+    }
+  }
+
+  Point<double> _getCoordinatesForIndex(int index) {
+    if (index == 0) {
+      return _hostCoordinates;
+    } else if (index - 1 < _routerCoordinates.length) {
+      return _routerCoordinates[index - 1];
+    } else {
+      return _serviceCoordinates;
     }
   }
 
