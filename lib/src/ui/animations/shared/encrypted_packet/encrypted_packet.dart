@@ -119,7 +119,8 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   }
 
   /// Draw an encryption layer.
-  void _drawEncryptionLayer(CanvasRenderingContext2D context, Color color, int encryptionLayerIndex, double offset, double baseSize, double endAngle, double layerLineWidth) {
+  void _drawEncryptionLayer(
+      CanvasRenderingContext2D context, Color color, int encryptionLayerIndex, double offset, double baseSize, double endAngle, double layerLineWidth) {
     double layerRadius = baseSize + layerLineWidth * encryptionLayerIndex;
 
     setStrokeColor(context, color);
@@ -165,7 +166,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   bool get animationInProgress => _animationStartTS != null;
 
   /// Encrypt the packet once more.
-  void encrypt({
+  Future<void> encrypt({
     Color color = Colors.SLATE_GREY,
     bool withAnimation = true,
   }) {
@@ -174,22 +175,32 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
     _encryptionLayerColors.add(color);
     _animationEncryption = true;
 
-    if (withAnimation) _startAnimation();
+    if (withAnimation) {
+      _startAnimation();
+      return Future.delayed(animationDuration);
+    } else {
+      return Future.value(null);
+    }
   }
 
   /// Decrypt the packet.
-  void decrypt({
+  Future<void> decrypt({
     bool withAnimation = true,
   }) {
     if (_encryptionLayers <= 0) {
-      return;
+      return Future.value(null);
     }
 
     _encryptionLayers--;
     _lastEncryptionLayerColor = _encryptionLayerColors.removeLast();
     _animationEncryption = false;
 
-    if (withAnimation) _startAnimation();
+    if (withAnimation) {
+      _startAnimation();
+      return Future.delayed(animationDuration);
+    } else {
+      return Future.value(null);
+    }
   }
 
   /// Reset the packet.

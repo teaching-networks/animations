@@ -19,6 +19,7 @@ class Bubble extends CanvasDrawable with Repaintable {
   /// At which string length to wrap the text.
   final int wrapAtLength;
   final Color color;
+  final double opacity;
 
   final Alignment alignment;
 
@@ -35,12 +36,14 @@ class Bubble extends CanvasDrawable with Repaintable {
     this.text,
     this.wrapAtLength, {
     this.color = Colors.SLATE_GREY,
+    this.opacity = 0.5,
     this.alignment = Alignment.Center,
   }) {
     _lines = _buildLines(text, wrapAtLength);
     _longestLine = _getLongestLine(_lines);
 
-    _bubbleRect = RoundRectangle(color: Color.opacity(this.color, 0.5), paintMode: PaintMode.FILL, radius: Edges.all(0.2), radiusSizeType: SizeType.PERCENT);
+    _bubbleRect =
+        RoundRectangle(color: Color.opacity(this.color, opacity), paintMode: PaintMode.FILL, radius: Edges.all(0.2), radiusSizeType: SizeType.PERCENT);
 
     _cacheCanvas.width = 1000;
     _cacheCanvas.height = 1000;

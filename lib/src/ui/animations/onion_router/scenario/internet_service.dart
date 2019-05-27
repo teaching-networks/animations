@@ -26,6 +26,9 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   /// Duration of the packet transmission (from one point to another).
   static const Duration _packetTransmissionDuration = Duration(seconds: 3);
 
+  /// Duration how long a bubble should be showing per character.
+  static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
+
   /// Colors for the encryption layers of the packet.
   static const List<Color> _encryptionLayerColors = [
     Color.hex(0xFFFF3366),
@@ -69,6 +72,7 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
   Bubble _infoBubble;
   int _infoBubblePosIndex;
+  bool _showBubbles = false;
 
   /// Create scenario.
   InternetService() {
@@ -78,29 +82,51 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
     reroute();
   }
 
-  void test() {
+  void test(bool withBubbles) {
     if (_route.isEmpty) {
       return;
     }
 
+    _showBubbles = withBubbles;
+
     _packet.reset();
     _packetPosition = 0;
 
+    if (_showBubbles) {
+      _infoBubble = Bubble(
+        "Für jeden Onion Router auf dem Web zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+        30,
+        alignment: Alignment.Start,
+        opacity: 1.0,
+      );
+      _infoBubblePosIndex = 0;
+
+      Future.wait([
+        _animatePaketInitialization(),
+        Future.delayed(_bubbleDurationPerCharacter * _infoBubble.text.length),
+      ]).then((_) {
+        _infoBubble = null;
+        _startPacketTransition = true;
+      });
+    } else {
+      for (final color in _encryptionLayerColors) {
+        _packet.encrypt(
+          color: color,
+          withAnimation: false,
+        );
+      }
+
+      _startPacketTransition = true;
+    }
+  }
+
+  Future<void> _animatePaketInitialization() async {
     for (final color in _encryptionLayerColors) {
-      _packet.encrypt(
+      await _packet.encrypt(
         color: color,
-        withAnimation: false,
+        withAnimation: true,
       );
     }
-
-    _infoBubble = Bubble(
-      "Für jeden Onion Router auf dem Web zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
-      30,
-      alignment: Alignment.Start,
-    );
-    _infoBubblePosIndex = 0;
-
-    _startPacketTransition = true;
   }
 
   void _loadImages() async {
@@ -156,15 +182,28 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
         if (_packetTransitionForward) {
           if (_packetPosition + 1 < _route.length + 1) {
             _packetPosition++;
-
-            // Start transition all over again!
-            _packetTransitionTS = timestamp;
             _packetTransitionProgress = 0;
             _packet.decrypt();
+
+            if (_showBubbles && _packetPosition == 1) {
+              _pauseAnimationAndShowBubble(
+                  "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.", _packetPosition, Alignment.Center, timestamp);
+            } else {
+              _packetTransitionTS = timestamp; // Start transition all over again!
+            }
           } else {
             _packetTransitionForward = false; // Reverse transition direction
-            _packetTransitionTS = timestamp;
             _packetTransitionProgress = 0;
+
+            if (_showBubbles) {
+              _pauseAnimationAndShowBubble(
+                  "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
+                  _route.length + 1,
+                  Alignment.End,
+                  timestamp);
+            } else {
+              _packetTransitionTS = timestamp;
+            }
           }
         } else {
           if (_packetPosition > 0) {
@@ -186,6 +225,25 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
 
       invalidate();
     }
+  }
+
+  void _pauseAnimationAndShowBubble(String text, int posIndex, Alignment alignment, num timestamp) {
+    _packetTransitionTS = null; // Pause animation
+
+    _infoBubble = Bubble(
+      text,
+      30,
+      alignment: alignment,
+      opacity: 1.0,
+    );
+    _infoBubblePosIndex = posIndex;
+
+    Duration toWait = _bubbleDurationPerCharacter * _infoBubble.text.length;
+    Future.delayed(toWait).then((_) {
+      _infoBubble = null;
+
+      _packetTransitionTS = timestamp + toWait.inMilliseconds;
+    });
   }
 
   /// Get progress of an animation using its start timestamp and the duration.
@@ -242,8 +300,8 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
         _drawRoute(context, routeCoordinates);
       }
 
-      if (_packetTransitionProgress != null) {
-        _drawPacket(context, _packet, _packetTransitionProgress, routeCoordinates, _packetPosition, timestamp);
+      if (_packet != null) {
+        _drawPacket(context, _packet, _packetTransitionProgress != null ? _packetTransitionProgress : 0.0, routeCoordinates, _packetPosition, timestamp);
       }
 
       if (_infoBubble != null) {
@@ -256,8 +314,8 @@ class InternetService extends CanvasDrawable with Repaintable implements Scenari
   Point<double> _getCoordinatesForIndex(int index) {
     if (index == 0) {
       return _hostCoordinates;
-    } else if (index - 1 < _routerCoordinates.length) {
-      return _routerCoordinates[index - 1];
+    } else if (index - 1 < _route.length) {
+      return _routerCoordinates[_route[index - 1]];
     } else {
       return _serviceCoordinates;
     }
