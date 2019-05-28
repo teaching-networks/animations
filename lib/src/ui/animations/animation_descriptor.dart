@@ -27,11 +27,14 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
+  final int version;
+
   const AnimationDescriptor({
     @required this.id,
     @required this.componentFactory,
     @required this.baseTranslationKey,
     @required this.previewImagePath,
     @required this.path,
+    this.version = 1,
   });
 }

@@ -1,8 +1,7 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/canvas/animation/repaintable.dart';
-import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
@@ -10,7 +9,7 @@ import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 /// An packet which can be encrypted multiple times.
 /// This is visualized by wrapping the packet in circles which equal the
 /// amount of encryption steps the packet has been processed.
-class EncryptedPacket extends CanvasDrawable with Repaintable {
+class EncryptedPacket extends Drawable {
   /// Default duration of the encryption and decryption animations.
   static const Duration _defaultAnimationDuration = Duration(seconds: 1);
 
@@ -47,51 +46,42 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
   /// Start angle of the encryptin/decryption layer in the animation.
   double _animationStartAngle = 0;
 
-  /// Cached image of the previously drawn packet.
-  CanvasElement _cacheCanvas = CanvasElement();
-  CanvasRenderingContext2D _cacheContext;
-
-  /// Rectangle of the last drawn canvas.
-  Rectangle<double> _cachedCanvasRect;
+  double _packetSize = 0;
 
   /// Create encrypted packet.
   EncryptedPacket({
     int encryptionLayers = 0,
     this.animationDuration = _defaultAnimationDuration,
-  }) : _encryptionLayers = encryptionLayers {
-    _cacheContext = _cacheCanvas.getContext("2d");
+  }) : _encryptionLayers = encryptionLayers;
+
+  set packetSize(double value) {
+    _packetSize = value;
+
+    setSize(
+      width: value,
+      height: value,
+    );
   }
 
   @override
-  void preRender([num timestamp = -1]) {
-    super.preRender(timestamp);
-
-    if (timestamp == -1) {
-      throw Exception("EncryptedPacket drawable must be provided a timestamp to work properly");
-    }
-
+  void update(num timestamp) {
     _checkTimestamps(timestamp);
     _updateAnimationProgress(timestamp);
   }
 
   @override
-  void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
-    if (needsRepaint || rect != _cachedCanvasRect) {
-      // Refresh cached canvas content
-      _cacheCanvas.width = rect.width.toInt();
-      _cacheCanvas.height = rect.height.toInt();
-
-      _cacheContext.clearRect(0, 0, rect.width, rect.height);
-
-      _drawPacket(_cacheContext, max(rect.width, rect.height));
-      _cachedCanvasRect = rect;
-
-      validate();
-    }
-
-    // Only draw content of cached canvas to canvas.
-    context.drawImageToRect(_cacheCanvas, rect);
+  void draw() {
+    print("Redraw packet");
+    _drawPacket(ctx, _packetSize);
   }
+
+  @override
+  void drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, double x, double y) {
+    context.drawImage(src, x - size.width / 2, y - size.height / 2);
+  }
+
+  @override
+  bool needsRepaint() => false;
 
   /// Draw the packet on the passed rendering [context].
   void _drawPacket(CanvasRenderingContext2D context, double size) {
@@ -100,7 +90,7 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
     double layerLineWidth = radius * 0.5;
 
     // Draw packet sphere
-    setFillColor(context, Colors.CORAL);
+    setFillColor(Colors.CORAL);
     context.beginPath();
     context.arc(offset, offset, radius, 0, _maxAngle);
     context.fill();
@@ -120,10 +110,17 @@ class EncryptedPacket extends CanvasDrawable with Repaintable {
 
   /// Draw an encryption layer.
   void _drawEncryptionLayer(
-      CanvasRenderingContext2D context, Color color, int encryptionLayerIndex, double offset, double baseSize, double endAngle, double layerLineWidth) {
+    CanvasRenderingContext2D context,
+    Color color,
+    int encryptionLayerIndex,
+    double offset,
+    double baseSize,
+    double endAngle,
+    double layerLineWidth,
+  ) {
     double layerRadius = baseSize + layerLineWidth * encryptionLayerIndex;
 
-    setStrokeColor(context, color);
+    setStrokeColor(color);
     context.beginPath();
     context.arc(offset, offset, layerRadius, _animationStartAngle, _animationStartAngle + endAngle);
     context.stroke();

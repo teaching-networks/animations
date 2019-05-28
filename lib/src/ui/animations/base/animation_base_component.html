@@ -1,0 +1,15 @@
+<div #animationComponentContainer>
+	<!-- will be filled with the animation component -->
+</div>
+
+<template [ngIf]="loaded">
+	<div class="description">
+		<h3>{{ "description" | i18n }}:</h3>
+		<description-component [descriptor]="animationDescriptor"></description-component>
+	</div>
+
+	<div class="animation-credits">
+		<hr>
+		<p>{{ credits }}</p>
+	</div>
+</template>

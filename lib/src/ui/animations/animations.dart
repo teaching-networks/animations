@@ -9,8 +9,7 @@ import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csm
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.template.dart' as CSMACA;
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/csma_cd_animation.template.dart' as CSMACD;
-import 'package:hm_animations/src/ui/animations/onion_router/onion_router_animation.dart';
-import 'package:hm_animations/src/ui/animations/onion_router/onion_router_animation.template.dart' as onionRouter;
+import 'package:hm_animations/src/ui/animations/onion_router/onion_router_animation_component.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.dart';
 import 'package:hm_animations/src/ui/animations/queue_simulation/queue_simulation_animation.template.dart' as queueSimulation;
 import 'package:hm_animations/src/ui/animations/reliable_transmission/impl/go_back_n/go_back_n_animation.dart';
@@ -34,96 +33,90 @@ class Animations {
   /// List of animations in this application.
   /// Add a new animation to this list in order to make it available to the application.
   static List<AnimationDescriptor> ANIMATIONS = <AnimationDescriptor>[
-    new AnimationDescriptor<TransmissionAnimation>(
+    AnimationDescriptor<TransmissionAnimation>(
       id: ID_COUNTER++,
       componentFactory: transmission.TransmissionAnimationNgFactory,
       baseTranslationKey: "packetTransmission",
       previewImagePath: "img/animation/preview/packet-transmission-preview.png",
       path: "transmission",
     ),
-    new AnimationDescriptor<StopAndWaitAnimation>(
+    AnimationDescriptor<StopAndWaitAnimation>(
       id: ID_COUNTER++,
       componentFactory: stopAndWait.StopAndWaitAnimationNgFactory,
       baseTranslationKey: "reliable-transmission-animation.protocol.stop-and-wait",
       previewImagePath: "img/animation/preview/stop-and-wait-preview.png",
       path: "stop-and-wait",
     ),
-    new AnimationDescriptor<GoBackNAnimation>(
+    AnimationDescriptor<GoBackNAnimation>(
       id: ID_COUNTER++,
       componentFactory: goBackN.GoBackNAnimationNgFactory,
       baseTranslationKey: "reliable-transmission-animation.protocol.go-back-n",
       previewImagePath: "img/animation/preview/go-back-n-preview.png",
       path: "go-back-n",
     ),
-    new AnimationDescriptor<SelectiveRepeatAnimation>(
+    AnimationDescriptor<SelectiveRepeatAnimation>(
       id: ID_COUNTER++,
       componentFactory: selectiveRepeat.SelectiveRepeatAnimationNgFactory,
       baseTranslationKey: "reliable-transmission-animation.protocol.selective-repeat",
       previewImagePath: "img/animation/preview/selective-repeat-preview.png",
       path: "selective-repeat",
     ),
-    new AnimationDescriptor<QueueSimulationAnimation>(
+    AnimationDescriptor<QueueSimulationAnimation>(
       id: ID_COUNTER++,
       componentFactory: queueSimulation.QueueSimulationAnimationNgFactory,
       baseTranslationKey: "queue-simulation-animation",
       previewImagePath: "img/animation/preview/queue-simulation-preview.png",
       path: "queue-simulation",
     ),
-    new AnimationDescriptor<HttpDelayAnimation>(
+    AnimationDescriptor<HttpDelayAnimation>(
       id: ID_COUNTER++,
       componentFactory: httpDelay.HttpDelayAnimationNgFactory,
       baseTranslationKey: "http-delay-animation",
       previewImagePath: "img/animation/preview/http-delay-preview.png",
       path: "http-delay",
     ),
-    new AnimationDescriptor<DNSAnimation>(
+    AnimationDescriptor<DNSAnimation>(
       id: ID_COUNTER++,
       componentFactory: dns.DNSAnimationNgFactory,
       baseTranslationKey: "dns-animation",
       previewImagePath: "img/animation/preview/dns-animation-preview.png",
       path: "dns",
     ),
-    new AnimationDescriptor<TCPFlowControlAnimation>(
+    AnimationDescriptor<TCPFlowControlAnimation>(
       id: ID_COUNTER++,
       componentFactory: tcpFlowControl.TCPFlowControlAnimationNgFactory,
       baseTranslationKey: "tcp-flow-control-animation",
       previewImagePath: "img/animation/preview/tcp-flow-control-preview.png",
       path: "tcp-flow-control",
     ),
-    new AnimationDescriptor<TCPCongestionControlAnimation>(
+    AnimationDescriptor<TCPCongestionControlAnimation>(
       id: ID_COUNTER++,
       componentFactory: tcpCongestionControl.TCPCongestionControlAnimationNgFactory,
       baseTranslationKey: "tcp-congestion-control-animation",
       previewImagePath: "img/animation/preview/tcp_congestion_control_preview.png",
       path: "tcp-congestion-control",
     ),
-    new AnimationDescriptor<CSMACDAnimation>(
+    AnimationDescriptor<CSMACDAnimation>(
       id: ID_COUNTER++,
       componentFactory: CSMACD.CSMACDAnimationNgFactory,
       baseTranslationKey: "csma-cd-animation",
       previewImagePath: "img/animation/preview/csma-cd-preview.png",
       path: "csma-cd",
     ),
-    new AnimationDescriptor<DijkstraAlgorithmAnimation>(
+    AnimationDescriptor<DijkstraAlgorithmAnimation>(
       id: ID_COUNTER++,
       componentFactory: dijkstra.DijkstraAlgorithmAnimationNgFactory,
       baseTranslationKey: "dijkstra-algorithm-animation",
       previewImagePath: "img/animation/preview/dijkstra-preview.png",
       path: "dijkstra",
     ),
-    new AnimationDescriptor<CSMACAAnimation>(
+    AnimationDescriptor<CSMACAAnimation>(
       id: ID_COUNTER++,
       componentFactory: CSMACA.CSMACAAnimationNgFactory,
       baseTranslationKey: "csma-ca-animation",
       previewImagePath: "img/animation/preview/csma-ca-preview.png",
       path: "hidden-node-problem",
     ),
-    new AnimationDescriptor<OnionRouterAnimation>(
-      id: ID_COUNTER++,
-      componentFactory: onionRouter.OnionRouterAnimationNgFactory,
-      baseTranslationKey: "onion-router",
-      previewImagePath: "", // TODO
-      path: "onion-router",
-    ),
+    OnionRouterAnimationComponent.descriptor,
   ];
 }
