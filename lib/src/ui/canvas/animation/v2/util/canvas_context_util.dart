@@ -58,21 +58,44 @@ abstract class CanvasContextUtil {
   }) {
     _checkContextAvailable();
 
-    Rectangle<double> bounds;
+    Rectangle<double> bounds = layoutImage(
+      mode: mode,
+      alignment: alignment,
+      width: width,
+      height: height,
+      aspectRatio: aspectRatio,
+      x: x,
+      y: y,
+    );
+
+    _ctx.drawImageToRect(
+      src,
+      bounds,
+    );
+
+    return bounds;
+  }
+
+  /// Layout an image correctly using the provided parameters.
+  Rectangle<double> layoutImage({
+    ImageDrawMode mode = ImageDrawMode.STRETCH,
+    ImageAlignment alignment = ImageAlignment.START,
+    double width,
+    double height,
+    double aspectRatio,
+    double x = 0,
+    double y = 0,
+  }) {
     switch (mode) {
       case ImageDrawMode.STRETCH:
-        bounds = _stretchLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
+        return _stretchLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
         break;
       case ImageDrawMode.FILL:
-        bounds = _fillLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
+        return _fillLayout.layout(width: width, height: height, aspectRatio: aspectRatio, x: x, y: y, alignment: alignment);
         break;
       default:
         throw Exception("Image draw mode unknown");
     }
-
-    _ctx.drawImageToRect(src, bounds);
-
-    return bounds;
   }
 }
 

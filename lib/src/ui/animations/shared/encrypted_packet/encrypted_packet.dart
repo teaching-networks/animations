@@ -71,7 +71,6 @@ class EncryptedPacket extends Drawable {
 
   @override
   void draw() {
-    print("Redraw packet");
     _drawPacket(ctx, _packetSize);
   }
 
