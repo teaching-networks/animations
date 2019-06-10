@@ -27,6 +27,9 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   /// Duration of the TCP connection establishment animation.
   static const Duration _tcpConnectionAnimationDuration = Duration(seconds: 6);
 
+  /// Duration of the key exchange animation.
+  static const Duration _keyExchangeAnimationDuration = Duration(seconds: 2);
+
   /// Duration how long a bubble should be showing per character.
   static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
 
@@ -54,8 +57,14 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   ImageInfo _serviceImageInfo;
   CanvasImageSource _serviceImage;
 
+  ImageInfo _keyImageInfo;
+  CanvasImageSource _keyImage;
+
   Point<double> _hostCoordinates;
+  Rectangle<double> _hostBounds;
   Point<double> _serviceCoordinates;
+  Rectangle<double> _serviceBounds;
+
   List<Point<double>> _relayNodeCoordinates = List<Point<double>>();
   List<Rectangle<double>> _relayNodeBounds = List<Rectangle<double>>();
 
@@ -73,6 +82,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   Bubble _infoBubble;
   double _infoBubblePosIndex;
   bool _showBubbles = false;
+  int _currentInfoBubbleID = 0;
 
   List<Point<double>> _relativeRelayNodeCoordinates;
 
@@ -88,6 +98,9 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   /// Whether TCP connections are established between the relay nodes.
   bool _tcpConnectionsEstablished = false;
 
+  /// Whether the keys have been exchanged.
+  bool _keysExchanged = false;
+
   /// Start timestamp of the TCP connection establishment animation.
   num _tcpConnectionAnimationTS;
 
@@ -96,6 +109,21 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   /// Whether to start the TCP Connection animation the next rendering cycle.
   bool _startTCPConnectionAnimation = false;
+
+  /// Whether to start the key exchange animation the next rendering cycle.
+  bool _startKeyExchangeAnim = false;
+
+  /// Start timestamp of the key exchange animation.
+  num _keyExchangeAnimationTS;
+
+  /// Progress of the key exchange animation.
+  double _keyExchangeAnimationProgress = 0;
+
+  /// Duration of the current key exchange animation.
+  Duration _currentKeyExchangeAnimationDuration;
+
+  /// Position (Route index) in the key exchange animation.
+  int _keyExchangeAnimationPosition = 1;
 
   /// Create the internet service drawable.
   InternetServiceDrawable() {
@@ -130,8 +158,20 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         Alignment.Start,
       );
     }
+  }
 
-    invalidate();
+  /// Start the key exchange animation.
+  void _startKeyExchangeAnimation() {
+    _startKeyExchangeAnim = true;
+    _resetKeyExchangeAnimation();
+
+    if (_showBubbles) {
+      _showBubble(
+        "Zwischen dem Host und jedem Relay Knoten (OR) werden Schritt für Schritt symmetrische Schlüssel ausgetauscht.",
+        0.5,
+        Alignment.Start,
+      );
+    }
   }
 
   /// Start the packet transition animation.
@@ -144,7 +184,6 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         0,
         Alignment.Start,
       ).then((duration) {
-        _infoBubble = null;
         _startPacketTransition = true;
       });
     } else {
@@ -183,6 +222,9 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _routerImageInfo = Images.routerIconImage;
     _routerImage = await _routerImageInfo.load();
 
+    _keyImageInfo = Images.key;
+    _keyImage = await _keyImageInfo.load();
+
     invalidate();
   }
 
@@ -207,11 +249,11 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
     if (_hasCoordinates && _route.isNotEmpty) {
       List<Point<double>> routeCoordinates = List<Point<double>>();
-      routeCoordinates.add(_hostCoordinates);
+      routeCoordinates.add(_hostCoordinates + Point<double>(0, _hostBounds.height / 2));
       for (int i in _route) {
         routeCoordinates.add(_relayNodeCoordinates[i] + Point<double>(0, _relayNodeBounds[i].height / 2));
       }
-      routeCoordinates.add(_serviceCoordinates);
+      routeCoordinates.add(_serviceCoordinates + Point<double>(0, _serviceBounds.height / 2));
 
       if (_route.isNotEmpty) {
         _drawRoute(routeCoordinates);
@@ -231,21 +273,23 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   /// Get coordinates for the passed floating point [index].
   /// The method will calculate the coordinates based on the coordinates before and after
   /// the passed integer indices and interpolate them.
-  Point<double> _getCoordinatesForFloatingIndex(double index) {
-    Point<double> before = _getCoordinatesForIndex(index.floor());
-    Point<double> after = _getCoordinatesForIndex(index.ceil());
+  Point<double> _getCoordinatesForFloatingIndex(double index, {bool addOffset = true}) {
+    Point<double> before = _getCoordinatesForIndex(index.floor(), addOffset: addOffset);
+    Point<double> after = _getCoordinatesForIndex(index.ceil(), addOffset: addOffset);
 
     return before + (after - before) * (index - index.floor());
   }
 
   /// Get coordinates for the passed route [index].
-  Point<double> _getCoordinatesForIndex(int index) {
+  Point<double> _getCoordinatesForIndex(int index, {bool addOffset = true}) {
     if (index == 0) {
-      return _hostCoordinates;
+      return addOffset ? _hostCoordinates + Point<double>(0, _hostBounds.height / 2) : _hostCoordinates;
     } else if (index - 1 < _route.length) {
-      return _relayNodeCoordinates[_route[index - 1]];
+      return addOffset
+          ? _relayNodeCoordinates[_route[index - 1]] + Point<double>(0, _relayNodeBounds[_route[index - 1]].height / 2)
+          : _relayNodeCoordinates[_route[index - 1]];
     } else {
-      return _serviceCoordinates;
+      return addOffset ? _serviceCoordinates + Point<double>(0, _serviceBounds.height / 2) : _serviceCoordinates;
     }
   }
 
@@ -300,12 +344,53 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       ctx.ellipse(coords.x, coords.y, radius, radius, 2 * pi, 0, 2 * pi, false);
       ctx.fill();
     }
+
+    if (_keyExchangeAnimationRunning) {
+      double index = _keyExchangeAnimationPosition * _keyExchangeAnimationProgress;
+
+      Point<double> cP1 = _getCoordinatesForFloatingIndex(index);
+      Point<double> cP2 = _getCoordinatesForFloatingIndex(_keyExchangeAnimationPosition - index);
+
+      double keySize = window.devicePixelRatio * 50.0;
+
+      drawImageOnCanvas(
+        _keyImage,
+        aspectRatio: _keyImageInfo.aspectRatio,
+        width: keySize,
+        height: keySize,
+        x: cP1.x - keySize / 2,
+        y: cP1.y - keySize / 2,
+        mode: ImageDrawMode.FILL,
+        alignment: ImageAlignment.MID,
+      );
+
+      drawImageOnCanvas(
+        _keyImage,
+        aspectRatio: _keyImageInfo.aspectRatio,
+        width: keySize,
+        height: keySize,
+        x: cP2.x - keySize / 2,
+        y: cP2.y - keySize / 2,
+        mode: ImageDrawMode.FILL,
+        alignment: ImageAlignment.MID,
+      );
+    }
   }
 
   /// Get the color of the passed route part [index].
   Color getRoutePartColor(int index) {
-    if (!_tcpConnectionsEstablished) {
-      return Colors.LIGHTER_GRAY;
+    if (!_tcpConnectionsEstablished || !_keysExchanged) {
+      if (!_tcpConnectionsEstablished) {
+        return Colors.LIGHTER_GRAY;
+      } else if (!_keysExchanged) {
+        if (index + 1 >= _keyExchangeAnimationPosition) {
+          return Colors.SPACE_BLUE;
+        } else {
+          return _encryptionLayerColors[_encryptionLayerColors.length - 1 - index];
+        }
+      } else {
+        return Colors.LIGHTER_GRAY;
+      }
     } else if (_encryptionLayerColors.length > index) {
       return _encryptionLayerColors[_encryptionLayerColors.length - 1 - index];
     } else {
@@ -328,7 +413,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       mode: ImageDrawMode.FILL,
       alignment: ImageAlignment.MID,
     );
-    _hostCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height);
+    _hostCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+    _hostBounds = bounds;
   }
 
   void _drawService(Rectangle<double> rectangle) {
@@ -346,7 +432,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       mode: ImageDrawMode.FILL,
       alignment: ImageAlignment.MID,
     );
-    _serviceCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height);
+    _serviceCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+    _serviceBounds = bounds;
   }
 
   /// Generate a list of relay nodes with random coordinates with the passed [size].
@@ -568,11 +655,24 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   /// Whether the TCP connection establishment animation is currently running.
   bool get _tcpConnectionAnimationRunning => _tcpConnectionAnimationTS != null;
 
+  /// Whether the key exchange animation is currently running.
+  bool get _keyExchangeAnimationRunning => _keyExchangeAnimationTS != null;
+
   /// Reset the animation.
   void _resetAnimation() {
     _resetPacketTransitionAnimation();
     _resetRelayNodeGrowthAnimation();
     _resetTCPConnectionEstablishmentAnimation();
+    _resetKeyExchangeAnimation();
+  }
+
+  /// Reset the key exchange animation.
+  void _resetKeyExchangeAnimation() {
+    _keysExchanged = false;
+    _keyExchangeAnimationTS = null;
+    _keyExchangeAnimationProgress = 0.0;
+    _keyExchangeAnimationPosition = 1;
+    _currentKeyExchangeAnimationDuration = _keyExchangeAnimationDuration;
   }
 
   /// Reset the packet transition animation.
@@ -609,6 +709,19 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _checkPacketTransitionStart(timestamp);
     _checkRelayNodeGrowthAnimationStart(timestamp);
     _checkTCPConnectionEstablishmentAnimationStart(timestamp);
+    _checkKeyExchangeAnimationStart(timestamp);
+  }
+
+  /// Check whether the key exchange animation should be started.
+  void _checkKeyExchangeAnimationStart(num timestamp) {
+    if (_startKeyExchangeAnim) {
+      _startKeyExchangeAnim = false;
+
+      _resetKeyExchangeAnimation();
+      _keyExchangeAnimationTS = timestamp;
+
+      invalidate();
+    }
   }
 
   /// Check whether the packet transition animation should be started.
@@ -648,6 +761,36 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _updatePacketTransitionAnimation(timestamp);
     _updateRelayNodeGrowthAnimation(timestamp);
     _updateTCPConnectionEstablishmentAnimation(timestamp);
+    _updateKeyExchangeAnimation(timestamp);
+  }
+
+  /// Update the key exchange animation.
+  void _updateKeyExchangeAnimation(num timestamp) {
+    if (!_keyExchangeAnimationRunning) {
+      return;
+    }
+
+    _keyExchangeAnimationProgress = _getProgress(timestamp, _keyExchangeAnimationTS, _currentKeyExchangeAnimationDuration);
+
+    if (_keyExchangeAnimationProgress >= 1.0) {
+      _onKeyExchangeAnimationEnd(timestamp);
+    }
+
+    invalidate();
+  }
+
+  /// What to do when the key exchange animation ends.
+  void _onKeyExchangeAnimationEnd(num timestamp) {
+    if (_keyExchangeAnimationPosition + 1 < _route.length + 1) {
+      _keyExchangeAnimationPosition++;
+      _keyExchangeAnimationTS = timestamp; // Start animation again
+      _keyExchangeAnimationProgress = 0.0;
+      _currentKeyExchangeAnimationDuration = Duration(milliseconds: _keyExchangeAnimationDuration.inMilliseconds * _keyExchangeAnimationPosition);
+    } else {
+      _keyExchangeAnimationTS = null; // End animation
+      _keysExchanged = true;
+      _startPacketTransitionAnimation();
+    }
   }
 
   /// Update the TCP connection establishment animation.
@@ -670,8 +813,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _tcpConnectionAnimationTS = null; // Stop the animation
     _tcpConnectionsEstablished = true;
 
-    // TODO Start symmetric key exchange for each relay node (step by step)
-    _startPacketTransitionAnimation();
+    _startKeyExchangeAnimation();
   }
 
   /// Update the relay node grown animation.
@@ -767,6 +909,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   /// Pause the packet transition animation and show a help bubble at the current [posIndex] position.
   Future<Duration> _showBubble(String text, double posIndex, Alignment alignment) {
+    int id = ++_currentInfoBubbleID;
+
     _infoBubble = Bubble(
       text,
       30,
@@ -776,8 +920,13 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _infoBubblePosIndex = posIndex;
 
     Duration toWait = _bubbleDurationPerCharacter * _infoBubble.text.length;
+
+    invalidate();
+
     return Future.delayed(toWait).then((_) {
-      _infoBubble = null;
+      if (_currentInfoBubbleID == id) {
+        _infoBubble = null;
+      }
 
       return toWait;
     });
