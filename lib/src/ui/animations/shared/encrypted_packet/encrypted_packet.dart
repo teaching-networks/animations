@@ -127,7 +127,7 @@ class EncryptedPacket extends Drawable {
     double endAngle,
     double layerLineWidth,
   ) {
-    double layerRadius = baseSize + layerLineWidth * encryptionLayerIndex;
+    double layerRadius = baseSize + layerLineWidth * encryptionLayerIndex + layerLineWidth / 2;
 
     setStrokeColor(color);
     context.beginPath();

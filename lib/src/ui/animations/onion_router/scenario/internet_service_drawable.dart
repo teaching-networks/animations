@@ -210,6 +210,12 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     }
   }
 
+  Future<void> _animatePaketDecryption() async {
+    for (int i = 0; i < _route.length; i++) {
+      await _packet.decrypt(withAnimation: true);
+    }
+  }
+
   /// Generate the relay nodes to show.
   Future<void> _generateRelayNodes() async {
     _relativeRelayNodeCoordinates = await _generateRelayNodeCloud(_relayNodeCount, minDistance: 0.2).timeout(
@@ -925,6 +931,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
           0,
           Alignment.Start,
         );
+
+        _animatePaketDecryption();
       }
     }
   }
@@ -949,6 +957,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     return Future.delayed(toWait).then((_) {
       if (_currentInfoBubbleID == id) {
         _infoBubble = null;
+        invalidate();
       }
 
       return toWait;
