@@ -21,6 +21,22 @@
 					Tor Kanal wechseln
 				</material-button>
 			</li>
+			<li>
+				<span class="slider-panel">
+					<div>
+						Circuit Länge
+					</div>
+					<material-slider [min]="minRouteLength"
+									 [max]="maxRouteLength"
+									 [step]="1"
+									 [value]="currentRouteLength"
+									 (valueChange)="changeRouteLength($event)">
+					</material-slider>
+					<div>
+						{{ currentRouteLength }}
+					</div>
+				</span>
+			</li>
 			<li class="labeled" style="text-align: center">
 				<label>Test</label>
 				<material-button raised (click)="test()">

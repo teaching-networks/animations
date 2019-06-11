@@ -5,6 +5,7 @@ import 'package:angular/core.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_select/material_dropdown_select.dart';
+import 'package:angular_components/material_slider/material_slider.dart';
 import 'package:angular_components/model/selection/selection_model.dart';
 import 'package:angular_components/model/ui/has_renderer.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
@@ -31,6 +32,7 @@ import 'package:hm_animations/src/ui/misc/angular_components/selection_options.d
     MaterialButtonComponent,
     MaterialIconComponent,
     MaterialDropdownSelectComponent,
+    MaterialSliderComponent,
   ],
   pipes: [
     I18nPipe,
@@ -71,6 +73,8 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
 
   /// Current drawable to display.
   Drawable _currentDrawable;
+
+  int currentRouteLength = 3;
 
   /// Create animation.
   OnionRouterAnimationComponent(
@@ -135,5 +139,14 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
   // Find a new route in the onion router network.
   void reroute() {
     (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).reroute();
+  }
+
+  int get minRouteLength => (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).minRouteLength;
+
+  int get maxRouteLength => (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).maxRouteLength;
+
+  void changeRouteLength(int newRouteLength) {
+    currentRouteLength = newRouteLength;
+    (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).reroute(routeLength: newRouteLength);
   }
 }

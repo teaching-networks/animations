@@ -38,13 +38,23 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     Color.hex(0xFFFF3366),
     Color.hex(0xFFFF9955),
     Color.hex(0xFFFFCC33),
+    Colors.BORDEAUX,
+    Colors.NAVY, // TODO Change the colors to the colors of the rainbow
+    Colors.MINT,
+    Colors.PINK_RED,
   ];
 
   /// How much relay nodes to display.
   static const int _relayNodeCount = 20;
 
-  /// Length of the route through the relay nodes.
-  static const int _routeLength = 3;
+  /// The maximum route length.
+  static const int _maxRouteLength = 7;
+
+  /// The minimum route length.
+  static const int _minRouteLength = 1;
+
+  /// Default length of the route through the relay nodes.
+  static const int _defaultRouteLength = 3;
 
   static Random _rng = Random();
 
@@ -180,7 +190,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
     if (_showBubbles) {
       _showBubble(
-        "Für jeden Onion Router auf dem Web zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+        "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
         0,
         Alignment.Start,
       ).then((duration) {
@@ -192,9 +202,9 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   }
 
   Future<void> _animatePaketInitialization() async {
-    for (final color in _encryptionLayerColors) {
+    for (int i = 0; i < _route.length; i++) {
       await _packet.encrypt(
-        color: color,
+        color: _encryptionLayerColors[i],
         withAnimation: true,
       );
     }
@@ -303,6 +313,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     double size = 100 * window.devicePixelRatio;
 
     _packet.packetSize = size;
+    _packet.maxEncryptionLayers = _route.length;
     _packet.render(
       ctx,
       timestamp,
@@ -386,13 +397,13 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         if (index + 1 >= _keyExchangeAnimationPosition) {
           return Colors.SPACE_BLUE;
         } else {
-          return _encryptionLayerColors[_encryptionLayerColors.length - 1 - index];
+          return _encryptionLayerColors[_route.length - 1 - index];
         }
       } else {
         return Colors.LIGHTER_GRAY;
       }
-    } else if (_encryptionLayerColors.length > index) {
-      return _encryptionLayerColors[_encryptionLayerColors.length - 1 - index];
+    } else if (_route.length > index) {
+      return _encryptionLayerColors[_route.length - 1 - index];
     } else {
       return Colors.SPACE_BLUE;
     }
@@ -608,7 +619,12 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   // Find a new route in the onion router network.
   void reroute({
     bool withAnimation = true,
+    int routeLength = _defaultRouteLength,
   }) {
+    if (routeLength < _minRouteLength || routeLength > _maxRouteLength) {
+      throw Exception("Route length $routeLength is illegal. Must be in range [$_minRouteLength; $_maxRouteLength].");
+    }
+
     _resetAnimation();
 
     // Cache old route
@@ -621,12 +637,12 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       _startRelayNodeGrowthAnimation = true;
     }
 
-    if (_route.length != _routeLength) _route.length = _routeLength;
+    if (_route.length != routeLength) _route.length = routeLength;
 
     Set<int> oldUsedIndices = _oldRoute != null ? _oldRoute.toSet() : Set<int>();
     Set<int> usedIndices = Set<int>();
 
-    for (int i = 0; i < _routeLength; i++) {
+    for (int i = 0; i < routeLength; i++) {
       _route[i] = _rng.nextInt(_relativeRelayNodeCoordinates.length);
 
       // Check that index hasn't been used yet and is not used in the old route (if any).
@@ -900,9 +916,15 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         // Restart transition progress
         _packetTransitionTS = timestamp;
         _packetTransitionProgress = 0;
-        _packet.encrypt(color: _encryptionLayerColors[_encryptionLayerColors.length - 1 - _packetPosition]);
+        _packet.encrypt(color: _encryptionLayerColors[_route.length - 1 - _packetPosition]);
       } else {
         _packetTransitionTS = null; // End transition
+
+        _showBubble(
+          "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
+          0,
+          Alignment.Start,
+        );
       }
     }
   }
@@ -915,7 +937,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       text,
       30,
       alignment: alignment,
-      opacity: 1.0,
+      opacity: 0.7,
+      color: Colors.BLACK,
     );
     _infoBubblePosIndex = posIndex;
 
@@ -934,4 +957,10 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   @override
   String toString() => name;
+
+  /// The minimum route length.
+  int get minRouteLength => _minRouteLength;
+
+  /// The maximum route length.
+  int get maxRouteLength => _maxRouteLength;
 }

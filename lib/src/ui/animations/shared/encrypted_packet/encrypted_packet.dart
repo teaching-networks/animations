@@ -48,6 +48,8 @@ class EncryptedPacket extends Drawable {
 
   double _packetSize = 0;
 
+  int _maxEncryptionLayers = 3;
+
   /// Create encrypted packet.
   EncryptedPacket({
     int encryptionLayers = 0,
@@ -61,6 +63,14 @@ class EncryptedPacket extends Drawable {
       width: value,
       height: value,
     );
+  }
+
+  set maxEncryptionLayers(int value) {
+    _maxEncryptionLayers = value;
+
+    while (_encryptionLayers > _maxEncryptionLayers) {
+      decrypt(withAnimation: false);
+    }
   }
 
   @override
@@ -86,7 +96,7 @@ class EncryptedPacket extends Drawable {
   void _drawPacket(CanvasRenderingContext2D context, double size) {
     double offset = size / 2;
     double radius = size / 6;
-    double layerLineWidth = radius * 0.5;
+    double layerLineWidth = (size - radius * 2) / _maxEncryptionLayers / 2;
 
     // Draw packet sphere
     setFillColor(Colors.CORAL);
@@ -167,6 +177,10 @@ class EncryptedPacket extends Drawable {
     bool withAnimation = true,
   }) {
     _encryptionLayers++;
+    if (_encryptionLayers > _maxEncryptionLayers) {
+      throw Exception("Cannot encrypt when the maximum encryption layer amount has been reached. Set via EcryptedPacket.maxEncryptionLayers = ...");
+    }
+
     _lastEncryptionLayerColor = color;
     _encryptionLayerColors.add(color);
     _animationEncryption = true;
