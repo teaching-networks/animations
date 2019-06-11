@@ -6,6 +6,7 @@ import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
 import 'package:angular_components/material_select/material_dropdown_select.dart';
 import 'package:angular_components/material_slider/material_slider.dart';
+import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:angular_components/model/selection/selection_model.dart';
 import 'package:angular_components/model/ui/has_renderer.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
@@ -33,6 +34,7 @@ import 'package:hm_animations/src/ui/misc/angular_components/selection_options.d
     MaterialIconComponent,
     MaterialDropdownSelectComponent,
     MaterialSliderComponent,
+    MaterialToggleComponent,
   ],
   pipes: [
     I18nPipe,
@@ -75,6 +77,8 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
   Drawable _currentDrawable;
 
   int currentRouteLength = 3;
+
+  bool showHelpBubbles = true;
 
   /// Create animation.
   OnionRouterAnimationComponent(
@@ -133,7 +137,7 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
   String get scenarioSelectionLabel => scenarioSelectionModel.selectedValues.isNotEmpty ? scenarioSelectionModel.selectedValues.first.name : "";
 
   void test() {
-    (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).start(true);
+    (scenarioSelectionModel.selectedValues.first as InternetServiceDrawable).start(showHelpBubbles);
   }
 
   // Find a new route in the onion router network.

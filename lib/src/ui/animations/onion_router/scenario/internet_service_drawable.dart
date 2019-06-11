@@ -185,23 +185,21 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   }
 
   /// Start the packet transition animation.
-  void _startPacketTransitionAnimation() {
-    _animatePaketInitialization();
+  void _startPacketTransitionAnimation() async {
+    await Future.wait([
+      _animatePacketInitialization(),
+      if (_showBubbles)
+        _showBubble(
+          "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+          0,
+          Alignment.Start,
+        ),
+    ]);
 
-    if (_showBubbles) {
-      _showBubble(
-        "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
-        0,
-        Alignment.Start,
-      ).then((duration) {
-        _startPacketTransition = true;
-      });
-    } else {
-      _startPacketTransition = true;
-    }
+    _startPacketTransition = true;
   }
 
-  Future<void> _animatePaketInitialization() async {
+  Future<void> _animatePacketInitialization() async {
     for (int i = 0; i < _route.length; i++) {
       await _packet.encrypt(
         color: _encryptionLayerColors[i],
@@ -210,7 +208,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     }
   }
 
-  Future<void> _animatePaketDecryption() async {
+  Future<void> _animatePacketDecryption() async {
     for (int i = 0; i < _route.length; i++) {
       await _packet.decrypt(withAnimation: true);
     }
@@ -926,13 +924,15 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       } else {
         _packetTransitionTS = null; // End transition
 
-        _showBubble(
-          "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
-          0,
-          Alignment.Start,
-        );
+        if (_showBubbles) {
+          _showBubble(
+            "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
+            0,
+            Alignment.Start,
+          );
+        }
 
-        _animatePaketDecryption();
+        _animatePacketDecryption();
       }
     }
   }

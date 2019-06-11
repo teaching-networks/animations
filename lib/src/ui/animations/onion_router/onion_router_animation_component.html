@@ -38,10 +38,13 @@
 				</span>
 			</li>
 			<li class="labeled" style="text-align: center">
-				<label>Test</label>
 				<material-button raised (click)="test()">
-					<material-icon icon="help"></material-icon>
+					<material-icon icon="play_arrow"></material-icon>
 				</material-button>
+			</li>
+			<li class="labeled">
+				<label>Einstellungen</label>
+				<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
 			</li>
 		</ul>
 	</div>
