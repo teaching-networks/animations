@@ -272,5 +272,9 @@
   "csma-ca-animation.label.rts-cts": "RTS/CTS",
   "csma-ca-animation.animation-speed": "Geschwindigkeit",
   "editor.edit": "Bearbeiten",
-  "editor.preview": "Vorschau"
+  "editor.preview": "Vorschau",
+  "onion-router.name": "Onion Routing",
+  "onion-router.short-description": "Multi-layer Prozess und versteckte Dienste",
+  "onion-router.description": "Beschreibung nicht verfügbar.",
+  "onion-router.credits": "-"
 }

@@ -35,13 +35,13 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   /// Colors for the encryption layers of the packet.
   static const List<Color> _encryptionLayerColors = [
-    Color.hex(0xFFFF3366),
-    Color.hex(0xFFFF9955),
-    Color.hex(0xFFFFCC33),
-    Colors.BORDEAUX,
-    Colors.NAVY, // TODO Change the colors to the colors of the rainbow
-    Colors.MINT,
-    Colors.PINK_RED,
+    Color.hex(0xFFD91F37),
+    Color.hex(0xFFF79621),
+    Color.hex(0xFFF2EC36),
+    Color.hex(0xFF80C143),
+    Color.hex(0xFF0AC0F2),
+    Color.hex(0xFF1177BF),
+    Color.hex(0xFF653291),
   ];
 
   /// How much relay nodes to display.
@@ -186,6 +186,14 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   /// Start the packet transition animation.
   void _startPacketTransitionAnimation() async {
+    if (_showBubbles) {
+      await _showBubble(
+        "Daten werden als sogenannte \"Cells\" gesendet, welche 512 Byte Einheiten darstellen und aus Header & Payload bestehen.",
+        0,
+        Alignment.Start,
+      );
+    }
+
     await Future.wait([
       _animatePacketInitialization(),
       if (_showBubbles)
@@ -249,13 +257,15 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     double cellW = size.width / columns;
     double cellH = size.height;
 
+    double paddingY = 50.0 * window.devicePixelRatio;
+
     double xOffset = 0.0;
     // In the first cell, draw the host image.
     _drawHost(Rectangle<double>(0, 0, cellW, cellH));
     xOffset += cellW;
 
     // In the intermediate cells, draw the routers.
-    _drawRelayNodes(Rectangle<double>(xOffset, 0, cellW * (columns - 2), cellH), _relativeRelayNodeCoordinates);
+    _drawRelayNodes(Rectangle<double>(xOffset, paddingY, cellW * (columns - 2), cellH - paddingY * 2), _relativeRelayNodeCoordinates);
     xOffset += cellW * (columns - 2);
 
     // In the last cell, draw the service image.
@@ -877,63 +887,82 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   }
 
   /// What to do when the packet transition animation reached its end.
-  void _onPacketTransitionAnimationEnd(num timestamp) {
+  void _onPacketTransitionAnimationEnd(num timestamp) async {
     if (_packetTransitionForward) {
-      if (_packetPosition + 1 < _route.length + 1) {
-        _packetPosition++;
-        _packetTransitionProgress = 0;
-        _packet.decrypt();
+      _onPacketTransitionAnimationEndForward(timestamp);
+    } else {
+      _onPacketTransitionAnimationEndReverse(timestamp);
+    }
+  }
 
-        if (_showBubbles && _packetPosition == 1) {
-          _packetTransitionTS = null; // Pause transition
-          _showBubble(
-            "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
-            _packetPosition.toDouble(),
-            Alignment.Center,
-          ).then((duration) {
-            _packetTransitionTS = timestamp + duration.inMilliseconds;
-          });
-        } else {
-          _packetTransitionTS = timestamp; // Start transition all over again!
-        }
+  /// What to do on the packet transition animation end in forward direction.
+  void _onPacketTransitionAnimationEndForward(num timestamp) async {
+    if (_packetPosition + 1 < _route.length + 1) {
+      _packetPosition++;
+      _packetTransitionProgress = 0;
+      _packet.decrypt();
+
+      if (_showBubbles && _packetPosition == 1) {
+        _packetTransitionTS = null; // Pause transition
+
+        Duration waitDuration = await _showBubble(
+          "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
+          _packetPosition.toDouble(),
+          Alignment.Center,
+        );
+        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
+      } else if (_showBubbles && _packetPosition == _route.length) {
+        _packetTransitionTS = null; // Pause transition
+
+        Duration waitDuration = await _showBubble(
+          "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
+          _packetPosition.toDouble(),
+          Alignment.Center,
+        );
+        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
       } else {
-        _packetTransitionForward = false; // Reverse transition direction
-        _packetTransitionProgress = 0;
-
-        if (_showBubbles) {
-          _packetTransitionTS = null; // Pause transition
-          _showBubble(
-            "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
-            (_route.length + 1).toDouble(),
-            Alignment.End,
-          ).then((duration) {
-            _packetTransitionTS = timestamp + duration.inMilliseconds;
-          });
-        } else {
-          _packetTransitionTS = timestamp;
-        }
+        _packetTransitionTS = timestamp; // Start transition all over again!
       }
     } else {
-      if (_packetPosition > 0) {
-        _packetPosition--;
+      _packetTransitionForward = false; // Reverse transition direction
+      _packetTransitionProgress = 0;
 
-        // Restart transition progress
-        _packetTransitionTS = timestamp;
-        _packetTransitionProgress = 0;
-        _packet.encrypt(color: _encryptionLayerColors[_route.length - 1 - _packetPosition]);
+      if (_showBubbles) {
+        _packetTransitionTS = null; // Pause transition
+
+        Duration waitDuration = await _showBubble(
+          "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
+          (_route.length + 1).toDouble(),
+          Alignment.End,
+        );
+        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
       } else {
-        _packetTransitionTS = null; // End transition
-
-        if (_showBubbles) {
-          _showBubble(
-            "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
-            0,
-            Alignment.Start,
-          );
-        }
-
-        _animatePacketDecryption();
+        _packetTransitionTS = timestamp;
       }
+    }
+  }
+
+  /// What to do when the packet transition animation ends in reverse direction.
+  void _onPacketTransitionAnimationEndReverse(num timestamp) async {
+    if (_packetPosition > 0) {
+      _packetPosition--;
+
+      // Restart transition progress
+      _packetTransitionTS = timestamp;
+      _packetTransitionProgress = 0;
+      _packet.encrypt(color: _encryptionLayerColors[_route.length - 1 - _packetPosition]);
+    } else {
+      _packetTransitionTS = null; // End transition
+
+      if (_showBubbles) {
+        _showBubble(
+          "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
+          0,
+          Alignment.Start,
+        );
+      }
+
+      _animatePacketDecryption();
     }
   }
 
