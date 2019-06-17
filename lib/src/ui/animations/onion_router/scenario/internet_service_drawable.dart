@@ -3,8 +3,10 @@ import 'dart:math';
 
 import 'package:angular_components/laminate/enums/alignment.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
+import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario_drawable_mixin.dart';
 import 'package:hm_animations/src/ui/animations/shared/encrypted_packet/encrypted_packet.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
@@ -17,9 +19,9 @@ import 'package:hm_animations/src/ui/misc/image/images.dart';
 /// Drawable illustrating the onion network, where a service is routed within
 /// the internet, but accessible from within the onion network, via
 /// multi layers of onion routers (relays).
-class InternetServiceDrawable extends Drawable implements Scenario {
+class InternetServiceDrawable extends Drawable with ScenarioDrawable implements Scenario {
   /// Duration of the packet transmission (from one point to another).
-  static const Duration _packetTransmissionDuration = Duration(seconds: 3);
+  static const Duration _packetTransitionAnimationDuration = Duration(seconds: 3);
 
   /// Duration of the relay node growth animation.
   static const Duration _relayNodeGrowthAnimationDuration = Duration(seconds: 1);
@@ -43,9 +45,6 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     Color.hex(0xFF1177BF),
     Color.hex(0xFF653291),
   ];
-
-  /// How much relay nodes to display.
-  static const int _relayNodeCount = 20;
 
   /// The maximum route length.
   static const int _maxRouteLength = 7;
@@ -84,10 +83,6 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   EncryptedPacket _packet = EncryptedPacket();
   int _packetPosition = 0;
-  num _packetTransitionTS;
-  bool _startPacketTransition = false;
-  bool _packetTransitionForward = true;
-  double _packetTransitionProgress;
 
   Bubble _infoBubble;
   double _infoBubblePosIndex;
@@ -96,51 +91,37 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   List<Point<double>> _relativeRelayNodeCoordinates;
 
-  /// Start timestamp of the relay node grown animation.
-  num _relayNodeGrowthTS;
-
-  /// Progress of the growth animation of a relay node.
-  double _relayNodeGrowthProgress = 1.0;
-
-  /// Whether to start the relay node growth animation the next rendering cycle.
-  bool _startRelayNodeGrowthAnimation = false;
-
   /// Whether TCP connections are established between the relay nodes.
   bool _tcpConnectionsEstablished = false;
 
   /// Whether the keys have been exchanged.
   bool _keysExchanged = false;
 
-  /// Start timestamp of the TCP connection establishment animation.
-  num _tcpConnectionAnimationTS;
-
-  /// Progress of the TCP connection establishment animation.
-  double _tcpConnectionAnimationProgress = 0;
-
-  /// Whether to start the TCP Connection animation the next rendering cycle.
-  bool _startTCPConnectionAnimation = false;
-
-  /// Whether to start the key exchange animation the next rendering cycle.
-  bool _startKeyExchangeAnim = false;
-
-  /// Start timestamp of the key exchange animation.
-  num _keyExchangeAnimationTS;
-
-  /// Progress of the key exchange animation.
-  double _keyExchangeAnimationProgress = 0;
-
-  /// Duration of the current key exchange animation.
-  Duration _currentKeyExchangeAnimationDuration;
-
   /// Position (Route index) in the key exchange animation.
   int _keyExchangeAnimationPosition = 1;
 
+  AnimHelper _packetTransitionAnimation;
+  AnimHelper _relayNodeGrowthAnimation;
+  AnimHelper _tcpConnectionAnimation;
+  AnimHelper _keyExchangeAnimation;
+
   /// Create the internet service drawable.
   InternetServiceDrawable() {
-    _loadImages();
-    _generateRelayNodes().then((_) {
-      reroute();
-    });
+    _init();
+  }
+
+  /// Initialize the drawable.
+  Future<void> _init() async {
+    _setupAnimations();
+
+    // Initially load images
+    await _loadImages();
+
+    // Prepare relay nodes and route through them
+    _relativeRelayNodeCoordinates = await generateRelayNodes();
+    reroute();
+
+    invalidate();
   }
 
   @override
@@ -148,6 +129,60 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
   @override
   String get name => "Dienst im Internet geroutet";
+
+  /// Setup the animations needed by the scenario.
+  void _setupAnimations() {
+    _packetTransitionAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: _packetTransitionAnimationDuration,
+      onEnd: (timestamp) {
+        if (_packetTransitionAnimation.reversed) {
+          _onPacketTransitionAnimationEndReverse(timestamp);
+        } else {
+          _onPacketTransitionAnimationEndForward(timestamp);
+        }
+      },
+    );
+
+    _relayNodeGrowthAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: _relayNodeGrowthAnimationDuration,
+    );
+
+    _tcpConnectionAnimation = AnimHelper(
+      curve: Curves.easeOutCubic,
+      duration: _tcpConnectionAnimationDuration,
+      onEnd: (timestamp) {
+        _tcpConnectionsEstablished = true;
+        _startKeyExchangeAnimation();
+      },
+      onReset: () {
+        _tcpConnectionsEstablished = false;
+      },
+    );
+
+    _keyExchangeAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      onEnd: (timestamp) {
+        if (_keyExchangeAnimationPosition + 1 < _route.length + 1) {
+          _keyExchangeAnimationPosition++;
+          _keyExchangeAnimation.start(
+            timestamp: timestamp,
+            duration: Duration(milliseconds: _keyExchangeAnimationDuration.inMilliseconds * _keyExchangeAnimationPosition),
+          );
+        } else {
+          _keysExchanged = true;
+          _startPacketTransitionAnimation();
+        }
+      },
+      onReset: () {
+        if (_keysExchanged) {
+          _keyExchangeAnimationPosition = 1;
+        }
+        _keysExchanged = false;
+      },
+    );
+  }
 
   /// Start the scenario.
   void start(bool withBubbles) {
@@ -159,7 +194,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
     _showBubbles = withBubbles;
 
-    _startTCPConnectionAnimation = true;
+    _tcpConnectionAnimation.start();
 
     if (_showBubbles) {
       _showBubble(
@@ -168,12 +203,13 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         Alignment.Start,
       );
     }
+
+    invalidate();
   }
 
   /// Start the key exchange animation.
   void _startKeyExchangeAnimation() {
-    _startKeyExchangeAnim = true;
-    _resetKeyExchangeAnimation();
+    _keyExchangeAnimation.start(duration: _keyExchangeAnimationDuration);
 
     if (_showBubbles) {
       _showBubble(
@@ -182,6 +218,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         Alignment.Start,
       );
     }
+
+    invalidate();
   }
 
   /// Start the packet transition animation.
@@ -204,7 +242,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         ),
     ]);
 
-    _startPacketTransition = true;
+    _packetTransitionAnimation.start();
+    invalidate();
   }
 
   Future<void> _animatePacketInitialization() async {
@@ -222,19 +261,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     }
   }
 
-  /// Generate the relay nodes to show.
-  Future<void> _generateRelayNodes() async {
-    _relativeRelayNodeCoordinates = await _generateRelayNodeCloud(_relayNodeCount, minDistance: 0.2).timeout(
-      Duration(seconds: 1),
-      onTimeout: () {
-        _generateRelayNodeCloud(_relayNodeCount, minDistance: 0.0);
-      },
-    );
-
-    invalidate();
-  }
-
-  void _loadImages() async {
+  Future<void> _loadImages() async {
     _hostImageInfo = Images.hostIconImage;
     _hostImage = await _hostImageInfo.load();
 
@@ -246,8 +273,6 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
     _keyImageInfo = Images.key;
     _keyImage = await _keyImageInfo.load();
-
-    invalidate();
   }
 
   @override
@@ -284,7 +309,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       }
 
       if (_packet != null) {
-        _drawPacket(_packet, _packetTransitionProgress != null ? _packetTransitionProgress : 0.0, routeCoordinates, _packetPosition, lastPassTimestamp);
+        _drawPacket(_packet, _packetTransitionAnimation.progress, routeCoordinates, _packetPosition, lastPassTimestamp);
       }
 
       if (_infoBubble != null) {
@@ -348,11 +373,11 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       ctx.lineTo(route[i + 1].x, route[i + 1].y);
       ctx.stroke();
 
-      if (_tcpConnectionAnimationRunning) {
+      if (_tcpConnectionAnimation.running) {
         // Stroke the TCP connection handshake progress (Just for visualization).
         setStrokeColor(Colors.SPACE_BLUE);
 
-        Point<double> cP = route[i] + (route[i + 1] - route[i]) * _tcpConnectionAnimationProgress;
+        Point<double> cP = route[i] + (route[i + 1] - route[i]) * _tcpConnectionAnimation.progress;
 
         ctx.beginPath();
         ctx.moveTo(route[i].x, route[i].y);
@@ -370,8 +395,8 @@ class InternetServiceDrawable extends Drawable implements Scenario {
       ctx.fill();
     }
 
-    if (_keyExchangeAnimationRunning) {
-      double index = _keyExchangeAnimationPosition * _keyExchangeAnimationProgress;
+    if (_keyExchangeAnimation.running) {
+      double index = _keyExchangeAnimationPosition * _keyExchangeAnimation.progress;
 
       Point<double> cP1 = _getCoordinatesForFloatingIndex(index);
       Point<double> cP2 = _getCoordinatesForFloatingIndex(_keyExchangeAnimationPosition - index);
@@ -461,28 +486,6 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     _serviceBounds = bounds;
   }
 
-  /// Generate a list of relay nodes with random coordinates with the passed [size].
-  Future<List<Point<double>>> _generateRelayNodeCloud(
-    int size, {
-    double minDistance = 0.1,
-  }) async {
-    List<Point<double>> points = List<Point<double>>(size);
-
-    for (int i = 0; i < size; i++) {
-      points[i] = Point<double>(_rng.nextDouble(), _rng.nextDouble());
-
-      // Check if too near to a point
-      for (int a = 0; a < i; a++) {
-        if (points[i].distanceTo(points[a]) < minDistance) {
-          i--; // Point is too near! Regenerate.
-          break;
-        }
-      }
-    }
-
-    return points;
-  }
-
   void _drawRelayNodes(Rectangle<double> rectangle, List<Point<double>> nodeCoordinates) {
     if (nodeCoordinates == null || _routerImage == null) {
       return;
@@ -526,7 +529,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
 
     for (int i = 0; i < nodeCoordinates.length; i++) {
       if ((routeIndicesLookup != null && routeIndicesLookup.contains(i)) ||
-          (_relayNodeGrowthAnimationRunning && oldRouteIndicesLookup != null && oldRouteIndicesLookup.contains(i))) {
+          (_relayNodeGrowthAnimation.running && oldRouteIndicesLookup != null && oldRouteIndicesLookup.contains(i))) {
         continue;
       }
 
@@ -539,9 +542,9 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     ctx.restore();
 
     if (_route != null) {
-      if (_relayNodeGrowthAnimationRunning) {
+      if (_relayNodeGrowthAnimation.running) {
         if (_oldRoute != null && _oldRoute.isNotEmpty) {
-          double reverseProgress = 1.0 - _relayNodeGrowthProgress;
+          double reverseProgress = 1.0 - _relayNodeGrowthAnimation.progress;
           // Draw old chosen nodes of the route
           double shrinkWidth = iW + iW * reverseProgress;
           double shrinkHeight = iW + iH * reverseProgress;
@@ -574,11 +577,11 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         }
 
         // Draw new route nodes
-        double growWidth = iW + iW * _relayNodeGrowthProgress;
-        double growHeight = iH + iH * _relayNodeGrowthProgress;
+        double growWidth = iW + iW * _relayNodeGrowthAnimation.progress;
+        double growHeight = iH + iH * _relayNodeGrowthAnimation.progress;
 
         ctx.save();
-        ctx.globalAlpha = 0.5 + 0.5 * _relayNodeGrowthProgress;
+        ctx.globalAlpha = 0.5 + 0.5 * _relayNodeGrowthAnimation.progress;
 
         for (int i in _route) {
           Point<double> point = nodeCoordinates[i];
@@ -648,7 +651,7 @@ class InternetServiceDrawable extends Drawable implements Scenario {
     }
 
     if (withAnimation) {
-      _startRelayNodeGrowthAnimation = true;
+      _relayNodeGrowthAnimation.start();
     }
 
     if (_route.length != routeLength) _route.length = routeLength;
@@ -673,287 +676,96 @@ class InternetServiceDrawable extends Drawable implements Scenario {
   @override
   bool needsRepaint() => _packet.isInvalid;
 
-  /// Get progress of an animation using its start timestamp and the duration.
-  double _getProgress(num curTS, num startTS, Duration duration) => (curTS - startTS) / duration.inMilliseconds;
-
-  /// Whether the packet transition is currently running.
-  bool get _packetTransitionRunning => _packetTransitionTS != null;
-
-  /// Whether the relay node growth animation is currently running.
-  bool get _relayNodeGrowthAnimationRunning => _relayNodeGrowthTS != null;
-
-  /// Whether the TCP connection establishment animation is currently running.
-  bool get _tcpConnectionAnimationRunning => _tcpConnectionAnimationTS != null;
-
-  /// Whether the key exchange animation is currently running.
-  bool get _keyExchangeAnimationRunning => _keyExchangeAnimationTS != null;
-
   /// Reset the animation.
   void _resetAnimation() {
-    _resetPacketTransitionAnimation();
-    _resetRelayNodeGrowthAnimation();
-    _resetTCPConnectionEstablishmentAnimation();
-    _resetKeyExchangeAnimation();
-  }
-
-  /// Reset the key exchange animation.
-  void _resetKeyExchangeAnimation() {
-    _keysExchanged = false;
-    _keyExchangeAnimationTS = null;
-    _keyExchangeAnimationProgress = 0.0;
-    _keyExchangeAnimationPosition = 1;
-    _currentKeyExchangeAnimationDuration = _keyExchangeAnimationDuration;
-  }
-
-  /// Reset the packet transition animation.
-  void _resetPacketTransitionAnimation() {
     _packet.reset();
     _packetPosition = 0;
-    _startPacketTransition = false;
-    _packetTransitionTS = null;
-  }
 
-  /// Reset the relay node growth animation.
-  void _resetRelayNodeGrowthAnimation() {
-    _relayNodeGrowthTS = null;
-    _startRelayNodeGrowthAnimation = false;
-  }
-
-  /// Reset the TCP connection establishment animation.
-  void _resetTCPConnectionEstablishmentAnimation() {
-    _tcpConnectionsEstablished = false;
-    _tcpConnectionAnimationTS = null;
-    _startTCPConnectionAnimation = false;
+    _packetTransitionAnimation.reset();
+    _relayNodeGrowthAnimation.reset();
+    _tcpConnectionAnimation.reset();
+    _keyExchangeAnimation.reset();
   }
 
   @override
   void update(num timestamp) {
-    _checkTimestamp(timestamp);
     _updateAnimations(timestamp);
 
     _packet.update(timestamp);
   }
 
-  /// Check the current timestamp for events.
-  void _checkTimestamp(num timestamp) {
-    _checkPacketTransitionStart(timestamp);
-    _checkRelayNodeGrowthAnimationStart(timestamp);
-    _checkTCPConnectionEstablishmentAnimationStart(timestamp);
-    _checkKeyExchangeAnimationStart(timestamp);
-  }
-
-  /// Check whether the key exchange animation should be started.
-  void _checkKeyExchangeAnimationStart(num timestamp) {
-    if (_startKeyExchangeAnim) {
-      _startKeyExchangeAnim = false;
-
-      _resetKeyExchangeAnimation();
-      _keyExchangeAnimationTS = timestamp;
-
-      invalidate();
-    }
-  }
-
-  /// Check whether the packet transition animation should be started.
-  void _checkPacketTransitionStart(num timestamp) {
-    if (_startPacketTransition) {
-      _startPacketTransition = false;
-      _packetTransitionTS = timestamp;
-      _packetTransitionForward = true;
-
-      invalidate();
-    }
-  }
-
-  /// Check whether the relay node growth animation should be started.
-  void _checkRelayNodeGrowthAnimationStart(num timestamp) {
-    if (_startRelayNodeGrowthAnimation) {
-      _startRelayNodeGrowthAnimation = false;
-      _relayNodeGrowthTS = timestamp;
-
-      invalidate();
-    }
-  }
-
-  /// Check whether the TCP connection establishment animation should be started.
-  void _checkTCPConnectionEstablishmentAnimationStart(num timestamp) {
-    if (_startTCPConnectionAnimation) {
-      _startTCPConnectionAnimation = false;
-      _tcpConnectionsEstablished = false;
-      _tcpConnectionAnimationTS = timestamp;
-
-      invalidate();
-    }
-  }
-
   /// Update running animations (if any).
   void _updateAnimations(num timestamp) {
-    _updatePacketTransitionAnimation(timestamp);
-    _updateRelayNodeGrowthAnimation(timestamp);
-    _updateTCPConnectionEstablishmentAnimation(timestamp);
-    _updateKeyExchangeAnimation(timestamp);
-  }
+    bool updated = false;
 
-  /// Update the key exchange animation.
-  void _updateKeyExchangeAnimation(num timestamp) {
-    if (!_keyExchangeAnimationRunning) {
-      return;
-    }
+    updated = _packetTransitionAnimation.update(timestamp) || updated;
+    updated = _relayNodeGrowthAnimation.update(timestamp) || updated;
+    updated = _tcpConnectionAnimation.update(timestamp) || updated;
+    updated = _keyExchangeAnimation.update(timestamp) || updated;
 
-    _keyExchangeAnimationProgress = _getProgress(timestamp, _keyExchangeAnimationTS, _currentKeyExchangeAnimationDuration);
-
-    if (_keyExchangeAnimationProgress >= 1.0) {
-      _onKeyExchangeAnimationEnd(timestamp);
-    }
-
-    invalidate();
-  }
-
-  /// What to do when the key exchange animation ends.
-  void _onKeyExchangeAnimationEnd(num timestamp) {
-    if (_keyExchangeAnimationPosition + 1 < _route.length + 1) {
-      _keyExchangeAnimationPosition++;
-      _keyExchangeAnimationTS = timestamp; // Start animation again
-      _keyExchangeAnimationProgress = 0.0;
-      _currentKeyExchangeAnimationDuration = Duration(milliseconds: _keyExchangeAnimationDuration.inMilliseconds * _keyExchangeAnimationPosition);
-    } else {
-      _keyExchangeAnimationTS = null; // End animation
-      _keysExchanged = true;
-      _startPacketTransitionAnimation();
-    }
-  }
-
-  /// Update the TCP connection establishment animation.
-  void _updateTCPConnectionEstablishmentAnimation(num timestamp) {
-    if (!_tcpConnectionAnimationRunning) {
-      return;
-    }
-
-    _tcpConnectionAnimationProgress = Curves.easeOutCubic(_getProgress(timestamp, _tcpConnectionAnimationTS, _tcpConnectionAnimationDuration));
-
-    if (_tcpConnectionAnimationProgress >= 1.0) {
-      _onTCPConnectionEstablishmentAnimationEnd(timestamp);
-    }
-
-    invalidate();
-  }
-
-  /// What should happen when the TCP connection establishment animation ends.
-  void _onTCPConnectionEstablishmentAnimationEnd(num timestamp) {
-    _tcpConnectionAnimationTS = null; // Stop the animation
-    _tcpConnectionsEstablished = true;
-
-    _startKeyExchangeAnimation();
-  }
-
-  /// Update the relay node grown animation.
-  void _updateRelayNodeGrowthAnimation(num timestamp) {
-    if (!_relayNodeGrowthAnimationRunning) {
-      return;
-    }
-
-    _relayNodeGrowthProgress = Curves.easeInOutCubic(_getProgress(timestamp, _relayNodeGrowthTS, _relayNodeGrowthAnimationDuration));
-
-    if (_relayNodeGrowthProgress >= 1.0) {
-      _onRelayNodeGrowthAnimationEnd(timestamp);
-    }
-
-    invalidate();
-  }
-
-  /// What should happen when the relay node growth animation comes to an end.
-  void _onRelayNodeGrowthAnimationEnd(num timestamp) {
-    _relayNodeGrowthTS = null; // Simply stop the animation
-  }
-
-  /// Update the packet transition animation.
-  void _updatePacketTransitionAnimation(num timestamp) {
-    if (!_packetTransitionRunning) {
-      return;
-    }
-
-    // Update transition progress.
-    _packetTransitionProgress = Curves.easeInOutCubic(_getProgress(timestamp, _packetTransitionTS, _packetTransmissionDuration));
-
-    if (_packetTransitionProgress >= 1.0) {
-      _onPacketTransitionAnimationEnd(timestamp);
-    }
-
-    if (!_packetTransitionForward) {
-      _packetTransitionProgress = 1 - _packetTransitionProgress; // Reverse transition
-    }
-
-    invalidate();
-  }
-
-  /// What to do when the packet transition animation reached its end.
-  void _onPacketTransitionAnimationEnd(num timestamp) async {
-    if (_packetTransitionForward) {
-      _onPacketTransitionAnimationEndForward(timestamp);
-    } else {
-      _onPacketTransitionAnimationEndReverse(timestamp);
+    if (updated) {
+      invalidate();
     }
   }
 
   /// What to do on the packet transition animation end in forward direction.
   void _onPacketTransitionAnimationEndForward(num timestamp) async {
-    if (_packetPosition + 1 < _route.length + 1) {
+    if (_packetPosition < _route.length) {
+      _packetTransitionAnimation.reset();
       _packetPosition++;
-      _packetTransitionProgress = 0;
       _packet.decrypt();
 
-      if (_showBubbles && _packetPosition == 1) {
-        _packetTransitionTS = null; // Pause transition
+      invalidate();
 
+      if (_showBubbles && _packetPosition == 1) {
         Duration waitDuration = await _showBubble(
           "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
           _packetPosition.toDouble(),
           Alignment.Center,
         );
-        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
-      } else if (_showBubbles && _packetPosition == _route.length) {
-        _packetTransitionTS = null; // Pause transition
 
+        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
+      } else if (_showBubbles && _packetPosition == _route.length) {
         Duration waitDuration = await _showBubble(
           "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
           _packetPosition.toDouble(),
           Alignment.Center,
         );
-        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
+
+        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
       } else {
-        _packetTransitionTS = timestamp; // Start transition all over again!
+        _packetTransitionAnimation.start(timestamp: timestamp); // Start transition all over again!
       }
     } else {
-      _packetTransitionForward = false; // Reverse transition direction
-      _packetTransitionProgress = 0;
+      _packetTransitionAnimation.reverse(); // Reverse transition direction
 
       if (_showBubbles) {
-        _packetTransitionTS = null; // Pause transition
-
         Duration waitDuration = await _showBubble(
           "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
           (_route.length + 1).toDouble(),
           Alignment.End,
         );
-        _packetTransitionTS = timestamp + waitDuration.inMilliseconds;
+
+        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
       } else {
-        _packetTransitionTS = timestamp;
+        _packetTransitionAnimation.start(timestamp: timestamp);
       }
     }
+
+    invalidate();
   }
 
   /// What to do when the packet transition animation ends in reverse direction.
   void _onPacketTransitionAnimationEndReverse(num timestamp) async {
     if (_packetPosition > 0) {
+      _packetTransitionAnimation.reset();
       _packetPosition--;
 
       // Restart transition progress
-      _packetTransitionTS = timestamp;
-      _packetTransitionProgress = 0;
+      _packetTransitionAnimation.start(timestamp: timestamp);
+
       _packet.encrypt(color: _encryptionLayerColors[_route.length - 1 - _packetPosition]);
     } else {
-      _packetTransitionTS = null; // End transition
-
       if (_showBubbles) {
         _showBubble(
           "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
@@ -962,8 +774,13 @@ class InternetServiceDrawable extends Drawable implements Scenario {
         );
       }
 
-      _animatePacketDecryption();
+      await _animatePacketDecryption();
+
+      _packet.reset();
+      _packetPosition = 0;
     }
+
+    invalidate();
   }
 
   /// Pause the packet transition animation and show a help bubble at the current [posIndex] position.

@@ -1,3 +1,6 @@
+/// Type of a curve function.
+typedef double Curve(double p);
+
 /**
  * Class helping with curved animations.
  */
