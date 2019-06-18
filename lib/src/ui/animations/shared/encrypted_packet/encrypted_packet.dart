@@ -219,6 +219,8 @@ class EncryptedPacket extends Drawable {
     _encryptionLayerColors.clear();
     _animationEncryption = false;
     _animationStartTS = null;
+
+    invalidate();
   }
 
   /// Start the animation next render cycle.

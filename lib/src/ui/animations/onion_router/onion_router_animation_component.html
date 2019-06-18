@@ -14,38 +14,14 @@
 						[deselectOnActivate]="false">
 				</material-dropdown-select>
 			</li>
-			<li class="labeled">
-				<label>Route</label>
-				<material-button raised (click)="reroute()">
-					<material-icon icon="link"></material-icon>
-					Tor Kanal wechseln
-				</material-button>
+
+			<li class="exception">
+				<hr>
 			</li>
-			<li>
-				<span class="slider-panel">
-					<div>
-						Circuit Länge
-					</div>
-					<material-slider [min]="minRouteLength"
-									 [max]="maxRouteLength"
-									 [step]="1"
-									 [value]="currentRouteLength"
-									 (valueChange)="changeRouteLength($event)">
-					</material-slider>
-					<div>
-						{{ currentRouteLength }}
-					</div>
-				</span>
-			</li>
-			<li class="labeled" style="text-align: center">
-				<material-button raised (click)="test()">
-					<material-icon icon="play_arrow"></material-icon>
-				</material-button>
-			</li>
-			<li class="labeled">
-				<label>Einstellungen</label>
-				<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
-			</li>
+
+			<template #controlContainer>
+				<!-- Will be filled with the correct controls per scenario -->
+			</template>
 		</ul>
 	</div>
 </div>

@@ -1,7 +1,11 @@
 import 'dart:html';
 import 'dart:math';
 
+import 'package:angular/src/core/linker/component_factory.dart';
 import 'package:angular_components/laminate/enums/alignment.dart';
+import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
+import 'package:hm_animations/src/ui/animations/onion_router/scenario/internet_service/controls/internet_service_controls_component.template.dart'
+    as internetServiceControls;
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario_drawable_mixin.dart';
 import 'package:hm_animations/src/ui/animations/shared/encrypted_packet/encrypted_packet.dart';
@@ -678,13 +682,17 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
   /// Reset the animation.
   void _resetAnimation() {
+    _hideBubble();
+
     _packet.reset();
     _packetPosition = 0;
 
-    _packetTransitionAnimation.reset();
+    _packetTransitionAnimation.reset(resetReverse: true);
     _relayNodeGrowthAnimation.reset();
     _tcpConnectionAnimation.reset();
     _keyExchangeAnimation.reset();
+
+    invalidate();
   }
 
   @override
@@ -810,8 +818,17 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     });
   }
 
+  /// Hide the bubble (if it is currently shown).
+  void _hideBubble() {
+    _currentInfoBubbleID = -1;
+    _infoBubble = null;
+  }
+
   @override
   String toString() => name;
+
+  @override
+  ComponentFactory<ControlsComponent> get controlComponentFactory => internetServiceControls.InternetServiceControlsComponentNgFactory;
 
   /// The minimum route length.
   int get minRouteLength => _minRouteLength;

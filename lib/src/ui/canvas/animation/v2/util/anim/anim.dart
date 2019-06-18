@@ -75,7 +75,13 @@ abstract class Anim {
 
   /// Reset the animation.
   /// Will be called at the beginning of an animation.
-  void reset() {
+  void reset({
+    bool resetReverse = false,
+  }) {
+    if (resetReverse) {
+      _reversed = false;
+    }
+
     _progress = _reversed ? 1.0 : 0.0;
     _startTS = null;
 
