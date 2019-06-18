@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
@@ -22,6 +23,9 @@ class EncryptedPacket extends Drawable {
   /// Duration of the encryption and decryption animations.
   final Duration animationDuration;
 
+  /// Encryption/Decryption animation of the packet.
+  AnimHelper _animation;
+
   /// Layers of encryption applied to the packet.
   int _encryptionLayers;
 
@@ -31,17 +35,8 @@ class EncryptedPacket extends Drawable {
   /// Color of the last encryption layer (during encryption/decryption animation).
   Color _lastEncryptionLayerColor;
 
-  /// Whether to start the encryption/decryption animation.
-  bool _animationStarted = false;
-
-  /// Point in time the encryption animation has been started.
-  num _animationStartTS;
-
   /// Whether the animation is an encryption or decryption.
   bool _animationEncryption = false;
-
-  /// Current angle of the encryption layer encryption/decryption animation in progress.
-  double _animationAngle;
 
   /// Start angle of the encryptin/decryption layer in the animation.
   double _animationStartAngle = 0;
@@ -54,7 +49,11 @@ class EncryptedPacket extends Drawable {
   EncryptedPacket({
     int encryptionLayers = 0,
     this.animationDuration = _defaultAnimationDuration,
-  }) : _encryptionLayers = encryptionLayers;
+  })  : _encryptionLayers = encryptionLayers,
+        _animation = AnimHelper(
+          duration: animationDuration,
+          curve: Curves.easeInOutCubic,
+        );
 
   set packetSize(double value) {
     _packetSize = value;
@@ -75,8 +74,7 @@ class EncryptedPacket extends Drawable {
 
   @override
   void update(num timestamp) {
-    _checkTimestamps(timestamp);
-    _updateAnimationProgress(timestamp);
+    if (_animation.update(timestamp)) invalidate();
   }
 
   @override
@@ -104,7 +102,7 @@ class EncryptedPacket extends Drawable {
     context.arc(offset, offset, radius, 0, _maxAngle);
     context.fill();
 
-    int layers = animationInProgress && _animationEncryption ? _encryptionLayers - 1 : _encryptionLayers;
+    int layers = _animation.running && _animationEncryption ? _encryptionLayers - 1 : _encryptionLayers;
 
     // Draw encryption layers (except the last one).
     context.lineWidth = layerLineWidth;
@@ -112,8 +110,9 @@ class EncryptedPacket extends Drawable {
       _drawEncryptionLayer(context, _encryptionLayerColors[i], i, offset, radius, _maxAngle, layerLineWidth);
     }
 
-    if (animationInProgress) {
-      _drawEncryptionLayer(context, _lastEncryptionLayerColor, layers, offset, radius, _animationAngle, layerLineWidth);
+    if (_animation.running) {
+      double animationAngle = _maxAngle * _animation.progress;
+      _drawEncryptionLayer(context, _lastEncryptionLayerColor, layers, offset, radius, animationAngle, layerLineWidth);
     }
   }
 
@@ -135,42 +134,6 @@ class EncryptedPacket extends Drawable {
     context.stroke();
   }
 
-  /// Check if timestamps need to be updated.
-  void _checkTimestamps(num timestamp) {
-    if (_animationStarted) {
-      _animationStarted = false;
-      _animationStartTS = timestamp;
-
-      invalidate();
-    }
-  }
-
-  /// Update the current animation state.
-  void _updateAnimationProgress(num timestamp) {
-    if (animationInProgress) {
-      double progress = Curves.easeInOutCubic(_getProgress(_animationStartTS, timestamp));
-
-      if (progress >= 1.0) {
-        _animationStartTS = null;
-      } else {
-        // Update animation to match the progress.
-        if (!_animationEncryption) {
-          progress = 1.0 - progress; // Reverse animation
-        }
-
-        _animationAngle = _maxAngle * progress;
-        invalidate();
-      }
-    }
-  }
-
-  /// Get the animation progress defined by the passed [startTS] (start timestamp) and [curTS] (current timestamp).
-  double _getProgress(num startTS, num curTS) {
-    return (curTS - startTS) / animationDuration.inMilliseconds;
-  }
-
-  bool get animationInProgress => _animationStartTS != null;
-
   /// Encrypt the packet once more.
   Future<void> encrypt({
     Color color = Colors.SLATE_GREY,
@@ -186,6 +149,7 @@ class EncryptedPacket extends Drawable {
     _animationEncryption = true;
 
     if (withAnimation) {
+      if (_animation.reversed) _animation.reverse();
       _startAnimation();
       return Future.delayed(animationDuration);
     } else {
@@ -206,6 +170,7 @@ class EncryptedPacket extends Drawable {
     _animationEncryption = false;
 
     if (withAnimation) {
+      if (!_animation.reversed) _animation.reverse();
       _startAnimation();
       return Future.delayed(animationDuration);
     } else {
@@ -218,14 +183,14 @@ class EncryptedPacket extends Drawable {
     _encryptionLayers = 0;
     _encryptionLayerColors.clear();
     _animationEncryption = false;
-    _animationStartTS = null;
+    _animation.reset();
 
     invalidate();
   }
 
   /// Start the animation next render cycle.
   void _startAnimation() {
-    _animationStarted = true;
     _animationStartAngle = 2 * pi * _rng.nextDouble();
+    _animation.start();
   }
 }
