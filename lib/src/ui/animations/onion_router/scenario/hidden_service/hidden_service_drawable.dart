@@ -30,6 +30,9 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   ImageInfo _databaseImageInfo;
   CanvasImageSource _databaseImage;
 
+  ImageInfo _scrollImageInfo;
+  CanvasImageSource _scrollImage;
+
   Rectangle<double> _hostBounds;
   Point<double> _hostCoordinates;
 
@@ -48,6 +51,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   List<Rectangle<double>> _relayNodeBounds = List<Rectangle<double>>();
 
   Anim _relayNodeHighlightAnimation;
+
+  Anim _serviceInitAnimation;
 
   /// Create service.
   HiddenServiceDrawable() {
@@ -74,16 +79,18 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   }
 
   void test() {
-    _oldRelayNodeIndicesToHighlight = _relayNodeIndicesToHighlight.sublist(0);
-    _relayNodeIndicesToHighlight.add(_relayNodeIndicesToHighlight.length + 1);
-
-    _relayNodeHighlightAnimation.start();
+    _serviceInitAnimation.start();
   }
 
   void _setupAnimations() {
     _relayNodeHighlightAnimation = AnimHelper(
       curve: Curves.easeInOutCubic,
       duration: Duration(seconds: 1),
+    );
+
+    _serviceInitAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(seconds: 6),
     );
   }
 
@@ -99,6 +106,9 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     _databaseImageInfo = Images.database;
     _databaseImage = await _databaseImageInfo.load();
+
+    _scrollImageInfo = Images.scroll;
+    _scrollImage = await _scrollImageInfo.load();
   }
 
   @override
@@ -200,14 +210,45 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     _databaseCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
     _databaseBounds = bounds;
+
+    if (_serviceInitAnimation.running) {
+      _drawServiceInit();
+    }
+  }
+
+  /// Draw the current state of the service initialization animation.
+  void _drawServiceInit() {
+    double minSize = 100;
+    double growSize = 200;
+
+    Point<double> curPos = _serviceCoordinates + (_databaseCoordinates - _serviceCoordinates) * _serviceInitAnimation.progress;
+    double growProgress = sin(_serviceInitAnimation.progress * pi);
+    double opacity = growProgress;
+    double curSize = minSize + growSize * growProgress;
+
+    double oldGlobalAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = opacity;
+
+    drawImageOnCanvas(
+      _scrollImage,
+      aspectRatio: _scrollImageInfo.aspectRatio,
+      width: curSize,
+      height: curSize,
+      x: curPos.x - curSize / 2,
+      y: curPos.y - curSize / 2,
+      mode: ImageDrawMode.FILL,
+    );
+
+    ctx.globalAlpha = oldGlobalAlpha;
   }
 
   @override
-  bool needsRepaint() => _relayNodeHighlightAnimation.running;
+  bool needsRepaint() => _relayNodeHighlightAnimation.running || _serviceInitAnimation.running;
 
   @override
   void update(num timestamp) {
     _relayNodeHighlightAnimation.update(timestamp);
+    _serviceInitAnimation.update(timestamp);
   }
 
   @override
