@@ -155,9 +155,9 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
   /// Initialize the scenario dropdown selection.
   void _initScenarioDropDown() {
     scenarioSelectionOptions = SelectionOptions([
-      InternetServiceDrawable(),
       HiddenServiceDrawable(),
-    ]);
+      InternetServiceDrawable(),
+    ]); // TODO Reverse list direction again when finished with developing. InternetServiceDrawable should be first
     scenarioSelectionModel = SelectionModel.single(selected: scenarioSelectionOptions.optionsList.first, keyProvider: (scenario) => scenario.id);
     scenarioSelectionItemRenderer = (dynamic scenario) => scenario.toString();
 
