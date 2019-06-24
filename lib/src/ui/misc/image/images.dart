@@ -7,4 +7,5 @@ class Images {
   static const germanyMapImage = ImageInfo(path: "img/animation/germany.svg", aspectRatio: 176.6 / 239.5);
   static const serverImage = ImageInfo(path: "img/animation/server.svg", aspectRatio: 245.5 / 233.7);
   static const key = ImageInfo(path: "img/animation/key.svg", aspectRatio: 355.4 / 157.8);
+  static const database = ImageInfo(path: "img/animation/database.svg", aspectRatio: 283.5 / 337.9);
 }

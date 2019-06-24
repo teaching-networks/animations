@@ -495,144 +495,18 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       return;
     }
 
-    double iW = rectangle.width * 0.1;
-    double iH = rectangle.height * 0.1;
-    double xPad = rectangle.width * 0.1;
-    double yPad = rectangle.height * 0.1;
-    double x = rectangle.left + xPad;
-    double y = rectangle.top + yPad;
-    double w = rectangle.width - xPad * 2;
-    double h = rectangle.height - yPad * 2;
-
-    // Layout relay nodes first -> Calculate current coordinates on the canvas
-    _relayNodeCoordinates.clear();
-    _relayNodeBounds.clear();
-    for (int i = 0; i < nodeCoordinates.length; i++) {
-      Point<double> point = nodeCoordinates[i];
-
-      Rectangle<double> b = layoutImage(
-        width: iW,
-        height: iH,
-        aspectRatio: _routerImageInfo.aspectRatio,
-        x: x + point.x * w - iW / 2,
-        y: y + point.y * h - iH / 2,
-        mode: ImageDrawMode.FILL,
-        alignment: ImageAlignment.MID,
-      );
-
-      _relayNodeBounds.add(b);
-      _relayNodeCoordinates.add(Point<double>(b.left + b.width / 2, b.top + b.height / 2));
-    }
-
-    final routeIndicesLookup = _route != null ? _route.toSet() : null;
-    final oldRouteIndicesLookup = _oldRoute != null && _oldRoute.isNotEmpty ? _oldRoute.toSet() : null;
-
-    // Draw background relay nodes
-    ctx.save();
-    ctx.globalAlpha = 0.5;
-
-    for (int i = 0; i < nodeCoordinates.length; i++) {
-      if ((routeIndicesLookup != null && routeIndicesLookup.contains(i)) ||
-          (_relayNodeGrowthAnimation.running && oldRouteIndicesLookup != null && oldRouteIndicesLookup.contains(i))) {
-        continue;
-      }
-
-      ctx.drawImageToRect(
-        _routerImage,
-        _relayNodeBounds[i],
-      );
-    }
-
-    ctx.restore();
-
-    if (_route != null) {
-      if (_relayNodeGrowthAnimation.running) {
-        if (_oldRoute != null && _oldRoute.isNotEmpty) {
-          double reverseProgress = 1.0 - _relayNodeGrowthAnimation.progress;
-          // Draw old chosen nodes of the route
-          double shrinkWidth = iW + iW * reverseProgress;
-          double shrinkHeight = iW + iH * reverseProgress;
-
-          ctx.save();
-          ctx.globalAlpha = 0.5 + 0.5 * reverseProgress;
-
-          for (int i in _oldRoute) {
-            Point<double> point = nodeCoordinates[i];
-
-            final newBounds = layoutImage(
-              width: shrinkWidth,
-              height: shrinkHeight,
-              aspectRatio: _routerImageInfo.aspectRatio,
-              x: x + point.x * w - shrinkWidth / 2,
-              y: y + point.y * h - shrinkHeight / 2,
-              mode: ImageDrawMode.FILL,
-              alignment: ImageAlignment.MID,
-            );
-
-            _relayNodeBounds[i] = newBounds;
-
-            ctx.drawImageToRect(
-              _routerImage,
-              newBounds,
-            );
-          }
-
-          ctx.restore();
-        }
-
-        // Draw new route nodes
-        double growWidth = iW + iW * _relayNodeGrowthAnimation.progress;
-        double growHeight = iH + iH * _relayNodeGrowthAnimation.progress;
-
-        ctx.save();
-        ctx.globalAlpha = 0.5 + 0.5 * _relayNodeGrowthAnimation.progress;
-
-        for (int i in _route) {
-          Point<double> point = nodeCoordinates[i];
-
-          final newBounds = layoutImage(
-            width: growWidth,
-            height: growHeight,
-            aspectRatio: _routerImageInfo.aspectRatio,
-            x: x + point.x * w - growWidth / 2,
-            y: y + point.y * h - growHeight / 2,
-            mode: ImageDrawMode.FILL,
-            alignment: ImageAlignment.MID,
-          );
-
-          _relayNodeBounds[i] = newBounds;
-
-          ctx.drawImageToRect(
-            _routerImage,
-            newBounds,
-          );
-        }
-
-        ctx.restore();
-      } else {
-        // Draw chosen nodes of the route
-        for (int i in _route) {
-          Point<double> point = nodeCoordinates[i];
-
-          final newBounds = layoutImage(
-            width: iW * 2,
-            height: iH * 2,
-            aspectRatio: _routerImageInfo.aspectRatio,
-            x: x + point.x * w - iW,
-            y: y + point.y * h - iH,
-            mode: ImageDrawMode.FILL,
-            alignment: ImageAlignment.MID,
-          );
-
-          _relayNodeBounds[i] = newBounds;
-
-          ctx.drawImageToRect(
-            _routerImage,
-            newBounds,
-          );
-        }
-      }
-    }
+    drawNodes(
+      this,
+      rectangle,
+      nodeCoordinates,
+      _routerImage,
+      _routerImageInfo,
+      bounds: _relayNodeBounds,
+      coordinates: _relayNodeCoordinates,
+      highlightAnimation: _relayNodeGrowthAnimation,
+      indicesToHighlight: _route,
+      oldIndicesToHighlight: _oldRoute,
+    );
   }
 
   bool get _hasCoordinates => _hostCoordinates != null && _serviceCoordinates != null && _relayNodeCoordinates.isNotEmpty;
@@ -660,15 +534,13 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
     if (_route.length != routeLength) _route.length = routeLength;
 
-    Set<int> oldUsedIndices = _oldRoute != null ? _oldRoute.toSet() : Set<int>();
     Set<int> usedIndices = Set<int>();
 
     for (int i = 0; i < routeLength; i++) {
       _route[i] = _rng.nextInt(_relativeRelayNodeCoordinates.length);
 
-      // Check that index hasn't been used yet and is not used in the old route (if any).
-      if (usedIndices.contains(_route[i]) || oldUsedIndices.contains(_route[i])) {
-        i--; // Regenerate index in next iteration
+      if (usedIndices.contains(_route[i])) {
+        i--; // Index already in new route -> regenerate
       } else {
         usedIndices.add(_route[i]);
       }
