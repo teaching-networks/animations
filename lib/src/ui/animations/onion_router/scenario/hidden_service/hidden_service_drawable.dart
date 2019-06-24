@@ -25,6 +25,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   /// Duration how long a bubble should be showing per character.
   static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
 
+  static Random _rng = Random();
+
   ImageInfo _hostImageInfo;
   CanvasImageSource _hostImage;
 
@@ -67,6 +69,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   Point<double> _infoBubblePosition;
   int _currentInfoBubbleID = 0;
 
+  List<int> _introductionPoints = List<int>();
+
   /// Create service.
   HiddenServiceDrawable() {
     _init();
@@ -96,7 +100,33 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     if (_showHelpBubbles) {
       await _showBubble(
-        text: "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
+        text:
+            "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
+        position: _serviceCoordinates,
+        alignment: Alignment.End,
+      );
+    }
+
+    // TODO Make this variable
+    final ip1 = _rng.nextInt(_relayNodeCoordinates.length);
+    final ip2 = _rng.nextInt(_relayNodeCoordinates.length);
+    final ip3 = _rng.nextInt(_relayNodeCoordinates.length);
+
+    _oldRelayNodeIndicesToHighlight = _introductionPoints;
+    _introductionPoints = [ip1, ip2, ip3];
+    _relayNodeHighlightAnimation.start();
+
+    if (_showHelpBubbles) {
+      await _showBubble(
+        text:
+            "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
+        position: _relayNodeCoordinates[ip1],
+      );
+    }
+
+    if (_showHelpBubbles) {
+      await _showBubble(
+        text: "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
         position: _serviceCoordinates,
         alignment: Alignment.End,
       );
@@ -186,7 +216,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       _relativeRelayNodeCoordinates,
       _routerImage,
       _routerImageInfo,
-      indicesToHighlight: _relayNodeIndicesToHighlight,
+      indicesToHighlight: _introductionPoints,
       oldIndicesToHighlight: _oldRelayNodeIndicesToHighlight,
       highlightAnimation: _relayNodeHighlightAnimation,
       coordinates: _relayNodeCoordinates,
