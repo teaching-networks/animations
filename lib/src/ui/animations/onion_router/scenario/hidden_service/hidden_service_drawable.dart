@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/src/core/linker/component_factory.dart';
+import 'package:angular_components/laminate/enums/alignment.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service/controls/hidden_service_controls_component.template.dart'
     as hiddenServiceControls;
@@ -12,12 +13,18 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:meta/meta.dart';
 
 /// Scenario where the service is routed only within the onion network.
 class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario {
+  /// Duration how long a bubble should be showing per character.
+  static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
+
   ImageInfo _hostImageInfo;
   CanvasImageSource _hostImage;
 
@@ -54,6 +61,12 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   Anim _serviceInitAnimation;
 
+  bool _showHelpBubbles = false;
+
+  Bubble _infoBubble;
+  Point<double> _infoBubblePosition;
+  int _currentInfoBubbleID = 0;
+
   /// Create service.
   HiddenServiceDrawable() {
     _init();
@@ -78,8 +91,23 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     invalidate();
   }
 
-  void test() {
+  Future<void> start(bool showHelpBubbles) async {
+    _showHelpBubbles = showHelpBubbles;
+
+    if (_showHelpBubbles) {
+      await _showBubble(
+        text: "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
+        position: _serviceCoordinates,
+        alignment: Alignment.End,
+      );
+    }
+
     _serviceInitAnimation.start();
+  }
+
+  void test() {
+    // TODO Remove when no more needed
+    _showBubble(text: "Hallo Welt!", position: Point<double>(100.5, 100.5));
   }
 
   void _setupAnimations() {
@@ -134,6 +162,16 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     xOffset += cellW * (columns - 2);
     _drawServiceAndDatabase(Rectangle<double>(xOffset, cellY, cellW, cellH));
+
+    _drawInfoBubble();
+  }
+
+  void _drawInfoBubble() {
+    if (_infoBubble == null) {
+      return;
+    }
+
+    _infoBubble.render(ctx, Rectangle<double>(_infoBubblePosition.x, _infoBubblePosition.y, 0, 0), lastPassTimestamp);
   }
 
   /// Draw the scenario nodes (relay nodes or onion routers).
@@ -253,4 +291,35 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   @override
   ComponentFactory<ControlsComponent> get controlComponentFactory => hiddenServiceControls.HiddenServiceControlsComponentNgFactory;
+
+  /// Pause the packet transition animation and show a help bubble at the current [posIndex] position.
+  Future<Duration> _showBubble({
+    @required String text,
+    @required Point<double> position,
+    Alignment alignment = Alignment.Center,
+  }) async {
+    int id = ++_currentInfoBubbleID;
+
+    _infoBubble = Bubble(
+      text,
+      30,
+      alignment: alignment,
+      opacity: 0.7,
+      color: Colors.BLACK,
+    );
+    _infoBubblePosition = position;
+
+    Duration toWait = _bubbleDurationPerCharacter * _infoBubble.text.length;
+
+    invalidate();
+
+    return Future.delayed(toWait).then((_) {
+      if (_currentInfoBubbleID == id) {
+        _infoBubble = null;
+        invalidate();
+      }
+
+      return toWait;
+    });
+  }
 }

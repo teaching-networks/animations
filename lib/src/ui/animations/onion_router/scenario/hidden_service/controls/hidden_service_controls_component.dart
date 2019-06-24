@@ -1,5 +1,8 @@
 import 'package:angular/angular.dart';
-import 'package:angular_components/angular_components.dart';
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_components/material_slider/material_slider.dart';
+import 'package:angular_components/material_toggle/material_toggle.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service/hidden_service_drawable.dart';
@@ -13,6 +16,9 @@ import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.d
   directives: [
     coreDirectives,
     MaterialButtonComponent,
+    MaterialSliderComponent,
+    MaterialIconComponent,
+    MaterialToggleComponent,
   ],
   pipes: [
     I18nPipe,
@@ -21,6 +27,8 @@ import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.d
 class HiddenServiceControlsComponent implements ControlsComponent {
   HiddenServiceDrawable _scenario;
 
+  bool showHelpBubbles = true;
+
   @override
   void set scenario(Scenario scenario) {
     if (!(scenario is HiddenServiceDrawable)) {
@@ -28,6 +36,12 @@ class HiddenServiceControlsComponent implements ControlsComponent {
     }
 
     _scenario = scenario;
+  }
+
+  bool get hasScenario => _scenario != null;
+
+  void start() {
+    _scenario.start(showHelpBubbles);
   }
 
   void test() {

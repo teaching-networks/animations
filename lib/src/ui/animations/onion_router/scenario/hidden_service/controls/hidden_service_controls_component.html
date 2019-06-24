@@ -1,1 +1,24 @@
-<material-button (click)="test()">Test</material-button>
+<template [ngIf]="hasScenario">
+
+	<li class="labeled">
+		<material-button raised (click)="test()">
+			Test
+		</material-button>
+	</li>
+
+	<li class="labeled" style="text-align: center">
+		<material-button raised (click)="start()">
+			<material-icon icon="play_arrow"></material-icon>
+		</material-button>
+	</li>
+
+	<li class="exception">
+		<hr>
+	</li>
+
+	<li class="labeled">
+		<label>Einstellungen</label>
+		<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
+	</li>
+
+</template>
