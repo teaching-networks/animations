@@ -22,6 +22,15 @@ import 'package:meta/meta.dart';
 
 /// Scenario where the service is routed only within the onion network.
 class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario {
+  /// Number of introduction points for the hidden service.
+  static const int _introductionPointCount = 3;
+
+  /// Minimum size of the scroll image (when shrank).
+  static const double _scrollMinSize = 100;
+
+  /// Size of the scroll image when grown.
+  static const double _scrollGrownSize = 200;
+
   /// Duration how long a bubble should be showing per character.
   static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
 
@@ -60,8 +69,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   List<Rectangle<double>> _relayNodeBounds = List<Rectangle<double>>();
 
   Anim _relayNodeHighlightAnimation;
-
   Anim _serviceInitAnimation;
+  Anim _hiddenServiceDescriptorRequestAnimation;
 
   bool _showHelpBubbles = false;
 
@@ -107,26 +116,27 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       );
     }
 
-    // TODO Make this variable
-    final ip1 = _rng.nextInt(_relayNodeCoordinates.length);
-    final ip2 = _rng.nextInt(_relayNodeCoordinates.length);
-    final ip3 = _rng.nextInt(_relayNodeCoordinates.length);
-
     _oldRelayNodeIndicesToHighlight = _introductionPoints;
-    _introductionPoints = [ip1, ip2, ip3];
+
+    _introductionPoints.clear();
+    for (int i = 0; i < _introductionPointCount; i++) {
+      _introductionPoints.add(_rng.nextInt(_relayNodeCoordinates.length));
+    }
+
     _relayNodeHighlightAnimation.start();
 
     if (_showHelpBubbles) {
       await _showBubble(
         text:
             "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
-        position: _relayNodeCoordinates[ip1],
+        position: _relayNodeCoordinates[_introductionPoints.first],
       );
     }
 
     if (_showHelpBubbles) {
       await _showBubble(
-        text: "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
+        text:
+            "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
         position: _serviceCoordinates,
         alignment: Alignment.End,
       );
@@ -149,6 +159,30 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _serviceInitAnimation = AnimHelper(
       curve: Curves.easeInOutCubic,
       duration: Duration(seconds: 6),
+      onEnd: (_) async {
+        await _showBubble(
+          text:
+              "Nun kann ein Client, welcher den Hidden Service nutzen will, den Hidden Service Descriptor von der Distributed Hash Table mit Hilfe der \".onion\" Adresse abfragen.",
+          position: _hostCoordinates,
+          alignment: Alignment.Start,
+        );
+
+        _hiddenServiceDescriptorRequestAnimation.start();
+      },
+    );
+
+    _hiddenServiceDescriptorRequestAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(seconds: 6),
+      onEnd: (_) async {
+        await _showBubble(
+          text: "Nun kennt der Client die Introduction Points & den Public Key des Hidden Service.",
+          position: _hostCoordinates,
+          alignment: Alignment.Start,
+        );
+
+        // TODO Next animation step
+      },
     );
   }
 
@@ -281,18 +315,29 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     if (_serviceInitAnimation.running) {
       _drawServiceInit();
+    } else if (_hiddenServiceDescriptorRequestAnimation.running) {
+      _drawHiddenServiceDescriptorRequest();
     }
   }
 
-  /// Draw the current state of the service initialization animation.
-  void _drawServiceInit() {
-    double minSize = 100;
-    double growSize = 200;
+  /// Draw a scroll transfer from the passed two points.
+  void _drawScrollTransfer(
+    Anim animation,
+    Point<double> start,
+    Point<double> end, {
+    double minSize = _scrollMinSize,
+    double grownSize = _scrollGrownSize,
+  }) {
+    if (!animation.running) {
+      return;
+    }
 
-    Point<double> curPos = _serviceCoordinates + (_databaseCoordinates - _serviceCoordinates) * _serviceInitAnimation.progress;
-    double growProgress = sin(_serviceInitAnimation.progress * pi);
+    Point<double> curPos = start + (end - start) * animation.progress;
+
+    double growProgress = sin(animation.progress * pi);
+
     double opacity = growProgress;
-    double curSize = minSize + growSize * growProgress;
+    double curSize = minSize + grownSize * growProgress;
 
     double oldGlobalAlpha = ctx.globalAlpha;
     ctx.globalAlpha = opacity;
@@ -310,13 +355,24 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     ctx.globalAlpha = oldGlobalAlpha;
   }
 
+  /// Draw the request of the hidden service descriptor from the distributed hash table.
+  void _drawHiddenServiceDescriptorRequest() {
+    _drawScrollTransfer(_hiddenServiceDescriptorRequestAnimation, _databaseCoordinates, _hostCoordinates);
+  }
+
+  /// Draw the current state of the service initialization animation.
+  void _drawServiceInit() {
+    _drawScrollTransfer(_serviceInitAnimation, _serviceCoordinates, _databaseCoordinates);
+  }
+
   @override
-  bool needsRepaint() => _relayNodeHighlightAnimation.running || _serviceInitAnimation.running;
+  bool needsRepaint() => _relayNodeHighlightAnimation.running || _serviceInitAnimation.running || _hiddenServiceDescriptorRequestAnimation.running;
 
   @override
   void update(num timestamp) {
     _relayNodeHighlightAnimation.update(timestamp);
     _serviceInitAnimation.update(timestamp);
+    _hiddenServiceDescriptorRequestAnimation.update(timestamp);
   }
 
   @override
