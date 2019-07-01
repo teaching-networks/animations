@@ -1,8 +1,12 @@
 class Size {
-  num width;
-  num height;
+  final num width;
+  final num height;
 
-  Size(this.width, this.height);
+  const Size(this.width, this.height);
+
+  const Size.empty()
+      : this.width = 0,
+        this.height = 0;
 
   Size operator *(double factor) => Size(width * factor, height * factor);
 

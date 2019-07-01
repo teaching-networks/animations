@@ -4,6 +4,7 @@ import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular/core.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawable_context.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
@@ -46,6 +47,9 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
   /// Controller emitting event when the rendering loop is killed.
   StreamController<void> _loopKilledController;
 
+  /// Drawable context that can be shared between multiple dependent drawables.
+  MutableDrawableContext _mutableDrawableContext = MutableDrawableContext();
+
   /// Create viewer.
   DrawableViewer(
     this._cd,
@@ -53,6 +57,7 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
 
   @override
   void ngOnDestroy() {
+    _drawable.cleanup();
     _killRenderLoop();
   }
 
@@ -133,6 +138,9 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
         width: _size.width,
         height: _size.height,
       );
+
+      _mutableDrawableContext.rootSize = size;
+      _notifyDrawableContextChange();
     }
   }
 
@@ -154,6 +162,13 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
   void onMouseUp(Point<double> pos) {
     if (_drawable is MouseListener) {
       (_drawable as MouseListener).onMouseUp(pos);
+    }
+  }
+
+  /// Notify drawable of a drawable context change (root canvas size, ...).
+  void _notifyDrawableContextChange() {
+    if (_drawable != null) {
+      _drawable.setDrawableContext(_mutableDrawableContext.getImmutableInstance());
     }
   }
 }

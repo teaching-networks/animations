@@ -9,11 +9,14 @@ import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_ser
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario_drawable_mixin.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
+import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
@@ -21,7 +24,7 @@ import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:meta/meta.dart';
 
 /// Scenario where the service is routed only within the onion network.
-class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario {
+class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario, MouseListener {
   /// Number of introduction points for the hidden service.
   static const int _introductionPointCount = 3;
 
@@ -80,8 +83,16 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   List<int> _introductionPoints = List<int>();
 
+  // TODO REMOVE TEST DRAWABLES
+  TextDrawable _testTextDrawable;
+  BubbleContainer _testBubbleContainer;
+  Point<double> _testPos = Point<double>(200, 200);
+
   /// Create service.
-  HiddenServiceDrawable() {
+  HiddenServiceDrawable() : super(null) {
+    _testTextDrawable = TextDrawable(this, text: "Hallo Welt! Der Text ist so lange, dass ich brechen möchte.", color: Colors.WHITE, wrapAtLength: 30);
+    _testBubbleContainer = BubbleContainer(parent: this, drawable: _testTextDrawable);
+
     _init();
   }
 
@@ -133,8 +144,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         usedIndices.add(newIndex);
       }
     }
-
-    print("$_oldRelayNodeIndicesToHighlight - $_introductionPoints");
 
     _relayNodeHighlightAnimation.start();
 
@@ -241,6 +250,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _drawServiceAndDatabase(Rectangle<double>(xOffset, cellY, cellW, cellH));
 
     _drawInfoBubble();
+
+    _testBubbleContainer.render(ctx, lastPassTimestamp, x: _testPos.x, y: _testPos.y); // TODO REMOVE JUST FOR TESTING!
   }
 
   void _drawInfoBubble() {
@@ -420,5 +431,22 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
       return toWait;
     });
+  }
+
+  @override
+  void onMouseDown(Point<double> pos) {
+    // TODO: implement onMouseDown
+  }
+
+  @override
+  void onMouseMove(Point<double> pos) {
+    _testPos = pos;
+
+    _testBubbleContainer.invalidate();
+  }
+
+  @override
+  void onMouseUp(Point<double> pos) {
+    // TODO: implement onMouseUp
   }
 }

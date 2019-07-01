@@ -85,7 +85,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   List<int> _route = List<int>();
   List<int> _oldRoute = List<int>();
 
-  EncryptedPacket _packet = EncryptedPacket();
+  EncryptedPacket _packet;
   int _packetPosition = 0;
 
   Bubble _infoBubble;
@@ -110,7 +110,9 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   AnimHelper _keyExchangeAnimation;
 
   /// Create the internet service drawable.
-  InternetServiceDrawable() {
+  InternetServiceDrawable() : super(null) {
+    _packet = EncryptedPacket(parent: this);
+
     _init();
   }
 

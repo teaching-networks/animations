@@ -47,13 +47,15 @@ class EncryptedPacket extends Drawable {
 
   /// Create encrypted packet.
   EncryptedPacket({
+    Drawable parent,
     int encryptionLayers = 0,
     this.animationDuration = _defaultAnimationDuration,
   })  : _encryptionLayers = encryptionLayers,
         _animation = AnimHelper(
           duration: animationDuration,
           curve: Curves.easeInOutCubic,
-        );
+        ),
+        super(parent);
 
   set packetSize(double value) {
     _packetSize = value;
@@ -74,7 +76,7 @@ class EncryptedPacket extends Drawable {
 
   @override
   void update(num timestamp) {
-    if (_animation.update(timestamp)) invalidate();
+    _animation.update(timestamp);
   }
 
   @override
@@ -88,7 +90,7 @@ class EncryptedPacket extends Drawable {
   }
 
   @override
-  bool needsRepaint() => false;
+  bool needsRepaint() => _animation.running;
 
   /// Draw the packet on the passed rendering [context].
   void _drawPacket(CanvasRenderingContext2D context, double size) {
