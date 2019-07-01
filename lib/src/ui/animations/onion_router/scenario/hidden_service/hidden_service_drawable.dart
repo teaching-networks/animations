@@ -116,12 +116,25 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       );
     }
 
-    _oldRelayNodeIndicesToHighlight = _introductionPoints;
+    _oldRelayNodeIndicesToHighlight.clear();
+    for (int i in _introductionPoints) {
+      _oldRelayNodeIndicesToHighlight.add(i);
+    }
 
     _introductionPoints.clear();
+    Set<int> usedIndices = Set<int>();
     for (int i = 0; i < _introductionPointCount; i++) {
-      _introductionPoints.add(_rng.nextInt(_relayNodeCoordinates.length));
+      int newIndex = _rng.nextInt(_relayNodeCoordinates.length);
+
+      if (usedIndices.contains(newIndex)) {
+        i--;
+      } else {
+        _introductionPoints.add(newIndex);
+        usedIndices.add(newIndex);
+      }
     }
+
+    print("$_oldRelayNodeIndicesToHighlight - $_introductionPoints");
 
     _relayNodeHighlightAnimation.start();
 
