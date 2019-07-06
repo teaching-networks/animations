@@ -17,6 +17,7 @@ import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
@@ -91,7 +92,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   /// Create service.
   HiddenServiceDrawable() : super(null) {
     _testTextDrawable = TextDrawable(this, text: "Hallo Welt! Der Text ist so lange, dass ich brechen möchte.", color: Colors.WHITE, wrapAtLength: 30);
-    _testBubbleContainer = BubbleContainer(parent: this, drawable: _testTextDrawable);
+    _testBubbleContainer = BubbleContainer(parent: this, drawable: _testTextDrawable)..color = Color.opacity(Colors.BLACK, 0.6);
 
     _init();
   }

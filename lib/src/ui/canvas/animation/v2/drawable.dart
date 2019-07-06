@@ -4,6 +4,7 @@ import 'dart:html';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable_context.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/util/size.dart';
+import 'package:meta/meta.dart';
 
 /// Next generation canvas animation class.
 abstract class Drawable extends CanvasContextUtil {
@@ -15,6 +16,9 @@ abstract class Drawable extends CanvasContextUtil {
 
   /// Default height of the drawable.
   static const double _defaultHeight = 150;
+
+  /// Parent of the drawable (if any -> can be null).
+  final Drawable parent;
 
   /// Canvas where to cache rendered content until it needs to be refreshed.
   CanvasElement _cacheCanvas;
@@ -49,13 +53,11 @@ abstract class Drawable extends CanvasContextUtil {
   List<Drawable> _dependentDrawables;
 
   /// Stream controller managing size change events.
-  StreamController<Size> _sizeChangedController = StreamController<Size>.broadcast(sync: true);
+  StreamController<SizeChange> _sizeChangedController = StreamController<SizeChange>.broadcast(sync: true);
 
   /// Create drawable.
   /// Specify the drawables [parent] to automatically add it to its dependent drawables (Can be null).
-  Drawable(
-    Drawable parent,
-  ) {
+  Drawable(this.parent) {
     _init(parent);
   }
 
@@ -136,12 +138,17 @@ abstract class Drawable extends CanvasContextUtil {
     double height = _defaultHeight,
   }) {
     if (_cacheCanvasSize == null || width != _cacheCanvasSize.width || height != _cacheCanvasSize.height) {
+      Size oldSize = _cacheCanvasSize;
+
       _cacheCanvasSize = Size(width, height);
 
       _cacheCanvas.width = width.toInt();
       _cacheCanvas.height = height.toInt();
 
-      _sizeChangedController.add(_cacheCanvasSize);
+      _sizeChangedController.add(SizeChange(
+        oldSize: oldSize,
+        newSize: _cacheCanvasSize,
+      ));
 
       invalidate();
     }
@@ -210,7 +217,7 @@ abstract class Drawable extends CanvasContextUtil {
   bool get hasCurrentDrawableContext => _currentDrawableContext != null;
 
   /// Get a stream emitting size changes.
-  Stream<Size> get sizeChanges => _sizeChangedController.stream;
+  Stream<SizeChange> get sizeChanges => _sizeChangedController.stream;
 
   /// Get the current drawable context.
   DrawableContext get currentDrawableContext => _currentDrawableContext;
@@ -233,6 +240,9 @@ abstract class Drawable extends CanvasContextUtil {
   /// Check whether the drawable should propagate events to the dependent drawables (Check if needs repaint, ...).
   bool get propagateEventsToDependentDrawables => _propagateEventsToDependentDrawables;
 
+  /// Check if the drawable has a parent drawable specified.
+  bool get hasParent => parent != null;
+
   /// Check if the drawable needs to be repainted.
   /// It will be repainted no matter what this method is stating in case you
   /// call [invalidate()].
@@ -248,4 +258,19 @@ abstract class Drawable extends CanvasContextUtil {
   /// The current pass timestamp is available via [lastPassTimestamp].
   /// The current x & y offset is available via [lastPassXOffset] & [lastPassYOffset].
   void draw();
+}
+
+/// Change event of a drawables size.
+class SizeChange {
+  /// The old size of the drawable.
+  final Size oldSize;
+
+  /// The current (new) size of the drawable.
+  final Size newSize;
+
+  /// Create size change event.
+  SizeChange({
+    @required this.oldSize,
+    @required this.newSize,
+  });
 }

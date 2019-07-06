@@ -54,7 +54,7 @@ class BubbleContainer extends Drawable {
     Drawable parent,
   })  : _drawable = drawable,
         super(parent) {
-    drawable.sizeChanges.listen((newSize) => _updateSize(newSize));
+    drawable.sizeChanges.listen((change) => _updateSize(change.newSize));
     _updateSize(drawable.size);
 
     addDependentDrawable(drawable);
