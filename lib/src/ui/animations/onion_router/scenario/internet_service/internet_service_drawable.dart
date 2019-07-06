@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/src/core/linker/component_factory.dart';
-import 'package:angular_components/laminate/enums/alignment.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/internet_service/controls/internet_service_controls_component.template.dart'
     as internetServiceControls;
@@ -10,10 +10,15 @@ import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.d
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario_drawable_mixin.dart';
 import 'package:hm_animations/src/ui/animations/shared/encrypted_packet/encrypted_packet.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
+import 'package:hm_animations/src/ui/canvas/control/button/timed_button/timed_button.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
-import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
+import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
@@ -88,7 +93,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   EncryptedPacket _packet;
   int _packetPosition = 0;
 
-  Bubble _infoBubble;
+  BubbleContainer _infoBubble;
   double _infoBubblePosIndex;
   bool _showBubbles = false;
   int _currentInfoBubbleID = 0;
@@ -110,7 +115,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   AnimHelper _keyExchangeAnimation;
 
   /// Create the internet service drawable.
-  InternetServiceDrawable() : super(null) {
+  InternetServiceDrawable() {
     _packet = EncryptedPacket(parent: this);
 
     _init();
@@ -206,7 +211,6 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       _showBubble(
         "Zwischen Host, Dienst & Relay Knoten (Onion Router (OR)) werden TCP/TLS Verbindungen aufgebaut. Hier nur vereinfacht dargestellt.",
         0.5,
-        Alignment.Start,
       );
     }
 
@@ -221,7 +225,6 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       _showBubble(
         "Zwischen dem Host und jedem Relay Knoten (OR) werden Schritt für Schritt symmetrische Schlüssel ausgetauscht.",
         0.5,
-        Alignment.Start,
       );
     }
 
@@ -234,7 +237,6 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       await _showBubble(
         "Daten werden als sogenannte \"Cells\" gesendet, welche 512 Byte Einheiten darstellen und aus Header & Payload bestehen.",
         0,
-        Alignment.Start,
       );
     }
 
@@ -244,7 +246,6 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
         _showBubble(
           "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
           0,
-          Alignment.Start,
         ),
     ]);
 
@@ -320,7 +321,12 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
       if (_infoBubble != null) {
         Point<double> coords = _getCoordinatesForFloatingIndex(_infoBubblePosIndex);
-        _infoBubble.render(ctx, Rectangle<double>(coords.x, coords.y, 0, 0), lastPassTimestamp);
+        _infoBubble.render(
+          ctx,
+          lastPassTimestamp,
+          x: coords.x,
+          y: coords.y,
+        );
       }
     }
   }
@@ -552,7 +558,8 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   }
 
   @override
-  bool needsRepaint() => _packet.isInvalid;
+  bool needsRepaint() =>
+      _packetTransitionAnimation.running || _tcpConnectionAnimation.running || _relayNodeGrowthAnimation.running || _keyExchangeAnimation.running;
 
   /// Reset the animation.
   void _resetAnimation() {
@@ -572,22 +579,14 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   @override
   void update(num timestamp) {
     _updateAnimations(timestamp);
-
-    _packet.update(timestamp);
   }
 
   /// Update running animations (if any).
   void _updateAnimations(num timestamp) {
-    bool updated = false;
-
-    updated = _packetTransitionAnimation.update(timestamp) || updated;
-    updated = _relayNodeGrowthAnimation.update(timestamp) || updated;
-    updated = _tcpConnectionAnimation.update(timestamp) || updated;
-    updated = _keyExchangeAnimation.update(timestamp) || updated;
-
-    if (updated) {
-      invalidate();
-    }
+    _packetTransitionAnimation.update(timestamp);
+    _relayNodeGrowthAnimation.update(timestamp);
+    _tcpConnectionAnimation.update(timestamp);
+    _keyExchangeAnimation.update(timestamp);
   }
 
   /// What to do on the packet transition animation end in forward direction.
@@ -600,21 +599,19 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       invalidate();
 
       if (_showBubbles && _packetPosition == 1) {
-        Duration waitDuration = await _showBubble(
+        await _showBubble(
           "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
           _packetPosition.toDouble(),
-          Alignment.Center,
         );
 
-        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
+        _packetTransitionAnimation.start();
       } else if (_showBubbles && _packetPosition == _route.length) {
-        Duration waitDuration = await _showBubble(
+        await _showBubble(
           "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
           _packetPosition.toDouble(),
-          Alignment.Center,
         );
 
-        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
+        _packetTransitionAnimation.start();
       } else {
         _packetTransitionAnimation.start(timestamp: timestamp); // Start transition all over again!
       }
@@ -622,13 +619,12 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       _packetTransitionAnimation.reverse(); // Reverse transition direction
 
       if (_showBubbles) {
-        Duration waitDuration = await _showBubble(
+        await _showBubble(
           "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
           (_route.length + 1).toDouble(),
-          Alignment.End,
         );
 
-        _packetTransitionAnimation.start(timestamp: timestamp + waitDuration.inMilliseconds);
+        _packetTransitionAnimation.start();
       } else {
         _packetTransitionAnimation.start(timestamp: timestamp);
       }
@@ -652,7 +648,6 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
         _showBubble(
           "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
           0,
-          Alignment.Start,
         );
       }
 
@@ -666,30 +661,47 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   }
 
   /// Pause the packet transition animation and show a help bubble at the current [posIndex] position.
-  Future<Duration> _showBubble(String text, double posIndex, Alignment alignment) {
+  Future<void> _showBubble(String text, double posIndex) {
     int id = ++_currentInfoBubbleID;
 
-    _infoBubble = Bubble(
-      text,
-      30,
-      alignment: alignment,
-      opacity: 0.7,
-      color: Colors.BLACK,
-    );
-    _infoBubblePosIndex = posIndex;
+    Duration toWait = _bubbleDurationPerCharacter * text.length;
 
-    Duration toWait = _bubbleDurationPerCharacter * _infoBubble.text.length;
-
-    invalidate();
-
-    return Future.delayed(toWait).then((_) {
+    final completer = Completer();
+    Action end = () {
       if (_currentInfoBubbleID == id) {
         _infoBubble = null;
         invalidate();
       }
 
-      return toWait;
-    });
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    };
+
+    _infoBubblePosIndex = posIndex;
+    _infoBubble = BubbleContainer(
+      parent: this,
+      drawable: VerticalLayout(
+        layoutMode: LayoutMode.FIT,
+        alignment: HorizontalAlignment.RIGHT,
+        children: [
+          TextDrawable(
+            text: text,
+            color: Colors.WHITE,
+            wrapAtLength: 30,
+          ),
+          TimedButton(
+            text: "Weiter...",
+            duration: toWait,
+            action: end,
+          ),
+        ],
+      ),
+    )..color = Color.opacity(Colors.BLACK, 0.6);
+
+    invalidate();
+
+    return completer.future;
   }
 
   /// Hide the bubble (if it is currently shown).

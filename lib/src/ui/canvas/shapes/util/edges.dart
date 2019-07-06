@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:hm_animations/src/util/size.dart';
 
 /**
@@ -34,4 +35,11 @@ class Edges {
         bottomLeft: min(edges.bottomLeft * ref, maxRadius),
         bottomRight: min(edges.bottomRight * ref, maxRadius));
   }
+
+  Edges operator *(double factor) => Edges(
+        topLeft: topLeft * factor,
+        topRight: topRight * factor,
+        bottomLeft: bottomLeft * factor,
+        bottomRight: bottomRight * factor,
+      );
 }

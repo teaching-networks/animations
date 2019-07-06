@@ -30,11 +30,10 @@ class TextDrawable extends Drawable {
   final TextAlignment alignment;
 
   List<String> _lines;
-  String _longestLine;
 
   /// Create drawable.
-  TextDrawable(
-    Drawable parent, {
+  TextDrawable({
+    Drawable parent,
     String text = "[No Text provided]",
     this.wrapAtLength = 50,
     this.fontFamilies = "sans-serif",
@@ -43,14 +42,13 @@ class TextDrawable extends Drawable {
     this.color = Colors.BLACK,
     this.alignment = TextAlignment.CENTER,
   })  : _text = text,
-        super(parent) {
+        super(parent: parent) {
     _init();
   }
 
   /// Initializing drawable.
   void _init() {
     _lines = _buildLines(_text, wrapAtLength);
-    _longestLine = _getLongestLine(_lines);
 
     _calculateSize();
 
@@ -84,10 +82,10 @@ class TextDrawable extends Drawable {
     }
   }
 
+  double get fontSize => textSize != null ? this.textSize * window.devicePixelRatio : defaultFontSize;
+
   /// Calculate the size of the drawable.
   void _calculateSize() {
-    double fontSize = textSize != null ? this.textSize : defaultFontSize;
-
     _initFont(fontSize);
 
     final textBoundsSize = _calculateTextSize(ctx, defaultFontSize);
@@ -102,7 +100,7 @@ class TextDrawable extends Drawable {
   void draw() {
     double xOffset = _getXOffsetForAlignment(alignment);
 
-    _initFont(textSize != null ? this.textSize : defaultFontSize);
+    _initFont(fontSize);
     setFillColor(color);
 
     double lineOffset = size.height / _lines.length;
@@ -137,14 +135,17 @@ class TextDrawable extends Drawable {
   }
 
   Size _calculateTextSize(CanvasRenderingContext2D context, double fontSize) {
-    var metrics = context.measureText(_longestLine);
+    double maxWidth = 0;
+    for (final line in _lines) {
+      final width = context.measureText(line).width;
 
-    var width = metrics.width;
+      if (width > maxWidth) maxWidth = width;
+    }
 
     var lineH = fontSize * lineHeight;
     var height = lineH * _lines.length;
 
-    return Size(width, height);
+    return Size(maxWidth, height);
   }
 
   List<String> _buildLines(String text, int wrapAtLength) {
@@ -169,20 +170,6 @@ class TextDrawable extends Drawable {
     lines.add(lineBuffer.toString());
 
     return lines;
-  }
-
-  String _getLongestLine(List<String> lines) {
-    int maxLength = 0;
-    String maxLine;
-
-    for (var line in lines) {
-      if (maxLine == null || line.length > maxLength) {
-        maxLength = line.length;
-        maxLine = line;
-      }
-    }
-
-    return maxLine;
   }
 }
 

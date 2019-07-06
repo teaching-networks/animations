@@ -146,22 +146,52 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
 
   @override
   void onMouseDown(Point<double> pos) {
-    if (_drawable is MouseListener) {
-      (_drawable as MouseListener).onMouseDown(pos);
+    _onMouseDown(pos, _drawable);
+  }
+
+  void _onMouseDown(Point<double> pos, Drawable parent) {
+    if (parent is MouseListener) {
+      (parent as MouseListener).onMouseDown(pos);
+    }
+
+    if (parent.hasDependentDrawables) {
+      for (Drawable drawable in parent.dependentDrawables) {
+        _onMouseDown(pos, drawable);
+      }
     }
   }
 
   @override
   void onMouseMove(Point<double> pos) {
-    if (_drawable is MouseListener) {
-      (_drawable as MouseListener).onMouseMove(pos);
+    _onMouseMove(pos, _drawable);
+  }
+
+  void _onMouseMove(Point<double> pos, Drawable parent) {
+    if (parent is MouseListener) {
+      (parent as MouseListener).onMouseMove(pos);
+    }
+
+    if (parent.hasDependentDrawables) {
+      for (Drawable drawable in parent.dependentDrawables) {
+        _onMouseMove(pos, drawable);
+      }
     }
   }
 
   @override
   void onMouseUp(Point<double> pos) {
-    if (_drawable is MouseListener) {
-      (_drawable as MouseListener).onMouseUp(pos);
+    _onMouseUp(pos, _drawable);
+  }
+
+  void _onMouseUp(Point<double> pos, Drawable parent) {
+    if (parent is MouseListener) {
+      (parent as MouseListener).onMouseUp(pos);
+    }
+
+    if (parent.hasDependentDrawables) {
+      for (Drawable drawable in parent.dependentDrawables) {
+        _onMouseUp(pos, drawable);
+      }
     }
   }
 

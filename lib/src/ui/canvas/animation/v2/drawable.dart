@@ -18,7 +18,7 @@ abstract class Drawable extends CanvasContextUtil {
   static const double _defaultHeight = 150;
 
   /// Parent of the drawable (if any -> can be null).
-  final Drawable parent;
+  Drawable _parent;
 
   /// Canvas where to cache rendered content until it needs to be refreshed.
   CanvasElement _cacheCanvas;
@@ -41,6 +41,15 @@ abstract class Drawable extends CanvasContextUtil {
   /// Y Offset of the last rendering loop pass.
   double _lastPassYOffset;
 
+  /// Relative offset of the cached canvas on the parent canvas of the last rendering.
+  Point<double> _lastRenderOffset = Point<double>(0, 0);
+
+  /// X Offset of the last rendering loop pass (Absolute means from the root drawable).
+  double _lastRenderAbsoluteXOffset;
+
+  /// Y Offset of the last rendering loop pass (Absolute means from the root drawable).
+  double _lastRenderAbsoluteYOffset;
+
   /// Current context shared by multiple dependent drawables.
   DrawableContext _currentDrawableContext;
 
@@ -50,28 +59,29 @@ abstract class Drawable extends CanvasContextUtil {
   /// List of dependent drawables.
   /// Dependent drawables will be checked for needed repaints and
   /// passed some additional info.
-  List<Drawable> _dependentDrawables;
+  Set<Drawable> _dependentDrawables;
 
   /// Stream controller managing size change events.
   StreamController<SizeChange> _sizeChangedController = StreamController<SizeChange>.broadcast(sync: true);
 
   /// Create drawable.
-  /// Specify the drawables [parent] to automatically add it to its dependent drawables (Can be null).
-  Drawable(this.parent) {
-    _init(parent);
+  Drawable({
+    Drawable parent,
+  }) {
+    if (parent != null) {
+      setParent(parent);
+    }
+
+    _init();
   }
 
   /// Initialize the drawable.
-  void _init(Drawable parent) {
+  void _init() {
     _cacheCanvas = CanvasElement();
     setSize();
     _cacheCanvasContext = _cacheCanvas.getContext(_canvas2dRenderingContextId);
 
     setUtilCanvasContext(_cacheCanvasContext);
-
-    if (parent != null) {
-      parent.addDependentDrawable(this);
-    }
   }
 
   /// Invalidate the drawable to repaint itself the next rendering cycle.
@@ -101,9 +111,17 @@ abstract class Drawable extends CanvasContextUtil {
     _lastPassXOffset = x;
     _lastPassYOffset = y;
 
+    _lastRenderOffset = calculateRenderingPosition(x, y);
+
     update(timestamp);
 
     if (isInvalid) {
+      if (hasParent) {
+        // Calculate the absolute position of the cached canvas from the root canvas.
+        _lastRenderAbsoluteXOffset = _lastRenderOffset.x + _parent.lastRenderAbsoluteXOffset;
+        _lastRenderAbsoluteYOffset = _lastRenderOffset.y + _parent.lastRenderAbsoluteYOffset;
+      }
+
       // Repaint drawable
       _cacheCanvasContext.clearRect(0, 0, size.width, size.height);
       draw();
@@ -111,14 +129,18 @@ abstract class Drawable extends CanvasContextUtil {
       _validate(); // Drawable has been redrawn and thus is valid again!
     }
 
-    drawOnCanvas(context, _cacheCanvas, x, y);
+    _drawOnCanvas(context, _cacheCanvas, _lastRenderOffset);
   }
 
+  /// Calculate the rendering position of the cached canvas.
+  /// Override this method to position the canvas somewhere else.
+  /// For example the x and y parameters of the render method could be interpreted as the center
+  /// of the canvas to draw by returning something like Point<double>(x - size.width / 2, y - size.width / 2);
+  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(x, y);
+
   /// Draw cached canvas on the passed [context].
-  /// Override this method if you need to adjust the cache canvas image alignment
-  /// (for example centering the image where [x] and [y] is in the center).
-  void drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, double x, double y) {
-    context.drawImage(_cacheCanvas, x, y);
+  void _drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, Point<double> offset) {
+    context.drawImage(_cacheCanvas, offset.x, offset.y);
   }
 
   /// Cleanup drawable if it will be destroyed.
@@ -157,17 +179,21 @@ abstract class Drawable extends CanvasContextUtil {
   /// Add a drawable to be dependent to this drawable, in order to
   /// get some additional info in the dependent drawable and automatically check dependent
   /// drawable if it needs to be repainted.
-  void addDependentDrawable(Drawable drawable) {
+  void _addDependentDrawable(Drawable drawable) {
     if (_dependentDrawables == null) {
-      _dependentDrawables = List<Drawable>();
+      _dependentDrawables = Set<Drawable>();
     }
 
-    _dependentDrawables.add(drawable);
-    _initDependentDrawable(drawable);
+    if (!_dependentDrawables.contains(drawable) && drawable != this) {
+      _dependentDrawables.add(drawable);
+
+      _initDependentDrawable(drawable);
+    }
   }
 
   /// Remove a dependent drawable from this drawable.
-  void removeDependentDrawable(Drawable drawable) {
+  // ignore: unused_element
+  void _removeDependentDrawable(Drawable drawable) {
     if (_dependentDrawables != null) {
       _dependentDrawables.remove(drawable);
     }
@@ -185,6 +211,12 @@ abstract class Drawable extends CanvasContextUtil {
     // Inherit options
     drawable.propagateEventsToDependentDrawables = _propagateEventsToDependentDrawables;
   }
+
+  /// Whether the drawable has dependent drawables.
+  bool get hasDependentDrawables => _dependentDrawables != null;
+
+  /// Get all dependent drawables of this drawable. Do not mutate.
+  Set<Drawable> get dependentDrawables => _dependentDrawables;
 
   /// Check if dependent drawables need to be repainted.
   bool get _dependentDrawablesNeedRepaint {
@@ -234,6 +266,15 @@ abstract class Drawable extends CanvasContextUtil {
   /// Get the y offset of the last rendering loop pass.
   double get lastPassYOffset => _lastPassYOffset;
 
+  /// Get the (relative) render offset of the last rendering.
+  Point<double> get lastRenderOffset => _lastRenderOffset;
+
+  /// Get the x offset of the last rendering loop pass (Absolute -> From the root drawable).
+  double get lastRenderAbsoluteXOffset => _lastRenderAbsoluteXOffset != null ? _lastRenderAbsoluteXOffset : _lastRenderOffset.x;
+
+  /// Get the y offset of the last rendering loop pass (Absolute -> From the root drawable).
+  double get lastRenderAbsoluteYOffset => _lastRenderAbsoluteYOffset != null ? _lastRenderAbsoluteYOffset : _lastRenderOffset.y;
+
   /// Set whether the drawable should propagate events to the dependent drawables (Check if needs repaint, ...).
   void set propagateEventsToDependentDrawables(bool check) => _propagateEventsToDependentDrawables = check;
 
@@ -241,7 +282,22 @@ abstract class Drawable extends CanvasContextUtil {
   bool get propagateEventsToDependentDrawables => _propagateEventsToDependentDrawables;
 
   /// Check if the drawable has a parent drawable specified.
-  bool get hasParent => parent != null;
+  bool get hasParent => _parent != null;
+
+  /// Get the drawables parent (if any -> can be null).
+  Drawable get parent => _parent;
+
+  /// Set the parent of the drawable.
+  void setParent(Drawable parent) {
+    if (hasParent) {
+      throw Exception("Drawable already has parent. Cannot switch to new parent.");
+    }
+
+    if (parent != null) {
+      _parent = parent;
+      parent._addDependentDrawable(this);
+    }
+  }
 
   /// Check if the drawable needs to be repainted.
   /// It will be repainted no matter what this method is stating in case you

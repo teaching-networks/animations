@@ -1,20 +1,22 @@
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/src/core/linker/component_factory.dart';
-import 'package:angular_components/laminate/enums/alignment.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service/controls/hidden_service_controls_component.template.dart'
     as hiddenServiceControls;
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario_drawable_mixin.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
-import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
+import 'package:hm_animations/src/ui/canvas/control/button/timed_button/timed_button.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
-import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
@@ -25,7 +27,7 @@ import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:meta/meta.dart';
 
 /// Scenario where the service is routed only within the onion network.
-class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario, MouseListener {
+class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Scenario {
   /// Number of introduction points for the hidden service.
   static const int _introductionPointCount = 3;
 
@@ -66,7 +68,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   List<Point<double>> _relativeRelayNodeCoordinates;
 
-  List<int> _relayNodeIndicesToHighlight = [];
   List<int> _oldRelayNodeIndicesToHighlight = [];
 
   List<Point<double>> _relayNodeCoordinates = List<Point<double>>();
@@ -78,22 +79,14 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   bool _showHelpBubbles = false;
 
-  Bubble _infoBubble;
+  BubbleContainer _infoBubble;
   Point<double> _infoBubblePosition;
   int _currentInfoBubbleID = 0;
 
   List<int> _introductionPoints = List<int>();
 
-  // TODO REMOVE TEST DRAWABLES
-  TextDrawable _testTextDrawable;
-  BubbleContainer _testBubbleContainer;
-  Point<double> _testPos = Point<double>(200, 200);
-
   /// Create service.
-  HiddenServiceDrawable() : super(null) {
-    _testTextDrawable = TextDrawable(this, text: "Hallo Welt! Der Text ist so lange, dass ich brechen möchte.", color: Colors.WHITE, wrapAtLength: 30);
-    _testBubbleContainer = BubbleContainer(parent: this, drawable: _testTextDrawable)..color = Color.opacity(Colors.BLACK, 0.6);
-
+  HiddenServiceDrawable() {
     _init();
   }
 
@@ -124,7 +117,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         text:
             "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
         position: _serviceCoordinates,
-        alignment: Alignment.End,
       );
     }
 
@@ -161,7 +153,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         text:
             "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
         position: _serviceCoordinates,
-        alignment: Alignment.End,
       );
     }
 
@@ -187,7 +178,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
           text:
               "Nun kann ein Client, welcher den Hidden Service nutzen will, den Hidden Service Descriptor von der Distributed Hash Table mit Hilfe der \".onion\" Adresse abfragen.",
           position: _hostCoordinates,
-          alignment: Alignment.Start,
         );
 
         _hiddenServiceDescriptorRequestAnimation.start();
@@ -201,7 +191,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         await _showBubble(
           text: "Nun kennt der Client die Introduction Points & den Public Key des Hidden Service.",
           position: _hostCoordinates,
-          alignment: Alignment.Start,
         );
 
         // TODO Next animation step
@@ -251,8 +240,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _drawServiceAndDatabase(Rectangle<double>(xOffset, cellY, cellW, cellH));
 
     _drawInfoBubble();
-
-    _testBubbleContainer.render(ctx, lastPassTimestamp, x: _testPos.x, y: _testPos.y); // TODO REMOVE JUST FOR TESTING!
   }
 
   void _drawInfoBubble() {
@@ -260,7 +247,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       return;
     }
 
-    _infoBubble.render(ctx, Rectangle<double>(_infoBubblePosition.x, _infoBubblePosition.y, 0, 0), lastPassTimestamp);
+    _infoBubble.render(ctx, lastPassTimestamp, x: _infoBubblePosition.x, y: _infoBubblePosition.y);
   }
 
   /// Draw the scenario nodes (relay nodes or onion routers).
@@ -403,51 +390,50 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   @override
   ComponentFactory<ControlsComponent> get controlComponentFactory => hiddenServiceControls.HiddenServiceControlsComponentNgFactory;
 
-  /// Pause the packet transition animation and show a help bubble at the current [posIndex] position.
-  Future<Duration> _showBubble({
+  /// Show a help bubble at the passed [position] with the specified [text].
+  Future<void> _showBubble({
     @required String text,
     @required Point<double> position,
-    Alignment alignment = Alignment.Center,
-  }) async {
+  }) {
     int id = ++_currentInfoBubbleID;
 
-    _infoBubble = Bubble(
-      text,
-      30,
-      alignment: alignment,
-      opacity: 0.7,
-      color: Colors.BLACK,
-    );
-    _infoBubblePosition = position;
+    Duration toWait = _bubbleDurationPerCharacter * text.length;
 
-    Duration toWait = _bubbleDurationPerCharacter * _infoBubble.text.length;
-
-    invalidate();
-
-    return Future.delayed(toWait).then((_) {
+    final completer = Completer();
+    Action end = () {
       if (_currentInfoBubbleID == id) {
         _infoBubble = null;
         invalidate();
       }
 
-      return toWait;
-    });
-  }
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    };
 
-  @override
-  void onMouseDown(Point<double> pos) {
-    // TODO: implement onMouseDown
-  }
+    _infoBubblePosition = position;
+    _infoBubble = BubbleContainer(
+      parent: this,
+      drawable: VerticalLayout(
+        layoutMode: LayoutMode.FIT,
+        alignment: HorizontalAlignment.RIGHT,
+        children: [
+          TextDrawable(
+            text: text,
+            color: Colors.WHITE,
+            wrapAtLength: 30,
+          ),
+          TimedButton(
+            text: "Weiter...",
+            duration: toWait,
+            action: end,
+          ),
+        ],
+      ),
+    )..color = Color.opacity(Colors.BLACK, 0.6);
 
-  @override
-  void onMouseMove(Point<double> pos) {
-    _testPos = pos;
+    invalidate();
 
-    _testBubbleContainer.invalidate();
-  }
-
-  @override
-  void onMouseUp(Point<double> pos) {
-    // TODO: implement onMouseUp
+    return completer.future;
   }
 }

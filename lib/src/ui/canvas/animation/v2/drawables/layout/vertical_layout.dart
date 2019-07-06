@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
@@ -15,12 +16,16 @@ class VerticalLayout extends Layout {
   /// Layout mode of the layout.
   final LayoutMode layoutMode;
 
+  /// Alignment of the child drawables along the vertical axis.
+  final HorizontalAlignment alignment;
+
   /// Create layout
   VerticalLayout({
-    @required Drawable parent,
     @required this.children,
+    Drawable parent,
     this.layoutMode = LayoutMode.FIT,
-  }) : super(parent) {
+    this.alignment = HorizontalAlignment.LEFT,
+  }) : super(parent: parent) {
     _init();
   }
 
@@ -61,10 +66,19 @@ class VerticalLayout extends Layout {
   }
 
   void _recalculateSizeGrowMode() {
-    setSize(
-      width: parent.size.width,
-      height: parent.size.height,
-    );
+    if (parent != null) {
+      setSize(
+        width: parent.size.width,
+        height: parent.size.height,
+      );
+    }
+  }
+
+  @override
+  void setParent(Drawable parent) {
+    super.setParent(parent);
+
+    _recalculateSize();
   }
 
   @override
@@ -75,8 +89,21 @@ class VerticalLayout extends Layout {
 
     double yOffset = 0;
     for (Drawable child in children) {
-      child.render(ctx, lastPassTimestamp, y: yOffset);
+      child.render(ctx, lastPassTimestamp, y: yOffset, x: _calculateAlignmentOffset(child));
       yOffset += child.size.height;
+    }
+  }
+
+  double _calculateAlignmentOffset(Drawable child) {
+    switch (alignment) {
+      case HorizontalAlignment.LEFT:
+        return 0;
+      case HorizontalAlignment.RIGHT:
+        return size.width - child.size.width;
+      case HorizontalAlignment.CENTER:
+        return (size.width - child.size.width) / 2;
+      default:
+        throw Exception("Horizontal alignment unknown");
     }
   }
 

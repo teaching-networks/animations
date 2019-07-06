@@ -11,11 +11,9 @@ abstract class Layout extends Drawable {
   List<StreamSubscription<SizeChange>> _childSizeChangeStreamSubscriptions;
 
   /// Create layout.
-  Layout(Drawable parent) : super(parent) {
-    if (parent != null) {
-      throw Exception("A layout needs to have a parent specified (To calculate the correct size from). Null values are not allowed!");
-    }
-
+  Layout({
+    Drawable parent,
+  }) : super(parent: parent) {
     _init();
   }
 
@@ -27,13 +25,20 @@ abstract class Layout extends Drawable {
       throw Exception("A layout cannot lay out no children. Please specify at least one child drawable.");
     }
 
-    parent.sizeChanges.listen(onParentSizeChange);
-
     _childSizeChangeStreamSubscriptions = List<StreamSubscription<SizeChange>>();
     for (Drawable child in children) {
       _childSizeChangeStreamSubscriptions.add(child.sizeChanges.listen(onChildSizeChange));
-      addDependentDrawable(child);
+      child.setParent(this);
     }
+  }
+
+  @override
+  void setParent(Drawable parent) {
+    if (!hasParent) {
+      parent.sizeChanges.listen(onParentSizeChange);
+    }
+
+    super.setParent(parent);
   }
 
   @override

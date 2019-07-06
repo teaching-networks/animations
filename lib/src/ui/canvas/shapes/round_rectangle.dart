@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:math';
+
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
@@ -66,6 +67,8 @@ class RoundRectangle extends CanvasDrawable {
       // Convert strokeWidth to pixel
       lineWidth = lineWidth * min(rect.width, rect.height);
     }
+
+    r *= window.devicePixelRatio;
 
     context.beginPath();
 

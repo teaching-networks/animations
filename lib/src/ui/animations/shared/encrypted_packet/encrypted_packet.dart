@@ -55,7 +55,7 @@ class EncryptedPacket extends Drawable {
           duration: animationDuration,
           curve: Curves.easeInOutCubic,
         ),
-        super(parent);
+        super(parent: parent);
 
   set packetSize(double value) {
     _packetSize = value;
@@ -85,9 +85,7 @@ class EncryptedPacket extends Drawable {
   }
 
   @override
-  void drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, double x, double y) {
-    context.drawImage(src, x - size.width / 2, y - size.height / 2);
-  }
+  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(x - size.width / 2, y - size.height / 2);
 
   @override
   bool needsRepaint() => _animation.running;

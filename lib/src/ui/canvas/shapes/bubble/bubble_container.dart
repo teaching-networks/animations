@@ -39,13 +39,13 @@ class BubbleContainer extends Drawable {
 
   VerticalArrowOrientation _verticalArrowOrientation;
   HorizontalArrowOrientation _horizontalArrowOrientation;
-  double _horizontalFreeDiff;
+  double _horizontalFreeDiff = 0;
 
   RoundRectangle _roundRect = RoundRectangle(
     color: Colors.BLACK,
     paintMode: PaintMode.FILL,
-    radius: Edges.all(0.2),
-    radiusSizeType: SizeType.PERCENT,
+    radius: Edges.all(10),
+    radiusSizeType: SizeType.PIXEL,
   );
 
   /// Create bubble.
@@ -53,11 +53,11 @@ class BubbleContainer extends Drawable {
     @required Drawable drawable,
     Drawable parent,
   })  : _drawable = drawable,
-        super(parent) {
+        super(parent: parent) {
     drawable.sizeChanges.listen((change) => _updateSize(change.newSize));
     _updateSize(drawable.size);
 
-    addDependentDrawable(drawable);
+    drawable.setParent(this);
   }
 
   /// Update bubble size.
@@ -99,13 +99,10 @@ class BubbleContainer extends Drawable {
   }
 
   @override
-  void drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, double x, double y) {
-    context.drawImage(
-      src,
-      _horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff,
-      _verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y,
-    );
-  }
+  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(
+        _horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff,
+        _verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y,
+      );
 
   @override
   bool needsRepaint() => false;
