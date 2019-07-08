@@ -39,7 +39,8 @@ class BubbleContainer extends Drawable {
 
   VerticalArrowOrientation _verticalArrowOrientation;
   HorizontalArrowOrientation _horizontalArrowOrientation;
-  double _horizontalFreeDiff = 0;
+
+  double _horizontalFreeDiff;
 
   RoundRectangle _roundRect = RoundRectangle(
     color: Colors.BLACK,
@@ -70,11 +71,6 @@ class BubbleContainer extends Drawable {
 
   @override
   void draw() {
-    _determineArrowOrientation(
-      x: lastPassXOffset,
-      y: lastPassYOffset,
-    );
-
     _roundRect.render(
         ctx,
         Rectangle<double>(
@@ -99,10 +95,16 @@ class BubbleContainer extends Drawable {
   }
 
   @override
-  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(
-        _horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff,
-        _verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y,
-      );
+  Point<double> calculateRenderingPosition(double x, double y) {
+    if (isInvalid) {
+      _determineArrowOrientation(x: x, y: y); // Recalculate the arrow position
+    }
+
+    return Point<double>(
+      _horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff,
+      _verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y,
+    );
+  }
 
   @override
   bool needsRepaint() => false;

@@ -94,9 +94,12 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   int _packetPosition = 0;
 
   BubbleContainer _infoBubble;
+  Completer _infoBubbleCompleter;
+  TimedButton _infoBubbleTimedButton;
   double _infoBubblePosIndex;
   bool _showBubbles = false;
   int _currentInfoBubbleID = 0;
+  bool _autoSkipBubbles = true;
 
   List<Point<double>> _relativeRelayNodeCoordinates;
 
@@ -234,20 +237,28 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   /// Start the packet transition animation.
   void _startPacketTransitionAnimation() async {
     if (_showBubbles) {
-      await _showBubble(
-        "Daten werden als sogenannte \"Cells\" gesendet, welche 512 Byte Einheiten darstellen und aus Header & Payload bestehen.",
-        0,
-      );
+      try {
+        await _showBubble(
+          "Daten werden als sogenannte \"Cells\" gesendet, welche 512 Byte Einheiten darstellen und aus Header & Payload bestehen.",
+          0,
+        );
+      } catch (e) {
+        return;
+      }
     }
 
-    await Future.wait([
-      _animatePacketInitialization(),
-      if (_showBubbles)
-        _showBubble(
-          "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
-          0,
-        ),
-    ]);
+    try {
+      await Future.wait([
+        _animatePacketInitialization(),
+        if (_showBubbles)
+          _showBubble(
+            "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+            0,
+          ),
+      ]);
+    } catch (e) {
+      return;
+    }
 
     _packetTransitionAnimation.start();
     invalidate();
@@ -599,17 +610,25 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       invalidate();
 
       if (_showBubbles && _packetPosition == 1) {
-        await _showBubble(
-          "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
-          _packetPosition.toDouble(),
-        );
+        try {
+          await _showBubble(
+            "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
+            _packetPosition.toDouble(),
+          );
+        } catch (e) {
+          return;
+        }
 
         _packetTransitionAnimation.start();
       } else if (_showBubbles && _packetPosition == _route.length) {
-        await _showBubble(
-          "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
-          _packetPosition.toDouble(),
-        );
+        try {
+          await _showBubble(
+            "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
+            _packetPosition.toDouble(),
+          );
+        } catch (e) {
+          return;
+        }
 
         _packetTransitionAnimation.start();
       } else {
@@ -619,10 +638,14 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       _packetTransitionAnimation.reverse(); // Reverse transition direction
 
       if (_showBubbles) {
-        await _showBubble(
-          "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
-          (_route.length + 1).toDouble(),
-        );
+        try {
+          await _showBubble(
+            "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
+            (_route.length + 1).toDouble(),
+          );
+        } catch (e) {
+          return;
+        }
 
         _packetTransitionAnimation.start();
       } else {
@@ -666,17 +689,24 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
     Duration toWait = _bubbleDurationPerCharacter * text.length;
 
-    final completer = Completer();
+    _infoBubbleCompleter = Completer();
     Action end = () {
       if (_currentInfoBubbleID == id) {
         _infoBubble = null;
+        _infoBubbleTimedButton = null;
         invalidate();
       }
 
-      if (!completer.isCompleted) {
-        completer.complete();
+      if (!_infoBubbleCompleter.isCompleted) {
+        _infoBubbleCompleter.complete();
       }
     };
+
+    _infoBubbleTimedButton = TimedButton(
+      text: "Weiter...",
+      duration: toWait,
+      action: end,
+    );
 
     _infoBubblePosIndex = posIndex;
     _infoBubble = BubbleContainer(
@@ -690,24 +720,29 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
             color: Colors.WHITE,
             wrapAtLength: 30,
           ),
-          TimedButton(
-            text: "Weiter...",
-            duration: toWait,
-            action: end,
-          ),
+          _infoBubbleTimedButton,
         ],
       ),
     )..color = Color.opacity(Colors.BLACK, 0.6);
 
+    if (autoSkipBubbles) {
+      _infoBubbleTimedButton.start();
+    }
+
     invalidate();
 
-    return completer.future;
+    return _infoBubbleCompleter.future;
   }
 
   /// Hide the bubble (if it is currently shown).
   void _hideBubble() {
     _currentInfoBubbleID = -1;
     _infoBubble = null;
+    _infoBubbleTimedButton = null;
+
+    if (_infoBubbleCompleter != null && !_infoBubbleCompleter.isCompleted) {
+      _infoBubbleCompleter.completeError(Exception("Bubble has been cancelled"));
+    }
   }
 
   @override
@@ -721,4 +756,18 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
   /// The maximum route length.
   int get maxRouteLength => _maxRouteLength;
+
+  bool get autoSkipBubbles => _autoSkipBubbles;
+
+  set autoSkipBubbles(bool value) {
+    _autoSkipBubbles = value;
+
+    if (_infoBubbleTimedButton != null) {
+      if (value) {
+        _infoBubbleTimedButton.start();
+      } else {
+        _infoBubbleTimedButton.reset();
+      }
+    }
+  }
 }

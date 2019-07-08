@@ -80,8 +80,11 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   bool _showHelpBubbles = false;
 
   BubbleContainer _infoBubble;
+  Completer _infoBubbleCompleter;
+  TimedButton _infoBubbleTimedButton;
   Point<double> _infoBubblePosition;
   int _currentInfoBubbleID = 0;
+  bool _autoSkipBubbles = true;
 
   List<int> _introductionPoints = List<int>();
 
@@ -109,15 +112,26 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     invalidate();
   }
 
+  /// Reset the animation.
+  void _resetAnimation() {
+    _hideBubble();
+  }
+
   Future<void> start(bool showHelpBubbles) async {
+    _resetAnimation();
+
     _showHelpBubbles = showHelpBubbles;
 
     if (_showHelpBubbles) {
-      await _showBubble(
-        text:
-            "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
-        position: _serviceCoordinates,
-      );
+      try {
+        await _showBubble(
+          text:
+              "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
+          position: _serviceCoordinates,
+        );
+      } catch (e) {
+        return;
+      }
     }
 
     _oldRelayNodeIndicesToHighlight.clear();
@@ -141,27 +155,40 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _relayNodeHighlightAnimation.start();
 
     if (_showHelpBubbles) {
-      await _showBubble(
-        text:
-            "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
-        position: _relayNodeCoordinates[_introductionPoints.first],
-      );
+      try {
+        await _showBubble(
+          text:
+              "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
+          position: _relayNodeCoordinates[_introductionPoints.first],
+        );
+      } catch (e) {
+        return;
+      }
     }
 
     if (_showHelpBubbles) {
-      await _showBubble(
-        text:
-            "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
-        position: _serviceCoordinates,
-      );
+      try {
+        await _showBubble(
+          text:
+              "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
+          position: _serviceCoordinates,
+        );
+      } catch (e) {
+        return;
+      }
     }
 
     _serviceInitAnimation.start();
   }
 
-  void test() {
+  Future<void> test() async {
     // TODO Remove when no more needed
-    _showBubble(text: "Hallo Welt!", position: Point<double>(100.5, 100.5));
+    try {
+      _showBubble(text: "Hallo Welt!", position: Point<double>(size.width / 2, size.height / 2));
+    } catch (e) {
+      print("WARNING: ${e.toString()}");
+      return;
+    }
   }
 
   void _setupAnimations() {
@@ -174,11 +201,15 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       curve: Curves.easeInOutCubic,
       duration: Duration(seconds: 6),
       onEnd: (_) async {
-        await _showBubble(
-          text:
-              "Nun kann ein Client, welcher den Hidden Service nutzen will, den Hidden Service Descriptor von der Distributed Hash Table mit Hilfe der \".onion\" Adresse abfragen.",
-          position: _hostCoordinates,
-        );
+        try {
+          await _showBubble(
+            text:
+                "Nun kann ein Client, welcher den Hidden Service nutzen will, den Hidden Service Descriptor von der Distributed Hash Table mit Hilfe der \".onion\" Adresse abfragen.",
+            position: _hostCoordinates,
+          );
+        } catch (e) {
+          return;
+        }
 
         _hiddenServiceDescriptorRequestAnimation.start();
       },
@@ -188,10 +219,14 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       curve: Curves.easeInOutCubic,
       duration: Duration(seconds: 6),
       onEnd: (_) async {
-        await _showBubble(
-          text: "Nun kennt der Client die Introduction Points & den Public Key des Hidden Service.",
-          position: _hostCoordinates,
-        );
+        try {
+          await _showBubble(
+            text: "Nun kennt der Client die Introduction Points & den Public Key des Hidden Service.",
+            position: _hostCoordinates,
+          );
+        } catch (e) {
+          return;
+        }
 
         // TODO Next animation step
       },
@@ -399,17 +434,24 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     Duration toWait = _bubbleDurationPerCharacter * text.length;
 
-    final completer = Completer();
+    _infoBubbleCompleter = Completer();
     Action end = () {
       if (_currentInfoBubbleID == id) {
         _infoBubble = null;
+        _infoBubbleTimedButton = null;
         invalidate();
       }
 
-      if (!completer.isCompleted) {
-        completer.complete();
+      if (!_infoBubbleCompleter.isCompleted) {
+        _infoBubbleCompleter.complete();
       }
     };
+
+    _infoBubbleTimedButton = TimedButton(
+      text: "Weiter...",
+      duration: toWait,
+      action: end,
+    );
 
     _infoBubblePosition = position;
     _infoBubble = BubbleContainer(
@@ -423,17 +465,42 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
             color: Colors.WHITE,
             wrapAtLength: 30,
           ),
-          TimedButton(
-            text: "Weiter...",
-            duration: toWait,
-            action: end,
-          ),
+          _infoBubbleTimedButton,
         ],
       ),
     )..color = Color.opacity(Colors.BLACK, 0.6);
 
+    if (autoSkipBubbles) {
+      _infoBubbleTimedButton.start();
+    }
+
     invalidate();
 
-    return completer.future;
+    return _infoBubbleCompleter.future;
+  }
+
+  /// Hide the bubble (if it is currently shown).
+  void _hideBubble() {
+    _currentInfoBubbleID = -1;
+    _infoBubble = null;
+    _infoBubbleTimedButton = null;
+
+    if (_infoBubbleCompleter != null && !_infoBubbleCompleter.isCompleted) {
+      _infoBubbleCompleter.completeError(Exception("Bubble has been cancelled"));
+    }
+  }
+
+  bool get autoSkipBubbles => _autoSkipBubbles;
+
+  set autoSkipBubbles(bool value) {
+    _autoSkipBubbles = value;
+
+    if (_infoBubbleTimedButton != null) {
+      if (value) {
+        _infoBubbleTimedButton.start();
+      } else {
+        _infoBubbleTimedButton.reset();
+      }
+    }
   }
 }

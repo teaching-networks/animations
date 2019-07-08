@@ -18,7 +18,13 @@
 
 	<li class="labeled">
 		<label>Einstellungen</label>
-		<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
+		<div>
+			<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
+		</div>
+		<div>
+			<material-toggle [(checked)]="autoSkipBubbles"
+							 label="Automatisch weiter"></material-toggle>
+		</div>
 	</li>
 
 </template>

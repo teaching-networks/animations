@@ -80,8 +80,7 @@ class TimedButton extends Drawable implements MouseListener {
             duration: duration,
             onEnd: (timestamp) {
               action();
-            })
-          ..start(),
+            }),
         _roundRect = RoundRectangle(
           color: color,
           paintMode: PaintMode.FILL,
@@ -181,6 +180,18 @@ class TimedButton extends Drawable implements MouseListener {
   void _onButtonClicked() {
     _timerAnimation.reset();
     action();
+
+    invalidate();
+  }
+
+  /// Start the timer.
+  void start() {
+    _timerAnimation.start();
+  }
+
+  /// Reset the timer.
+  void reset() {
+    _timerAnimation.reset();
 
     invalidate();
   }

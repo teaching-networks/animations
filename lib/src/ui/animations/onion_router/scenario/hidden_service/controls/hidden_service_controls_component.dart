@@ -47,4 +47,10 @@ class HiddenServiceControlsComponent implements ControlsComponent {
   void test() {
     _scenario.test();
   }
+
+  bool get autoSkipBubbles => _scenario.autoSkipBubbles;
+
+  set autoSkipBubbles(bool value) {
+    _scenario.autoSkipBubbles = value;
+  }
 }

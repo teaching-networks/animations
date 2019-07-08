@@ -64,4 +64,10 @@ class InternetServiceControlsComponent implements ControlsComponent {
     currentRouteLength = newRouteLength;
     _scenario.reroute(routeLength: newRouteLength);
   }
+
+  bool get autoSkipBubbles => _scenario.autoSkipBubbles;
+
+  set autoSkipBubbles(bool value) {
+    _scenario.autoSkipBubbles = value;
+  }
 }
