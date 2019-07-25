@@ -36,4 +36,10 @@ class ImageInfo {
       return element;
     }
   }
+
+  /// Get the loaded image (if loaded yet, otherwise null).
+  CanvasImageSource get image => _cachedInstances[path];
+
+  /// Check whether the image is loaded yet.
+  bool get loaded => _cachedInstances[path] != null;
 }

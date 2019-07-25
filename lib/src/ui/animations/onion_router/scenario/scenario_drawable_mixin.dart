@@ -32,6 +32,7 @@ mixin ScenarioDrawable {
     List<int> indicesToHighlight, // Node indices to highlight
     List<int> oldIndicesToHighlight, // Used to animate the indices to highlight change
     Anim highlightAnimation,
+    Map<int, NodeHighlightOptions> highlightOptions = const {},
   }) {
     if (nodeCoordinates == null || img == null) {
       return;
@@ -111,10 +112,12 @@ mixin ScenarioDrawable {
           for (int i in sameIndices) {
             Point<double> point = nodeCoordinates[i];
 
+            final imageInfo = highlightOptions[i]?.replacementImageInfo ?? imgInfo;
+
             final newBounds = drawable.layoutImage(
               width: iW * 2,
               height: iH * 2,
-              aspectRatio: imgInfo.aspectRatio,
+              aspectRatio: imageInfo.aspectRatio,
               x: x + point.x * w - iW,
               y: y + point.y * h - iH,
               mode: ImageDrawMode.FILL,
@@ -124,7 +127,7 @@ mixin ScenarioDrawable {
             bounds[i] = newBounds;
 
             drawable.ctx.drawImageToRect(
-              img,
+              imageInfo.image,
               newBounds,
             );
           }
@@ -174,10 +177,12 @@ mixin ScenarioDrawable {
         for (int i in growIndices) {
           Point<double> point = nodeCoordinates[i];
 
+          final imageInfo = highlightOptions[i]?.replacementImageInfo ?? imgInfo;
+
           final newBounds = drawable.layoutImage(
             width: growWidth,
             height: growHeight,
-            aspectRatio: imgInfo.aspectRatio,
+            aspectRatio: imageInfo.aspectRatio,
             x: x + point.x * w - growWidth / 2,
             y: y + point.y * h - growHeight / 2,
             mode: ImageDrawMode.FILL,
@@ -187,7 +192,7 @@ mixin ScenarioDrawable {
           bounds[i] = newBounds;
 
           drawable.ctx.drawImageToRect(
-            img,
+            imageInfo.image,
             newBounds,
           );
         }
@@ -198,10 +203,12 @@ mixin ScenarioDrawable {
         for (int i in indicesToHighlight) {
           Point<double> point = nodeCoordinates[i];
 
+          final imageInfo = highlightOptions[i]?.replacementImageInfo ?? imgInfo;
+
           final newBounds = drawable.layoutImage(
             width: iW * 2,
             height: iH * 2,
-            aspectRatio: imgInfo.aspectRatio,
+            aspectRatio: imageInfo.aspectRatio,
             x: x + point.x * w - iW,
             y: y + point.y * h - iH,
             mode: ImageDrawMode.FILL,
@@ -211,11 +218,23 @@ mixin ScenarioDrawable {
           bounds[i] = newBounds;
 
           drawable.ctx.drawImageToRect(
-            img,
+            imageInfo.image,
             newBounds,
           );
         }
       }
     }
   }
+}
+
+/// Options for highlighting nodes.
+class NodeHighlightOptions {
+  /// Image info for the replacement image.
+  /// Will replace the default image.
+  final ImageInfo replacementImageInfo;
+
+  /// Create highlight options for a node.
+  NodeHighlightOptions({
+    this.replacementImageInfo,
+  });
 }

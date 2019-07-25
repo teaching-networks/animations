@@ -22,7 +22,6 @@ import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
-import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:meta/meta.dart';
 
@@ -41,21 +40,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   static const Duration _bubbleDurationPerCharacter = Duration(milliseconds: 50);
 
   static Random _rng = Random();
-
-  ImageInfo _hostImageInfo;
-  CanvasImageSource _hostImage;
-
-  ImageInfo _routerImageInfo;
-  CanvasImageSource _routerImage;
-
-  ImageInfo _serviceImageInfo;
-  CanvasImageSource _serviceImage;
-
-  ImageInfo _databaseImageInfo;
-  CanvasImageSource _databaseImage;
-
-  ImageInfo _scrollImageInfo;
-  CanvasImageSource _scrollImage;
 
   Rectangle<double> _hostBounds;
   Point<double> _hostCoordinates;
@@ -76,6 +60,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   Anim _relayNodeHighlightAnimation;
   Anim _serviceInitAnimation;
   Anim _hiddenServiceDescriptorRequestAnimation;
+  Anim _cookieFromClientTransmissionAnimation;
 
   bool _showHelpBubbles = false;
 
@@ -86,7 +71,9 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   int _currentInfoBubbleID = 0;
   bool _autoSkipBubbles = true;
 
+  List<int> _highlightedRelayNodes = List<int>();
   List<int> _introductionPoints = List<int>();
+  int _rendezvousPoint;
 
   /// Create service.
   HiddenServiceDrawable() {
@@ -135,11 +122,13 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     }
 
     _oldRelayNodeIndicesToHighlight.clear();
-    for (int i in _introductionPoints) {
+    for (int i in _highlightedRelayNodes) {
       _oldRelayNodeIndicesToHighlight.add(i);
     }
 
+    _highlightedRelayNodes.clear();
     _introductionPoints.clear();
+    _rendezvousPoint = null;
     Set<int> usedIndices = Set<int>();
     for (int i = 0; i < _introductionPointCount; i++) {
       int newIndex = _rng.nextInt(_relayNodeCoordinates.length);
@@ -148,6 +137,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         i--;
       } else {
         _introductionPoints.add(newIndex);
+        _highlightedRelayNodes.add(newIndex);
         usedIndices.add(newIndex);
       }
     }
@@ -159,7 +149,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         await _showBubble(
           text:
               "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
-          position: _relayNodeCoordinates[_introductionPoints.first],
+          position: _relayNodeCoordinates[_highlightedRelayNodes.first],
         );
       } catch (e) {
         return;
@@ -181,21 +171,26 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _serviceInitAnimation.start();
   }
 
-  Future<void> test() async {
-    // TODO Remove when no more needed
-    try {
-      _showBubble(text: "Hallo Welt!", position: Point<double>(size.width / 2, size.height / 2));
-    } catch (e) {
-      print("WARNING: ${e.toString()}");
-      return;
-    }
-  }
-
   void _setupAnimations() {
     _relayNodeHighlightAnimation = AnimHelper(
-      curve: Curves.easeInOutCubic,
-      duration: Duration(seconds: 1),
-    );
+        curve: Curves.easeInOutCubic,
+        duration: Duration(seconds: 1),
+        onEnd: (_) async {
+          if (_rendezvousPoint != null) {
+            // Start the cookie transmission from client to the rendezvous point
+            try {
+              await _showBubble(
+                text:
+                    "Damit sich der Hidden Service später beim Rendezvous Point authentifizieren kann, generiert der Client ein One-Time-Secret/Cookie, der dem Rendezvous Point mitgeteilt wird.",
+                position: _relayNodeCoordinates[_rendezvousPoint],
+              );
+            } catch (e) {
+              return;
+            }
+
+            _cookieFromClientTransmissionAnimation.start();
+          }
+        });
 
     _serviceInitAnimation = AnimHelper(
       curve: Curves.easeInOutCubic,
@@ -228,26 +223,47 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
           return;
         }
 
-        // TODO Next animation step
+        // Choose rendezvous point and highlight it
+        do {
+          _rendezvousPoint = _rng.nextInt(_relativeRelayNodeCoordinates.length);
+        } while (_introductionPoints.contains(_rendezvousPoint));
+
+        try {
+          await _showBubble(
+            text: "Der Client baut einen Circuit zu einem beliebigen Relay Node auf, mit der Bitte als Rendezvous Point (RP) zu agieren",
+            position: _relayNodeCoordinates[_rendezvousPoint],
+          );
+        } catch (e) {
+          return;
+        }
+
+        _oldRelayNodeIndicesToHighlight.clear();
+        for (int i in _introductionPoints) {
+          _oldRelayNodeIndicesToHighlight.add(i);
+        }
+        _highlightedRelayNodes.add(_rendezvousPoint);
+
+        _relayNodeHighlightAnimation.start();
+      },
+    );
+
+    _cookieFromClientTransmissionAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(seconds: 3),
+      onEnd: (_) async {
+        // TODO
       },
     );
   }
 
   Future<void> _loadImages() async {
-    _hostImageInfo = Images.hostIconImage;
-    _hostImage = await _hostImageInfo.load();
-
-    _serviceImageInfo = Images.serverImage;
-    _serviceImage = await _serviceImageInfo.load();
-
-    _routerImageInfo = Images.routerIconImage;
-    _routerImage = await _routerImageInfo.load();
-
-    _databaseImageInfo = Images.database;
-    _databaseImage = await _databaseImageInfo.load();
-
-    _scrollImageInfo = Images.scroll;
-    _scrollImage = await _scrollImageInfo.load();
+    await Images.hostIconImage.load();
+    await Images.serverImage.load();
+    await Images.routerIconImage.load();
+    await Images.database.load();
+    await Images.scroll.load();
+    await Images.blueRouter.load();
+    await Images.cookie.load();
   }
 
   @override
@@ -274,7 +290,33 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     xOffset += cellW * (columns - 2);
     _drawServiceAndDatabase(Rectangle<double>(xOffset, cellY, cellW, cellH));
 
+    _drawCircuitConnections();
+
+    if (_serviceInitAnimation.running) {
+      _drawServiceInit();
+    } else if (_hiddenServiceDescriptorRequestAnimation.running) {
+      _drawHiddenServiceDescriptorRequest();
+    } else if (_cookieFromClientTransmissionAnimation.running) {
+      _drawCookieTransmission(_hostCoordinates + Point<double>(_hostBounds.width / 2, 0),
+          _relayNodeCoordinates[_rendezvousPoint] - Point<double>(_relayNodeBounds[_rendezvousPoint].width / 2, 0));
+    }
+
     _drawInfoBubble();
+  }
+
+  void _drawCookieTransmission(Point<double> from, Point<double> to) {
+    Point<double> pos = from + (to - from) * _cookieFromClientTransmissionAnimation.progress;
+
+    double size = window.devicePixelRatio * 60;
+
+    drawImageOnCanvas(
+      Images.cookie.image,
+      width: size,
+      height: size,
+      aspectRatio: Images.cookie.aspectRatio,
+      x: pos.x - size / 2,
+      y: pos.y - size / 2,
+    );
   }
 
   void _drawInfoBubble() {
@@ -285,35 +327,84 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _infoBubble.render(ctx, lastPassTimestamp, x: _infoBubblePosition.x, y: _infoBubblePosition.y);
   }
 
+  void _drawCircuitConnections() {
+    setStrokeColor(Color.opacity(Colors.GREY_GREEN, 0.6));
+    ctx.lineWidth = window.devicePixelRatio * 2;
+
+    for (final i in _introductionPoints) {
+      _drawCircuitConnection(Point<double>(_serviceCoordinates.x - _serviceBounds.width / 2 - 10, _serviceCoordinates.y),
+          Point<double>(_relayNodeCoordinates[i].x + _relayNodeBounds[i].width / 2, _relayNodeCoordinates[i].y));
+    }
+
+    if (_rendezvousPoint != null) {
+      setStrokeColor(Color.opacity(Colors.SPACE_BLUE, 0.6));
+
+      _drawCircuitConnection(Point<double>(_hostCoordinates.x + _hostBounds.width / 2 + 10, _hostCoordinates.y),
+          Point<double>(_relayNodeCoordinates[_rendezvousPoint].x - _relayNodeBounds[_rendezvousPoint].width / 2, _relayNodeCoordinates[_rendezvousPoint].y));
+    }
+  }
+
+  void _drawCircuitConnection(Point<double> start, Point<double> end) {
+    ctx.lineCap = "round";
+
+    Point<double> mid1 = start + (end - start) * 0.3;
+    Point<double> mid2 = start + (end - start) * 0.7;
+
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(mid1.x, mid1.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.setLineDash([2, 8]);
+    ctx.moveTo(mid1.x, mid1.y);
+    ctx.lineTo(mid2.x, mid2.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.moveTo(mid2.x, mid2.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  }
+
   /// Draw the scenario nodes (relay nodes or onion routers).
   void _drawNodes(Rectangle<double> rect) {
-    if (_relativeRelayNodeCoordinates == null || _routerImage == null) {
+    if (_relativeRelayNodeCoordinates == null || !Images.routerIconImage.loaded || !Images.blueRouter.loaded) {
       return;
+    }
+
+    Map<int, NodeHighlightOptions> highlightOptions = {};
+    if (_rendezvousPoint != null) {
+      highlightOptions[_rendezvousPoint] = NodeHighlightOptions(
+        replacementImageInfo: Images.blueRouter,
+      );
     }
 
     drawNodes(
       this,
       rect,
       _relativeRelayNodeCoordinates,
-      _routerImage,
-      _routerImageInfo,
-      indicesToHighlight: _introductionPoints,
+      Images.routerIconImage.image,
+      Images.routerIconImage,
+      indicesToHighlight: _highlightedRelayNodes,
       oldIndicesToHighlight: _oldRelayNodeIndicesToHighlight,
       highlightAnimation: _relayNodeHighlightAnimation,
       coordinates: _relayNodeCoordinates,
       bounds: _relayNodeBounds,
+      highlightOptions: highlightOptions,
     );
   }
 
   /// Draw the host icon.
   void _drawHost(Rectangle<double> rect) {
-    if (_hostImage == null) {
+    if (!Images.hostIconImage.loaded) {
       return;
     }
 
     Rectangle<double> bounds = drawImageOnCanvas(
-      _hostImage,
-      aspectRatio: _hostImageInfo.aspectRatio,
+      Images.hostIconImage.image,
+      aspectRatio: Images.hostIconImage.aspectRatio,
       width: rect.width,
       height: rect.height,
       x: rect.left,
@@ -328,13 +419,13 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   /// Draw the service icon.
   void _drawServiceAndDatabase(Rectangle<double> rect) {
-    if (_serviceImage == null || _databaseImage == null) {
+    if (!Images.serverImage.loaded || !Images.database.loaded) {
       return;
     }
 
     Rectangle<double> bounds = drawImageOnCanvas(
-      _serviceImage,
-      aspectRatio: _serviceImageInfo.aspectRatio,
+      Images.serverImage.image,
+      aspectRatio: Images.serverImage.aspectRatio,
       width: rect.width * 0.75,
       height: rect.height,
       x: rect.left + rect.width * 0.125,
@@ -347,8 +438,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _serviceBounds = bounds;
 
     bounds = drawImageOnCanvas(
-      _databaseImage,
-      aspectRatio: _databaseImageInfo.aspectRatio,
+      Images.database.image,
+      aspectRatio: Images.database.aspectRatio,
       width: rect.width * 0.5,
       height: rect.height,
       x: rect.left + rect.width * 0.25,
@@ -359,12 +450,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     _databaseCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
     _databaseBounds = bounds;
-
-    if (_serviceInitAnimation.running) {
-      _drawServiceInit();
-    } else if (_hiddenServiceDescriptorRequestAnimation.running) {
-      _drawHiddenServiceDescriptorRequest();
-    }
   }
 
   /// Draw a scroll transfer from the passed two points.
@@ -390,8 +475,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     ctx.globalAlpha = opacity;
 
     drawImageOnCanvas(
-      _scrollImage,
-      aspectRatio: _scrollImageInfo.aspectRatio,
+      Images.scroll.image,
+      aspectRatio: Images.scroll.aspectRatio,
       width: curSize,
       height: curSize,
       x: curPos.x - curSize / 2,
@@ -413,13 +498,18 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   }
 
   @override
-  bool needsRepaint() => _relayNodeHighlightAnimation.running || _serviceInitAnimation.running || _hiddenServiceDescriptorRequestAnimation.running;
+  bool needsRepaint() =>
+      _relayNodeHighlightAnimation.running ||
+      _serviceInitAnimation.running ||
+      _hiddenServiceDescriptorRequestAnimation.running ||
+      _cookieFromClientTransmissionAnimation.running;
 
   @override
   void update(num timestamp) {
     _relayNodeHighlightAnimation.update(timestamp);
     _serviceInitAnimation.update(timestamp);
     _hiddenServiceDescriptorRequestAnimation.update(timestamp);
+    _cookieFromClientTransmissionAnimation.update(timestamp);
   }
 
   @override
