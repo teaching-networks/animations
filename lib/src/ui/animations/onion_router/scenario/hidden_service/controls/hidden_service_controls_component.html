@@ -1,24 +1,23 @@
 <template [ngIf]="hasScenario">
 
-	<li class="labeled" style="text-align: center">
-		<material-button raised (click)="start()">
-			<material-icon icon="play_arrow"></material-icon>
-		</material-button>
-	</li>
+    <li class="labeled" style="text-align: center">
+        <material-button raised (click)="start()">
+            <material-icon icon="play_arrow"></material-icon>
+        </material-button>
+    </li>
 
-	<li class="exception">
-		<hr>
-	</li>
+    <li class="exception">
+        <hr>
+    </li>
 
-	<li class="labeled">
-		<label>Einstellungen</label>
-		<div>
-			<material-toggle [(checked)]="showHelpBubbles" label="Hilfen anzeigen"></material-toggle>
-		</div>
-		<div>
-			<material-toggle [(checked)]="autoSkipBubbles"
-							 label="Automatisch weiter"></material-toggle>
-		</div>
-	</li>
+    <li class="labeled">
+        <label>{{ "onion-router.settings" | i18n }}</label>
+        <div>
+            <material-toggle [(checked)]="showHelpBubbles" [label]="showHelpMsg"></material-toggle>
+        </div>
+        <div>
+            <material-toggle [(checked)]="autoSkipBubbles" [label]="skipAuto"></material-toggle>
+        </div>
+    </li>
 
 </template>

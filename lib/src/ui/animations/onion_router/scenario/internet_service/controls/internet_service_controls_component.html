@@ -1,7 +1,7 @@
 <template [ngIf]="hasScenario">
 
 	<li class="labeled">
-		<label>Route</label>
+		<label>{{ "onion-router.route" | i18n }}</label>
 		<material-button raised (click)="reroute()">
 			<material-icon icon="link"></material-icon>
 			Tor Kanal wechseln
@@ -11,7 +11,7 @@
 	<li>
 				<span class="slider-panel">
 					<div>
-						Circuit Länge
+						{{ "onion-router.circuit-length" | i18n }}
 					</div>
 					<material-slider [min]="minRouteLength"
 									 [max]="maxRouteLength"
@@ -36,13 +36,13 @@
 	</li>
 
 	<li class="labeled">
-		<label>Einstellungen</label>
+		<label>{{ "onion-router.settings" | i18n }}</label>
 		<div>
-			<material-toggle [(checked)]="showHelpBubbles" label="Erklärungen anzeigen"></material-toggle>
+			<material-toggle [(checked)]="showHelpBubbles" [label]="showHelpMsg"></material-toggle>
 		</div>
 		<div>
 			<material-toggle [(checked)]="autoSkipBubbles"
-							 label="Automatisch weiter"></material-toggle>
+							 [label]="skipAuto"></material-toggle>
 		</div>
 	</li>
 

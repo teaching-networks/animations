@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/src/core/linker/component_factory.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/internet_service/controls/internet_service_controls_component.template.dart'
     as internetServiceControls;
@@ -117,8 +118,10 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   AnimHelper _tcpConnectionAnimation;
   AnimHelper _keyExchangeAnimation;
 
+  Message _name;
+
   /// Create the internet service drawable.
-  InternetServiceDrawable() {
+  InternetServiceDrawable(this._name) {
     _packet = EncryptedPacket(parent: this);
 
     _init();
@@ -142,7 +145,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   int get id => 1;
 
   @override
-  String get name => "Dienst im Internet geroutet";
+  String get name => _name?.toString() ?? "";
 
   /// Setup the animations needed by the scenario.
   void _setupAnimations() {

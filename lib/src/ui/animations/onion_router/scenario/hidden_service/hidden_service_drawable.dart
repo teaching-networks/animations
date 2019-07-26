@@ -3,6 +3,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/src/core/linker/component_factory.dart';
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service/controls/hidden_service_controls_component.template.dart'
     as hiddenServiceControls;
@@ -61,6 +62,11 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   Anim _serviceInitAnimation;
   Anim _hiddenServiceDescriptorRequestAnimation;
   Anim _cookieFromClientTransmissionAnimation;
+  Anim _cookieToServiceTransmissionAnimation;
+  Anim _cookieFromServiceTransmissionAnimation;
+  int _introductionPointToUse;
+  bool _fromClient = true;
+  bool _rendezvousPointConnectionEstablished = false;
 
   bool _showHelpBubbles = false;
 
@@ -75,8 +81,10 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   List<int> _introductionPoints = List<int>();
   int _rendezvousPoint;
 
+  Message _name;
+
   /// Create service.
-  HiddenServiceDrawable() {
+  HiddenServiceDrawable(this._name) {
     _init();
   }
 
@@ -84,7 +92,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   int get id => 2;
 
   @override
-  String get name => "Versteckter Dienst";
+  String get name => _name?.toString() ?? "";
 
   @override
   String toString() => name;
@@ -102,6 +110,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   /// Reset the animation.
   void _resetAnimation() {
     _hideBubble();
+    _rendezvousPointConnectionEstablished = false;
   }
 
   Future<void> start(bool showHelpBubbles) async {
@@ -176,7 +185,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         curve: Curves.easeInOutCubic,
         duration: Duration(seconds: 1),
         onEnd: (_) async {
-          if (_rendezvousPoint != null) {
+          if (_rendezvousPoint != null && _introductionPoints.isNotEmpty) {
             // Start the cookie transmission from client to the rendezvous point
             try {
               await _showBubble(
@@ -251,7 +260,70 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       curve: Curves.easeInOutCubic,
       duration: Duration(seconds: 3),
       onEnd: (_) async {
-        // TODO
+        try {
+          await _showBubble(
+            text:
+                "Schlussendlich muss der Client dem Service noch mitteilen, dass eine Verbindung über den Rendezvous Point gewünscht ist. Dazu wird eine „Introduce Message“ (IM) mit dem One-Time-Secret/Cookie & der Adresse des Rendezvous Point verschlüsselt (mit dem Public Key des Hidden Service) an einen der, im Hidden Service Descriptor aufgelisteten, Introduction Points gesendet.",
+            position: _hostCoordinates,
+          );
+        } catch (e) {
+          return;
+        }
+
+        // Choose introduction point to use
+        _introductionPointToUse = _rng.nextInt(_introductionPoints.length);
+
+        _cookieToServiceTransmissionAnimation.start();
+        _fromClient = true;
+      },
+    );
+
+    _cookieToServiceTransmissionAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(seconds: 3),
+      onEnd: (_) async {
+        if (_fromClient) {
+          _fromClient = false;
+          // Cookie is now at the introduction point. Start transmission to the service.
+          _cookieToServiceTransmissionAnimation.start();
+        } else {
+          try {
+            await _showBubble(
+              text:
+                  "Der Hidden Service hat das One-Time-Secret/Cookie erhalten, sowie die Information, welcher Rendezvous Point die Kommunikation zwischen Service & Client vermittelt. Zu letzterem wird nun ein Circuit aufgebaut & das One-Time-Secret/Cookie in einer „Rendezvous Message“ gesendet, um die Verbindung einzuleiten.",
+              position: _serviceCoordinates,
+            );
+          } catch (e) {
+            return;
+          }
+
+          _rendezvousPointConnectionEstablished = true;
+          _cookieFromServiceTransmissionAnimation.start();
+        }
+      },
+    );
+
+    _cookieFromServiceTransmissionAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(seconds: 3),
+      onEnd: (_) async {
+        try {
+          await _showBubble(
+            text: "Der Rendezvous Point kann anhand des mitgeschickten One-Time-Secrets/Cookies den anfragenden Client & Service zuordnen und verbinden.",
+            position: _relayNodeCoordinates[_rendezvousPoint],
+          );
+        } catch (e) {
+          return;
+        }
+
+        // Hide introduction points. Animation ended.
+        _oldRelayNodeIndicesToHighlight.clear();
+        for (final i in _highlightedRelayNodes) {
+          _oldRelayNodeIndicesToHighlight.add(i);
+        }
+        _introductionPoints.clear();
+        _highlightedRelayNodes = [_rendezvousPoint];
+        _relayNodeHighlightAnimation.start();
       },
     );
   }
@@ -298,14 +370,25 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       _drawHiddenServiceDescriptorRequest();
     } else if (_cookieFromClientTransmissionAnimation.running) {
       _drawCookieTransmission(_hostCoordinates + Point<double>(_hostBounds.width / 2, 0),
-          _relayNodeCoordinates[_rendezvousPoint] - Point<double>(_relayNodeBounds[_rendezvousPoint].width / 2, 0));
+          _relayNodeCoordinates[_rendezvousPoint] - Point<double>(_relayNodeBounds[_rendezvousPoint].width / 2, 0), _cookieFromClientTransmissionAnimation);
+    } else if (_cookieToServiceTransmissionAnimation.running) {
+      if (_fromClient) {
+        _drawCookieTransmission(_hostCoordinates + Point<double>(_hostBounds.width / 2, 0), _relayNodeCoordinates[_introductionPoints[_introductionPointToUse]],
+            _cookieToServiceTransmissionAnimation);
+      } else {
+        _drawCookieTransmission(_relayNodeCoordinates[_introductionPoints[_introductionPointToUse]],
+            _serviceCoordinates - Point<double>(_serviceBounds.width / 2, 0), _cookieToServiceTransmissionAnimation);
+      }
+    } else if (_cookieFromServiceTransmissionAnimation.running) {
+      _drawCookieTransmission(_serviceCoordinates - Point<double>(_serviceBounds.width / 2, 0),
+          _relayNodeCoordinates[_rendezvousPoint] + Point<double>(_relayNodeBounds[_rendezvousPoint].width / 2, 0), _cookieFromServiceTransmissionAnimation);
     }
 
     _drawInfoBubble();
   }
 
-  void _drawCookieTransmission(Point<double> from, Point<double> to) {
-    Point<double> pos = from + (to - from) * _cookieFromClientTransmissionAnimation.progress;
+  void _drawCookieTransmission(Point<double> from, Point<double> to, Anim animation) {
+    Point<double> pos = from + (to - from) * animation.progress;
 
     double size = window.devicePixelRatio * 60;
 
@@ -336,11 +419,24 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
           Point<double>(_relayNodeCoordinates[i].x + _relayNodeBounds[i].width / 2, _relayNodeCoordinates[i].y));
     }
 
-    if (_rendezvousPoint != null) {
-      setStrokeColor(Color.opacity(Colors.SPACE_BLUE, 0.6));
+    if (this._cookieToServiceTransmissionAnimation.running && _introductionPointToUse != null) {
+      Point<double> introPoint = _relayNodeCoordinates[_introductionPoints[_introductionPointToUse]];
+      Rectangle<double> introPointBounds = _relayNodeBounds[_introductionPoints[_introductionPointToUse]];
 
       _drawCircuitConnection(Point<double>(_hostCoordinates.x + _hostBounds.width / 2 + 10, _hostCoordinates.y),
+          Point<double>(introPoint.x - introPointBounds.width / 2, introPoint.y));
+    }
+
+    setStrokeColor(Color.opacity(Colors.SPACE_BLUE, 0.6));
+
+    if (_rendezvousPoint != null) {
+      _drawCircuitConnection(Point<double>(_hostCoordinates.x + _hostBounds.width / 2 + 10, _hostCoordinates.y),
           Point<double>(_relayNodeCoordinates[_rendezvousPoint].x - _relayNodeBounds[_rendezvousPoint].width / 2, _relayNodeCoordinates[_rendezvousPoint].y));
+    }
+
+    if (_rendezvousPointConnectionEstablished) {
+      _drawCircuitConnection(Point<double>(_serviceCoordinates.x - _serviceBounds.width / 2 - 10, _serviceCoordinates.y),
+          Point<double>(_relayNodeCoordinates[_rendezvousPoint].x + _relayNodeBounds[_rendezvousPoint].width / 2, _relayNodeCoordinates[_rendezvousPoint].y));
     }
   }
 
@@ -502,7 +598,9 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       _relayNodeHighlightAnimation.running ||
       _serviceInitAnimation.running ||
       _hiddenServiceDescriptorRequestAnimation.running ||
-      _cookieFromClientTransmissionAnimation.running;
+      _cookieFromClientTransmissionAnimation.running ||
+      _cookieToServiceTransmissionAnimation.running ||
+      _cookieFromServiceTransmissionAnimation.running;
 
   @override
   void update(num timestamp) {
@@ -510,6 +608,8 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _serviceInitAnimation.update(timestamp);
     _hiddenServiceDescriptorRequestAnimation.update(timestamp);
     _cookieFromClientTransmissionAnimation.update(timestamp);
+    _cookieToServiceTransmissionAnimation.update(timestamp);
+    _cookieFromServiceTransmissionAnimation.update(timestamp);
   }
 
   @override

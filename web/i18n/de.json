@@ -275,6 +275,14 @@
   "editor.preview": "Vorschau",
   "onion-router.name": "Onion Routing",
   "onion-router.short-description": "Multi-layer Prozess und versteckte Dienste",
-  "onion-router.description": "Beschreibung nicht verfügbar.",
-  "onion-router.credits": "-"
+  "onion-router.description": "Die Animation zeigt zwei verschiedene Szenarien beim Onion Routing. Die Kommunikation eines Clients zu im Internet gerouteten Servern & die Kommunikation eines Client zu einem „Hidden Service“.",
+  "onion-router.credits": "",
+  "onion-router.hidden-service": "Versteckter Dienst",
+  "onion-router.routed-service": "Dienst im Internet geroutet",
+  "onion-router.scenario-selection": "Szenario",
+  "onion-router.route": "Route",
+  "onion-router.circuit-length": "Circuit Länge",
+  "onion-router.settings": "Einstellungen",
+  "onion-router.show-help": "Hilfen zeigen",
+  "onion-router.auto-advance": "Automatisch weiter"
 }
