@@ -14,6 +14,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
 
@@ -152,7 +153,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     context.fillText(receiverLabel.toString(), 0.0, h - windowSize.height / 2);
 
     // Draw sender window array
-    _drawWindowArray(context, windowSize, _senderSpace, timestamp, (index) {
+    _drawWindowArray(context, true, windowSize, _senderSpace, timestamp, (index) {
       int timeout = null;
 
       if (isPaused && _timeoutLabelCache[index] != null) {
@@ -177,7 +178,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
     {
       context.translate(0.0, h - windowSize.height);
       // Draw receiver window array
-      _drawWindowArray(context, windowSize, _receiverSpace, timestamp);
+      _drawWindowArray(context, false, windowSize, _receiverSpace, timestamp);
     }
     context.restore();
 
@@ -217,7 +218,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Draw window array.
    */
-  void _drawWindowArray(CanvasRenderingContext2D context, Size size, WindowSpaceDrawable windowSpace, num timestamp, [LabelSupplier labelSupplier]) {
+  void _drawWindowArray(CanvasRenderingContext2D context, bool isSender, Size size, WindowSpaceDrawable windowSpace, num timestamp,
+      [LabelSupplier labelSupplier]) {
     double width = size.width / _length;
     double height = size.height;
     double slotWidth = width - SLOT_PADDING * 2;
@@ -229,6 +231,8 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
         context.translate(i * width + SLOT_PADDING, 0.0);
         Rectangle<double> r = new Rectangle(0.0, 0.0, slotWidth, height);
 
+        _packetPlaceRect.color =
+            isSender && packetSlots != null && i < packetSlots.length && packetSlots[i].activePackets.isNotEmpty ? Color.hex(0xFFBBBBBBB) : Colors.LIGHTER_GRAY;
         _packetPlaceRect.render(context, r, 0);
 
         // Draw label if any

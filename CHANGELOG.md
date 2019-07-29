@@ -8,7 +8,8 @@
 ### 2.1.0
 - Added onion router animation
 - New Drawing API for drawing on a HTML 2D Canvas
-- Fixed problems
+- "Sent, but not yet ACKed" Slots in the Go-Back-N Animation are now colored to differenciate them from unsent slots
+- Fixed minor bugs
 
 #### 2.0.1
 - Bugfixing for the reliable transmission animations
