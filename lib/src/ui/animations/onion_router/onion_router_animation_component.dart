@@ -51,8 +51,7 @@ class OnionRouterAnimationComponent extends AnimationComponentConnector implemen
     id: Animations.ID_COUNTER++,
     componentFactory: template.OnionRouterAnimationComponentNgFactory,
     baseTranslationKey: "onion-router",
-    previewImagePath: "",
-    // TODO
+    previewImagePath: "img/animation/preview/onion-router-preview.png",
     path: "onion-router",
     version: 2,
   );

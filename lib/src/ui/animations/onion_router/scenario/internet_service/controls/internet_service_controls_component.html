@@ -1,49 +1,49 @@
 <template [ngIf]="hasScenario">
 
-	<li class="labeled">
-		<label>{{ "onion-router.route" | i18n }}</label>
-		<material-button raised (click)="reroute()">
-			<material-icon icon="link"></material-icon>
-			{{ "onion-router.change-tor-circuit" | i18n }}
-		</material-button>
-	</li>
+    <li class="labeled" style="text-align: center">
+        <label>{{ "onion-router.route" | i18n }}</label>
+        <material-button raised (click)="reroute()">
+            <material-icon icon="link"></material-icon>
+            {{ "onion-router.change-tor-circuit" | i18n }}
+        </material-button>
+    </li>
 
-	<li>
+    <li>
 				<span class="slider-panel">
 					<div>
 						{{ "onion-router.circuit-length" | i18n }}
 					</div>
 					<material-slider [min]="minRouteLength"
-									 [max]="maxRouteLength"
-									 [step]="1"
-									 [value]="currentRouteLength"
-									 (valueChange)="changeRouteLength($event)">
+                                     [max]="maxRouteLength"
+                                     [step]="1"
+                                     [value]="currentRouteLength"
+                                     (valueChange)="changeRouteLength($event)">
 					</material-slider>
 					<div>
 						{{ currentRouteLength }}
 					</div>
 				</span>
-	</li>
+    </li>
 
-	<li class="labeled" style="text-align: center">
-		<material-button raised (click)="start()">
-			<material-icon icon="play_arrow"></material-icon>
-		</material-button>
-	</li>
+    <li class="labeled" style="text-align: center">
+        <material-button raised (click)="start()">
+            <material-icon icon="play_arrow"></material-icon>
+        </material-button>
+    </li>
 
-	<li class="exception">
-		<hr>
-	</li>
+    <li class="exception">
+        <hr>
+    </li>
 
-	<li class="labeled">
-		<label>{{ "onion-router.settings" | i18n }}</label>
-		<div>
-			<material-toggle [(checked)]="showHelpBubbles" [label]="showHelpMsg"></material-toggle>
-		</div>
-		<div>
-			<material-toggle [(checked)]="autoSkipBubbles"
-							 [label]="skipAuto"></material-toggle>
-		</div>
-	</li>
+    <li class="labeled" style="text-align: center">
+        <label>{{ "onion-router.settings" | i18n }}</label>
+        <div>
+            <material-toggle [(checked)]="showHelpBubbles" [label]="showHelpMsg"></material-toggle>
+        </div>
+        <div>
+            <material-toggle [(checked)]="autoSkipBubbles"
+                             [label]="skipAuto"></material-toggle>
+        </div>
+    </li>
 
 </template>
