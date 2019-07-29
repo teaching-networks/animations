@@ -5,6 +5,11 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 2.1.0
+- Added onion router animation
+- New Drawing API for drawing on a HTML 2D Canvas
+- Fixed problems
+
 #### 2.0.1
 - Bugfixing for the reliable transmission animations
 - Added notice regarding data privacy and imprint

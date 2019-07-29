@@ -60,7 +60,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
     color: Colors.SLATE_GREY,
     radiusSizeType: SizeType.PERCENT,
     paintMode: PaintMode.FILL,
-    radius: Edges.all(1.0),
+    radius: Edges.all(0.1),
   );
 
   /// Medium the peer is sending and listening on.
