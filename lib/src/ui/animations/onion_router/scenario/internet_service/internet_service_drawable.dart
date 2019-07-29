@@ -67,6 +67,8 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
   static Random _rng = Random();
 
+  final I18nService _i18n;
+
   ImageInfo _hostImageInfo;
   CanvasImageSource _hostImage;
 
@@ -119,10 +121,29 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   AnimHelper _keyExchangeAnimation;
 
   Message _name;
+  Message _circuitConnectingMsg;
+  Message _circuitEncryptingMsg;
+  Message _sendingDataMsg;
+  Message _circuitEncryptionMechanismMsg;
+  Message _decryptionMsg;
+  Message _exitORMsg;
+  Message _atServiceMsg;
+  Message _decryptionAtSenderMsg;
+  Message _continueMsg;
 
   /// Create the internet service drawable.
-  InternetServiceDrawable(this._name) {
+  InternetServiceDrawable(this._name, this._i18n) {
     _packet = EncryptedPacket(parent: this);
+
+    _circuitConnectingMsg = _i18n.get("onion-router.internet-service.circuit-connecting");
+    _circuitEncryptingMsg = _i18n.get("onion-router.internet-service.circuit-encrypting");
+    _sendingDataMsg = _i18n.get("onion-router.internet-service.sending-data");
+    _circuitEncryptionMechanismMsg = _i18n.get("onion-router.internet-service.onion-router-mechanism");
+    _decryptionMsg = _i18n.get("onion-router.internet-service.decryption");
+    _exitORMsg = _i18n.get("onion-router.internet-service.exit-or");
+    _atServiceMsg = _i18n.get("onion-router.internet-service.at-service");
+    _decryptionAtSenderMsg = _i18n.get("onion-router.internet-service.decryption-at-sender");
+    _continueMsg = _i18n.get("onion-router.continue");
 
     _init();
   }
@@ -215,7 +236,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
     if (_showBubbles) {
       _showBubble(
-        "Zwischen Host, Dienst & Relay Knoten (Onion Router (OR)) werden TCP/TLS Verbindungen aufgebaut. Hier nur vereinfacht dargestellt.",
+        _circuitConnectingMsg.toString(),
         0.5,
       );
     }
@@ -229,7 +250,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
     if (_showBubbles) {
       _showBubble(
-        "Zwischen dem Host und jedem Relay Knoten (OR) werden Schritt für Schritt symmetrische Schlüssel ausgetauscht.",
+        _circuitEncryptingMsg.toString(),
         0.5,
       );
     }
@@ -242,7 +263,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     if (_showBubbles) {
       try {
         await _showBubble(
-          "Daten werden als sogenannte \"Cells\" gesendet, welche 512 Byte Einheiten darstellen und aus Header & Payload bestehen.",
+          _sendingDataMsg.toString(),
           0,
         );
       } catch (e) {
@@ -255,7 +276,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
         _animatePacketInitialization(),
         if (_showBubbles)
           _showBubble(
-            "Für jeden Onion Router auf dem Weg zum Dienst wird das zu sendende Paket verschlüsselt. Folge: Nur der erste Onion Router kenn die Quell-IP und nur der letzte kennt die Ziel-IP.",
+            _circuitEncryptionMechanismMsg.toString(),
             0,
           ),
       ]);
@@ -615,7 +636,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       if (_showBubbles && _packetPosition == 1) {
         try {
           await _showBubble(
-            "Für jeden OR auf dem Weg vom Start zum Ziel wird nun das Paket einmal entschlüsselt.",
+            _decryptionMsg.toString(),
             _packetPosition.toDouble(),
           );
         } catch (e) {
@@ -626,7 +647,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       } else if (_showBubbles && _packetPosition == _route.length) {
         try {
           await _showBubble(
-            "Auf den unverschlüsselten Daten wird am Host ein Digest-Wert berechnet. Nun sind die Daten unverschlüsselt und der berechnete Digest-Wert passt zum Digest-Wert in der Cell. So erkennt der Relay-Knoten, dass er der Ausstiegsknoten ist.",
+            _exitORMsg.toString(),
             _packetPosition.toDouble(),
           );
         } catch (e) {
@@ -643,7 +664,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       if (_showBubbles) {
         try {
           await _showBubble(
-            "Der Dienst erhält die unverschlüsselten Daten. Man kann TLS verwenden, um den Datenverkehr vom letzten OR zum Dienst zu verschlüsseln.",
+            _atServiceMsg.toString(),
             (_route.length + 1).toDouble(),
           );
         } catch (e) {
@@ -672,7 +693,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     } else {
       if (_showBubbles) {
         _showBubble(
-          "Die Daten sind wieder verschlüsselt beim Absender angekommen. Nun können diese mit den symmetrischen Schlüsseln ${_route.length} mal entschlüsselt werden, um wieder die Originaldaten zu erhalten.",
+          _decryptionAtSenderMsg.toString(),
           0,
         );
       }
@@ -706,7 +727,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     };
 
     _infoBubbleTimedButton = TimedButton(
-      text: "Weiter...",
+      text: _continueMsg.toString(),
       duration: toWait,
       action: end,
     );

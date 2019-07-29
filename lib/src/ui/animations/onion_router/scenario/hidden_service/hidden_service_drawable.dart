@@ -48,7 +48,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   Rectangle<double> _serviceBounds;
   Point<double> _serviceCoordinates;
 
-  Rectangle<double> _databaseBounds;
   Point<double> _databaseCoordinates;
 
   List<Point<double>> _relativeRelayNodeCoordinates;
@@ -81,10 +80,35 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   List<int> _introductionPoints = List<int>();
   int _rendezvousPoint;
 
+  final I18nService _i18n;
+
   Message _name;
+  Message _continueMsg;
+  Message _serviceCreationMsg;
+  Message _introductionPointMsg;
+  Message _hiddenServiceDescriptorUploadMsg;
+  Message _oneTimeSecretMsg;
+  Message _requestHiddenServiceDescriptorMsg;
+  Message _descriptorResultMsg;
+  Message _rendezvousPointCircuitMsg;
+  Message _introduceMsg;
+  Message _rendezvousMsg;
+  Message _connectMsg;
 
   /// Create service.
-  HiddenServiceDrawable(this._name) {
+  HiddenServiceDrawable(this._name, this._i18n) {
+    _continueMsg = _i18n.get("onion-router.continue");
+    _serviceCreationMsg = _i18n.get("onion-router.hidden-service.create");
+    _introductionPointMsg = _i18n.get("onion-router.hidden-service.introduction-point-circuit");
+    _hiddenServiceDescriptorUploadMsg = _i18n.get("onion-router.hidden-service.hidden-service-descriptor-upload");
+    _oneTimeSecretMsg = _i18n.get("onion-router.hidden-service.one-time-secret");
+    _requestHiddenServiceDescriptorMsg = _i18n.get("onion-router.hidden-service.request-hidden-service-descriptor");
+    _descriptorResultMsg = _i18n.get("onion-router.hidden-service.descriptor-result");
+    _rendezvousPointCircuitMsg = _i18n.get("onion-router.hidden-service.rendezvous-point-circuit");
+    _introduceMsg = _i18n.get("onion-router.hidden-service.introduce-message");
+    _rendezvousMsg = _i18n.get("onion-router.hidden-service.rendezvous-message");
+    _connectMsg = _i18n.get("onion-router.hidden-service.connecting");
+
     _init();
   }
 
@@ -121,8 +145,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     if (_showHelpBubbles) {
       try {
         await _showBubble(
-          text:
-              "Der Dienstanbieter erzeugt ein Schlüsselpaar (Public / Private Key). Die Schlüssel identifizieren den Dienst. So ist der Hostname, unter dem der Service aufzufinden sein wird, der halbierte SHA-1 Hash des Public Keys (Base64 kodiert) mit Suffix \".onion\". Lediglich der Dienstanbieter hat den passenden Private Key.",
+          text: _serviceCreationMsg.toString(),
           position: _serviceCoordinates,
         );
       } catch (e) {
@@ -156,8 +179,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     if (_showHelpBubbles) {
       try {
         await _showBubble(
-          text:
-              "Es werden zu mehreren zufällig ausgewählten Relay Knoten Circuits aufgebaut, mit der Anfrage, als Introduction Point (IP) für den Dienst zu fungieren.",
+          text: _introductionPointMsg.toString(),
           position: _relayNodeCoordinates[_highlightedRelayNodes.first],
         );
       } catch (e) {
@@ -168,8 +190,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     if (_showHelpBubbles) {
       try {
         await _showBubble(
-          text:
-              "Der Service generiert einen \"Hidden Service Descriptor\", welcher aus Public Key, Introduction Points besteht & mit dem Private Key signiert ist. Dieser wird in einen dezentralen Verzeichnisdienst (Distributed Hash Table) des TOR-Netzwerks hochgeladen.",
+          text: _hiddenServiceDescriptorUploadMsg.toString(),
           position: _serviceCoordinates,
         );
       } catch (e) {
@@ -189,8 +210,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
             // Start the cookie transmission from client to the rendezvous point
             try {
               await _showBubble(
-                text:
-                    "Damit sich der Hidden Service später beim Rendezvous Point authentifizieren kann, generiert der Client ein One-Time-Secret/Cookie, der dem Rendezvous Point mitgeteilt wird.",
+                text: _oneTimeSecretMsg.toString(),
                 position: _relayNodeCoordinates[_rendezvousPoint],
               );
             } catch (e) {
@@ -207,8 +227,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       onEnd: (_) async {
         try {
           await _showBubble(
-            text:
-                "Nun kann ein Client, welcher den Hidden Service nutzen will, den Hidden Service Descriptor von der Distributed Hash Table mit Hilfe der \".onion\" Adresse abfragen.",
+            text: _requestHiddenServiceDescriptorMsg.toString(),
             position: _hostCoordinates,
           );
         } catch (e) {
@@ -225,7 +244,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       onEnd: (_) async {
         try {
           await _showBubble(
-            text: "Nun kennt der Client die Introduction Points & den Public Key des Hidden Service.",
+            text: _descriptorResultMsg.toString(),
             position: _hostCoordinates,
           );
         } catch (e) {
@@ -239,7 +258,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
         try {
           await _showBubble(
-            text: "Der Client baut einen Circuit zu einem beliebigen Relay Node auf, mit der Bitte als Rendezvous Point (RP) zu agieren",
+            text: _rendezvousPointCircuitMsg.toString(),
             position: _relayNodeCoordinates[_rendezvousPoint],
           );
         } catch (e) {
@@ -262,8 +281,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       onEnd: (_) async {
         try {
           await _showBubble(
-            text:
-                "Schlussendlich muss der Client dem Service noch mitteilen, dass eine Verbindung über den Rendezvous Point gewünscht ist. Dazu wird eine „Introduce Message“ (IM) mit dem One-Time-Secret/Cookie & der Adresse des Rendezvous Point verschlüsselt (mit dem Public Key des Hidden Service) an einen der, im Hidden Service Descriptor aufgelisteten, Introduction Points gesendet.",
+            text: _introduceMsg.toString(),
             position: _hostCoordinates,
           );
         } catch (e) {
@@ -289,8 +307,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
         } else {
           try {
             await _showBubble(
-              text:
-                  "Der Hidden Service hat das One-Time-Secret/Cookie erhalten, sowie die Information, welcher Rendezvous Point die Kommunikation zwischen Service & Client vermittelt. Zu letzterem wird nun ein Circuit aufgebaut & das One-Time-Secret/Cookie in einer „Rendezvous Message“ gesendet, um die Verbindung einzuleiten.",
+              text: _rendezvousMsg.toString(),
               position: _serviceCoordinates,
             );
           } catch (e) {
@@ -309,7 +326,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
       onEnd: (_) async {
         try {
           await _showBubble(
-            text: "Der Rendezvous Point kann anhand des mitgeschickten One-Time-Secrets/Cookies den anfragenden Client & Service zuordnen und verbinden.",
+            text: _connectMsg.toString(),
             position: _relayNodeCoordinates[_rendezvousPoint],
           );
         } catch (e) {
@@ -545,7 +562,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     );
 
     _databaseCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
-    _databaseBounds = bounds;
   }
 
   /// Draw a scroll transfer from the passed two points.
@@ -638,7 +654,7 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     };
 
     _infoBubbleTimedButton = TimedButton(
-      text: "Weiter...",
+      text: _continueMsg.toString(),
       duration: toWait,
       action: end,
     );
