@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';

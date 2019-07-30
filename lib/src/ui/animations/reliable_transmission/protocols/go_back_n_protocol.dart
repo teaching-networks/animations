@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';

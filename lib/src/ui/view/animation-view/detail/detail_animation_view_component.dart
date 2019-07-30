@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import "package:angular/angular.dart";
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:angular_router/angular_router.dart';
