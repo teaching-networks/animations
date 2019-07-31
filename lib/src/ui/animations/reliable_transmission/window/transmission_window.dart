@@ -237,7 +237,7 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
         Rectangle<double> r = new Rectangle(0.0, 0.0, slotWidth, height);
 
         _packetPlaceRect.color =
-            isSender && packetSlots != null && i < packetSlots.length && packetSlots[i].activePackets.isNotEmpty ? Color.hex(0xFFBBBBBBB) : Colors.LIGHTER_GRAY;
+            isSender && packetSlots != null && i < packetSlots.length && packetSlots[i].hadPacket ? Color.hex(0xFFBBBBBBB) : Colors.LIGHTER_GRAY;
         _packetPlaceRect.render(context, r, 0);
 
         // Draw label if any

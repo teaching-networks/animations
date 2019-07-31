@@ -36,6 +36,9 @@ class PacketSlot {
    */
   num index;
 
+  /// Whether addPacket has been called at least once.
+  bool _hadPacket = false;
+
   /**
    * List of arrival listeners being notified when a pkt arrives at sender or receiver.
    */
@@ -88,6 +91,8 @@ class PacketSlot {
    * Add packet to the slot.
    */
   void addPacket(Packet p) {
+    _hadPacket = true;
+
     _activePackets.add(p);
 
     p.addStateChangeListener((newState) {
@@ -139,4 +144,7 @@ class PacketSlot {
       }
     }
   }
+
+  /// Whether addPacket has been called at least once.
+  bool get hadPacket => _hadPacket;
 }
