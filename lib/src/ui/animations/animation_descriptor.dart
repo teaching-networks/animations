@@ -32,6 +32,7 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
+  /// Version of the animation API to use.
   final int version;
 
   const AnimationDescriptor({

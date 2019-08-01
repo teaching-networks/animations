@@ -304,5 +304,9 @@
   "onion-router.hidden-service.rendezvous-point-circuit": "Der Client baut einen Circuit zu einem beliebigen Relay Node auf, mit der Bitte als Rendezvous Point (RP) zu agieren. Der Rendezvous Point verbindet später Client & Server, ohne das diese die IP Adresse ihres jeweiligen Kommunikationspartners kennen!",
   "onion-router.hidden-service.introduce-message": "Schlussendlich muss der Client dem Service noch mitteilen, dass eine Verbindung über den Rendezvous Point gewünscht ist. Dazu wird eine „Introduce Message“ (IM) mit dem One-Time-Secret/Cookie & der Adresse des Rendezvous Point verschlüsselt (mit dem Public Key des Hidden Service) an einen der, im Hidden Service Descriptor aufgelisteten, Introduction Points gesendet.",
   "onion-router.hidden-service.rendezvous-message": "Der Hidden Service hat das One-Time-Secret/Cookie erhalten, sowie die Information, welcher Rendezvous Point die Kommunikation zwischen Service & Client vermittelt. Zu letzterem wird nun ein Circuit aufgebaut & das One-Time-Secret/Cookie in einer „Rendezvous Message“ gesendet, um die Verbindung einzuleiten.",
-  "onion-router.hidden-service.connecting": "Der Rendezvous Point kann anhand des mitgeschickten One-Time-Secrets/Cookies den anfragenden Client & Service zuordnen und verbinden."
+  "onion-router.hidden-service.connecting": "Der Rendezvous Point kann anhand des mitgeschickten One-Time-Secrets/Cookies den anfragenden Client & Service zuordnen und verbinden.",
+  "cdma.name": "CDMA (Code Division Multiple Access)",
+  "cdma.short-description": "Code Divison Multiple Access, oder kurz CDMA, ist ein Verfahren um Mehrfachzugriff auf ein geteiltes Medium zu gewährleisten, indem Daten durch orthogonale Codes gespreizt werden",
+  "cdma.description": "Code Divison Multiple Access, oder kurz CDMA, ist ein Verfahren um Mehrfachzugriff auf ein geteiltes Medium zu gewährleisten, indem Daten durch orthogonale Codes gespreizt werden.",
+  "cdma.credits": ""
 }

@@ -303,5 +303,9 @@
   "onion-router.hidden-service.rendezvous-point-circuit": "The Client is establishing a Circuit to an arbitrary relay node with the request to act as a Rendezvous Point (RP). The Rendezvous Point will connect Client & Server without any of them knowing their communication partners IP address!",
   "onion-router.hidden-service.introduce-message": "Finally the Client has to notify the service to connect over the Rendezvous Point. Therefore an \"Introduce Message\" (IM) with the One-Time-Secret/Cookie & the address of the Rendezvous Point is sent over encrypted (with the public key of the service) to one of the services Introduction Points in order to redirect it to the hidden service.",
   "onion-router.hidden-service.rendezvous-message": "The hidden service received the One-Time-Secret/Cookie as well as the information which Rendezvous Point to connect to. A Circuit is established to the Rendezvous Point and the One-Time-Secret/Cookie is sent over in a \"Rendezvous Message\" to get connected",
-  "onion-router.hidden-service.connecting": "The Rendezvous Point is able to map Client and Service via the One-Time-Secret/Cookie and connects them"
+  "onion-router.hidden-service.connecting": "The Rendezvous Point is able to map Client and Service via the One-Time-Secret/Cookie and connects them",
+  "cdma.name": "CDMA (Code Division Multiple Access)",
+  "cdma.short-description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes",
+  "cdma.description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes.",
+  "cdma.credits": ""
 }
