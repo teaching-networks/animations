@@ -363,26 +363,26 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
   @override
   void draw() {
     /*
-     * Drawing scenario in a row layout with one row and 6 columns.
+     * Drawing scenario in a row layout with 5 rows and 6 columns.
      */
     int columns = 6;
+    int rows = 5;
 
     double yPad = size.height * 0.03;
     double xPad = size.width * 0.03;
 
     double cellW = (size.width - xPad * 2) / columns;
-    double cellH = size.height - yPad * 2;
+    double cellH = (size.height - yPad * 2) / rows;
     double cellX = xPad;
     double cellY = yPad;
 
-    double xOffset = cellX;
-    _drawHost(Rectangle<double>(xOffset, cellY, cellW, cellH));
+    _drawHost(Rectangle<double>(cellX, cellY, cellW, cellH * rows));
 
-    xOffset += cellW;
-    _drawNodes(Rectangle<double>(xOffset, cellY, cellW * (columns - 2), cellH));
+    _drawDatabase(Rectangle<double>(cellX + cellW, cellY, cellW * (columns - 2), cellH));
 
-    xOffset += cellW * (columns - 2);
-    _drawServiceAndDatabase(Rectangle<double>(xOffset, cellY, cellW, cellH));
+    _drawNodes(Rectangle<double>(cellX + cellW, cellY + cellH, cellW * (columns - 2), cellH * (rows - 1)));
+
+    _drawService(Rectangle<double>(cellX + cellW * (columns - 1), cellY, cellW, cellH * rows));
 
     _drawCircuitConnections();
 
@@ -535,9 +535,29 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
     _hostBounds = bounds;
   }
 
+  /// Draw the database.
+  void _drawDatabase(Rectangle<double> rect) {
+    if (!Images.database.loaded) {
+      return;
+    }
+
+    final bounds = drawImageOnCanvas(
+      Images.database.image,
+      aspectRatio: Images.database.aspectRatio,
+      width: rect.width,
+      height: rect.height,
+      x: rect.left,
+      y: rect.top,
+      mode: ImageDrawMode.FILL,
+      alignment: ImageAlignment.MID,
+    );
+
+    _databaseCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
+  }
+
   /// Draw the service icon.
-  void _drawServiceAndDatabase(Rectangle<double> rect) {
-    if (!Images.serverImage.loaded || !Images.database.loaded) {
+  void _drawService(Rectangle<double> rect) {
+    if (!Images.serverImage.loaded) {
       return;
     }
 
@@ -554,19 +574,6 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
     _serviceCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
     _serviceBounds = bounds;
-
-    bounds = drawImageOnCanvas(
-      Images.database.image,
-      aspectRatio: Images.database.aspectRatio,
-      width: rect.width * 0.5,
-      height: rect.height,
-      x: rect.left + rect.width * 0.25,
-      y: rect.top,
-      mode: ImageDrawMode.FILL,
-      alignment: ImageAlignment.START,
-    );
-
-    _databaseCoordinates = Point<double>(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
   }
 
   /// Draw a scroll transfer from the passed two points.

@@ -52,7 +52,7 @@ class FillImageLayout implements ImageLayout {
         iH = iH * shrink;
       }
 
-      var vertical = height >= iH;
+      var vertical = height > iH;
 
       // Align
       switch (alignment) {
