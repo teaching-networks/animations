@@ -42,7 +42,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   static const Duration _relayNodeGrowthAnimationDuration = Duration(seconds: 1);
 
   /// Duration of the TCP connection establishment animation.
-  static const Duration _tcpConnectionAnimationDuration = Duration(seconds: 6);
+  static const Duration _tcpConnectionAnimationDuration = Duration(seconds: 2);
 
   /// Duration of the key exchange animation.
   static const Duration _keyExchangeAnimationDuration = Duration(seconds: 2);
@@ -120,6 +120,9 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   /// Position (Route index) in the key exchange animation.
   int _keyExchangeAnimationPosition = 1;
 
+  /// Current index of the tcp connection animation.
+  int _tcpConnectionAnimIndex = 0;
+
   AnimHelper _packetTransitionAnimation;
   AnimHelper _relayNodeGrowthAnimation;
   AnimHelper _tcpConnectionAnimation;
@@ -196,8 +199,14 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       curve: Curves.easeOutCubic,
       duration: _tcpConnectionAnimationDuration,
       onEnd: (timestamp) {
-        _tcpConnectionsEstablished = true;
-        _startKeyExchangeAnimation();
+        if (_tcpConnectionAnimIndex < this._route.length) {
+          _tcpConnectionAnimIndex++;
+          _tcpConnectionAnimation.start();
+        } else {
+          _tcpConnectionAnimIndex = 0;
+          _tcpConnectionsEstablished = true;
+          _startKeyExchangeAnimation();
+        }
       },
       onReset: () {
         _tcpConnectionsEstablished = false;
@@ -425,7 +434,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
       ctx.lineTo(route[i + 1].x, route[i + 1].y);
       ctx.stroke();
 
-      if (_tcpConnectionAnimation.running) {
+      if (_tcpConnectionAnimation.running && _tcpConnectionAnimIndex == i) {
         // Stroke the TCP connection handshake progress (Just for visualization).
         setStrokeColor(Colors.SPACE_BLUE);
 
@@ -483,7 +492,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   Color getRoutePartColor(int index) {
     if (!_tcpConnectionsEstablished || !_keysExchanged) {
       if (!_tcpConnectionsEstablished) {
-        return Colors.LIGHTER_GRAY;
+        return this._tcpConnectionAnimIndex > index ? Colors.SPACE_BLUE : Colors.LIGHTER_GRAY;
       } else if (!_keysExchanged) {
         if (index + 1 >= _keyExchangeAnimationPosition) {
           return Colors.SPACE_BLUE;
