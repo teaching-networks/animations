@@ -139,6 +139,9 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   Message _decryptionAtSenderMsg;
   Message _continueMsg;
 
+  Future<void> _tcpConnectionFuture;
+  Future<void> _keyExchangeBubbleFuture;
+
   /// Create the internet service drawable.
   InternetServiceDrawable(this._name, this._i18n) {
     _packet = EncryptedPacket(parent: this);
@@ -198,13 +201,18 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     _tcpConnectionAnimation = AnimHelper(
       curve: Curves.easeOutCubic,
       duration: _tcpConnectionAnimationDuration,
-      onEnd: (timestamp) {
+      onEnd: (timestamp) async {
         if (_tcpConnectionAnimIndex < this._route.length) {
           _tcpConnectionAnimIndex++;
           _tcpConnectionAnimation.start();
         } else {
           _tcpConnectionAnimIndex = 0;
           _tcpConnectionsEstablished = true;
+
+          if (_tcpConnectionFuture != null) {
+            await _tcpConnectionFuture;
+          }
+
           _startKeyExchangeAnimation();
         }
       },
@@ -215,7 +223,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
 
     _keyExchangeAnimation = AnimHelper(
       curve: Curves.easeInOutCubic,
-      onEnd: (timestamp) {
+      onEnd: (timestamp) async {
         if (_keyExchangeAnimationPosition + 1 < _route.length + 1) {
           _keyExchangeAnimationPosition++;
           _keyExchangeAnimation.start(
@@ -224,6 +232,11 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
           );
         } else {
           _keysExchanged = true;
+
+          if (_keyExchangeBubbleFuture != null) {
+            await _keyExchangeBubbleFuture;
+          }
+
           _startPacketTransitionAnimation();
         }
       },
@@ -249,7 +262,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     _tcpConnectionAnimation.start();
 
     if (_showBubbles) {
-      _showBubble(
+      _tcpConnectionFuture = _showBubble(
         _circuitConnectingMsg.toString(),
         0.5,
       );
@@ -263,7 +276,7 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
     _keyExchangeAnimation.start(duration: _keyExchangeAnimationDuration);
 
     if (_showBubbles) {
-      _showBubble(
+      _keyExchangeBubbleFuture = _showBubble(
         _circuitEncryptingMsg.toString(),
         0.5,
       );
