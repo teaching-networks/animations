@@ -150,52 +150,52 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
   }
 
   @override
-  void onMouseDown(Point<double> pos) {
-    _onMouseDown(pos, _drawable);
+  void onMouseDown(CanvasMouseEvent event) {
+    _onMouseDown(event, _drawable);
   }
 
-  void _onMouseDown(Point<double> pos, Drawable parent) {
+  void _onMouseDown(CanvasMouseEvent event, Drawable parent) {
     if (parent is MouseListener) {
-      (parent as MouseListener).onMouseDown(pos);
+      (parent as MouseListener).onMouseDown(event);
     }
 
     if (parent.hasDependentDrawables) {
       for (Drawable drawable in parent.dependentDrawables) {
-        _onMouseDown(pos, drawable);
+        _onMouseDown(event, drawable);
       }
     }
   }
 
   @override
-  void onMouseMove(Point<double> pos) {
-    _onMouseMove(pos, _drawable);
+  void onMouseMove(CanvasMouseEvent event) {
+    _onMouseMove(event, _drawable);
   }
 
-  void _onMouseMove(Point<double> pos, Drawable parent) {
+  void _onMouseMove(CanvasMouseEvent event, Drawable parent) {
     if (parent is MouseListener) {
-      (parent as MouseListener).onMouseMove(pos);
+      (parent as MouseListener).onMouseMove(event);
     }
 
     if (parent.hasDependentDrawables) {
       for (Drawable drawable in parent.dependentDrawables) {
-        _onMouseMove(pos, drawable);
+        _onMouseMove(event, drawable);
       }
     }
   }
 
   @override
-  void onMouseUp(Point<double> pos) {
-    _onMouseUp(pos, _drawable);
+  void onMouseUp(CanvasMouseEvent event) {
+    _onMouseUp(event, _drawable);
   }
 
-  void _onMouseUp(Point<double> pos, Drawable parent) {
+  void _onMouseUp(CanvasMouseEvent event, Drawable parent) {
     if (parent is MouseListener) {
-      (parent as MouseListener).onMouseUp(pos);
+      (parent as MouseListener).onMouseUp(event);
     }
 
     if (parent.hasDependentDrawables) {
       for (Drawable drawable in parent.dependentDrawables) {
-        _onMouseUp(pos, drawable);
+        _onMouseUp(event, drawable);
       }
     }
   }

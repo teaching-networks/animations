@@ -5,6 +5,7 @@
 
 import 'dart:async';
 import 'dart:html';
+
 import "package:angular/angular.dart";
 import 'package:hm_animations/src/util/size.dart';
 
@@ -47,13 +48,13 @@ class CanvasComponent implements OnInit, OnDestroy {
   final _clickController = new StreamController<Point<double>>.broadcast();
 
   /// Stream controller emitting mouse move events on the canvas.
-  final _mouseDownController = new StreamController<Point<double>>.broadcast();
+  final _mouseDownController = new StreamController<CanvasMouseEvent>.broadcast();
 
   /// Stream controller emitting mouse up events on the canvas.
-  final _mouseUpController = new StreamController<Point<double>>.broadcast();
+  final _mouseUpController = new StreamController<CanvasMouseEvent>.broadcast();
 
   /// Stream controller emitting mouse moved events on the canvas.
-  final _mouseMoveController = new StreamController<Point<double>>.broadcast();
+  final _mouseMoveController = new StreamController<CanvasMouseEvent>.broadcast();
 
   /*
   Width and height of the canvas.
@@ -88,15 +89,15 @@ class CanvasComponent implements OnInit, OnDestroy {
     });
 
     _mouseDownSub = canvasElement.onMouseDown.listen((event) {
-      _mouseDownController.add(_mouseEventToPoint(event));
+      _mouseDownController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
     });
 
     _mouseUpSub = canvasElement.onMouseUp.listen((event) {
-      _mouseUpController.add(_mouseEventToPoint(event));
+      _mouseUpController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
     });
 
     _mouseMoveSub = canvasElement.onMouseMove.listen((event) {
-      _mouseMoveController.add(_mouseEventToPoint(event));
+      _mouseMoveController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
     });
 
     _initCanvasSize();
@@ -279,4 +280,16 @@ class CanvasComponent implements OnInit, OnDestroy {
 
     return point;
   }
+}
+
+/// Mouse event on a canvas.
+class CanvasMouseEvent {
+  /// Position on the canvas of the mouse.
+  final Point<double> pos;
+
+  /// The original mouse event.
+  final MouseEvent event;
+
+  /// Create mouse event.
+  CanvasMouseEvent(this.pos, this.event);
 }

@@ -11,6 +11,7 @@
         <ul class="highlighted-fields">
             <li class="labeled">
                 <label>Test</label>
+                <material-input [ngModel]="testPattern" (ngModelChange)="onPatternChange(0, $event)" [maxCount]="maxPatternSize"></material-input>
             </li>
 
             <li class="exception">

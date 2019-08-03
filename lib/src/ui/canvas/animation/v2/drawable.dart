@@ -304,6 +304,15 @@ abstract class Drawable extends CanvasContextUtil {
     }
   }
 
+  /// Check if the passed absolute [pos] is contained within
+  /// this drawable.
+  bool containsPos(Point<double> pos) {
+    double x = pos.x - lastRenderAbsoluteXOffset;
+    double y = pos.y - lastRenderAbsoluteYOffset;
+
+    return x >= 0 && x <= size.width && y >= 0 && y <= size.height;
+  }
+
   /// Check if the drawable needs to be repainted.
   /// It will be repainted no matter what this method is stating in case you
   /// call [invalidate()].

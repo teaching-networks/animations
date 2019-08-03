@@ -385,7 +385,7 @@ packages:
       name: node_preamble
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.5"
+    version: "1.4.6"
   observable:
     dependency: transitive
     description:
@@ -455,14 +455,14 @@ packages:
       name: quiver
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   sass:
     dependency: transitive
     description:
       name: sass
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.22.8"
+    version: "1.22.9"
   sass_builder:
     dependency: "direct dev"
     description:
@@ -476,7 +476,7 @@ packages:
       name: scratch_space
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.3+2"
+    version: "0.0.4"
   shelf:
     dependency: transitive
     description:
@@ -560,7 +560,7 @@ packages:
       name: string_scanner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   term_glyph:
     dependency: transitive
     description:
@@ -623,7 +623,7 @@ packages:
       name: vm_service_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.6+2"
+    version: "0.2.6+3"
   watcher:
     dependency: transitive
     description:

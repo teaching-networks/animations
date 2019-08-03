@@ -18,6 +18,8 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:meta/meta.dart';
 
+import '../../../canvas_component.dart';
+
 /// Action to execute.
 typedef void Action();
 
@@ -144,13 +146,13 @@ class TimedButton extends Drawable implements MouseListener {
   }
 
   @override
-  void onMouseDown(Point<double> pos) {
+  void onMouseDown(CanvasMouseEvent event) {
     // Do nothing
   }
 
   @override
-  void onMouseMove(Point<double> pos) {
-    bool mouseOver = _containsMousePos(pos);
+  void onMouseMove(CanvasMouseEvent event) {
+    bool mouseOver = containsPos(event.pos);
 
     if (mouseOver != _isMouseOver) {
       _isMouseOver = mouseOver;
@@ -168,16 +170,9 @@ class TimedButton extends Drawable implements MouseListener {
     invalidate();
   }
 
-  bool _containsMousePos(Point<double> pos) {
-    double x = pos.x - lastRenderAbsoluteXOffset;
-    double y = pos.y - lastRenderAbsoluteYOffset;
-
-    return x >= 0 && x <= size.width && y >= 0 && y <= size.height;
-  }
-
   @override
-  void onMouseUp(Point<double> pos) {
-    if (_containsMousePos(pos)) {
+  void onMouseUp(CanvasMouseEvent event) {
+    if (containsPos(event.pos)) {
       _onButtonClicked();
     }
   }

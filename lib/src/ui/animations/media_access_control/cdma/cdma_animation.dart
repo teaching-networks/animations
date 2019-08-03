@@ -5,6 +5,7 @@
 
 import 'package:angular/angular.dart';
 import 'package:angular/core.dart';
+import 'package:angular_components/material_input/material_input.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
@@ -13,6 +14,8 @@ import 'package:hm_animations/src/ui/animations/base/connector/animation_compone
 import 'package:hm_animations/src/ui/animations/media_access_control/cdma/cdma_animation.template.dart' as template;
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/viewer/drawable_viewer.dart';
+
+import 'cdma_drawable.dart';
 
 /// Animation visualizing CDMA (Code Division Multiple Access).
 @Component(
@@ -23,12 +26,13 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/viewer/drawable_viewer.
   directives: [
     coreDirectives,
     DrawableViewer,
+    materialInputDirectives,
   ],
   pipes: [I18nPipe],
 )
 class CDMAAnimation extends AnimationComponentConnector {
   /// Descriptor of this animation.
-  static AnimationDescriptor<CDMAAnimation> descriptor = AnimationDescriptor<CDMAAnimation>(
+  static final AnimationDescriptor<CDMAAnimation> descriptor = AnimationDescriptor<CDMAAnimation>(
     id: Animations.ID_COUNTER++,
     componentFactory: template.CDMAAnimationNgFactory,
     baseTranslationKey: "cdma",
@@ -38,8 +42,16 @@ class CDMAAnimation extends AnimationComponentConnector {
     version: 2,
   );
 
+  /// Maximum pattern size.
+  static final int _maxPatternSize = 4;
+
   /// Service to get translations from.
   final I18nService _i18n;
+
+  /// Drawable of the CDMA animation.
+  final CDMADrawable _drawable = CDMADrawable();
+
+  String testPattern = "1010";
 
   /// Create animation.
   CDMAAnimation(this._i18n);
@@ -51,5 +63,13 @@ class CDMAAnimation extends AnimationComponentConnector {
   String get credits => _i18n.get("${animationDescriptor.baseTranslationKey}.credits").toString();
 
   @override
-  Drawable get drawable => null;
+  Drawable get drawable => _drawable;
+
+  /// Get the maximum pattern size.
+  int get maxPatternSize => CDMAAnimation._maxPatternSize;
+
+  /// What should happen when a signal pattern changes.
+  void onPatternChange(int index, String newPattern) {
+    print(newPattern);
+  }
 }
