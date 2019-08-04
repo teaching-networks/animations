@@ -11,6 +11,8 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_uti
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 
+typedef void CanvasPainter(CanvasImageSource src, Point<double> offset);
+
 /// Next generation canvas animation class.
 abstract class Drawable extends CanvasContextUtil {
   /// Id of the 2D canvas rendering context.
@@ -41,10 +43,10 @@ abstract class Drawable extends CanvasContextUtil {
   num _lastPassTimestamp;
 
   /// X Offset of the last rendering loop pass.
-  double _lastPassXOffset;
+  double _lastPassXOffset = 0;
 
   /// Y Offset of the last rendering loop pass.
-  double _lastPassYOffset;
+  double _lastPassYOffset = 0;
 
   /// Relative offset of the cached canvas on the parent canvas of the last rendering.
   Point<double> _lastRenderOffset = Point<double>(0, 0);
@@ -105,12 +107,16 @@ abstract class Drawable extends CanvasContextUtil {
   /// Get the drawables canvas rendering context.
   CanvasRenderingContext2D get ctx => _cacheCanvasContext;
 
+  /// Get the last drawn drawable image.
+  CanvasImageSource get image => _cacheCanvas;
+
   /// Render the drawable onto the passed canvas rendering [context].
   void render(
     CanvasRenderingContext2D context,
     num timestamp, {
     double x = 0,
     double y = 0,
+    CanvasPainter painter,
   }) {
     _lastPassTimestamp = timestamp;
     _lastPassXOffset = x;
@@ -134,7 +140,13 @@ abstract class Drawable extends CanvasContextUtil {
       _validate(); // Drawable has been redrawn and thus is valid again!
     }
 
-    _drawOnCanvas(context, _cacheCanvas, _lastRenderOffset);
+    if (painter == null) {
+      if (context != null) {
+        _drawOnCanvas(context, _cacheCanvas, _lastRenderOffset);
+      }
+    } else {
+      painter(_cacheCanvas, _lastRenderOffset);
+    }
   }
 
   /// Calculate the rendering position of the cached canvas.
@@ -145,7 +157,7 @@ abstract class Drawable extends CanvasContextUtil {
 
   /// Draw cached canvas on the passed [context].
   void _drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, Point<double> offset) {
-    context.drawImage(_cacheCanvas, offset.x, offset.y);
+    context.drawImage(src, offset.x, offset.y);
   }
 
   /// Cleanup drawable if it will be destroyed.

@@ -7,9 +7,11 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:async/async.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
@@ -27,7 +29,7 @@ class InputDrawable extends Drawable implements MouseListener {
   final int maxLength;
 
   /// Size of the font.
-  int _fontSize;
+  final double fontSize;
 
   /// Family of the font.
   final String fontFamily;
@@ -41,42 +43,103 @@ class InputDrawable extends Drawable implements MouseListener {
   /// The current selection.
   _SelectionRange _selection;
 
+  /// The current scroll position (x offset from the left).
+  double _scrollPos = 0;
+
+  /// Padding to the left and right.
+  double _xScrollPadding = 3 * window.devicePixelRatio;
+
   /// Event listener on the window.
   EventListener _windowMouseUpListener;
 
   /// Event listener for key down events on the window.
   EventListener _keyDownListener;
 
-  /// Bounds of the text from the last rendering cycle.
-  Rectangle<double> _textBounds;
+  /// Event listener for paste events on the window.
+  EventListener _pasteListener;
 
-  /// Width of each character of the last rendering cycle.
+  /// Width of all substrings for each character of the current value.
+  /// For example for the value "abc" there would be 3 entries in the
+  /// list (when each character is 5 px width): [5, 10, 15].
+  /// Of course the characters are not 5 px wide for each font, thus
+  /// we need this lookup.
   List<double> _widthPerCharacter = [];
+
+  /// Drawable to draw the text.
+  TextDrawable _textDrawable;
+
+  /// Operation to detect a double click.
+  CancelableOperation _doubleClickDetector;
+
+  /// Whether the input box is currently dragged on.
+  bool _isMouseDown = false;
+
+  /// Start selection position of the mouse.
+  int _startSelectPos;
+
+  /// Padding to use vertically.
+  double _padding = 0;
 
   /// Create new input drawable.
   InputDrawable({
     Drawable parent,
     String value = "",
     this.maxLength,
-    int fontSize,
+    this.fontSize,
     this.fontFamily = "sans-serif",
     this.textColor = Colors.BLACK,
-  })  : this._value = value,
-        super(parent: parent) {
-    _fontSize = fontSize != null ? fontSize : defaultFontSize;
+    double width = 300,
+    double padding = 3,
+  }) : super(parent: parent) {
+    _padding = padding * window.devicePixelRatio;
 
-    _init();
+    _init(width * window.devicePixelRatio);
+
+    this.value = value;
   }
 
-  /// Initialize the drawable.
-  void _init() {
-    setSize(width: 500, height: 100);
+  /// Get the available window width.
+  double get windowWidth => size.width;
 
+  /// Initialize the drawable.
+  void _init(double width) {
     _windowMouseUpListener = (event) => _onWindowMouseUp(event);
     window.addEventListener("mouseup", _windowMouseUpListener);
 
     _keyDownListener = (event) => _onKeyDown(event);
     window.addEventListener("keydown", _keyDownListener);
+
+    _pasteListener = (event) => _onPaste(event);
+    window.addEventListener("paste", _pasteListener);
+
+    _textDrawable = TextDrawable(
+      parent: this,
+      text: _value,
+      alignment: TextAlignment.LEFT,
+      color: textColor,
+      lineHeight: 1.0,
+      fontFamilies: fontFamily,
+      textSize: fontSize,
+    );
+
+    setSize(width: width, height: _textDrawable.size.height + _padding * 2);
+  }
+
+  /// What to do on a paste event on the window.
+  void _onPaste(ClipboardEvent event) {
+    if (!_isFocused) {
+      return;
+    }
+
+    event.preventDefault();
+
+    DataTransfer transferable = event.clipboardData;
+    if (transferable == null) {
+      return;
+    }
+
+    String toPaste = transferable.getData("text");
+    insert(toPaste);
   }
 
   /// What to do on mouse up on the window.
@@ -95,6 +158,7 @@ class InputDrawable extends Drawable implements MouseListener {
       bool isArrowLeftKey = event.code == "ArrowLeft";
       bool isArrowRightKey = event.code == "ArrowRight";
       bool isArrowKey = isArrowLeftKey || isArrowRightKey;
+      bool isSpace = event.code == "Space";
       bool isShift = event.shiftKey;
       bool isCtrl = event.ctrlKey;
 
@@ -113,6 +177,8 @@ class InputDrawable extends Drawable implements MouseListener {
             } else if (isArrowRightKey) {
               selectRange(min(_selection.end + 1, value.length), min(_selection.end + 1, value.length));
             }
+
+            scrollToPos(_selection.start);
           } else {
             // Select the next character
             if (isArrowLeftKey) {
@@ -122,6 +188,8 @@ class InputDrawable extends Drawable implements MouseListener {
                   start: max(_selection.start - 1, 0),
                   end: _selection.end,
                 );
+
+                scrollToPos(_selection.start);
               } else {
                 _selection = _SelectionRange(
                   initialPos: _selection.initialPos,
@@ -136,6 +204,8 @@ class InputDrawable extends Drawable implements MouseListener {
                   start: _selection.start,
                   end: min(_selection.end + 1, value.length),
                 );
+
+                scrollToPos(_selection.end);
               } else {
                 _selection = _SelectionRange(
                   initialPos: _selection.initialPos,
@@ -154,6 +224,8 @@ class InputDrawable extends Drawable implements MouseListener {
             } else {
               selectRange(value.length, value.length);
             }
+
+            scrollToPos(_selection.start);
           } else {
             // Select everything from the current character to the end or start
             if (isArrowLeftKey) {
@@ -162,12 +234,16 @@ class InputDrawable extends Drawable implements MouseListener {
                 start: 0,
                 end: _selection.initialPos,
               );
+
+              scrollToPos(0);
             } else if (isArrowRightKey) {
               _selection = _SelectionRange(
                 initialPos: _selection.initialPos,
                 start: _selection.initialPos,
                 end: value.length,
               );
+
+              scrollToPos(value.length);
             }
             invalidate();
           }
@@ -175,15 +251,40 @@ class InputDrawable extends Drawable implements MouseListener {
       } else if (isCtrl) {
         if (event.code == "KeyA") {
           selectAll();
+          event.preventDefault();
         } else if (event.code == "KeyC") {
-          // Copy the selected value
-        } else if (event.code == "KeyV") {
-          // Paste the currently copied value
+          copySelection();
+        } else if (event.code == "KeyX") {
+          // Cut the selected value
+          copySelection();
+          delete();
         }
-      } else if (isPrintableKey) {
+      } else if (isPrintableKey || isSpace) {
+        event.preventDefault();
+
         insert(event.key);
       }
     }
+  }
+
+  /// Get the currently selected text.
+  String get selectedText => value.substring(_selection.start, _selection.end);
+
+  /// Copy the current selected text.
+  void copySelection() {
+    TextAreaElement elm = document.createElement("textarea");
+    elm.value = selectedText;
+
+    elm.setAttribute("readonly", "");
+    elm.style.position = "absolute";
+    elm.style.left = "-10000px";
+
+    document.body.children.add(elm);
+
+    elm.select(); // Select text in the area
+    document.execCommand("copy");
+
+    document.body.children.remove(elm);
   }
 
   /// Select all of the text in the input.
@@ -206,9 +307,50 @@ class InputDrawable extends Drawable implements MouseListener {
     invalidate();
   }
 
+  /// Scroll to the passed [pos].
+  void scrollToPos(int pos) {
+    if (_isOverflow) {
+      if (pos < 0) {
+        pos = 0;
+      }
+      if (pos > value.length) {
+        pos = value.length;
+      }
+
+      double cursorOffset = _getXOffsetForCharPos(pos);
+
+      if (cursorOffset < _scrollPos) {
+        // Scroll left
+        _scrollPos = max(cursorOffset - _xScrollPadding, 0);
+      } else if (cursorOffset > _scrollPos + windowWidth) {
+        // Scroll right
+        _scrollPos = cursorOffset - windowWidth + _xScrollPadding;
+      }
+    } else {
+      _scrollPos = 0;
+    }
+  }
+
+  /// Validate the scroll position.
+  void _validateScrollPos() {
+    if (_isOverflow) {
+      double maxScrollPos = _textDrawable.size.width - windowWidth;
+      if (_scrollPos > maxScrollPos) {
+        _scrollPos = maxScrollPos + _xScrollPadding;
+      }
+    } else {
+      _scrollPos = 0;
+    }
+  }
+
   /// Insert the passed [v].
   void insert(String v) {
-    if (_selection.size == 0) {
+    if (v == null || v.length == 0) {
+      return;
+    }
+
+    bool replaceSelection = _selection.size != 0;
+    if (!replaceSelection) {
       if (_selection.start > 0 && _selection.start < value.length) {
         value = value.substring(0, _selection.start) + v + value.substring(_selection.start);
       } else if (_selection.start == 0) {
@@ -217,10 +359,13 @@ class InputDrawable extends Drawable implements MouseListener {
         value += v;
       }
     } else {
-      value.replaceRange(_selection.start, _selection.end, v);
+      value = value.replaceRange(_selection.start, _selection.end, v);
     }
 
-    selectRange(_selection.start + 1, _selection.start + 1);
+    selectRange(_selection.start + v.length, _selection.start + v.length);
+
+    scrollToPos(_selection.start);
+    _validateScrollPos();
 
     invalidate();
   }
@@ -230,17 +375,19 @@ class InputDrawable extends Drawable implements MouseListener {
     if (_selection.size == 0) {
       if (_selection.start > 0) {
         if (_selection.end < value.length) {
-          value = value.substring(0, _selection.start) + value.substring(_selection.start + 1);
+          value = value.substring(0, _selection.start - 1) + value.substring(_selection.start);
         } else {
-          value = value.substring(0, _selection.start);
+          value = value.substring(0, _selection.start - 1);
         }
 
         selectRange(_selection.start - 1, _selection.start - 1);
       }
     } else {
-      value.replaceRange(_selection.start, _selection.end, "");
+      value = value.replaceRange(_selection.start, _selection.end, "");
       selectRange(_selection.start, _selection.start);
     }
+
+    _validateScrollPos();
 
     invalidate();
   }
@@ -259,6 +406,7 @@ class InputDrawable extends Drawable implements MouseListener {
 
     window.removeEventListener("mouseup", _windowMouseUpListener);
     window.removeEventListener("keydown", _keyDownListener);
+    window.removeEventListener("paste", _pasteListener);
   }
 
   /// Get the current value of the input.
@@ -271,10 +419,21 @@ class InputDrawable extends Drawable implements MouseListener {
     }
 
     if (maxLength != null && value.length > maxLength) {
-      throw Exception("the value to set is longer than the maximum allowed length of $maxLength");
+      value = value.substring(0, maxLength);
     }
 
     _value = value;
+    _textDrawable.text = value;
+
+    // Calculate size for each character in the value
+    _widthPerCharacter.clear();
+    _textDrawable.setupCanvasContextFontSettings(ctx);
+    String currentString = "";
+    for (final rune in value.runes) {
+      currentString += String.fromCharCode(rune);
+      Size s = _textDrawable.calculateStringSize(currentString, context: ctx, setupContextFontSettings: false);
+      _widthPerCharacter.add(s.width);
+    }
 
     invalidate();
   }
@@ -295,24 +454,27 @@ class InputDrawable extends Drawable implements MouseListener {
     ctx.strokeRect(0, 0, size.width, size.height);
   }
 
+  /// Check if the text to display is currently overflowing the available space.
+  bool get _isOverflow => _textDrawable.size.width > windowWidth;
+
   /// Draw the current value.
   void _drawValue() {
-    ctx.textBaseline = "top";
-    ctx.font = "${_fontSize}px $fontFamily";
-    setFillColor(textColor);
-
-    Size size = _calculateTextBounds(value);
-    _textBounds = Rectangle<double>(0, 0, size.width, size.height); // TODO Add padding
-
-    ctx.fillText(value, 0, 0); // TODO Add padding
-
-    // Calculate size for each character in the value
-    _widthPerCharacter.clear();
-    for (final rune in value.runes) {
-      String char = String.fromCharCode(rune);
-      Size s = _calculateTextBounds(char);
-      _widthPerCharacter.add(s.width);
+    if (value.length == 0) {
+      return;
     }
+
+    double width = _isOverflow ? windowWidth : _textDrawable.size.width;
+    double height = _textDrawable.size.height;
+
+    _textDrawable.render(ctx, lastPassTimestamp, painter: (image, offset) {
+      ctx.drawImageToRect(image, Rectangle<double>(0, _padding, width, height),
+          sourceRect: Rectangle<double>(
+            _scrollPos,
+            0,
+            width,
+            height,
+          ));
+    });
   }
 
   /// Draw the current selection.
@@ -321,19 +483,19 @@ class InputDrawable extends Drawable implements MouseListener {
       return;
     }
 
-    double startX = _getXOffsetForCharPos(_selection.start);
-    double endX = _getXOffsetForCharPos(_selection.end);
+    double startX = _getXOffsetForCharPos(_selection.start) - _scrollPos;
+    double endX = _getXOffsetForCharPos(_selection.end) - _scrollPos;
 
-    double x = _textBounds.left + startX;
-    double y = _textBounds.top;
+    double x = startX;
+    double y = _padding;
     double width = endX - startX;
-    double height = _textBounds.height;
+    double height = _textDrawable.size.height;
 
     var color = Colors.SPACE_BLUE;
     ctx.globalAlpha = 0.3;
 
     if (width == 0) {
-      width = 2;
+      width = 2 * window.devicePixelRatio;
       color = Colors.BLACK;
       ctx.globalAlpha = 0.8;
     }
@@ -346,19 +508,11 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// Get the x offset for the passed character [pos].
   double _getXOffsetForCharPos(int pos) {
-    double offset = 0;
-    for (int i = 0; i < pos; i++) {
-      offset += _widthPerCharacter[i];
+    if (pos == 0) {
+      return 0;
+    } else {
+      return _widthPerCharacter[pos - 1];
     }
-
-    return offset;
-  }
-
-  /// Calculate the passed text size for the current canvas context.
-  Size _calculateTextBounds(String text) {
-    TextMetrics metrics = ctx.measureText(text);
-
-    return Size(metrics.width, _fontSize);
   }
 
   @override
@@ -369,42 +523,101 @@ class InputDrawable extends Drawable implements MouseListener {
     // Nothing to update.
   }
 
+  /// Get the correct character position for the passed x coordinate.
+  int _getPosForXCoordinate(double x) {
+    if (value.length == 0) {
+      return 0;
+    }
+
+    int pos = 0;
+    double xCoordLast = 0;
+    for (double xCoord in _widthPerCharacter) {
+      if (x < xCoord) {
+        // Choose the nearest
+        if ((x - xCoordLast) > (xCoord - x)) {
+          pos++;
+        }
+        break;
+      }
+
+      xCoordLast = xCoord;
+      pos++;
+    }
+
+    return pos;
+  }
+
   @override
   void onMouseDown(CanvasMouseEvent event) {
     if (!containsPos(event.pos)) {
       return;
     }
 
+    event.event.preventDefault();
+
     if (!_isFocused) {
       _isFocused = true;
-
-      // TODO Find cursor position in the text and set to selection accordingly
-      print("absoluteX: $lastRenderAbsoluteXOffset, absoluteY: $lastRenderAbsoluteYOffset, mouse pos: ${event.pos}");
-      selectRange(0, 0);
-
-      invalidate();
-    } else {
-      // TODO Detect double click and select everything
-      bool isDoubleClick = true;
-
-      if (isDoubleClick) {
-        selectAll();
-      }
     }
+
+    _isMouseDown = true;
+
+    int pos = _getPosForXCoordinate(_scrollPos + event.pos.x - lastRenderAbsoluteXOffset);
+    selectRange(pos, pos);
+
+    _startSelectPos = pos;
+  }
+
+  /// On double click on the input.
+  void _onDoubleClick() {
+    selectAll();
   }
 
   @override
   void onMouseMove(CanvasMouseEvent event) {
-    // TODO Change cursor style when hovering over the input!
+    if (containsPos(event.pos)) {
+      if (event.control.getCursorType() != "text") {
+        event.control.setCursorType("text");
+      }
+    } else {
+      event.control.resetCursorType();
+    }
+
+    if (_isMouseDown) {
+      int pos = _getPosForXCoordinate(_scrollPos + event.pos.x - lastRenderAbsoluteXOffset);
+
+      selectRange(min(_startSelectPos, pos), max(_startSelectPos, pos));
+      scrollToPos(pos);
+    }
   }
 
   @override
   void onMouseUp(CanvasMouseEvent event) {
+    _isMouseDown = false;
+
     if (!containsPos(event.pos)) {
       return;
     }
 
     event.event.stopPropagation();
+
+    if (_doubleClickDetector != null) {
+      _doubleClickDetector.cancel();
+      _doubleClickDetector = null;
+    } else {
+      CancelableOperation op;
+      op = CancelableOperation.fromFuture(
+        Future.delayed(Duration(milliseconds: 300)).then((_) {
+          if (op == _doubleClickDetector) {
+            _doubleClickDetector = null;
+          }
+        }),
+        onCancel: () {
+          // Is double click!
+          _onDoubleClick();
+        },
+      );
+      _doubleClickDetector = op;
+    }
   }
 }
 

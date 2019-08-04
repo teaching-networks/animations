@@ -40,7 +40,7 @@ class TextDrawable extends Drawable {
   TextDrawable({
     Drawable parent,
     String text = "[No Text provided]",
-    this.wrapAtLength = 50,
+    this.wrapAtLength,
     this.fontFamilies = "sans-serif",
     this.textSize,
     this.lineHeight = 1.2,
@@ -68,10 +68,15 @@ class TextDrawable extends Drawable {
     _init();
   }
 
-  void _initFont(double fontSize) {
-    ctx.textBaseline = "top";
-    ctx.textAlign = _getTextAlignmentString(alignment);
-    ctx.font = "${fontSize}px $fontFamilies";
+  void _initFont() {
+    setupCanvasContextFontSettings(ctx);
+  }
+
+  /// Setup the font settings used to render the text for the passed context.
+  void setupCanvasContextFontSettings(CanvasRenderingContext2D context) {
+    context.textBaseline = "top";
+    context.textAlign = _getTextAlignmentString(alignment);
+    context.font = "${fontSize}px $fontFamilies";
   }
 
   String _getTextAlignmentString(TextAlignment alignment) {
@@ -91,9 +96,9 @@ class TextDrawable extends Drawable {
 
   /// Calculate the size of the drawable.
   void _calculateSize() {
-    _initFont(fontSize);
+    _initFont();
 
-    final textBoundsSize = _calculateTextSize(ctx, defaultFontSize);
+    final textBoundsSize = _calculateNeededBoxSize();
 
     setSize(
       width: textBoundsSize.width,
@@ -105,7 +110,7 @@ class TextDrawable extends Drawable {
   void draw() {
     double xOffset = _getXOffsetForAlignment(alignment);
 
-    _initFont(fontSize);
+    _initFont();
     setFillColor(color);
 
     double lineOffset = size.height / _lines.length;
@@ -139,10 +144,26 @@ class TextDrawable extends Drawable {
     // Nothing to update
   }
 
-  Size _calculateTextSize(CanvasRenderingContext2D context, double fontSize) {
+  /// Calculate the passed string [s] size using the font settings of the text drawable.
+  Size calculateStringSize(String s, {CanvasRenderingContext2D context, bool setupContextFontSettings = true}) {
+    if (context == null) {
+      context = ctx;
+    }
+
+    if (setupContextFontSettings) {
+      setupCanvasContextFontSettings(context);
+    }
+
+    final width = context.measureText(s).width;
+    final height = fontSize * lineHeight;
+
+    return Size(width, height);
+  }
+
+  Size _calculateNeededBoxSize() {
     double maxWidth = 0;
     for (final line in _lines) {
-      final width = context.measureText(line).width;
+      final width = ctx.measureText(line).width;
 
       if (width > maxWidth) maxWidth = width;
     }
@@ -154,6 +175,10 @@ class TextDrawable extends Drawable {
   }
 
   List<String> _buildLines(String text, int wrapAtLength) {
+    if (wrapAtLength == null) {
+      return [text];
+    }
+
     List<String> words = text.split(" ");
 
     var lines = List<String>();

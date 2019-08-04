@@ -106,6 +106,7 @@ class TimedButton extends Drawable implements MouseListener {
           alignment: TextAlignment.CENTER,
           textSize: textSize,
           lineHeight: 1.0,
+          wrapAtLength: 50,
         ) {
     _textDrawable.setParent(this);
 

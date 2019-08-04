@@ -22,10 +22,16 @@ import 'package:hm_animations/src/util/size.dart';
 @Component(
   selector: "canvas-comp",
   templateUrl: "canvas_component.html",
-  styleUrls: const ["canvas_component.css"],
-  directives: const [coreDirectives],
+  styleUrls: ["canvas_component.css"],
+  directives: [
+    coreDirectives,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 )
-class CanvasComponent implements OnInit, OnDestroy {
+class CanvasComponent implements OnInit, OnDestroy, CanvasComponentControl {
+  /// Change detector reference.
+  final ChangeDetectorRef _cd;
+
   @ViewChild("canvasWrapper", read: HtmlElement)
   HtmlElement canvasWrapper;
 
@@ -77,6 +83,14 @@ class CanvasComponent implements OnInit, OnDestroy {
   StreamSubscription<MouseEvent> _mouseUpSub;
   StreamSubscription<MouseEvent> _mouseMoveSub;
 
+  StreamSubscription<Size> _sizeChangedSub;
+
+  /// Cursor type to show.
+  String _cursorType = "auto";
+
+  /// Create the component.
+  CanvasComponent(this._cd);
+
   @override
   ngOnInit() {
     CanvasElement canvasElement = canvas as CanvasElement;
@@ -89,18 +103,22 @@ class CanvasComponent implements OnInit, OnDestroy {
     });
 
     _mouseDownSub = canvasElement.onMouseDown.listen((event) {
-      _mouseDownController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
+      _mouseDownController.add(CanvasMouseEvent(_mouseEventToPoint(event), event, this));
     });
 
     _mouseUpSub = canvasElement.onMouseUp.listen((event) {
-      _mouseUpController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
+      _mouseUpController.add(CanvasMouseEvent(_mouseEventToPoint(event), event, this));
     });
 
     _mouseMoveSub = canvasElement.onMouseMove.listen((event) {
-      _mouseMoveController.add(CanvasMouseEvent(_mouseEventToPoint(event), event));
+      _mouseMoveController.add(CanvasMouseEvent(_mouseEventToPoint(event), event, this));
     });
 
     _initCanvasSize();
+
+    _sizeChangedSub = _sizeChangedController.stream.listen((_) {
+      _cd.markForCheck();
+    });
 
     // Send event that the user is able to start drawing.
     _readyController.add(context);
@@ -109,6 +127,8 @@ class CanvasComponent implements OnInit, OnDestroy {
 
   @override
   void ngOnDestroy() {
+    _sizeChangedSub.cancel();
+
     _clickSub.cancel();
     _mouseUpSub.cancel();
     _mouseMoveSub.cancel();
@@ -267,7 +287,11 @@ class CanvasComponent implements OnInit, OnDestroy {
    * while the real size is multiplied by the factor stored at window.deviceAspectRatio.
    */
   Map<String, String> setStyles() {
-    return {"width": "${width}px", "height": "${height}px"};
+    return {
+      "width": "${width}px",
+      "height": "${height}px",
+      "cursor": _cursorType,
+    };
   }
 
   /**
@@ -280,6 +304,23 @@ class CanvasComponent implements OnInit, OnDestroy {
 
     return point;
   }
+
+  @override
+  resetCursorType() {
+    setCursorType("auto");
+  }
+
+  @override
+  setCursorType(String type) {
+    _cursorType = type;
+
+    _cd.markForCheck();
+  }
+
+  @override
+  String getCursorType() {
+    return _cursorType;
+  }
 }
 
 /// Mouse event on a canvas.
@@ -290,6 +331,21 @@ class CanvasMouseEvent {
   /// The original mouse event.
   final MouseEvent event;
 
+  /// Control object to control the canvas component externally.
+  final CanvasComponentControl control;
+
   /// Create mouse event.
-  CanvasMouseEvent(this.pos, this.event);
+  CanvasMouseEvent(this.pos, this.event, this.control);
+}
+
+/// Control object to control the canvas component.
+abstract class CanvasComponentControl {
+  /// Set the cursor type to show.
+  setCursorType(String type);
+
+  /// Get the cursor type currently shown.
+  String getCursorType();
+
+  /// Reset the cursor type to show.
+  resetCursorType();
 }
