@@ -67,9 +67,4 @@ class CDMAAnimation extends AnimationComponentConnector {
 
   /// Get the maximum pattern size.
   int get maxPatternSize => CDMAAnimation._maxPatternSize;
-
-  /// What should happen when a signal pattern changes.
-  void onPatternChange(int index, String newPattern) {
-    print(newPattern);
-  }
 }

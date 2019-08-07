@@ -21,6 +21,10 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 
+typedef void OnChange(String value);
+
+typedef bool Filter(String value);
+
 /// Text field which is drawable on a canvas.
 class InputDrawable extends Drawable implements MouseListener {
   /// Controller emitting value changes.
@@ -40,6 +44,12 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// Color of the text.
   final Color textColor;
+
+  /// Callback emitting new values when they are typed in.
+  final OnChange onChange;
+
+  /// Filter filtering inserted strings.
+  final Filter filter;
 
   /// Whether the input is currently focused.
   bool _isFocused = false;
@@ -97,6 +107,8 @@ class InputDrawable extends Drawable implements MouseListener {
     this.textColor = Colors.BLACK,
     double width = 300,
     double padding = 6,
+    this.onChange,
+    this.filter,
   }) : super(parent: parent) {
     _padding = padding * window.devicePixelRatio;
 
@@ -132,7 +144,7 @@ class InputDrawable extends Drawable implements MouseListener {
     _roundRect = RoundRectangle(
       radius: Edges.all(3 * window.devicePixelRatio),
       radiusSizeType: SizeType.PIXEL,
-      strokeWidth: 2 * window.devicePixelRatio,
+      strokeWidth: 1 * window.devicePixelRatio,
     );
 
     setSize(width: width, height: _textDrawable.size.height + _padding * 2);
@@ -310,7 +322,9 @@ class InputDrawable extends Drawable implements MouseListener {
     if (start < 0) {
       start = 0;
     }
-
+    if (start > value.length) {
+      start = value.length;
+    }
     if (end > value.length) {
       end = value.length;
     }
@@ -359,6 +373,11 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Insert the passed [v].
   void insert(String v) {
     if (v == null || v.length == 0) {
+      return;
+    }
+
+    // The filter needs to approve the value to insert first
+    if (filter != null && !filter(v)) {
       return;
     }
 
@@ -449,6 +468,10 @@ class InputDrawable extends Drawable implements MouseListener {
     }
 
     invalidate();
+
+    if (onChange != null) {
+      onChange(this.value);
+    }
   }
 
   /// Listen to value changes of the input.
@@ -568,6 +591,8 @@ class InputDrawable extends Drawable implements MouseListener {
   @override
   void onMouseDown(CanvasMouseEvent event) {
     if (!containsPos(event.pos)) {
+      _isFocused = false;
+      invalidate();
       return;
     }
 

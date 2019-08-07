@@ -11,12 +11,11 @@ import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
-import 'package:meta/meta.dart';
 
 /// Graph displaying signals for the CDMA animation.
 class SignalGraph extends Drawable {
   /// Signal pattern to display.
-  final List<double> signal;
+  List<double> _signal;
 
   /// Graph drawable used to draw the signal graph.
   Graph2D _graph2d;
@@ -24,11 +23,20 @@ class SignalGraph extends Drawable {
   /// Create signal graph.
   SignalGraph({
     Drawable parent,
-    @required this.signal,
+    List<double> signal,
   }) : super(parent: parent) {
-    _initGraph();
+    this.signal = signal;
+  }
 
-    setSize(width: 600, height: 300);
+  List<double> get signal => _signal;
+
+  void set signal(List<double> value) {
+    if (value == null) {
+      value = [0, 0];
+    }
+    _signal = value;
+
+    _initGraph();
   }
 
   /// Initialize the graph.
@@ -63,6 +71,8 @@ class SignalGraph extends Drawable {
 
     // Add signal
     _graph2d.add(Graph2DSeries(series: series));
+
+    invalidate();
   }
 
   @override
