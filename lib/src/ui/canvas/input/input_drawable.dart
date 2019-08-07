@@ -11,6 +11,10 @@ import 'package:async/async.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
@@ -23,7 +27,7 @@ class InputDrawable extends Drawable implements MouseListener {
   final StreamController<String> _valueChanges = StreamController<String>.broadcast(sync: false);
 
   /// Current value of the input.
-  String _value;
+  String _value = "";
 
   /// Max length of the text field.
   final int maxLength;
@@ -80,6 +84,9 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Padding to use vertically.
   double _padding = 0;
 
+  /// Round rectangle to draw the input box with.
+  RoundRectangle _roundRect;
+
   /// Create new input drawable.
   InputDrawable({
     Drawable parent,
@@ -89,7 +96,7 @@ class InputDrawable extends Drawable implements MouseListener {
     this.fontFamily = "sans-serif",
     this.textColor = Colors.BLACK,
     double width = 300,
-    double padding = 3,
+    double padding = 6,
   }) : super(parent: parent) {
     _padding = padding * window.devicePixelRatio;
 
@@ -99,7 +106,7 @@ class InputDrawable extends Drawable implements MouseListener {
   }
 
   /// Get the available window width.
-  double get windowWidth => size.width;
+  double get windowWidth => size.width - 2 * _xScrollPadding;
 
   /// Initialize the drawable.
   void _init(double width) {
@@ -120,6 +127,12 @@ class InputDrawable extends Drawable implements MouseListener {
       lineHeight: 1.0,
       fontFamilies: fontFamily,
       textSize: fontSize,
+    );
+
+    _roundRect = RoundRectangle(
+      radius: Edges.all(3 * window.devicePixelRatio),
+      radiusSizeType: SizeType.PIXEL,
+      strokeWidth: 2 * window.devicePixelRatio,
     );
 
     setSize(width: width, height: _textDrawable.size.height + _padding * 2);
@@ -450,8 +463,13 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// Draw the input box border.
   void _drawBorder() {
-    setStrokeColor(_isFocused ? Colors.SPACE_BLUE : Colors.BLACK);
-    ctx.strokeRect(0, 0, size.width, size.height);
+    _roundRect.color = Color.hex(0xFFF9F9F9);
+    _roundRect.paintMode = PaintMode.FILL;
+    _roundRect.render(ctx, Rectangle<double>(0, 0, size.width, size.height));
+
+    _roundRect.color = _isFocused ? Colors.SPACE_BLUE : Colors.LIGHTGREY;
+    _roundRect.paintMode = PaintMode.STROKE;
+    _roundRect.render(ctx, Rectangle<double>(0, 0, size.width, size.height));
   }
 
   /// Check if the text to display is currently overflowing the available space.
@@ -467,7 +485,7 @@ class InputDrawable extends Drawable implements MouseListener {
     double height = _textDrawable.size.height;
 
     _textDrawable.render(ctx, lastPassTimestamp, painter: (image, offset) {
-      ctx.drawImageToRect(image, Rectangle<double>(0, _padding, width, height),
+      ctx.drawImageToRect(image, Rectangle<double>(_xScrollPadding, _padding, width, height),
           sourceRect: Rectangle<double>(
             _scrollPos,
             0,
@@ -509,9 +527,9 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Get the x offset for the passed character [pos].
   double _getXOffsetForCharPos(int pos) {
     if (pos == 0) {
-      return 0;
+      return _xScrollPadding;
     } else {
-      return _widthPerCharacter[pos - 1];
+      return _widthPerCharacter[pos - 1] + _xScrollPadding;
     }
   }
 

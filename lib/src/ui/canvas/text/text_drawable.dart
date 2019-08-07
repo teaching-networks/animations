@@ -57,7 +57,11 @@ class TextDrawable extends Drawable {
 
     _calculateSize();
 
-    invalidate();
+    if (_text == null || _text.isEmpty) {
+      validate();
+    } else {
+      invalidate();
+    }
   }
 
   String get text => _text;

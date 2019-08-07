@@ -68,9 +68,6 @@ class RoundRectangle extends CanvasDrawable {
     if (_sizeType == SizeType.PERCENT) {
       // Convert edges from percent to the actual pixel sizes.
       r = Edges.convertPercent(r, new Size(rect.width, rect.height));
-
-      // Convert strokeWidth to pixel
-      lineWidth = lineWidth * min(rect.width, rect.height);
     }
 
     r *= window.devicePixelRatio;

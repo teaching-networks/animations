@@ -21,14 +21,13 @@ class CDMADrawable extends Drawable {
   /// Initialize the drawable.
   void _init() {
     _signalGraph = SignalGraph(parent: this, signal: [0, 0, 0, 5, -3, 2, 1, 0, 0, 1, -1, 0, 1, 1, 1, 0]);
-    _input = InputDrawable(parent: this);
+    _input = InputDrawable(parent: this, fontFamily: 'Roboto');
   }
 
   @override
   void draw() {
     _signalGraph.render(ctx, lastPassTimestamp);
-
-    _input.render(ctx, lastPassTimestamp);
+    _input.render(ctx, lastPassTimestamp, x: 300, y: 600);
   }
 
   @override

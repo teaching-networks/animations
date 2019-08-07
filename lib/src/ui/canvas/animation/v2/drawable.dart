@@ -97,7 +97,7 @@ abstract class Drawable extends CanvasContextUtil {
   }
 
   /// Validate the drawable.
-  void _validate() {
+  void validate() {
     _invalid = false;
   }
 
@@ -137,7 +137,7 @@ abstract class Drawable extends CanvasContextUtil {
       _cacheCanvasContext.clearRect(0, 0, size.width, size.height);
       draw();
 
-      _validate(); // Drawable has been redrawn and thus is valid again!
+      validate(); // Drawable has been redrawn and thus is valid again!
     }
 
     if (painter == null) {
