@@ -14,6 +14,9 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// Graph displaying signals for the CDMA animation.
 class SignalGraph extends Drawable {
+  /// Whether the quadrants should have the same size.
+  final bool equalQuadrants;
+
   /// Signal pattern to display.
   List<double> _signal;
 
@@ -22,6 +25,7 @@ class SignalGraph extends Drawable {
 
   /// Create signal graph.
   SignalGraph({
+    this.equalQuadrants = true,
     Drawable parent,
     List<double> signal,
   }) : super(parent: parent) {
@@ -42,7 +46,7 @@ class SignalGraph extends Drawable {
   /// Initialize the graph.
   _initGraph() {
     List<Point<double>> series = [Point<double>(0, 0)];
-    double minY = -1;
+    double minY = 0;
     double maxY = 1;
     for (int i = 0; i < signal.length; i++) {
       double v = signal[i];
@@ -58,10 +62,15 @@ class SignalGraph extends Drawable {
       }
     }
     series.add(Point<double>(signal.length.toDouble(), 0));
+
     double yOffset = (minY.abs() > maxY.abs() ? minY : maxY).abs();
     double offsetPadding = yOffset * 0.05;
+    if (equalQuadrants) {
+      maxY = yOffset;
+      minY = -yOffset;
+    }
 
-    _graph2d = Graph2D(minX: 0, maxX: signal.length, minY: -yOffset - offsetPadding, maxY: yOffset + offsetPadding, preCalculationFactor: 0.0);
+    _graph2d = Graph2D(minX: 0, maxX: signal.length, minY: minY - offsetPadding, maxY: maxY + offsetPadding, preCalculationFactor: 0.0);
 
     // Add x and y axis
     _graph2d.add(Graph2DSeries(series: [Point<double>(_graph2d.minX, 0), Point<double>(_graph2d.maxX, 0)], style: Graph2DStyle(color: Colors.LIGHTGREY)));
@@ -81,6 +90,7 @@ class SignalGraph extends Drawable {
     _graph2d.render(ctx, Rectangle<double>(borderSize, borderSize, size.width - borderSize * 2, size.height - borderSize * 2));
 
     ctx.lineWidth = borderSize;
+    setFillColor(Colors.LIGHTGREY);
     ctx.strokeRect(0, 0, size.width, size.height);
   }
 

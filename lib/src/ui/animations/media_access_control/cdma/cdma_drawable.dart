@@ -24,26 +24,32 @@ class CDMADrawable extends Drawable {
   static const int _inputLength = 4;
 
   /// The default codes.
-  static const List<List<int>> _defaultCodes = [
+  static const List<List<double>> _defaultCodes = [
     [1, 1, 1, 1],
-    [1, 0, 1, 0],
-    [1, 1, 0, 0],
-    [1, 0, 0, 1],
+    [1, -1, 1, -1],
+    [1, 1, -1, -1],
+    [1, -1, -1, 1],
   ];
 
   /// Random number generator of the drawable.
   Random _rng = Random();
 
   /// Code for each sender and receiver.
-  List<List<int>> _codes = CDMADrawable._defaultCodes;
+  List<List<double>> _codes = CDMADrawable._defaultCodes;
 
-  List<List<int>> _input = List<List<int>>(CDMADrawable._connectionCount);
+  List<List<double>> _input = List<List<double>>(CDMADrawable._connectionCount);
 
   /// Input drawables for each sender to input the signal to send.
   List<InputDrawable> _inputDrawables = List<InputDrawable>(CDMADrawable._connectionCount);
 
   /// Signal graph for each sender.
   List<SignalGraph> _senderSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
+
+  /// Signal graph for each code.
+  List<SignalGraph> _codeGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
+
+  /// Signal graph for each code division.
+  List<SignalGraph> _stretchGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
 
   /// Signal graph for each receiver.
   List<SignalGraph> _receiverSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
@@ -58,16 +64,20 @@ class CDMADrawable extends Drawable {
 
   /// Initialize the drawable.
   void _init() {
+    _channelSignalGraph = SignalGraph(parent: this);
+
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
-      _inputDrawables[i] = _createInputDrawable((newValue) => _onInputUpdate(i, newValue));
+      _codeGraphs[i] = SignalGraph(parent: this, signal: _codes[i]);
+      _senderSignalGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
+      _stretchGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
+      _receiverSignalGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
 
-      _senderSignalGraphs[i] = SignalGraph(parent: this);
-      _receiverSignalGraphs[i] = SignalGraph(parent: this);
-
-      _input[i] = List<int>(CDMADrawable._inputLength);
+      _input[i] = List<double>(CDMADrawable._inputLength);
     }
 
-    _channelSignalGraph = SignalGraph(parent: this, signal: [0, 0, 0, 5, -3, 2, 1, 0, 0, 1, -1, 0, 1, 1, 1, 0]);
+    for (int i = 0; i < CDMADrawable._connectionCount; i++) {
+      _inputDrawables[i] = _createInputDrawable((newValue) => _onInputUpdate(i, newValue));
+    }
   }
 
   /// Create an input drawable.
@@ -119,12 +129,31 @@ class CDMADrawable extends Drawable {
     double width,
     double height,
   }) {
+    double padding = height * 0.01;
+    double curY = y + padding;
+
     InputDrawable input = _inputDrawables[index];
-    input.render(ctx, lastPassTimestamp, x: x, y: y);
+    input.render(ctx, lastPassTimestamp, x: x, y: curY);
+
+    curY += input.size.height + padding;
+    double heightLeft = height - padding * 2 - input.size.height;
+
+    double graphWidth = width * 0.8;
+    double graphHeight = (heightLeft - padding * 2) / 2;
+
+    SignalGraph codeGraph = _codeGraphs[index];
+    codeGraph.setSize(width: width * 0.2, height: graphHeight);
+    codeGraph.render(ctx, lastPassTimestamp, x: x, y: curY + (heightLeft - graphHeight) / 2);
 
     SignalGraph sg = _senderSignalGraphs[index];
-    sg.setSize(width: width, height: height);
-    sg.render(ctx, lastPassTimestamp, x: x, y: y);
+    sg.setSize(width: graphWidth, height: graphHeight);
+    sg.render(ctx, lastPassTimestamp, x: x + codeGraph.size.width, y: curY);
+
+    curY += graphHeight + padding;
+
+    SignalGraph sg2 = _stretchGraphs[index];
+    sg2.setSize(width: graphWidth, height: graphHeight);
+    sg2.render(ctx, lastPassTimestamp, x: x + codeGraph.size.width, y: curY);
   }
 
   /// Draw a receiver box.
@@ -165,15 +194,79 @@ class CDMADrawable extends Drawable {
   /// What should happen if a input value update is received.
   _onInputUpdate(int i, String newValue) {
     List<double> signal = List<double>(newValue.length);
-    int i = 0;
+    int a = 0;
     for (final rune in newValue.runes) {
       int v = int.tryParse(String.fromCharCode(rune));
       if (v == null) {
         throw new Exception("Could not parse input value $newValue");
       }
-      signal[i++] = v.toDouble();
+      signal[a++] = v == 0 ? -1 : 1;
     }
 
-    this._senderSignalGraphs[i].signal = signal;
+    _input[i] = signal;
+    _senderSignalGraphs[i].signal = signal;
+    _stretchGraphs[i].signal = _stretchSignal(signal, _codes[i]);
+
+    _updateChannelGraph();
+    _updateReceiverGraphs();
+  }
+
+  /// Update all receiver graphs.
+  void _updateReceiverGraphs() {
+    List<double> channelSignal = _channelSignalGraph.signal;
+
+    for (int i = 0; i < CDMADrawable._connectionCount; i++) {
+      List<double> code = _codes[i];
+      SignalGraph graph = _receiverSignalGraphs[i];
+      List<double> newSignal = List<double>();
+
+      for (int a = 0; a < CDMADrawable._inputLength; a++) {
+        double value = 0;
+        for (int u = 0; u < code.length; u++) {
+          int index = a * code.length + u;
+          double codeBit = code[u];
+
+          if (channelSignal.length > index) {
+            value += codeBit * channelSignal[index];
+          }
+        }
+
+        value /= code.length;
+        newSignal.add(value);
+      }
+
+      graph.signal = newSignal;
+    }
+  }
+
+  /// Update the channel graph.
+  void _updateChannelGraph() {
+    List<double> signal = List<double>(CDMADrawable._codeLength * CDMADrawable._inputLength);
+    for (int i = 0; i < signal.length; i++) {
+      double value = 0;
+      for (final graph in _stretchGraphs) {
+        if (graph.signal.length > i) {
+          value += graph.signal[i];
+        }
+      }
+      signal[i] = value;
+    }
+
+    _channelSignalGraph.signal = signal;
+  }
+
+  /// Divide the passed signal with the passed code.
+  List<double> _stretchSignal(List<double> signal, List<double> code) {
+    List<double> result = List<double>(signal.length * code.length);
+
+    for (int i = 0; i < signal.length; i++) {
+      final bit = signal[i];
+      for (int a = 0; a < code.length; a++) {
+        final codeBit = code[a];
+        result[i * code.length + a] = bit * codeBit;
+      }
+    }
+
+    return result;
   }
 }

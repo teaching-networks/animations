@@ -42,16 +42,11 @@ class CDMAAnimation extends AnimationComponentConnector {
     version: 2,
   );
 
-  /// Maximum pattern size.
-  static final int _maxPatternSize = 4;
-
   /// Service to get translations from.
   final I18nService _i18n;
 
   /// Drawable of the CDMA animation.
   final CDMADrawable _drawable = CDMADrawable();
-
-  String testPattern = "1010";
 
   /// Create animation.
   CDMAAnimation(this._i18n);
@@ -64,7 +59,4 @@ class CDMAAnimation extends AnimationComponentConnector {
 
   @override
   Drawable get drawable => _drawable;
-
-  /// Get the maximum pattern size.
-  int get maxPatternSize => CDMAAnimation._maxPatternSize;
 }
