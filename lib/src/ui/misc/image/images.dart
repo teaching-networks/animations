@@ -16,4 +16,6 @@ class Images {
   static const database = ImageInfo(path: "img/animation/database.svg", aspectRatio: 283.5 / 337.9);
   static const scroll = ImageInfo(path: "img/animation/scroll.svg", aspectRatio: 166.8 / 202.4);
   static const cookie = ImageInfo(path: "img/animation/cookie.svg", aspectRatio: 1);
+  static const cdmaCode = ImageInfo(path: "img/animation/cdma-code.svg", aspectRatio: 265.5 / 175.3);
+  static const cdmaInput = ImageInfo(path: "img/animation/cdma-input.svg", aspectRatio: 306.5 / 156.9);
 }

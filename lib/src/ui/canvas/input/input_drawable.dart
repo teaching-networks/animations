@@ -54,6 +54,9 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Whether the input is currently focused.
   bool _isFocused = false;
 
+  /// Whether the mouse is currently hovering over the drawables area.
+  bool _isMouseIn = false;
+
   /// The current selection.
   _SelectionRange _selection;
 
@@ -144,7 +147,7 @@ class InputDrawable extends Drawable implements MouseListener {
     _roundRect = RoundRectangle(
       radius: Edges.all(3 * window.devicePixelRatio),
       radiusSizeType: SizeType.PIXEL,
-      strokeWidth: 1 * window.devicePixelRatio,
+      strokeWidth: 2 * window.devicePixelRatio,
     );
 
     setSize(width: width, height: _textDrawable.size.height + _padding * 2);
@@ -480,19 +483,23 @@ class InputDrawable extends Drawable implements MouseListener {
   @override
   void draw() {
     _drawBorder();
-    _drawValue();
     _drawSelection();
+    _drawValue();
   }
 
   /// Draw the input box border.
   void _drawBorder() {
-    _roundRect.color = Color.hex(0xFFF9F9F9);
-    _roundRect.paintMode = PaintMode.FILL;
-    _roundRect.render(ctx, Rectangle<double>(0, 0, size.width, size.height));
-
     _roundRect.color = _isFocused ? Colors.SPACE_BLUE : Colors.LIGHTGREY;
     _roundRect.paintMode = PaintMode.STROKE;
-    _roundRect.render(ctx, Rectangle<double>(0, 0, size.width, size.height));
+    _roundRect.render(
+      ctx,
+      Rectangle<double>(
+        _roundRect.strokeWidth,
+        _roundRect.strokeWidth,
+        size.width - 2 * _roundRect.strokeWidth,
+        size.height - 2 * _roundRect.strokeWidth,
+      ),
+    );
   }
 
   /// Check if the text to display is currently overflowing the available space.
@@ -533,18 +540,14 @@ class InputDrawable extends Drawable implements MouseListener {
     double height = _textDrawable.size.height;
 
     var color = Colors.SPACE_BLUE;
-    ctx.globalAlpha = 0.3;
 
     if (width == 0) {
       width = 2 * window.devicePixelRatio;
-      color = Colors.BLACK;
-      ctx.globalAlpha = 0.8;
+      color = Colors.DARK_GRAY;
     }
 
     setFillColor(color);
     ctx.fillRect(x, y, width, height);
-
-    ctx.globalAlpha = 1.0;
   }
 
   /// Get the x offset for the passed character [pos].
@@ -618,11 +621,13 @@ class InputDrawable extends Drawable implements MouseListener {
   @override
   void onMouseMove(CanvasMouseEvent event) {
     if (containsPos(event.pos)) {
+      _isMouseIn = true;
       if (event.control.getCursorType() != "text") {
         event.control.setCursorType("text");
       }
-    } else {
-      event.control.resetCursorType();
+    } else if (_isMouseIn) {
+      _isMouseIn = false;
+      _onMouseLeave(event);
     }
 
     if (_isMouseDown) {
@@ -630,6 +635,13 @@ class InputDrawable extends Drawable implements MouseListener {
 
       selectRange(min(_startSelectPos, pos), max(_startSelectPos, pos));
       scrollToPos(pos);
+    }
+  }
+
+  /// What should happen when the mouse leaves the input drawable area.
+  void _onMouseLeave(CanvasMouseEvent event) {
+    if (event.control.getCursorType() == "text") {
+      event.control.resetCursorType();
     }
   }
 

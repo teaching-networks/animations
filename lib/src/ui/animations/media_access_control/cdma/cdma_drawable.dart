@@ -3,11 +3,17 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/media_access_control/cdma/graph/signal_graph.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/input/input_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/image/image_info.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:tuple/tuple.dart';
+import 'package:vector_math/vector_math.dart' as vector;
 
 /// Main drawable for the CDMA animation.
 class CDMADrawable extends Drawable {
@@ -43,19 +49,31 @@ class CDMADrawable extends Drawable {
   List<InputDrawable> _inputDrawables = List<InputDrawable>(CDMADrawable._connectionCount);
 
   /// Signal graph for each sender.
-  List<SignalGraph> _senderSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
+  List<SignalGraph> _inputSignals = List<SignalGraph>(CDMADrawable._connectionCount);
 
   /// Signal graph for each code.
   List<SignalGraph> _codeGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
 
   /// Signal graph for each code division.
-  List<SignalGraph> _stretchGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
+  List<SignalGraph> _encodedInputSignals = List<SignalGraph>(CDMADrawable._connectionCount);
 
   /// Signal graph for each receiver.
   List<SignalGraph> _receiverSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
 
   /// Signal graph visualizing the channel.
   SignalGraph _channelSignalGraph;
+
+  /// Image info for the cdma code image.
+  ImageInfo _cdmaCodeInfo;
+
+  /// The loaded cdma code image.
+  CanvasImageSource _cdmaCodeImage;
+
+  /// Image info for the cdma input image.
+  ImageInfo _cdmaInputInfo;
+
+  /// The loaded cdma input image.
+  CanvasImageSource _cdmaInputImage;
 
   /// Create drawable.
   CDMADrawable() {
@@ -67,10 +85,10 @@ class CDMADrawable extends Drawable {
     _channelSignalGraph = SignalGraph(parent: this);
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
-      _codeGraphs[i] = SignalGraph(parent: this, signal: _codes[i]);
-      _senderSignalGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
-      _stretchGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
-      _receiverSignalGraphs[i] = SignalGraph(parent: this, equalQuadrants: false);
+      _codeGraphs[i] = SignalGraph(parent: this, signal: _codes[i], signalColor: Colors.ORANGE);
+      _inputSignals[i] = SignalGraph(parent: this);
+      _encodedInputSignals[i] = SignalGraph(parent: this);
+      _receiverSignalGraphs[i] = SignalGraph(parent: this);
 
       _input[i] = List<double>(CDMADrawable._inputLength);
     }
@@ -78,6 +96,19 @@ class CDMADrawable extends Drawable {
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
       _inputDrawables[i] = _createInputDrawable((newValue) => _onInputUpdate(i, newValue));
     }
+
+    _initImages();
+  }
+
+  /// Initialize the images needed by the drawable.
+  Future<void> _initImages() async {
+    _cdmaCodeInfo = Images.cdmaCode;
+    _cdmaCodeImage = await _cdmaCodeInfo.load();
+
+    _cdmaInputInfo = Images.cdmaInput;
+    _cdmaInputImage = await _cdmaInputInfo.load();
+
+    invalidate();
   }
 
   /// Create an input drawable.
@@ -110,15 +141,82 @@ class CDMADrawable extends Drawable {
     double cellW = size.width / columns;
     double cellH = size.height / rows;
 
-    for (int i = 0; i < rows; i++) {
-      _drawSenderBox(i, x: 0, y: cellH * i, width: cellW, height: cellH);
-    }
+    final connectingOperatorInfo = _drawChannel(x: cellW, y: 0, width: cellW, height: cellH * rows);
 
-    _drawChannel(x: cellW, y: 0, width: cellW, height: cellH * rows);
+    for (int i = 0; i < rows; i++) {
+      _drawSenderBox(
+        i,
+        x: 0,
+        y: cellH * i,
+        width: cellW,
+        height: cellH,
+        connectTo: connectingOperatorInfo.item2,
+        connectOffset: connectingOperatorInfo.item1,
+      );
+    }
 
     for (int i = 0; i < rows; i++) {
       _drawReceiverBox(i, x: cellW * 2, y: cellH * i, width: cellW, height: cellH);
     }
+  }
+
+  /// Draw an operator bubble.
+  void _drawOperator(
+    String text, {
+    double x = 0,
+    double y = 0,
+    double size = 50,
+  }) {
+    double radius = size / 2;
+    double fontSize = size * 0.75;
+
+    ctx.beginPath();
+    ctx.ellipse(x, y, radius, radius, 2 * pi, 0, 2 * pi, false);
+
+    setFillColor(Colors.PINK_RED_2);
+    ctx.fill();
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    setFillColor(Colors.WHITE);
+    ctx.font = "bold ${fontSize}px monospace";
+
+    ctx.fillText(text, x, y);
+  }
+
+  /// Draw an arrow between the two points [from] and [to].
+  void _drawArrow(
+    Point<double> from,
+    Point<double> to, {
+    double headSize = 8,
+    double lineWidth = 2,
+    double headAngle = pi * 0.15,
+  }) {
+    headSize *= window.devicePixelRatio;
+    lineWidth *= window.devicePixelRatio;
+    headAngle -= pi;
+
+    setStrokeColor(Colors.SPACE_BLUE);
+    ctx.lineWidth = lineWidth;
+
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+
+    vector.Vector3 arrowV = vector.Vector3(to.x - from.x, to.y - from.y, 0);
+    vector.Quaternion rotateLeft = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), headAngle);
+    vector.Vector3 leftHead = rotateLeft.rotated(arrowV);
+    leftHead.length = headSize;
+    vector.Quaternion rotateRight = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), -headAngle);
+    vector.Vector3 rightHead = rotateRight.rotated(arrowV);
+    rightHead.length = headSize;
+
+    ctx.beginPath();
+    ctx.moveTo(to.x + leftHead.x, to.y + leftHead.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.lineTo(to.x + rightHead.x, to.y + rightHead.y);
+    ctx.stroke();
   }
 
   /// Draw a sender box.
@@ -128,32 +226,94 @@ class CDMADrawable extends Drawable {
     double y,
     double width,
     double height,
+    double connectOffset,
+    Point<double> connectTo,
   }) {
-    double padding = height * 0.01;
-    double curY = y + padding;
+    double padding = height * 0.05;
+    double spacing = height * 0.2;
 
     InputDrawable input = _inputDrawables[index];
-    input.render(ctx, lastPassTimestamp, x: x, y: curY);
 
-    curY += input.size.height + padding;
-    double heightLeft = height - padding * 2 - input.size.height;
+    double heightLeft = height - padding - input.size.height;
 
-    double graphWidth = width * 0.8;
-    double graphHeight = (heightLeft - padding * 2) / 2;
+    double graphHeight = (heightLeft - padding * 2 - spacing) / 2;
+    double codeGraphWidth = (width - padding * 2 - spacing) / (CDMADrawable._inputLength + 1);
+    double graphWidth = codeGraphWidth * CDMADrawable._inputLength;
+    double graphXOffset = x + codeGraphWidth + padding + spacing;
+    double graphYOffset = y + padding + input.size.height;
+
+    double inputBoxXOffset = graphXOffset + (graphWidth - input.size.width) / 2;
+    input.render(ctx, lastPassTimestamp, x: inputBoxXOffset, y: y + padding);
+
+    if (_cdmaInputImage != null) {
+      double imgHeight = input.size.height;
+      double imgWidth = imgHeight * _cdmaInputInfo.aspectRatio;
+
+      ctx.drawImageToRect(
+        _cdmaInputImage,
+        Rectangle<double>(
+          inputBoxXOffset - imgWidth - 5,
+          y + padding,
+          imgWidth,
+          imgHeight,
+        ),
+      );
+    }
 
     SignalGraph codeGraph = _codeGraphs[index];
-    codeGraph.setSize(width: width * 0.2, height: graphHeight);
-    codeGraph.render(ctx, lastPassTimestamp, x: x, y: curY + (heightLeft - graphHeight) / 2);
+    codeGraph.setSize(width: codeGraphWidth, height: graphHeight);
+    double codeGraphYOffset = graphYOffset + (heightLeft - graphHeight) / 2;
+    codeGraph.render(ctx, lastPassTimestamp, x: x + padding, y: codeGraphYOffset);
 
-    SignalGraph sg = _senderSignalGraphs[index];
-    sg.setSize(width: graphWidth, height: graphHeight);
-    sg.render(ctx, lastPassTimestamp, x: x + codeGraph.size.width, y: curY);
+    if (_cdmaCodeImage != null) {
+      double imgHeight = graphHeight / 2;
+      double imgWidth = imgHeight * _cdmaCodeInfo.aspectRatio;
 
-    curY += graphHeight + padding;
+      ctx.drawImageToRect(
+        _cdmaCodeImage,
+        Rectangle<double>(
+          x + padding + codeGraphWidth - imgWidth,
+          codeGraphYOffset - imgHeight - padding,
+          imgWidth,
+          imgHeight,
+        ),
+      );
+    }
 
-    SignalGraph sg2 = _stretchGraphs[index];
-    sg2.setSize(width: graphWidth, height: graphHeight);
-    sg2.render(ctx, lastPassTimestamp, x: x + codeGraph.size.width, y: curY);
+    SignalGraph inputSg = _inputSignals[index];
+    inputSg.setSize(width: codeGraphWidth, height: graphHeight);
+    inputSg.render(ctx, lastPassTimestamp, x: graphXOffset + (graphWidth - codeGraphWidth) / 2, y: graphYOffset + padding);
+
+    SignalGraph encodedSg = _encodedInputSignals[index];
+    encodedSg.setSize(width: graphWidth, height: graphHeight);
+    encodedSg.render(ctx, lastPassTimestamp, x: graphXOffset, y: graphYOffset + padding + spacing + graphHeight);
+
+    double operatorSize = spacing - 2 * padding;
+    _drawOperator("∗", x: graphXOffset + graphWidth / 2, y: graphYOffset + padding + graphHeight + spacing / 2, size: operatorSize);
+    _drawArrow(
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset),
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset + padding),
+    );
+    _drawArrow(
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset + padding + graphHeight),
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset + padding * 2 + graphHeight),
+    );
+    _drawArrow(
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset + padding + graphHeight + spacing - padding),
+      Point<double>(graphXOffset + graphWidth / 2, graphYOffset + padding + graphHeight + spacing),
+    );
+    _drawArrow(
+      Point<double>(x + padding + codeGraphWidth, graphYOffset + padding + graphHeight + spacing / 2),
+      Point<double>(graphXOffset + graphWidth / 2 - operatorSize / 2, graphYOffset + padding + graphHeight + spacing / 2),
+    );
+
+    // Draw arrow which connects to a point outside of the sender box
+    Point<double> from = Point<double>(width - padding, graphYOffset + padding + graphHeight * 1.5 + spacing);
+    vector.Vector2 connectToV = vector.Vector2(connectTo.x - from.x, connectTo.y - from.y)..length -= connectOffset;
+    _drawArrow(
+      from,
+      Point<double>(from.x + connectToV.x, from.y + connectToV.y),
+    );
   }
 
   /// Draw a receiver box.
@@ -171,16 +331,24 @@ class CDMADrawable extends Drawable {
   }
 
   /// Draw the channel visualization.
-  void _drawChannel({
+  /// It returns the radius and position of the operation bubbles.
+  Tuple2<double, Point<double>> _drawChannel({
     double x,
     int y,
     double width,
     double height,
   }) {
+    double operationBubbleSize = height * 0.04;
+    _drawOperator("+", x: x + operationBubbleSize / 2, y: y + height / 2, size: operationBubbleSize);
+
     SignalGraph sg = _channelSignalGraph;
 
-    sg.setSize(width: width, height: height / 3);
-    sg.render(ctx, lastPassTimestamp, x: x, y: y + height / 3);
+    sg.setSize(width: width - operationBubbleSize * 1.5, height: height / 3);
+    sg.render(ctx, lastPassTimestamp, x: x + operationBubbleSize * 1.5, y: y + height / 3);
+
+    _drawArrow(Point<double>(x + operationBubbleSize, y + height / 2), Point<double>(x + operationBubbleSize * 1.5, y + height / 2));
+
+    return Tuple2(operationBubbleSize / 2, Point<double>(x + operationBubbleSize / 2, y + height / 2));
   }
 
   @override
@@ -193,7 +361,8 @@ class CDMADrawable extends Drawable {
 
   /// What should happen if a input value update is received.
   _onInputUpdate(int i, String newValue) {
-    List<double> signal = List<double>(newValue.length);
+    List<double> signal = List<double>(CDMADrawable._inputLength)..fillRange(0, CDMADrawable._inputLength, 0);
+
     int a = 0;
     for (final rune in newValue.runes) {
       int v = int.tryParse(String.fromCharCode(rune));
@@ -204,8 +373,8 @@ class CDMADrawable extends Drawable {
     }
 
     _input[i] = signal;
-    _senderSignalGraphs[i].signal = signal;
-    _stretchGraphs[i].signal = _stretchSignal(signal, _codes[i]);
+    _inputSignals[i].signal = signal;
+    _encodedInputSignals[i].signal = _stretchSignal(signal, _codes[i]);
 
     _updateChannelGraph();
     _updateReceiverGraphs();
@@ -244,7 +413,7 @@ class CDMADrawable extends Drawable {
     List<double> signal = List<double>(CDMADrawable._codeLength * CDMADrawable._inputLength);
     for (int i = 0; i < signal.length; i++) {
       double value = 0;
-      for (final graph in _stretchGraphs) {
+      for (final graph in _encodedInputSignals) {
         if (graph.signal.length > i) {
           value += graph.signal[i];
         }
