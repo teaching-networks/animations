@@ -60,6 +60,9 @@ class CDMADrawable extends Drawable {
   /// Signal graph for each receiver.
   List<SignalGraph> _receiverSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
 
+  /// Signal graph for each received signal.
+  List<SignalGraph> _receiverEncodedSignalGraphs = List<SignalGraph>(CDMADrawable._connectionCount);
+
   /// Signal graph visualizing the channel.
   SignalGraph _channelSignalGraph;
 
@@ -89,6 +92,7 @@ class CDMADrawable extends Drawable {
       _inputSignals[i] = SignalGraph(parent: this);
       _encodedInputSignals[i] = SignalGraph(parent: this);
       _receiverSignalGraphs[i] = SignalGraph(parent: this);
+      _receiverEncodedSignalGraphs[i] = SignalGraph(parent: this);
 
       _input[i] = List<double>(CDMADrawable._inputLength);
     }
@@ -143,6 +147,9 @@ class CDMADrawable extends Drawable {
 
     final connectingOperatorInfo = _drawChannel(x: cellW, y: 0, width: cellW, height: cellH * rows);
 
+    double boxPadding = cellH * 0.05;
+    double boxSpacing = cellH * 0.2;
+
     for (int i = 0; i < rows; i++) {
       _drawSenderBox(
         i,
@@ -152,11 +159,21 @@ class CDMADrawable extends Drawable {
         height: cellH,
         connectTo: connectingOperatorInfo.item2,
         connectOffset: connectingOperatorInfo.item1,
+        padding: boxPadding,
+        spacing: boxSpacing,
       );
     }
 
     for (int i = 0; i < rows; i++) {
-      _drawReceiverBox(i, x: cellW * 2, y: cellH * i, width: cellW, height: cellH);
+      _drawReceiverBox(
+        i,
+        x: cellW * 2,
+        y: cellH * i,
+        width: cellW,
+        height: cellH,
+        padding: boxPadding,
+        spacing: boxSpacing,
+      );
     }
   }
 
@@ -228,10 +245,9 @@ class CDMADrawable extends Drawable {
     double height,
     double connectOffset,
     Point<double> connectTo,
+    double padding,
+    double spacing,
   }) {
-    double padding = height * 0.05;
-    double spacing = height * 0.2;
-
     InputDrawable input = _inputDrawables[index];
 
     double heightLeft = height - padding - input.size.height;
@@ -323,11 +339,51 @@ class CDMADrawable extends Drawable {
     double y,
     double width,
     double height,
+    double padding,
+    double spacing,
   }) {
-    SignalGraph sg = _receiverSignalGraphs[index];
+    SignalGraph codeGraph = _codeGraphs[index];
 
-    sg.setSize(width: width, height: height);
-    sg.render(ctx, lastPassTimestamp, x: x, y: y);
+    double operatorSize = spacing - 2 * padding;
+
+    double codeGraphYOffset = y + height - padding - codeGraph.size.height;
+    codeGraph.render(ctx, lastPassTimestamp, x: x + padding, y: codeGraphYOffset);
+
+    double graphXOffset = x + padding + codeGraph.size.width + spacing;
+    double encodedGraphHeight = height - padding * 2 - spacing - codeGraph.size.height;
+
+    SignalGraph encodedSg = _receiverEncodedSignalGraphs[index];
+    encodedSg.setSize(width: width - padding * 2 - spacing - codeGraph.size.width, height: encodedGraphHeight);
+    encodedSg.render(ctx, lastPassTimestamp, x: graphXOffset, y: y + padding);
+
+    SignalGraph resultSg = _receiverSignalGraphs[index];
+    resultSg.setSize(width: codeGraph.size.width, height: codeGraph.size.height);
+    resultSg.render(ctx, lastPassTimestamp, x: graphXOffset, y: y + height - padding - resultSg.size.height);
+
+    double operatorXOffset = x + padding + codeGraph.size.width / 2;
+    double operatorYOffset = y + height / 2;
+    _drawOperator("∗", x: operatorXOffset, y: operatorYOffset, size: operatorSize);
+    _drawArrow(
+      Point<double>(x, size.height / 2),
+      Point<double>(operatorXOffset - operatorSize / 2, operatorYOffset),
+    );
+    _drawArrow(
+      Point<double>(operatorXOffset, codeGraphYOffset),
+      Point<double>(operatorXOffset, operatorYOffset + operatorSize / 2),
+    );
+    _drawArrow(
+      Point<double>(operatorXOffset + operatorSize / 2, operatorYOffset),
+      Point<double>(x + padding + codeGraph.size.width + spacing, y + padding + encodedGraphHeight / 2),
+    );
+    _drawOperator("/", x: graphXOffset + encodedSg.size.width / 2, y: y + encodedGraphHeight + padding + spacing / 2, size: operatorSize);
+    _drawArrow(
+      Point<double>(graphXOffset + encodedSg.size.width / 2, y + encodedGraphHeight + padding),
+      Point<double>(graphXOffset + encodedSg.size.width / 2, y + encodedGraphHeight + padding + spacing / 2 - operatorSize / 2),
+    );
+    _drawArrow(
+      Point<double>(graphXOffset + encodedSg.size.width / 2, y + height - codeGraph.size.height - padding - spacing / 2 + operatorSize / 2),
+      Point<double>(graphXOffset + encodedSg.size.width / 2, y + height - codeGraph.size.height - padding),
+    );
   }
 
   /// Draw the channel visualization.
@@ -386,25 +442,29 @@ class CDMADrawable extends Drawable {
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
       List<double> code = _codes[i];
-      SignalGraph graph = _receiverSignalGraphs[i];
-      List<double> newSignal = List<double>();
+      SignalGraph encodedGraph = _receiverEncodedSignalGraphs[i];
+      SignalGraph resultGraph = _receiverSignalGraphs[i];
+      List<double> newEncodedSignal = List<double>();
+      List<double> resultSignal = List<double>();
 
       for (int a = 0; a < CDMADrawable._inputLength; a++) {
-        double value = 0;
+        double resultValue = 0;
         for (int u = 0; u < code.length; u++) {
           int index = a * code.length + u;
           double codeBit = code[u];
 
+          double encodedValue = 0;
           if (channelSignal.length > index) {
-            value += codeBit * channelSignal[index];
+            encodedValue = channelSignal[index] * codeBit;
+            resultValue += encodedValue;
           }
+          newEncodedSignal.add(encodedValue);
         }
-
-        value /= code.length;
-        newSignal.add(value);
+        resultSignal.add(resultValue / code.length);
       }
 
-      graph.signal = newSignal;
+      encodedGraph.signal = newEncodedSignal;
+      resultGraph.signal = resultSignal;
     }
   }
 
