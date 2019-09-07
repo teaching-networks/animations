@@ -11,8 +11,10 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 class Colors {
   static const Color BLACK = Color.hex(0xFF000000);
   static const Color GREY = Color.hex(0xFF999999);
+  static const Color GRAY = GREY;
   static const Color LIGHTER_GRAY = Color.rgb(245, 245, 245);
   static const Color LIGHTGREY = Color.hex(0xFFDDDDDD);
+  static const Color GRAY_BBB = Color.hex(0xFFBBBBBB);
   static const Color GRAY_444 = Color.hex(0xFF444444);
   static const Color DARK_GRAY = Color.hex(0xFF333333);
   static const Color DARKER_GRAY = Color.hex(0xFF222222);

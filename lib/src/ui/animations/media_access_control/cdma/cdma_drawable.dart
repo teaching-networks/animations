@@ -3,12 +3,14 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/media_access_control/cdma/graph/signal_graph.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
-import 'package:hm_animations/src/ui/canvas/input/input_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/input/checkbox/checkbox_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/input/text/input_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
@@ -78,13 +80,39 @@ class CDMADrawable extends Drawable {
   /// The loaded cdma input image.
   CanvasImageSource _cdmaInputImage;
 
+  /// Drawable drawing a checkbox.
+  CheckboxDrawable _checkboxDrawable;
+
+  /// Subscription to the checkbox checked events.
+  StreamSubscription<bool> _checkboxSub;
+
+  /// Whether to simulate random transmission errors.
+  bool _randomErrors = false;
+
   /// Create drawable.
   CDMADrawable() {
     _init();
   }
 
+  @override
+  void cleanup() {
+    _checkboxSub.cancel();
+
+    super.cleanup();
+  }
+
   /// Initialize the drawable.
   void _init() {
+    _checkboxDrawable = CheckboxDrawable(
+      parent: this,
+      label: "Zufallsfehler",
+      checked: _randomErrors,
+    );
+    _checkboxSub = _checkboxDrawable.checkedChanges.listen((checked) {
+      _randomErrors = checked;
+      print("Zufallsfehler? $_randomErrors");
+    });
+
     _channelSignalGraph = SignalGraph(parent: this);
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
@@ -404,6 +432,13 @@ class CDMADrawable extends Drawable {
     sg.render(ctx, lastPassTimestamp, x: x + operationBubbleSize * 1.5, y: y + height / 3);
 
     _drawArrow(Point<double>(x + operationBubbleSize, y + height / 2), Point<double>(x + operationBubbleSize * 1.5, y + height / 2));
+
+    _checkboxDrawable.render(
+      ctx,
+      lastPassTimestamp,
+      x: x + operationBubbleSize * 1.5 + (sg.size.width - _checkboxDrawable.size.width) / 2,
+      y: y + height / 3 + sg.size.height + 10 * window.devicePixelRatio,
+    );
 
     return Tuple2(operationBubbleSize / 2, Point<double>(x + operationBubbleSize / 2, y + height / 2));
   }

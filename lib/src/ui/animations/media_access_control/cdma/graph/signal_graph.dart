@@ -55,6 +55,7 @@ class SignalGraph extends Drawable {
     if (value == null) {
       value = [0, 0];
     }
+
     _signal = value;
 
     _initGraph();
@@ -119,6 +120,6 @@ class SignalGraph extends Drawable {
 
   @override
   void update(num timestamp) {
-    // Nothing to update
+    // Nothing to update.
   }
 }
