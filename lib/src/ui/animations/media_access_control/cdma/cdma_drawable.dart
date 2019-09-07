@@ -358,7 +358,8 @@ class CDMADrawable extends Drawable {
 
     SignalGraph resultSg = _receiverSignalGraphs[index];
     resultSg.setSize(width: codeGraph.size.width, height: codeGraph.size.height);
-    resultSg.render(ctx, lastPassTimestamp, x: graphXOffset, y: y + height - padding - resultSg.size.height);
+    resultSg.render(ctx, lastPassTimestamp,
+        x: graphXOffset + (encodedSg.size.width - codeGraph.size.width) / 2, y: y + height - padding - resultSg.size.height);
 
     double operatorXOffset = x + padding + codeGraph.size.width / 2;
     double operatorYOffset = y + height / 2;

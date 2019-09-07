@@ -647,7 +647,10 @@ class InputDrawable extends Drawable implements MouseListener {
 
   @override
   void onMouseUp(CanvasMouseEvent event) {
-    _isMouseDown = false;
+    if (_isMouseDown) {
+      _isMouseDown = false;
+      event.event.stopPropagation();
+    }
 
     if (!containsPos(event.pos)) {
       return;

@@ -93,7 +93,7 @@ class SignalGraph extends Drawable {
     _graph2d.add(Graph2DSeries(series: [Point<double>(_graph2d.minX, 0), Point<double>(_graph2d.maxX, 0)], style: Graph2DStyle(color: Colors.DARKER_GRAY)));
 
     // Add grid lines
-    for (int x = 0; x < signal.length; x++) {
+    for (int x = 1; x < signal.length; x++) {
       _graph2d.add(Graph2DSeries(
           series: [Point<double>(x.toDouble(), _graph2d.minY), Point<double>(x.toDouble(), _graph2d.maxY)], style: Graph2DStyle(color: Colors.GRAY_444)));
     }
