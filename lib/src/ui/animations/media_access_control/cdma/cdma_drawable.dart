@@ -110,17 +110,18 @@ class CDMADrawable extends Drawable {
     );
     _checkboxSub = _checkboxDrawable.checkedChanges.listen((checked) {
       _randomErrors = checked;
-      print("Zufallsfehler? $_randomErrors");
+      _updateChannelGraph();
+      _updateReceiverGraphs();
     });
 
-    _channelSignalGraph = SignalGraph(parent: this);
+    _channelSignalGraph = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
       _codeGraphs[i] = SignalGraph(parent: this, signal: _codes[i], signalColor: Colors.ORANGE);
-      _inputSignals[i] = SignalGraph(parent: this);
-      _encodedInputSignals[i] = SignalGraph(parent: this);
-      _receiverSignalGraphs[i] = SignalGraph(parent: this);
-      _receiverEncodedSignalGraphs[i] = SignalGraph(parent: this);
+      _inputSignals[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
+      _encodedInputSignals[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
+      _receiverSignalGraphs[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
+      _receiverEncodedSignalGraphs[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
 
       _input[i] = List<double>(CDMADrawable._inputLength);
     }
@@ -437,7 +438,7 @@ class CDMADrawable extends Drawable {
       ctx,
       lastPassTimestamp,
       x: x + operationBubbleSize * 1.5 + (sg.size.width - _checkboxDrawable.size.width) / 2,
-      y: y + height / 3 + sg.size.height + 10 * window.devicePixelRatio,
+      y: y + height / 3 + sg.size.height + 20 * window.devicePixelRatio,
     );
 
     return Tuple2(operationBubbleSize / 2, Point<double>(x + operationBubbleSize / 2, y + height / 2));
@@ -511,7 +512,11 @@ class CDMADrawable extends Drawable {
       double value = 0;
       for (final graph in _encodedInputSignals) {
         if (graph.signal.length > i) {
-          value += graph.signal[i];
+          if (_randomErrors) {
+            value += graph.signal[i] + graph.signal[i] * (_rng.nextDouble() - 0.5);
+          } else {
+            value += graph.signal[i];
+          }
         }
       }
       signal[i] = value;

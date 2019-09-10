@@ -22,6 +22,12 @@ class SignalGraph extends Drawable {
   /// Whether the quadrants should have the same size.
   final bool equalQuadrants;
 
+  /// Distance of the section separator.
+  final int sectionSeparatorDistance;
+
+  /// Color of the section separators.
+  final Color separatorColor;
+
   /// Signal pattern to display.
   List<double> _signal;
 
@@ -45,6 +51,8 @@ class SignalGraph extends Drawable {
     Drawable parent,
     List<double> signal,
     this.signalColor = Colors.WHITE,
+    this.sectionSeparatorDistance = 0,
+    this.separatorColor = Colors.FOREST,
   }) : super(parent: parent) {
     this.signal = signal;
   }
@@ -90,17 +98,31 @@ class SignalGraph extends Drawable {
 
     _graph2d = Graph2D(minX: 0, maxX: signal.length, minY: minY - offsetPadding, maxY: maxY + offsetPadding, preCalculationFactor: 0.0);
 
-    // Add x axis
-    _graph2d.add(Graph2DSeries(series: [Point<double>(_graph2d.minX, 0), Point<double>(_graph2d.maxX, 0)], style: Graph2DStyle(color: Colors.DARKER_GRAY)));
-
-    // Add grid lines
+    // Add background grid lines
     for (int x = 1; x < signal.length; x++) {
-      _graph2d.add(Graph2DSeries(
-          series: [Point<double>(x.toDouble(), _graph2d.minY), Point<double>(x.toDouble(), _graph2d.maxY)], style: Graph2DStyle(color: Colors.GRAY_444)));
+      if (sectionSeparatorDistance <= 0 || x <= 1 || x >= signal.length - 1 || x % sectionSeparatorDistance != 0) {
+        _graph2d.add(Graph2DSeries(
+            series: [Point<double>(x.toDouble(), _graph2d.minY), Point<double>(x.toDouble(), _graph2d.maxY)], style: Graph2DStyle(color: Colors.GRAY_444)));
+      }
     }
-    for (int y = minY.toInt(); y < maxY; y++) {
-      _graph2d.add(Graph2DSeries(
-          series: [Point<double>(_graph2d.minX, y.toDouble()), Point<double>(_graph2d.maxX, y.toDouble())], style: Graph2DStyle(color: Colors.GRAY_444)));
+    for (int y = minY.floor(); y < maxY.ceil(); y++) {
+      if (y != 0) {
+        _graph2d.add(Graph2DSeries(
+            series: [Point<double>(_graph2d.minX, y.toDouble()), Point<double>(_graph2d.maxX, y.toDouble())], style: Graph2DStyle(color: Colors.GRAY_444)));
+      }
+    }
+
+    // Add foreground grid lines
+    for (int x = 1; x < signal.length; x++) {
+      if (sectionSeparatorDistance > 0 && x > 1 && x < signal.length - 1 && x % sectionSeparatorDistance == 0) {
+        _graph2d.add(Graph2DSeries(
+            series: [Point<double>(x.toDouble(), _graph2d.minY), Point<double>(x.toDouble(), _graph2d.maxY)], style: Graph2DStyle(color: separatorColor)));
+      }
+    }
+    for (int y = minY.floor(); y < maxY.ceil(); y++) {
+      if (y == 0) {
+        _graph2d.add(Graph2DSeries(series: [Point<double>(_graph2d.minX, 0), Point<double>(_graph2d.maxX, 0)], style: Graph2DStyle(color: separatorColor)));
+      }
     }
 
     // Add signal
