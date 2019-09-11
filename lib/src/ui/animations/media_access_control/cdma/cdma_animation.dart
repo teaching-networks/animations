@@ -46,10 +46,10 @@ class CDMAAnimation extends AnimationComponentConnector {
   final I18nService _i18n;
 
   /// Drawable of the CDMA animation.
-  final CDMADrawable _drawable = CDMADrawable();
+  final CDMADrawable _drawable;
 
   /// Create animation.
-  CDMAAnimation(this._i18n);
+  CDMAAnimation(this._i18n) : _drawable = CDMADrawable(_i18n);
 
   @override
   AnimationDescriptor get animationDescriptor => CDMAAnimation.descriptor;

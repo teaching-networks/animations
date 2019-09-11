@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/cdma/graph/signal_graph.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/input/checkbox/checkbox_drawable.dart';
@@ -80,6 +81,12 @@ class CDMADrawable extends Drawable {
   /// The loaded cdma input image.
   CanvasImageSource _cdmaInputImage;
 
+  /// Image info for the cdma output image.
+  ImageInfo _cdmaOutputInfo;
+
+  /// The loaded cdma output image.
+  CanvasImageSource _cdmaOutputImage;
+
   /// Drawable drawing a checkbox.
   CheckboxDrawable _checkboxDrawable;
 
@@ -92,23 +99,35 @@ class CDMADrawable extends Drawable {
   /// Current list of error factors to apply when [_randomErrors] is set to true.
   List<double> _errorFactors = List<double>(CDMADrawable._inputLength * CDMADrawable._codeLength);
 
+  final I18nService _i18n;
+  LanguageLoadedListener _languageLoadedListener;
+
+  Message _randomErrorsMsg;
+
   /// Create drawable.
-  CDMADrawable() {
+  CDMADrawable(this._i18n) {
     _init();
   }
 
   @override
   void cleanup() {
     _checkboxSub.cancel();
+    _i18n.removeLanguageLoadedListener(_languageLoadedListener);
 
     super.cleanup();
   }
 
   /// Initialize the drawable.
   void _init() {
+    _languageLoadedListener = (_) {
+      _checkboxDrawable.label = _randomErrorsMsg.toString();
+    };
+    _i18n.addLanguageLoadedListener(_languageLoadedListener);
+    _randomErrorsMsg = _i18n.get("cdma.random-errors");
+
     _checkboxDrawable = CheckboxDrawable(
       parent: this,
-      label: "Zufallsfehler",
+      label: _randomErrorsMsg.toString(),
       checked: _randomErrors,
     );
     _checkboxSub = _checkboxDrawable.checkedChanges.listen((checked) {
@@ -150,6 +169,9 @@ class CDMADrawable extends Drawable {
 
     _cdmaInputInfo = Images.cdmaInput;
     _cdmaInputImage = await _cdmaInputInfo.load();
+
+    _cdmaOutputInfo = Images.cdmaOutput;
+    _cdmaOutputImage = await _cdmaOutputInfo.load();
 
     invalidate();
   }
@@ -399,6 +421,21 @@ class CDMADrawable extends Drawable {
     resultSg.setSize(width: codeGraph.size.width, height: codeGraph.size.height);
     resultSg.render(ctx, lastPassTimestamp,
         x: graphXOffset + (encodedSg.size.width - codeGraph.size.width) / 2, y: y + height - padding - resultSg.size.height);
+
+    if (_cdmaOutputImage != null) {
+      double imgHeight = resultSg.size.height / 2;
+      double imgWidth = imgHeight * _cdmaOutputInfo.aspectRatio;
+
+      ctx.drawImageToRect(
+        _cdmaOutputImage,
+        Rectangle<double>(
+          graphXOffset + (encodedSg.size.width - codeGraph.size.width) / 2 - imgWidth - 5,
+          y + height - padding - imgHeight,
+          imgWidth,
+          imgHeight,
+        ),
+      );
+    }
 
     double operatorXOffset = x + padding + codeGraph.size.width / 2;
     double operatorYOffset = y + height / 2;

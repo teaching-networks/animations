@@ -308,5 +308,6 @@
   "cdma.name": "CDMA (Code Division Multiple Access)",
   "cdma.short-description": "Code Divison Multiple Access, oder kurz CDMA, ist ein Verfahren um Mehrfachzugriff auf ein geteiltes Medium zu gewährleisten, indem Daten durch orthogonale Codes gespreizt werden",
   "cdma.description": "Code Divison Multiple Access, oder kurz CDMA, ist ein Verfahren um Mehrfachzugriff auf ein geteiltes Medium zu gewährleisten, indem Daten durch orthogonale Codes gespreizt werden.",
-  "cdma.credits": ""
+  "cdma.credits": "",
+  "cdma.random-errors": "Zufallsfehler"
 }

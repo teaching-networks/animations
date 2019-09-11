@@ -18,4 +18,5 @@ class Images {
   static const cookie = ImageInfo(path: "img/animation/cookie.svg", aspectRatio: 1);
   static const cdmaCode = ImageInfo(path: "img/animation/cdma-code.svg", aspectRatio: 265.5 / 175.3);
   static const cdmaInput = ImageInfo(path: "img/animation/cdma-input.svg", aspectRatio: 306.5 / 156.9);
+  static const cdmaOutput = ImageInfo(path: "img/animation/cdma-output.svg", aspectRatio: 373.9 / 164.1);
 }

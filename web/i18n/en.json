@@ -307,5 +307,6 @@
   "cdma.name": "CDMA (Code Division Multiple Access)",
   "cdma.short-description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes",
   "cdma.description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes.",
-  "cdma.credits": ""
+  "cdma.credits": "",
+  "cdma.random-errors": "Random errors"
 }
