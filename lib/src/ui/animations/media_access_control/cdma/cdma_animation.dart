@@ -36,8 +36,7 @@ class CDMAAnimation extends AnimationComponentConnector {
     id: Animations.ID_COUNTER++,
     componentFactory: template.CDMAAnimationNgFactory,
     baseTranslationKey: "cdma",
-    previewImagePath: "",
-    // TODO Specify preview image
+    previewImagePath: "img/animation/preview/cdma-preview.png",
     path: "cdma",
     version: 2,
   );

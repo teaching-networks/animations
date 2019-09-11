@@ -307,6 +307,6 @@
   "cdma.name": "CDMA (Code Division Multiple Access)",
   "cdma.short-description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes",
   "cdma.description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes.",
-  "cdma.credits": "",
+  "cdma.credits": "This animation was inspired by a Java Applet originally developed by J. Roth of the TH Nürnberg. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Applet author(s) for making their Java Applet publicly available.",
   "cdma.random-errors": "Random errors"
 }
