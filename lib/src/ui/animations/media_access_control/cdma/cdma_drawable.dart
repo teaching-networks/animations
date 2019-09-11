@@ -89,6 +89,9 @@ class CDMADrawable extends Drawable {
   /// Whether to simulate random transmission errors.
   bool _randomErrors = false;
 
+  /// Current list of error factors to apply when [_randomErrors] is set to true.
+  List<double> _errorFactors = List<double>(CDMADrawable._inputLength * CDMADrawable._codeLength);
+
   /// Create drawable.
   CDMADrawable() {
     _init();
@@ -110,6 +113,13 @@ class CDMADrawable extends Drawable {
     );
     _checkboxSub = _checkboxDrawable.checkedChanges.listen((checked) {
       _randomErrors = checked;
+
+      if (_randomErrors) {
+        for (int i = 0; i < _errorFactors.length; i++) {
+          _errorFactors[i] = _rng.nextDouble() - 0.5;
+        }
+      }
+
       _updateChannelGraph();
       _updateReceiverGraphs();
     });
@@ -513,7 +523,7 @@ class CDMADrawable extends Drawable {
       for (final graph in _encodedInputSignals) {
         if (graph.signal.length > i) {
           if (_randomErrors) {
-            value += graph.signal[i] + graph.signal[i] * (_rng.nextDouble() - 0.5);
+            value += graph.signal[i] + graph.signal[i] * _errorFactors[i];
           } else {
             value += graph.signal[i];
           }
