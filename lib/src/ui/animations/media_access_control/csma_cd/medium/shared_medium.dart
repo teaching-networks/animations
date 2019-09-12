@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
 
 /// A shared medium is for example a bus.

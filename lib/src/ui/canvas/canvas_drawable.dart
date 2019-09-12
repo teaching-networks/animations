@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:html';
 
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
@@ -7,13 +12,12 @@ import 'package:hm_animations/src/util/size.dart';
  * Defines a object which is drawable on a canvas.
  */
 abstract class CanvasDrawable extends CanvasContextBase {
-  /**
-   * Render your graphics on the canvas.
-   *
-   * @param context to draw on
-   * @param rect which defines the offset and size of the drawable
-   * @param timestamp of the rendering process
-   */
+  /// Before rendering.
+  void preRender([num timestamp = -1]) {
+    // Do nothing.
+  }
+
+  /// Render your graphics on the canvas.
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]);
 
   /**

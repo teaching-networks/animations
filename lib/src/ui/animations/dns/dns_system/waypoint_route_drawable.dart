@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:hm_animations/src/ui/animations/dns/dns_system/dns_server_type.dart';
 import 'package:hm_animations/src/ui/animations/shared/route/route_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';

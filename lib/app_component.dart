@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:async';
 
 import 'package:angular/angular.dart';
@@ -11,12 +16,13 @@ import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/services/user_service/user_service.dart';
+import 'package:hm_animations/src/ui/misc/angular_components/selection_options.dart' as so;
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
+import 'package:hm_animations/version.dart';
 
 import 'version.dart';
-import 'package:hm_animations/version.dart';
 
 @Component(
     selector: 'net-app',
@@ -50,7 +56,7 @@ class AppComponent implements OnInit, OnDestroy {
   final I18nService _i18n;
 
   SelectionModel<Language> languageSelectionModel;
-  LanguageSelectionOptions languageSelectionOptions;
+  so.SelectionOptions<Language> languageSelectionOptions;
 
   final AuthenticationService _authenticationService;
 
@@ -76,8 +82,8 @@ class AppComponent implements OnInit, OnDestroy {
   ngOnInit() {
     _initTranslations();
 
-    languageSelectionModel = new SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
-    languageSelectionOptions = new LanguageSelectionOptions(_i18n.getLanguages());
+    languageSelectionModel = SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
+    languageSelectionOptions = so.SelectionOptions(_i18n.getLanguages());
 
     // Select currently selected locale.
     _i18n.getLocale().then((locale) {
@@ -182,11 +188,4 @@ class AppComponent implements OnInit, OnDestroy {
   }
 
   String get version => Version.version;
-}
-
-class LanguageSelectionOptions extends StringSelectionOptions<Language> implements Selectable {
-  LanguageSelectionOptions(List<Language> options) : super(options, toFilterableString: (Language option) => option.toString());
-
-  @override
-  SelectableOption getSelectable(item) => SelectableOption.Selectable;
 }

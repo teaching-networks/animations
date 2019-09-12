@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:angular/angular.dart';
 import 'package:meta/meta.dart';
 
@@ -27,11 +32,15 @@ class AnimationDescriptor<T> {
    */
   final String path;
 
+  /// Version of the animation API to use.
+  final int version;
+
   const AnimationDescriptor({
     @required this.id,
     @required this.componentFactory,
     @required this.baseTranslationKey,
     @required this.previewImagePath,
     @required this.path,
+    this.version = 1,
   });
 }

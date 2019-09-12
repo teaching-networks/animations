@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
@@ -17,6 +22,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
 
 /// Animation showing the TCP flow control mechanism.
 @Component(
@@ -76,8 +82,7 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin, 
   bool pause = false;
 
   /// Icon of a host computer.
-  ImageElement _hostIcon = ImageElement(src: "img/animation/host_icon.svg");
-  static const double _HOST_ICON_ASPECT_RATIO = 232.28 / 142.6;
+  ImageElement _hostIcon;
 
   TCPFlowControlAnimation(this._i18n) {
     _reset();
@@ -101,7 +106,13 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin, 
   int get realSpeed => 5000 - speed;
 
   @override
-  void ngOnInit() {}
+  void ngOnInit() {
+    _loadImages();
+  }
+
+  void _loadImages() async {
+    _hostIcon = await Images.hostIconImage.load();
+  }
 
   @override
   void ngOnDestroy() {
@@ -118,7 +129,7 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin, 
 
     double windowSize = size.height / 2;
     double iconHeight = windowSize / 2;
-    double iconWidth = iconHeight * _HOST_ICON_ASPECT_RATIO;
+    double iconWidth = iconHeight * Images.hostIconImage.aspectRatio;
     double panelHeight = windowSize + iconHeight;
 
     double iconY = size.height / 2 - panelHeight / 2;
@@ -126,10 +137,14 @@ class TCPFlowControlAnimation extends CanvasAnimation with CanvasPausableMixin, 
 
     context.font = "${displayUnit * 2}px sans-serif";
 
-    context.drawImageToRect(_hostIcon, Rectangle(windowSize / 2 - iconWidth / 2, iconY, iconWidth, iconHeight));
+    if (_hostIcon != null) {
+      context.drawImageToRect(_hostIcon, Rectangle(windowSize / 2 - iconWidth / 2, iconY, iconWidth, iconHeight));
+    }
     _senderWindow.render(context, Rectangle(0.0, windowY, windowSize, windowSize), timestamp);
 
-    context.drawImageToRect(_hostIcon, Rectangle(size.width - windowSize / 2 - iconWidth / 2, iconY, iconWidth, iconHeight));
+    if (_hostIcon != null) {
+      context.drawImageToRect(_hostIcon, Rectangle(size.width - windowSize / 2 - iconWidth / 2, iconY, iconWidth, iconHeight));
+    }
     _receiverWindow.render(context, Rectangle(size.width - windowSize, windowY, windowSize, windowSize), timestamp);
 
     double packetLineHeight = windowSize / 5;

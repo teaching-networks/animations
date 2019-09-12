@@ -1,5 +1,11 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:html';
 import 'dart:math';
+
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
@@ -62,10 +68,9 @@ class RoundRectangle extends CanvasDrawable {
     if (_sizeType == SizeType.PERCENT) {
       // Convert edges from percent to the actual pixel sizes.
       r = Edges.convertPercent(r, new Size(rect.width, rect.height));
-
-      // Convert strokeWidth to pixel
-      lineWidth = lineWidth * min(rect.width, rect.height);
     }
+
+    r *= window.devicePixelRatio;
 
     context.beginPath();
 

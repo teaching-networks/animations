@@ -1,6 +1,12 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html';
+
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
@@ -60,6 +66,9 @@ class I18nService {
    * List of listeners which want to be notified when the language has been loaded (or changed).
    */
   List<LanguageLoadedListener> _languageLoadedListener;
+
+  /// List of completer which await completion when a language has been loaded.
+  List<Completer> _fetchCompleter = [];
 
   /**
    * I18n Service constructor.
@@ -132,6 +141,27 @@ class I18nService {
     }
 
     return msg;
+  }
+
+  /// Get translated messsage for the passed key and return a
+  /// future of when the message if fully loaded.
+  Future<Message> getAsync(String key) async {
+    Message msg = get(key);
+
+    if (msg.content.isEmpty) {
+      // Wait until message is loaded
+      final completer = Completer();
+      _fetchCompleter.add(completer);
+      await completer.future;
+
+      if (msg.content.isEmpty) {
+        throw Exception("the requested Message is still empty, even after loading a locale language file");
+      }
+
+      return msg;
+    } else {
+      return msg;
+    }
   }
 
   /**
@@ -241,6 +271,16 @@ class I18nService {
       for (LanguageLoadedListener listener in _languageLoadedListener) {
         listener.call(newLocale);
       }
+    }
+
+    if (_fetchCompleter != null && _fetchCompleter.isNotEmpty) {
+      for (Completer c in _fetchCompleter) {
+        if (!c.isCompleted) {
+          c.complete();
+        }
+      }
+
+      _fetchCompleter.clear();
     }
   }
 }

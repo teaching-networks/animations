@@ -1,6 +1,19 @@
+<!--
+  ~ Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+  ~ Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+  -->
+
 <h1 *ngIf="animationTitle != null">{{ animationTitle.toString() }}</h1>
 
-<dynamic-content *ngIf="componentToShow != null" [componentFactory]="componentToShow" (loaded)="onAnimationComponentLoaded($event)"></dynamic-content>
+<template [ngIf]="loaded">
+	<template [ngIf]="version == 1">
+		<dynamic-content *ngIf="componentToShow != null" [componentFactory]="componentToShow"
+						 (loaded)="onAnimationComponentLoaded($event)"></dynamic-content>
+	</template>
+	<template [ngIf]="version == 2">
+		<animation-base-component [componentFactory]="componentToShow"></animation-base-component>
+	</template>
+</template>
 
 <div class="centered-panel info-box" *ngIf="isLoading || notVisible || isError">
 	<material-spinner *ngIf="isLoading"></material-spinner>

@@ -1,8 +1,22 @@
-class Size {
-  num width;
-  num height;
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
 
-  Size(this.width, this.height);
+class Size {
+  final num width;
+  final num height;
+
+  const Size(this.width, this.height);
+
+  const Size.empty()
+      : this.width = 0,
+        this.height = 0;
 
   Size operator *(double factor) => Size(width * factor, height * factor);
+
+  @override
+  String toString() {
+    return "{width: $width, height: $height}";
+  }
 }

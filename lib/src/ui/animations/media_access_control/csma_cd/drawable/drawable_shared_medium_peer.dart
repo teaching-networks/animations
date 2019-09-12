@@ -1,5 +1,9 @@
-import 'dart:html';
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
 
+import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
@@ -15,6 +19,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:meta/meta.dart';
 
 /// A Drawable shared medium peer.
@@ -32,8 +37,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
   static Random _rng = Random();
 
   /// Icon of a host computer.
-  static ImageElement _hostIcon = ImageElement(src: "img/animation/host_icon.svg");
-  static const double _HOST_ICON_ASPECT_RATIO = 232.28 / 142.6;
+  ImageElement _hostIcon;
 
   /// Id of the peer.
   final int id;
@@ -61,7 +65,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
     color: Colors.SLATE_GREY,
     radiusSizeType: SizeType.PERCENT,
     paintMode: PaintMode.FILL,
-    radius: Edges.all(1.0),
+    radius: Edges.all(0.1),
   );
 
   /// Medium the peer is sending and listening on.
@@ -100,7 +104,13 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
     @required this.medium,
     @required this.position,
     @required this.labelMap,
-  }) : color = DrawableSharedMediumPeer._peerColors.length > id ? DrawableSharedMediumPeer._peerColors[id] : Colors.SLATE_GREY;
+  }) : color = DrawableSharedMediumPeer._peerColors.length > id ? DrawableSharedMediumPeer._peerColors[id] : Colors.SLATE_GREY {
+    _loadImages();
+  }
+
+  void _loadImages() async {
+    _hostIcon = await Images.hostIconImage.load();
+  }
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -134,9 +144,11 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
   /// Draw an icon of a host.
   void _drawHostIcon(CanvasRenderingContext2D context, Rectangle<double> rect) {
     double iconWidth = rect.height * 0.85;
-    double iconHeight = iconWidth / _HOST_ICON_ASPECT_RATIO;
+    double iconHeight = iconWidth / Images.hostIconImage.aspectRatio;
 
-    context.drawImageToRect(_hostIcon, Rectangle(rect.width / 2 - iconWidth / 2, rect.height / 2 - iconHeight / 2, iconWidth, iconHeight));
+    if (_hostIcon != null) {
+      context.drawImageToRect(_hostIcon, Rectangle(rect.width / 2 - iconWidth / 2, rect.height / 2 - iconHeight / 2, iconWidth, iconHeight));
+    }
   }
 
   /// Draw the number of the peer.

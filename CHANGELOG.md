@@ -5,6 +5,23 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 2.2.0
+- Added CDMA (Code Division Multiple Access) animation
+- Added input drawable
+- Added checkbox drawable
+
+### 2.1.0
+- Added onion router animation
+- New Drawing API for drawing on a HTML 2D Canvas
+- "Sent, but not yet ACKed" Slots in the Go-Back-N Animation are now colored to differenciate them from unsent slots
+- Fixed minor bugs
+
+#### 2.0.1
+- Bugfixing for the reliable transmission animations
+- Added notice regarding data privacy and imprint
+- Added application version in the footer
+- Small design adjustments
+
 ## 2.0.0
 - Overhauled the user management interface
 - New Admin interface for editing animation title, short description and description

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 /**
@@ -6,9 +11,13 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 class Colors {
   static const Color BLACK = Color.hex(0xFF000000);
   static const Color GREY = Color.hex(0xFF999999);
+  static const Color GRAY = GREY;
   static const Color LIGHTER_GRAY = Color.rgb(245, 245, 245);
   static const Color LIGHTGREY = Color.hex(0xFFDDDDDD);
+  static const Color GRAY_BBB = Color.hex(0xFFBBBBBB);
+  static const Color GRAY_444 = Color.hex(0xFF444444);
   static const Color DARK_GRAY = Color.hex(0xFF333333);
+  static const Color DARKER_GRAY = Color.hex(0xFF222222);
 
   static const Color WHITE = Color.hex(0xFFFFFFFF);
 
@@ -27,5 +36,8 @@ class Colors {
   static const Color PURPLE = Color.hex(0xFF911EB4);
   static const Color MINT = Color.hex(0xFFAAFFC3);
   static const Color PINK_RED = Color.hex(0xFFE6194B);
+  static const Color PINK_RED_2 = Color.hex(0xFFFF3366);
   static const Color NAVY = Color.hex(0xFF000075);
+  static const Color FOREST = Color.hex(0xFF339999);
+  static const Color NEON_GREEN = Color.hex(0xFF33FF66);
 }

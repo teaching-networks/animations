@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:html';
 import 'dart:math';
 
@@ -25,6 +30,7 @@ import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_function.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
+import 'package:hm_animations/src/ui/canvas/mouse/canvas_mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
@@ -52,7 +58,7 @@ import 'package:hm_animations/src/ui/misc/description/description.component.dart
     I18nPipe,
   ],
 )
-class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy {
+class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableMixin, AnimationUI implements OnInit, OnDestroy, CanvasMouseListener {
   /// How many ACKs fit on the x-axis of the graph.
   static const int ACKS_ON_GRAPH_X = 500;
 
@@ -251,25 +257,28 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   }
 
   /// What to do on mouse down on the canvas.
-  void onMouseDown(Point<double> pos) {
-    _lastMousePos = pos;
+  @override
+  void onMouseDown(CanvasMouseEvent event) {
+    _lastMousePos = event.pos;
   }
 
   /// What to do on mouse up on the canvas.
-  void onMouseUp(Point<double> pos) {
+  @override
+  void onMouseUp(CanvasMouseEvent event) {
     _lastMousePos = null;
   }
 
   /// What to do on mouse move on the canvas.
-  void onMouseMove(Point<double> pos) {
+  @override
+  void onMouseMove(CanvasMouseEvent event) {
     if (_lastMousePos != null && isPaused) {
       double xLength = _graph.maxX - _graph.minX;
 
-      double xDiff = (pos.x - _lastMousePos.x) / size.width * xLength;
+      double xDiff = (event.pos.x - _lastMousePos.x) / size.width * xLength;
 
       _graph.translate(-xDiff, 0.0);
 
-      _lastMousePos = pos;
+      _lastMousePos = event.pos;
     }
   }
 

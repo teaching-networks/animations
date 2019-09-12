@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:html';
 
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
@@ -30,6 +35,9 @@ class PacketSlot {
    * Index of the slot.
    */
   num index;
+
+  /// Whether addPacket has been called at least once.
+  bool _hadPacket = false;
 
   /**
    * List of arrival listeners being notified when a pkt arrives at sender or receiver.
@@ -83,6 +91,8 @@ class PacketSlot {
    * Add packet to the slot.
    */
   void addPacket(Packet p) {
+    _hadPacket = true;
+
     _activePackets.add(p);
 
     p.addStateChangeListener((newState) {
@@ -134,4 +144,7 @@ class PacketSlot {
       }
     }
   }
+
+  /// Whether addPacket has been called at least once.
+  bool get hadPacket => _hadPacket;
 }

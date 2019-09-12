@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import "package:angular/angular.dart";
 import 'package:angular_components/angular_components.dart';
 import 'package:angular_router/angular_router.dart';
@@ -10,6 +15,7 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/animations/animation_ui.dart';
+import 'package:hm_animations/src/ui/animations/base/animation_base_component.dart';
 import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
 
 /**
@@ -20,7 +26,15 @@ import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
   templateUrl: "default_animation_view_component.html",
   styleUrls: ["default_animation_view_component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  directives: [coreDirectives, MaterialButtonComponent, MaterialIconComponent, routerDirectives, DynamicContentComponent, MaterialSpinnerComponent],
+  directives: [
+    coreDirectives,
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    routerDirectives,
+    DynamicContentComponent,
+    MaterialSpinnerComponent,
+    AnimationBaseComponent,
+  ],
   providers: [ClassProvider(Routes)],
   pipes: [
     I18nPipe,
@@ -98,6 +112,10 @@ class DefaultAnimationViewComponent implements OnActivate, OnInit, OnDestroy {
       });
     }
   }
+
+  bool get loaded => _descriptor != null;
+
+  int get version => _descriptor.version;
 
   /// Load the animation title.
   void _loadAnimationTitle() async {

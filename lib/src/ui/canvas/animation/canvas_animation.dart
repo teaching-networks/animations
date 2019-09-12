@@ -1,11 +1,18 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:html';
 import 'dart:math';
+
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_context_base.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/debug.dart';
 import 'package:hm_animations/src/util/size.dart';
 
 /**
@@ -18,31 +25,18 @@ import 'package:hm_animations/src/util/size.dart';
  * <canvas-comp (onResized)="onCanvasResize($event)" (onReady)="onCanvasReady($event)"></canvas-comp>
  */
 abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
-
-  /**
-   * Whether to show FPS for development.
-   */
-  static const bool SHOW_FPS = false;
-
-  /**
-   * Draw fps every FPS_MILLIS milliseconds.
-   */
-  static const int FPS_MILLIS = 200;
+  /// Draw fps every FPS_MILLIS milliseconds.
+  static const int _fpsMillis = 200;
 
   /**
    * FPS font color.
    */
-  static const Color FPS_FONT_COLOR = Colors.WHITE;
+  static const Color _fpsFontColor = Colors.WHITE;
 
   /**
    * FPS background color.
    */
   static const Color FPS_BG_COLOR = const Color.rgba(255, 102, 102, 0.5);
-
-  /**
-   * When the Fps have been drawn last.
-   */
-  num _lastFpsDraw = -1;
 
   /**
    * Fps to render.
@@ -56,8 +50,11 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   /// It is always one percent of the median of width and height.
   double displayUnit = 0.0;
 
-  num _lastTimestamp = -1;
-  int fps = 0;
+  /// Counter counts rendered frames of the last [_fpsMillis] milliseconds.
+  int _frameCounter = 0;
+
+  /// Start timestamp of counting rendered frames.
+  num _frameCounterStartTS;
 
   /**
    * Set this to true when the rendering loop should be killed.
@@ -87,28 +84,30 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   void _renderLoop(num timestamp) {
     _initContextForIteration(context);
 
+    preRender(timestamp);
     render(timestamp);
 
-    if (SHOW_FPS && _lastTimestamp != -1) {
-      timestamp = window.performance.now();
-      double delta = (timestamp - _lastTimestamp) / 1000;
-      fps = (1 / delta).round();
+    bool showFps = Debug.isDebugMode;
+    if (showFps) {
+      _frameCounter++;
 
-      // Only render fps every few millis to avoid confusion.
-      if (_lastFpsDraw == -1 || timestamp >= (_lastFpsDraw + FPS_MILLIS)) {
-        _lastFpsDraw = timestamp;
-        _renderFps = fps;
+      if (_needToRenderFPS(timestamp)) {
+        _renderFps = _frameCounter * 1000 ~/ _fpsMillis;
+
+        _frameCounterStartTS = timestamp;
+        _frameCounter = 0;
       }
 
       renderFps(_renderFps);
     }
 
-    _lastTimestamp = timestamp;
-
     if (!_killLoop) {
       window.requestAnimationFrame(_renderLoop);
     }
   }
+
+  /// Check whether the FPS need to be rendered.
+  bool _needToRenderFPS(num curTS) => _frameCounterStartTS == null || curTS - _frameCounterStartTS >= _fpsMillis;
 
   /**
    * Render Fps to canvas.
@@ -119,7 +118,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
     context.textBaseline = "middle";
     context.textAlign = "center";
 
-    String fpsLabel = "Fps: $fps";
+    String fpsLabel = "$fps";
 
     TextMetrics textMetrics = context.measureText(fpsLabel);
 
@@ -130,10 +129,15 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
 
     _fpsBackgroundRectangle.render(context, new Rectangle<double>(0.0, 0.0, width, height));
 
-    context.setFillColorRgb(FPS_FONT_COLOR.red, FPS_FONT_COLOR.green, FPS_FONT_COLOR.blue);
-    context.fillText("Fps: $fps", width / 2, height / 2);
+    setFillColor(context, _fpsFontColor);
+    context.fillText(fpsLabel, width / 2, height / 2);
 
     context.restore();
+  }
+
+  /// Called before rendering.
+  void preRender(num timestamp) {
+    // Do nothing.
   }
 
   /**
@@ -156,14 +160,6 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   }
 
   /**
-   * Visible getter so that the last timestamp cannot be altered
-   * by extending classes.
-   */
-  num get _lastAnimTimestamp {
-    return _lastTimestamp;
-  }
-
-  /**
    * Get rectangle.
    */
   Rectangle<double> toRect(double left, double top, Size size) {
@@ -181,10 +177,7 @@ abstract class CanvasAnimation extends CanvasContextBase implements OnDestroy {
   /// Set the font for the canvas.
   /// Font size is set using [sizeFactor] where 1.0 is the [defaultFontSize].
   /// Font Family is set using [fontFamily] where "sans-serif" is the default font family.
-  void setFont({
-    double sizeFactor = 1.0,
-    String fontFamily = "sans-serif"
-  }) {
+  void setFont({double sizeFactor = 1.0, String fontFamily = "sans-serif"}) {
     context.font = "${defaultFontSize * sizeFactor}px $fontFamily";
   }
 

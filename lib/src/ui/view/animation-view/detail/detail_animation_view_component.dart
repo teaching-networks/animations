@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import "package:angular/angular.dart";
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:angular_router/angular_router.dart';
@@ -7,17 +12,22 @@ import 'package:hm_animations/src/services/animation_service/model/animation.dar
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animation_ui.dart';
+import 'package:hm_animations/src/ui/animations/base/animation_base_component.dart';
 import 'package:hm_animations/src/ui/dynamic/dynamic_content_component.dart';
 
 /**
  * Detail component showing an animation in detail (Fullscreen).
  */
-@Component(
-    selector: "detail-animation-view-component",
-    templateUrl: "detail_animation_view_component.html",
-    styleUrls: ["detail_animation_view_component.css"],
-    directives: [coreDirectives, DynamicContentComponent, MaterialSpinnerComponent],
-    pipes: [I18nPipe])
+@Component(selector: "detail-animation-view-component", templateUrl: "detail_animation_view_component.html", styleUrls: [
+  "detail_animation_view_component.css"
+], directives: [
+  coreDirectives,
+  DynamicContentComponent,
+  MaterialSpinnerComponent,
+  AnimationBaseComponent,
+], pipes: [
+  I18nPipe
+])
 class DetailAnimationViewComponent implements OnActivate {
   final AnimationService _animationService;
 
@@ -83,4 +93,8 @@ class DetailAnimationViewComponent implements OnActivate {
       loadedAnimationComponent.descriptor = _descriptor;
     }
   }
+
+  bool get loaded => _descriptor != null;
+
+  int get version => _descriptor.version;
 }

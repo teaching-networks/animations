@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
 import 'dart:async';
 import 'dart:html';
 import 'dart:math';
@@ -19,6 +24,8 @@ import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/ui/misc/image/image_info.dart';
+import 'package:hm_animations/src/ui/misc/image/images.dart';
 import 'package:tuple/tuple.dart';
 
 @Component(
@@ -44,15 +51,13 @@ import 'package:tuple/tuple.dart';
 class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, OnDestroy {
   static final int _WRAP_BUBBLE_TEXT_AT = 20;
 
-  /// Aspect ratio of the world map SVG -> width / height.
-  static final double _MAP_ASPECT_RATIO = 176.6 / 239.5;
-
   final I18nService _i18n;
 
   /*
   IMAGES TO DRAW IN THE CANVAS.
    */
-  final ImageElement _worldMap = new ImageElement(src: "img/animation/germany.svg");
+  final ImageInfo _map = Images.germanyMapImage;
+  CanvasImageSource _mapImage;
 
   static final Point<double> _ORIGIN_LOCATION = Point(0.457, 0.21);
   LocationDot _originDot = LocationDot(color: Colors.SPACE_BLUE);
@@ -108,9 +113,14 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
 
   @override
   ngOnInit() {
+    _initImages();
     _initDNSQueryTypes();
     _initScenarios();
     _initLegend();
+  }
+
+  void _initImages() async {
+    _mapImage = await _map.load();
   }
 
   void _initLegend() {
@@ -160,10 +170,12 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
 
     // Draw map
     double mapHeight = size.height;
-    double mapWidth = _MAP_ASPECT_RATIO * size.height;
+    double mapWidth = _map.aspectRatio * size.height;
     double mapXOffset = (size.width - mapWidth) / 2;
 
-    context.drawImageScaled(_worldMap, mapXOffset, 0.0, mapWidth, mapHeight);
+    if (_mapImage != null) {
+      context.drawImageScaled(_mapImage, mapXOffset, 0.0, mapWidth, mapHeight);
+    }
 
     // Replace relative locations with real ones.
     List<Tuple4<Point<double>, LocationDot, Bubble, DNSServerType>> source = List();
