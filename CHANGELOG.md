@@ -5,6 +5,9 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+### 2.3.0
+- TODO
+
 ### 2.2.0
 - Added CDMA (Code Division Multiple Access) animation
 - Added input drawable
