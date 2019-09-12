@@ -266,8 +266,8 @@ class CDMADrawable extends Drawable {
   void _drawArrow(
     Point<double> from,
     Point<double> to, {
-    double headSize = 8,
-    double lineWidth = 2,
+    double headSize = 10,
+    double lineWidth = 4,
     double headAngle = pi * 0.15,
   }) {
     headSize *= window.devicePixelRatio;
