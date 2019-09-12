@@ -100,6 +100,9 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Round rectangle to draw the input box with.
   RoundRectangle _roundRect;
 
+  /// Whether the input drawable is currently disabled.
+  bool _disabled = false;
+
   /// Create new input drawable.
   InputDrawable({
     Drawable parent,
@@ -110,14 +113,30 @@ class InputDrawable extends Drawable implements MouseListener {
     this.textColor = Colors.BLACK,
     double width = 300,
     double padding = 6,
+    bool disabled = false,
     this.onChange,
     this.filter,
-  }) : super(parent: parent) {
+  })  : this._disabled = disabled,
+        super(parent: parent) {
     _padding = padding * window.devicePixelRatio;
 
     _init(width * window.devicePixelRatio);
 
     this.value = value;
+  }
+
+  /// Whether the input drawable is currently disabled.
+  bool get disabled => _disabled;
+
+  /// Set the input drawable as disabled/enabled.
+  set disabled(bool value) {
+    _disabled = value;
+
+    if (_disabled) {
+      _isFocused = false; // Remove focus
+    }
+
+    invalidate();
   }
 
   /// Get the available window width.
@@ -500,6 +519,20 @@ class InputDrawable extends Drawable implements MouseListener {
         size.height - 2 * _roundRect.strokeWidth,
       ),
     );
+
+    if (_disabled) {
+      _roundRect.paintMode = PaintMode.FILL;
+      _roundRect.color = Colors.LIGHTER_GRAY;
+      _roundRect.render(
+        ctx,
+        Rectangle<double>(
+          _roundRect.strokeWidth,
+          _roundRect.strokeWidth,
+          size.width - 2,
+          size.height - 2,
+        ),
+      );
+    }
   }
 
   /// Check if the text to display is currently overflowing the available space.
@@ -593,6 +626,10 @@ class InputDrawable extends Drawable implements MouseListener {
 
   @override
   void onMouseDown(CanvasMouseEvent event) {
+    if (_disabled) {
+      return;
+    }
+
     if (!containsPos(event.pos)) {
       _isFocused = false;
       invalidate();

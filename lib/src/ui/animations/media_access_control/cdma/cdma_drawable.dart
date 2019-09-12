@@ -48,6 +48,12 @@ class CDMADrawable extends Drawable {
 
   List<List<double>> _input = List<List<double>>(CDMADrawable._connectionCount);
 
+  /// Checkboxes enabling individual senders.
+  List<CheckboxDrawable> _enableSenderCheckboxes = List<CheckboxDrawable>(CDMADrawable._connectionCount);
+
+  /// Subscriptions to enabled changes of the individual sender enable checkboxes.
+  List<StreamSubscription<bool>> _enableSenderCheckboxesSubs = List<StreamSubscription<bool>>(CDMADrawable._connectionCount);
+
   /// Input drawables for each sender to input the signal to send.
   List<InputDrawable> _inputDrawables = List<InputDrawable>(CDMADrawable._connectionCount);
 
@@ -114,6 +120,12 @@ class CDMADrawable extends Drawable {
     _checkboxSub.cancel();
     _i18n.removeLanguageLoadedListener(_languageLoadedListener);
 
+    if (_enableSenderCheckboxesSubs.isNotEmpty) {
+      for (final sub in _enableSenderCheckboxesSubs) {
+        sub.cancel();
+      }
+    }
+
     super.cleanup();
   }
 
@@ -146,6 +158,9 @@ class CDMADrawable extends Drawable {
     _channelSignalGraph = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
+      _enableSenderCheckboxes[i] = CheckboxDrawable(parent: this, checked: false);
+      _enableSenderCheckboxesSubs[i] = _enableSenderCheckboxes[i].checkedChanges.listen((checked) => _onSenderEnabled(i, checked));
+
       _codeGraphs[i] = SignalGraph(parent: this, signal: _codes[i], signalColor: Colors.ORANGE);
       _inputSignals[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
       _encodedInputSignals[i] = SignalGraph(parent: this, sectionSeparatorDistance: CDMADrawable._codeLength);
@@ -157,9 +172,17 @@ class CDMADrawable extends Drawable {
 
     for (int i = 0; i < CDMADrawable._connectionCount; i++) {
       _inputDrawables[i] = _createInputDrawable((newValue) => _onInputUpdate(i, newValue));
+      _inputDrawables[i].value = _generateRandomInputSequence();
     }
 
     _initImages();
+  }
+
+  /// What should happen if a sender gets enabled/disabled.
+  void _onSenderEnabled(int index, bool enabled) {
+    _inputDrawables[index].disabled = !enabled;
+
+    _onInputUpdate(index, _inputDrawables[index].value);
   }
 
   /// Initialize the images needed by the drawable.
@@ -182,9 +205,10 @@ class CDMADrawable extends Drawable {
         fontFamily: 'Roboto',
         maxLength: CDMADrawable._inputLength,
         width: 100,
-        value: _generateRandomInputSequence(),
+        value: "",
         filter: (toInsert) => toInsert.runes.firstWhere((c) => !CDMADrawable._allowedRunes.contains(c), orElse: () => -1) == -1,
         onChange: onChange,
+        disabled: true,
       );
 
   /// Generate a random input sequence.
@@ -336,6 +360,9 @@ class CDMADrawable extends Drawable {
         ),
       );
     }
+
+    CheckboxDrawable cb = _enableSenderCheckboxes[index];
+    cb.render(ctx, lastPassTimestamp, x: inputBoxXOffset + input.size.width + 5, y: y + padding + (input.size.height - cb.size.height) / 2);
 
     SignalGraph codeGraph = _codeGraphs[index];
     codeGraph.setSize(width: codeGraphWidth, height: graphHeight);
@@ -501,6 +528,10 @@ class CDMADrawable extends Drawable {
 
   /// What should happen if a input value update is received.
   _onInputUpdate(int i, String newValue) {
+    if (_inputDrawables[i] != null && _inputDrawables[i].disabled) {
+      newValue = "";
+    }
+
     List<double> signal = List<double>(CDMADrawable._inputLength)..fillRange(0, CDMADrawable._inputLength, 0);
 
     int a = 0;
