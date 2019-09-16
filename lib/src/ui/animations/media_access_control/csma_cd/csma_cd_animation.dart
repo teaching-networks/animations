@@ -180,13 +180,13 @@ class CSMACDAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   }
 
   /// What to do on mouse up on the canvas.
-  void onMouseUp(Point<double> pos) {
-    _sharedMedium.onMouseUp(pos);
+  void onMouseUp(CanvasMouseEvent event) {
+    _sharedMedium.onMouseUp(event.pos);
   }
 
   /// What to do on mouse move on the canvas.
-  void onMouseMove(Point<double> pos) {
-    _sharedMedium.onMouseMove(pos);
+  void onMouseMove(CanvasMouseEvent event) {
+    _sharedMedium.onMouseMove(event.pos);
   }
 
   int get canvasHeight => 650;
