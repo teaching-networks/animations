@@ -8,6 +8,9 @@
 ### 2.3.0
 - TODO
 
+#### 2.2.1
+- Fixed bug where the CSMA/CA animation could not receive mouse events
+
 ### 2.2.0
 - Added CDMA (Code Division Multiple Access) animation
 - Added input drawable
