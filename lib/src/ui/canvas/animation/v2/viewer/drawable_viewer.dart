@@ -11,6 +11,7 @@ import 'package:angular/core.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable_context.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/focus/focus_manager.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/mouse/canvas_mouse_listener.dart';
@@ -55,10 +56,19 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
   /// Drawable context that can be shared between multiple dependent drawables.
   MutableDrawableContext _mutableDrawableContext = MutableDrawableContext();
 
+  /// The elements tab index used to make the element focusable.
+  @HostBinding('tabindex')
+  int tabIndex = 0;
+
+  /// Manager managing focus inside the canvas.
+  FocusManager _focusManager = FocusManager();
+
   /// Create viewer.
   DrawableViewer(
     this._cd,
-  );
+  ) {
+    _mutableDrawableContext.focusManager = _focusManager;
+  }
 
   @override
   void ngOnDestroy() {
@@ -204,6 +214,30 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
   void _notifyDrawableContextChange() {
     if (_drawable != null) {
       _drawable.setDrawableContext(_mutableDrawableContext.getImmutableInstance());
+    }
+  }
+
+  /// What should happen when the drawable viewer element is focused.
+  @HostListener("focus")
+  void onFocus(FocusEvent event) {
+    _focusManager.onCanvasFocused();
+  }
+
+  /// What should happen when the drawable viewer loses focus.
+  @HostListener("blur")
+  void onBlur(FocusEvent event) {
+    _focusManager.onCanvasBlurred();
+  }
+
+  /// On key down on the focused host element.
+  @HostListener("keydown")
+  void onKeyDown(KeyboardEvent event) {
+    if (event.keyCode == 9) {
+      // Tab key down
+      event.preventDefault();
+      event.stopPropagation();
+
+      _focusManager.focusNext();
     }
   }
 }
