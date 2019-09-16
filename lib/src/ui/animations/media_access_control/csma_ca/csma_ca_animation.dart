@@ -504,13 +504,13 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   int get canvasHeight => 800;
 
   /// How to react to a mouse up event.
-  void onMouseUp(Point<double> pos) {
+  void onMouseUp(CanvasMouseEvent event) {
     if (_isInitState) {
       _isInitState = false;
     }
 
-    CSMACAClient client = _checkHoveredClient(pos);
-    double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
+    CSMACAClient client = _checkHoveredClient(event.pos);
+    double dragDistance = _dragStart != null ? event.pos.distanceTo(_dragStart) : 0;
 
     if (client != null && _draggedNode != null && client.wirelessNode == _draggedNode && dragDistance < _dragDistanceThreshold && !_isDraggingNode) {
       _sendRequestToSend(client);
@@ -521,12 +521,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   }
 
   /// How to react to a mouse down event.
-  void onMouseDown(Point<double> pos) {
-    CSMACAClient client = _checkHoveredClient(pos);
+  void onMouseDown(CanvasMouseEvent event) {
+    CSMACAClient client = _checkHoveredClient(event.pos);
 
     if (client != null) {
       _draggedNode = client.wirelessNode;
-      _dragStart = pos;
+      _dragStart = event.pos;
     }
   }
 
@@ -727,12 +727,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   }
 
   /// How to react to a mouse move event.
-  void onMouseMove(Point<double> pos) {
+  void onMouseMove(CanvasMouseEvent event) {
     if (_canConsumeMoreMouseMoveEvents) {
       _canConsumeMoreMouseMoveEvents = false;
 
       window.animationFrame.then((timestamp) {
-        CSMACAClient client = _checkHoveredClient(pos);
+        CSMACAClient client = _checkHoveredClient(event.pos);
 
         if (client != null) {
           setCursorType("pointer");
@@ -742,7 +742,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
 
         // Check if drag.
         if (!_isDraggingNode) {
-          double dragDistance = _dragStart != null ? pos.distanceTo(_dragStart) : 0;
+          double dragDistance = _dragStart != null ? event.pos.distanceTo(_dragStart) : 0;
 
           if (dragDistance > _dragDistanceThreshold) {
             _isDraggingNode = true;
@@ -750,8 +750,8 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
         }
 
         if (_isDraggingNode) {
-          double xCoord = (pos.x - _lastMapRenderXOffset) / _lastMapRenderSize;
-          double yCoord = (pos.y - _lastMapRenderYOffset) / _lastMapRenderSize;
+          double xCoord = (event.pos.x - _lastMapRenderXOffset) / _lastMapRenderSize;
+          double yCoord = (event.pos.y - _lastMapRenderYOffset) / _lastMapRenderSize;
 
           _draggedNode.coordinates = Point<double>(xCoord, yCoord);
         }
