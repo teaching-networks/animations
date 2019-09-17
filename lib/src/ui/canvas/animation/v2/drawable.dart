@@ -337,6 +337,17 @@ abstract class Drawable extends CanvasContextUtil {
     return x >= 0 && x <= size.width && y >= 0 && y <= size.height;
   }
 
+  /// Focus this drawable.
+  /// Returns whether this drawable could be focused.
+  /// Only drawables of type FocusableDrawable can be focused.
+  bool focus() {
+    if (currentDrawableContext != null && currentDrawableContext.focusManager != null && this is FocusableDrawable) {
+      return currentDrawableContext.focusManager.focus(this as FocusableDrawable);
+    }
+
+    return false;
+  }
+
   /// Check if the drawable needs to be repainted.
   /// It will be repainted no matter what this method is stating in case you
   /// call [invalidate()].

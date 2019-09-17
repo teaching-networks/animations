@@ -104,7 +104,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
   /// Whether the input drawable is currently disabled.
   bool _disabled = false;
 
-  /// Whether the input drawable has just been focused
+  /// Whether the input drawable just has been focused.
   bool _justFocused = false;
 
   /// Create new input drawable.
@@ -195,11 +195,6 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
 
   /// What to do on mouse up on the window.
   void _onWindowMouseUp(MouseEvent event) {
-    if (_justFocused) {
-      _justFocused = false;
-      return;
-    }
-
     if (hasFocus()) {
       onBlur();
     }
@@ -648,7 +643,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
     event.event.preventDefault();
 
     if (!hasFocus()) {
-      requestFocus();
+      focus();
     }
 
     _isMouseDown = true;
@@ -695,6 +690,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
   void onMouseUp(CanvasMouseEvent event) {
     if (_justFocused) {
       _justFocused = false;
+      event.event.stopPropagation();
     }
 
     if (_isMouseDown) {
@@ -746,10 +742,10 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
     }
 
     if (!_isFocused) {
-      _justFocused = true;
       selectRange(value.length, value.length);
 
       _isFocused = true;
+      _justFocused = true;
       invalidate();
     }
 

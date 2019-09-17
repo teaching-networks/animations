@@ -9,6 +9,7 @@ import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/focus/focusable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
@@ -20,7 +21,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
 
 /// Drawable simulating a checkbox input component.
-class CheckboxDrawable extends Drawable implements MouseListener {
+class CheckboxDrawable extends Drawable implements MouseListener, FocusableDrawable {
   /// State of the checkbox.
   _CheckboxState _state;
 
@@ -45,14 +46,21 @@ class CheckboxDrawable extends Drawable implements MouseListener {
     radius: Edges.all(2),
   );
 
+  /// Subscription to windows key up events.
+  Function _windowKeyUpSub;
+
   /// Create drawable.
   CheckboxDrawable({
     Drawable parent,
     bool checked = false,
+    bool disabled = false,
     String label,
     CheckboxStyle style = const CheckboxStyle(),
     CheckboxLabelOptions labelOptions = const CheckboxLabelOptions(),
-  })  : _state = _CheckboxState(checked: checked),
+  })  : _state = _CheckboxState(
+          checked: checked,
+          disabled: false,
+        ),
         _style = style,
         _label = label,
         _labelOptions = labelOptions,
@@ -75,6 +83,24 @@ class CheckboxDrawable extends Drawable implements MouseListener {
     _checkedStreamController.add(_state.checked);
     invalidate();
   }
+
+  /// Set whether the checkbox is disabled or enabled.
+  set disabled(bool isDisabled) {
+    if (_state.disabled == isDisabled) {
+      return;
+    }
+
+    _state.disabled = isDisabled;
+
+    if (hasFocus()) {
+      onBlur();
+    }
+
+    invalidate();
+  }
+
+  /// Get whether the checkbox is currently disabled.
+  bool get disabled => _state.disabled;
 
   /// Get the current label of the checkbox.
   String get label => _label;
@@ -99,6 +125,27 @@ class CheckboxDrawable extends Drawable implements MouseListener {
   void _init() {
     _initLabel();
     _calculateSize();
+
+    _windowKeyUpSub = (event) => _onKeyUp(event);
+    window.addEventListener("keyup", _windowKeyUpSub);
+  }
+
+  @override
+  void cleanup() {
+    window.removeEventListener("keyup", _windowKeyUpSub);
+
+    super.cleanup();
+  }
+
+  /// What should happen when a key has been released.
+  void _onKeyUp(KeyboardEvent event) {
+    if (!hasFocus()) {
+      return;
+    }
+
+    if (event.key == "Enter") {
+      checked = !checked;
+    }
   }
 
   /// Initialize the label.
@@ -121,9 +168,10 @@ class CheckboxDrawable extends Drawable implements MouseListener {
   /// Calculate the size of the drawable.
   void _calculateSize() {
     double checkboxSize = _style.size * window.devicePixelRatio;
+    double focusBorderWidth = _style.focusBorderWidth * window.devicePixelRatio;
 
-    double width = checkboxSize;
-    double height = checkboxSize;
+    double width = checkboxSize + focusBorderWidth * 4;
+    double height = checkboxSize + focusBorderWidth * 4;
 
     if (_labelDrawable != null) {
       width += _style.labelDistance * window.devicePixelRatio;
@@ -147,21 +195,44 @@ class CheckboxDrawable extends Drawable implements MouseListener {
   /// Draw a checkbox.
   /// Returns the drawn checkbox size.
   Size _drawCheckbox() {
+    double focusBorderWidth = window.devicePixelRatio * 2 * _style.focusBorderWidth;
+
+    Size result;
     if (_state.checked) {
-      return _drawCheckedCheckbox();
+      result = _drawCheckedCheckbox(focusBorderWidth);
     } else {
-      return _drawUncheckedCheckbox();
+      result = _drawUncheckedCheckbox(focusBorderWidth);
     }
+
+    if (hasFocus()) {
+      _drawFocusBorder(focusBorderWidth, result);
+    }
+
+    return result;
+  }
+
+  /// Draw the focus border around the checkbox.
+  void _drawFocusBorder(double width, Size checkboxSize) {
+    if (_state.disabled) {
+      return;
+    }
+
+    ctx.lineWidth = width / 2;
+    setStrokeColor(_style.focusedBorderColor);
+    double offset = width / 2;
+    ctx.strokeRect(offset, offset, checkboxSize.width - width, checkboxSize.height - width);
   }
 
   /// Draw the checked checkbox.
-  Size _drawCheckedCheckbox() {
+  Size _drawCheckedCheckbox(double padding) {
     double s = _style.size * window.devicePixelRatio;
-    Size boxSize = Size(s, s);
+    Size boxSize = Size(s + padding * 2, s + padding * 2);
 
     _roundRect.paintMode = PaintMode.FILL;
 
-    if (_state.active) {
+    if (_state.disabled) {
+      _roundRect.color = _style.disabledColor;
+    } else if (_state.active) {
       _roundRect.color = _style.activeTickedColor;
     } else if (_state.hovered) {
       _roundRect.color = _style.hoverTickedColor;
@@ -169,7 +240,7 @@ class CheckboxDrawable extends Drawable implements MouseListener {
       _roundRect.color = _style.tickedColor;
     }
 
-    _roundRect.render(ctx, Rectangle<double>(0, 0, boxSize.width, boxSize.height));
+    _roundRect.render(ctx, Rectangle<double>(padding, padding, s, s));
 
     // Draw tick
     ctx.lineWidth = _style.relativeTickThickness * s;
@@ -184,15 +255,17 @@ class CheckboxDrawable extends Drawable implements MouseListener {
   }
 
   /// Draw the unchecked checkbox.
-  Size _drawUncheckedCheckbox() {
+  Size _drawUncheckedCheckbox(double padding) {
     double offset = _style.borderWidth * window.devicePixelRatio;
     double s = _style.size * window.devicePixelRatio;
-    Size boxSize = Size(s, s);
+    Size boxSize = Size(s + padding * 2, s + padding * 2);
 
     _roundRect.paintMode = PaintMode.STROKE;
     _roundRect.strokeWidth = _style.borderWidth * window.devicePixelRatio;
 
-    if (_state.active) {
+    if (_state.disabled) {
+      _roundRect.color = _style.disabledColor;
+    } else if (_state.active) {
       _roundRect.color = _style.activeBorderColor;
     } else if (_state.hovered) {
       _roundRect.color = _style.hoverBorderColor;
@@ -200,7 +273,7 @@ class CheckboxDrawable extends Drawable implements MouseListener {
       _roundRect.color = _style.borderColor;
     }
 
-    _roundRect.render(ctx, Rectangle<double>(offset / 2, offset / 2, boxSize.width - offset, boxSize.height - offset));
+    _roundRect.render(ctx, Rectangle<double>(offset / 2 + padding, offset / 2 + padding, s - offset, s - offset));
 
     return boxSize;
   }
@@ -230,15 +303,31 @@ class CheckboxDrawable extends Drawable implements MouseListener {
   @override
   void onMouseDown(CanvasMouseEvent event) {
     if (!containsPos(event.pos)) {
+      if (hasFocus()) {
+        onBlur();
+      }
+      return;
+    }
+
+    if (!hasFocus()) {
+      focus();
+    }
+
+    if (_state.disabled) {
       return;
     }
 
     _state.active = true;
+
     invalidate();
   }
 
   @override
   void onMouseMove(CanvasMouseEvent event) {
+    if (_state.disabled) {
+      return;
+    }
+
     if (containsPos(event.pos)) {
       if (!_state.hovered) {
         _state.hovered = true;
@@ -272,6 +361,10 @@ class CheckboxDrawable extends Drawable implements MouseListener {
 
   @override
   void onMouseUp(CanvasMouseEvent event) {
+    if (_state.disabled) {
+      return;
+    }
+
     if (_state.active) {
       _state.active = false;
       invalidate();
@@ -284,6 +377,27 @@ class CheckboxDrawable extends Drawable implements MouseListener {
     if (_state.hovered) {
       checked = !checked;
     }
+  }
+
+  @override
+  bool hasFocus() => _state.focused;
+
+  @override
+  void onBlur() {
+    _state.focused = false;
+    invalidate();
+  }
+
+  @override
+  bool requestFocus() {
+    if (_state.disabled) {
+      return false;
+    }
+
+    _state.focused = true;
+    invalidate();
+
+    return true;
   }
 }
 
@@ -353,6 +467,15 @@ class CheckboxStyle {
   /// Color of the tick.
   final Color tickColor;
 
+  /// Color of the checkbox when disabled.
+  final Color disabledColor;
+
+  /// Color of the border which appears when the checkbox is focused.
+  final Color focusedBorderColor;
+
+  /// Width of the focus border.
+  final double focusBorderWidth;
+
   /// Create style.
   const CheckboxStyle({
     this.size = _defaultCheckboxSize,
@@ -366,6 +489,9 @@ class CheckboxStyle {
     this.borderWidth = _defaultBorderWidth,
     this.relativeTickThickness = _defaultRelativeTickThickness,
     this.tickColor = Colors.WHITE,
+    this.disabledColor = Colors.LIGHTER_GRAY,
+    this.focusedBorderColor = Colors.SPACE_BLUE,
+    this.focusBorderWidth = 1,
   });
 }
 
@@ -380,10 +506,18 @@ class _CheckboxState {
   /// Whether the checkbox is currently active (mouse down but not yet released).
   bool active;
 
+  /// Whether the checkbox is currently focused.
+  bool focused;
+
+  /// Whether the checkbox is currently disabled.
+  bool disabled;
+
   /// Create checkbox state.
   _CheckboxState({
     this.checked = false,
     this.hovered = false,
     this.active = false,
+    this.focused = false,
+    this.disabled = false,
   });
 }

@@ -235,9 +235,12 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
     if (event.keyCode == 9) {
       // Tab key down
       event.preventDefault();
-      event.stopPropagation();
 
-      _focusManager.focusNext();
+      if (event.shiftKey) {
+        _focusManager.focusPrev();
+      } else {
+        _focusManager.focusNext();
+      }
     }
   }
 }

@@ -120,4 +120,26 @@ class FocusManager {
       } while (!_focusables[_focusedIndex].requestFocus());
     }
   }
+
+  /// Focus the passed drawable.
+  /// Returns whether the drawable could be focused.
+  bool focus(FocusableDrawable drawable) {
+    int index = _focusables.indexOf(drawable);
+    if (index == -1) {
+      return false;
+    }
+
+    if (_focusedIndex != null) {
+      _focusables[_focusedIndex].onBlur();
+      _focusedIndex = null;
+    }
+
+    bool acceptedFocus = _focusables[index].requestFocus();
+    if (acceptedFocus) {
+      _focusedIndex = index;
+      _isFocused = true;
+    }
+
+    return acceptedFocus;
+  }
 }
