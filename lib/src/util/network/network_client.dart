@@ -34,7 +34,7 @@ class NetworkClient extends BaseClient {
       var token = _storage[NetworkUtil.tokenKey];
 
       // Set JSON web token in the Authorization header.
-      request.headers[NetworkHeaders.AUTHORIZATION] = "$token";
+      request.headers[NetworkHeaders.AUTHORIZATION] = "Bearer $token";
     }
 
     StreamedResponse response = await _delegate.send(request);
