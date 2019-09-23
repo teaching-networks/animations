@@ -87,6 +87,7 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
       );
     }
 
+    _notifyDrawableContextChange();
     _drawable.invalidate();
   }
 

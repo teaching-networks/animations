@@ -53,7 +53,7 @@ class FocusManager {
     _isFocused = true;
 
     // Focus the first focusable drawable (if any).
-    if (_focusables.isNotEmpty) {
+    if (_focusables.isNotEmpty && _focusedIndex == null) {
       focusNext();
     }
   }
@@ -75,49 +75,61 @@ class FocusManager {
 
   /// Focus the next focusable drawable.
   void focusNext() {
-    if (_focusables.isNotEmpty && _isFocused && _focusables.length > 1) {
-      if (_focusedIndex == null) {
-        _focusedIndex = _focusables.length - 1;
-      }
-
-      int startIndex = _focusedIndex;
-      _focusables[_focusedIndex].onBlur();
-
-      do {
-        _focusedIndex++;
-        if (_focusedIndex >= _focusables.length) {
+    if (_focusables.isNotEmpty && _isFocused) {
+      if (_focusables.length == 1) {
+        if (_focusedIndex != 0 && _focusables[0].requestFocus()) {
           _focusedIndex = 0;
         }
-
-        if (_focusedIndex == startIndex) {
-          _focusedIndex = null;
-          break;
+      } else {
+        if (_focusedIndex == null) {
+          _focusedIndex = _focusables.length - 1;
         }
-      } while (!_focusables[_focusedIndex].requestFocus());
+
+        int startIndex = _focusedIndex;
+        _focusables[_focusedIndex].onBlur();
+
+        do {
+          _focusedIndex++;
+          if (_focusedIndex >= _focusables.length) {
+            _focusedIndex = 0;
+          }
+
+          if (_focusedIndex == startIndex) {
+            _focusedIndex = null;
+            break;
+          }
+        } while (!_focusables[_focusedIndex].requestFocus());
+      }
     }
   }
 
   /// Focus the previous focusable drawable.
   void focusPrev() {
-    if (_focusables.isNotEmpty && _isFocused && _focusables.length > 1) {
-      if (_focusedIndex == null) {
-        _focusedIndex = 0;
+    if (_focusables.isNotEmpty && _isFocused) {
+      if (_focusables.length == 1) {
+        if (_focusedIndex != 0 && _focusables[0].requestFocus()) {
+          _focusedIndex = 0;
+        }
+      } else {
+        if (_focusedIndex == null) {
+          _focusedIndex = 0;
+        }
+
+        int startIndex = _focusedIndex;
+        _focusables[_focusedIndex].onBlur();
+
+        do {
+          _focusedIndex--;
+          if (_focusedIndex < 0) {
+            _focusedIndex = _focusables.length - 1;
+          }
+
+          if (_focusedIndex == startIndex) {
+            _focusedIndex = null;
+            break;
+          }
+        } while (!_focusables[_focusedIndex].requestFocus());
       }
-
-      int startIndex = _focusedIndex;
-      _focusables[_focusedIndex].onBlur();
-
-      do {
-        _focusedIndex--;
-        if (_focusedIndex < 0) {
-          _focusedIndex = _focusables.length - 1;
-        }
-
-        if (_focusedIndex == startIndex) {
-          _focusedIndex = null;
-          break;
-        }
-      } while (!_focusables[_focusedIndex].requestFocus());
     }
   }
 
@@ -129,7 +141,7 @@ class FocusManager {
       return false;
     }
 
-    if (_focusedIndex != null) {
+    if (_focusedIndex != null && _focusedIndex != index) {
       _focusables[_focusedIndex].onBlur();
       _focusedIndex = null;
     }

@@ -132,10 +132,11 @@ class ButtonDrawable extends Drawable implements MouseListener, FocusableDrawabl
   /// Calculate the size of the button drawable.
   void _calculateSize() {
     double padding = window.devicePixelRatio * _style.padding;
+    double shadowPadding = window.devicePixelRatio * _style.shadowBlur;
 
     setSize(
-      width: _textDrawable.size.width + padding * 2,
-      height: _textDrawable.size.height + padding * 2,
+      width: _textDrawable.size.width + padding * 2 + shadowPadding * 2,
+      height: _textDrawable.size.height + padding * 2 + shadowPadding * 2,
     );
   }
 
@@ -168,30 +169,24 @@ class ButtonDrawable extends Drawable implements MouseListener, FocusableDrawabl
     _roundRect.paintMode = PaintMode.FILL;
 
     if (_state.disabled) {
-      print("Disabled color");
       _roundRect.color = _style.buttonDisabledColor;
     } else if (_state.active) {
-      print("Active color");
       _roundRect.color = _style.buttonActiveColor;
     } else if (_state.hovered) {
-      print("Hovered color");
       _roundRect.color = _style.buttonHoveredColor;
     } else {
-      print("Default color");
       _roundRect.color = _style.buttonColor;
     }
 
-    _roundRect.render(ctx, Rectangle<double>(0, 0, size.width, size.height));
+    double shadowBlur = _style.shadowBlur * window.devicePixelRatio;
+    double shadowOffsetY = _style.shadowOffsetY * window.devicePixelRatio;
 
-    if (hasFocus()) {
-      double focusBorderWidth = _style.focusBorderWidth * window.devicePixelRatio;
-
-      _roundRect.paintMode = PaintMode.STROKE;
-      _roundRect.color = _style.focusColor;
-      _roundRect.strokeWidth = focusBorderWidth;
-
-      _roundRect.render(ctx, Rectangle<double>(focusBorderWidth, focusBorderWidth, size.width - focusBorderWidth * 2, size.height - focusBorderWidth * 2));
-    }
+    ctx.shadowColor = hasFocus() ? _style.focusColor.toCSSColorString() : _style.shadowColor.toCSSColorString();
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetY = shadowOffsetY;
+    _roundRect.render(ctx, Rectangle<double>(shadowBlur, shadowBlur - shadowOffsetY, size.width - shadowBlur * 2, size.height - shadowBlur * 2));
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "";
   }
 
   @override
@@ -344,8 +339,14 @@ class ButtonDrawableStyle {
   /// Focus border color.
   final Color focusColor;
 
-  /// Width of the focus border.
-  final double focusBorderWidth;
+  /// Blur of the shadow.
+  final double shadowBlur;
+
+  /// Color of the shadow.
+  final Color shadowColor;
+
+  /// Y offset of the shadow.
+  final double shadowOffsetY;
 
   /// Create style.
   const ButtonDrawableStyle({
@@ -355,12 +356,14 @@ class ButtonDrawableStyle {
     this.textDisabledColor = Colors.DARK_GRAY,
     this.textSize = CanvasContextUtil.DEFAULT_FONT_SIZE_PX,
     this.fontFamilies = "sans-serif",
-    this.buttonColor = Colors.LIGHTGREY,
+    this.buttonColor = Colors.WHITE,
     this.buttonHoveredColor = Colors.LIGHTER_GRAY,
     this.buttonActiveColor = Colors.GRAY_BBB,
     this.buttonDisabledColor = Colors.GRAY,
     this.focusColor = Colors.SPACE_BLUE,
-    this.focusBorderWidth = 2,
+    this.shadowBlur = 3,
+    this.shadowColor = Colors.DARK_GRAY,
+    this.shadowOffsetY = 1,
   });
 }
 
