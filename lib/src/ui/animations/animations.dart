@@ -126,6 +126,5 @@ class Animations {
     ),
     OnionRouterAnimationComponent.descriptor,
     CDMAAnimation.descriptor,
-    IPFragmentationAnimation.descriptor
   ];
 }
