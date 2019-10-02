@@ -10,6 +10,7 @@ import 'dart:math';
 import 'package:async/async.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/focus/focusable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
@@ -26,7 +27,7 @@ typedef void OnChange(String value);
 typedef bool Filter(String value);
 
 /// Text field which is drawable on a canvas.
-class InputDrawable extends Drawable implements MouseListener {
+class InputDrawable extends Drawable implements MouseListener, FocusableDrawable {
   /// Controller emitting value changes.
   final StreamController<String> _valueChanges = StreamController<String>.broadcast(sync: false);
 
@@ -103,6 +104,9 @@ class InputDrawable extends Drawable implements MouseListener {
   /// Whether the input drawable is currently disabled.
   bool _disabled = false;
 
+  /// Whether the input drawable just has been focused.
+  bool _justFocused = false;
+
   /// Create new input drawable.
   InputDrawable({
     Drawable parent,
@@ -133,7 +137,7 @@ class InputDrawable extends Drawable implements MouseListener {
     _disabled = value;
 
     if (_disabled) {
-      _isFocused = false; // Remove focus
+      onBlur(); // Remove focus
     }
 
     invalidate();
@@ -174,7 +178,7 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// What to do on a paste event on the window.
   void _onPaste(ClipboardEvent event) {
-    if (!_isFocused) {
+    if (!hasFocus()) {
       return;
     }
 
@@ -191,15 +195,14 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// What to do on mouse up on the window.
   void _onWindowMouseUp(MouseEvent event) {
-    if (_isFocused) {
-      _isFocused = false;
-      invalidate();
+    if (hasFocus()) {
+      onBlur();
     }
   }
 
   /// What to do on key down.
   void _onKeyDown(KeyboardEvent event) {
-    if (_isFocused) {
+    if (hasFocus()) {
       bool isBackSpaceKey = event.code == "Backspace";
       bool isPrintableKey = event.key.length == 1;
       bool isArrowLeftKey = event.code == "ArrowLeft";
@@ -508,7 +511,7 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// Draw the input box border.
   void _drawBorder() {
-    _roundRect.color = _isFocused ? Colors.SPACE_BLUE : Colors.LIGHTGREY;
+    _roundRect.color = hasFocus() ? Colors.SPACE_BLUE : Colors.LIGHTGREY;
     _roundRect.paintMode = PaintMode.STROKE;
     _roundRect.render(
       ctx,
@@ -560,7 +563,7 @@ class InputDrawable extends Drawable implements MouseListener {
 
   /// Draw the current selection.
   void _drawSelection() {
-    if (_selection == null || !_isFocused) {
+    if (_selection == null || !hasFocus()) {
       return;
     }
 
@@ -631,15 +634,16 @@ class InputDrawable extends Drawable implements MouseListener {
     }
 
     if (!containsPos(event.pos)) {
-      _isFocused = false;
-      invalidate();
+      if (hasFocus()) {
+        onBlur();
+      }
       return;
     }
 
     event.event.preventDefault();
 
-    if (!_isFocused) {
-      _isFocused = true;
+    if (!hasFocus()) {
+      focus();
     }
 
     _isMouseDown = true;
@@ -684,6 +688,11 @@ class InputDrawable extends Drawable implements MouseListener {
 
   @override
   void onMouseUp(CanvasMouseEvent event) {
+    if (_justFocused) {
+      _justFocused = false;
+      event.event.stopPropagation();
+    }
+
     if (_isMouseDown) {
       _isMouseDown = false;
       event.event.stopPropagation();
@@ -713,6 +722,34 @@ class InputDrawable extends Drawable implements MouseListener {
       );
       _doubleClickDetector = op;
     }
+  }
+
+  @override
+  bool hasFocus() {
+    return _isFocused;
+  }
+
+  @override
+  void onBlur() {
+    _isFocused = false;
+    invalidate();
+  }
+
+  @override
+  bool requestFocus() {
+    if (_disabled) {
+      return false;
+    }
+
+    if (!_isFocused) {
+      selectRange(value.length, value.length);
+
+      _isFocused = true;
+      _justFocused = true;
+      invalidate();
+    }
+
+    return true;
   }
 }
 

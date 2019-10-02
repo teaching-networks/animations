@@ -13,7 +13,7 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 abstract class CanvasContextUtil {
   /// Default font size - will be scaled using window.devicePixelRatio.
-  static const DEFAULT_FONT_SIZE_PX = 16;
+  static const double DEFAULT_FONT_SIZE_PX = 16;
 
   static const ImageLayout _stretchLayout = StretchImageLayout();
   static const ImageLayout _fillLayout = FillImageLayout();

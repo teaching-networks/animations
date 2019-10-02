@@ -11,6 +11,8 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_uti
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 
+import 'input/focus/focusable.dart';
+
 typedef void CanvasPainter(CanvasImageSource src, Point<double> offset);
 
 /// Next generation canvas animation class.
@@ -213,6 +215,10 @@ abstract class Drawable extends CanvasContextUtil {
   void _removeDependentDrawable(Drawable drawable) {
     if (_dependentDrawables != null) {
       _dependentDrawables.remove(drawable);
+
+      if (drawable is FocusableDrawable && _currentDrawableContext.focusManager.hasFocusable(drawable as FocusableDrawable)) {
+        _currentDrawableContext.focusManager.removeFocusable(drawable as FocusableDrawable);
+      }
     }
   }
 
@@ -253,6 +259,12 @@ abstract class Drawable extends CanvasContextUtil {
   /// Set the current context shared by multiple dependent drawables.
   void setDrawableContext(DrawableContext context) {
     _currentDrawableContext = context;
+
+    if (_currentDrawableContext != null) {
+      if (this is FocusableDrawable && !_currentDrawableContext.focusManager.hasFocusable(this as FocusableDrawable)) {
+        _currentDrawableContext.focusManager.addFocusable(this as FocusableDrawable);
+      }
+    }
 
     // Propagate
     if (_hasDependentDrawables) {
@@ -323,6 +335,17 @@ abstract class Drawable extends CanvasContextUtil {
     double y = pos.y - lastRenderAbsoluteYOffset;
 
     return x >= 0 && x <= size.width && y >= 0 && y <= size.height;
+  }
+
+  /// Focus this drawable.
+  /// Returns whether this drawable could be focused.
+  /// Only drawables of type FocusableDrawable can be focused.
+  bool focus() {
+    if (currentDrawableContext != null && currentDrawableContext.focusManager != null && this is FocusableDrawable) {
+      return currentDrawableContext.focusManager.focus(this as FocusableDrawable);
+    }
+
+    return false;
   }
 
   /// Check if the drawable needs to be repainted.

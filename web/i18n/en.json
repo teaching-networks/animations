@@ -308,5 +308,9 @@
   "cdma.short-description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes",
   "cdma.description": "Code Divison Multiple Access, or short CDMA, is used to access a shared medium by stretching data using orthogonal codes.",
   "cdma.credits": "This animation was inspired by a Java Applet originally developed by J. Roth of the TH Nürnberg. While the animation has been written from scratch and does not contain any source code of the original Java Applet, we would still like to thank the original Applet author(s) for making their Java Applet publicly available.",
-  "cdma.random-errors": "Random errors"
+  "cdma.random-errors": "Random errors",
+  "ip-frag.name": "IP Fragmentation",
+  "ip-frag.short-description": "Splitting of IP datagrams in case of a lower Maximum Transmission Unit (MTU) than the datagram size",
+  "ip-frag.description": "It might be the case that the Maximum Transmission Unit (MTU) is lower on a part of the connection from source to target than the size of the IP packet (datagram). In that case the datagram has to be split up in multiple smaller datagrams which is called IP fragmentation.",
+  "ip-frag.credits": "No credits yet"
 }

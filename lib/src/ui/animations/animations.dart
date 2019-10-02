@@ -10,6 +10,7 @@ import 'package:hm_animations/src/ui/animations/dns/dns_animation.dart';
 import 'package:hm_animations/src/ui/animations/dns/dns_animation.template.dart' as dns;
 import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.dart';
 import 'package:hm_animations/src/ui/animations/http_delay/http_delay_animation.template.dart' as httpDelay;
+import 'package:hm_animations/src/ui/animations/ip_fragmentation/ip_fragmentation_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/cdma/cdma_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_ca/csma_ca_animation.template.dart' as CSMACA;
