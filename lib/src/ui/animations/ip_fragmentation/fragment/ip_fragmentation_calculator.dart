@@ -10,17 +10,36 @@ class IPFragmentationCalculator {
   /// Size of the IP header in bytes.
   static const int _ipHeaderSize = 20;
 
+  /// Minimum MTU.
+  static const int minMTU = 31;
+
+  /// Maxmimum MTU.
+  static const int maxMTU = 65535;
+
+  /// Minimum datagram size.
+  static const int minDatagramSize = 31;
+
+  /// Maximum datagram size.
+  static const int maxDatagramSize = 65535;
+
   /// Fragment the passed IP datagram specs to a list of fragments.
   /// [size] in bytes
   /// [maximumTransmissionUnit] in bytes
   List<IPFragment> fragment(int size, int maximumTransmissionUnit, int datagramID) {
-    if (size <= _ipHeaderSize) {
-      throw new Exception("Passed datagram size ($size bytes) has to be greater than the IP header size ($_ipHeaderSize bytes)");
+    if (size < minDatagramSize) {
+      throw new Exception("Passed datagram size ($size bytes) has to be greater or equal to $minDatagramSize bytes");
     }
 
-    if (maximumTransmissionUnit <= _ipHeaderSize) {
-      throw new Exception(
-          "Passed MTU (Maximum transmission unit) ($maximumTransmissionUnit bytes) must be greater than the IP header size ($_ipHeaderSize bytes)");
+    if (size > maxDatagramSize) {
+      throw new Exception("Passed datagram size ($size bytes) has to be lower or equal to $maxDatagramSize bytes");
+    }
+
+    if (maximumTransmissionUnit < minMTU) {
+      throw new Exception("Passed MTU (Maximum transmission unit) ($maximumTransmissionUnit bytes) must be greater or equal to $minMTU bytes");
+    }
+
+    if (maximumTransmissionUnit > maxMTU) {
+      throw new Exception("Passed MTU (Maximum transmission unit) ($maximumTransmissionUnit bytes) must be lower or equal to $maxMTU bytes");
     }
 
     int dataSize = size - _ipHeaderSize;
