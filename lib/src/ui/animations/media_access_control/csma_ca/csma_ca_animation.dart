@@ -158,6 +158,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   /// Animation speed factor.
   double animationSpeedFactor = 1.0;
 
+  /// Ratio of TX (Transmission) to CS (Carrier Sense) Range.
+  double txCsRatio = 1.0;
+
   /// Create animation.
   CSMACAAnimation(this._i18n, this.changeDetector);
 
@@ -212,6 +215,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
         scale: 100000000 ~/ animationSpeedFactor,
         nodeCircleColor: Colors.PINK_RED,
         rangeCircleColor: Colors.LIME,
+        txCsRangeRatio: txCsRatio,
       ),
       chart: MediumAllocationChart(id: "X", valueBarLabel: _accessPointLabel, statusBarLabel: _statusBarLabel),
     );
@@ -237,6 +241,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
           scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.BLUE_GRAY,
           rangeCircleColor: _rangeCircleColor,
+          txCsRangeRatio: txCsRatio,
         ),
         chart: MediumAllocationChart(id: "A", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
       ),
@@ -247,6 +252,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
           scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.CORAL,
           rangeCircleColor: _rangeCircleColor,
+          txCsRangeRatio: txCsRatio,
         ),
         chart: MediumAllocationChart(id: "B", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
       ),
@@ -257,6 +263,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
           scale: 100000000 ~/ animationSpeedFactor,
           nodeCircleColor: Colors.BORDEAUX,
           rangeCircleColor: _rangeCircleColor,
+          txCsRangeRatio: txCsRatio,
         ),
         chart: MediumAllocationChart(id: "C", valueBarLabel: _valueBarLabel, statusBarLabel: _statusBarLabel),
       ),

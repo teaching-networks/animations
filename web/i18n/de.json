@@ -271,6 +271,7 @@
   "csma-ca-animation.settings": "Einstellungen",
   "csma-ca-animation.label.rts-cts": "RTS/CTS",
   "csma-ca-animation.animation-speed": "Geschwindigkeit",
+  "csma-ca-animation.ratio-tx-cs": "Verhältnis von RX- zu CS-Range",
   "editor.edit": "Bearbeiten",
   "editor.preview": "Vorschau",
   "onion-router.name": "Onion Routing",
