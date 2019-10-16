@@ -720,13 +720,14 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     List<CSMACAClient> nodesInRange = List<CSMACAClient>();
 
     for (final otherClient in _clients) {
-      if (otherClient != client && node.coordinates.distanceTo(otherClient.wirelessNode.coordinates) <= _relativeRadiusSize) {
+      print(node.coordinates.distanceTo(otherClient.wirelessNode.coordinates));
+      if (otherClient != client && node.coordinates.distanceTo(otherClient.wirelessNode.coordinates) <= _relativeRadiusSize * txCsRatio) {
         nodesInRange.add(otherClient);
       }
     }
 
     // Test with access point.
-    if (client != _accessPoint && node.coordinates.distanceTo(_accessPoint.wirelessNode.coordinates) <= _relativeRadiusSize) {
+    if (client != _accessPoint && node.coordinates.distanceTo(_accessPoint.wirelessNode.coordinates) <= _relativeRadiusSize * txCsRatio) {
       nodesInRange.add(_accessPoint);
     }
 
