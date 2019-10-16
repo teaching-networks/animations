@@ -11,12 +11,16 @@ import 'package:hm_animations/src/ui/animations/ip_fragmentation/fragment/ip_fra
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
 
@@ -98,8 +102,16 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
   Message _sizeMsg;
   Message _offsetMsg;
   Message _moreFragmentsFlagMsg;
+  Message _hoverItemInfoMsg;
 
   LanguageLoadedListener _languageLoadedListener;
+
+  BubbleContainer _infoBubble;
+  TextDrawable _infoBubbleText;
+
+  Anim _backgroundFadeAnim;
+
+  bool _infoShown = true;
 
   /// Create drawable.
   IPFragmentationDrawable(this._i18n) {
@@ -180,6 +192,24 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
       color: Colors.RED,
     );
 
+    _infoBubbleText = TextDrawable(
+      text: _hoverItemInfoMsg.toString(),
+      color: Colors.WHITE,
+      wrapAtLength: 30,
+    );
+    _infoBubble = BubbleContainer(
+      parent: this,
+      drawable: _infoBubbleText,
+    )..color = Color.opacity(Colors.BLACK, 0.6);
+
+    _backgroundFadeAnim = AnimHelper(
+      duration: Duration(seconds: 1),
+      curve: Curves.easeOutCubic,
+      onEnd: (ts) {
+        _infoShown = false;
+      },
+    );
+
     _initImages();
     _initTranslations();
   }
@@ -200,9 +230,11 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
     _sizeMsg = _i18n.get("ip-frag.fragment-info.size");
     _offsetMsg = _i18n.get("ip-frag.fragment-info.offset");
     _moreFragmentsFlagMsg = _i18n.get("ip-frag.fragment-info.more-fragments-flag");
+    _hoverItemInfoMsg = _i18n.get("ip-frag.fragment-info.hover-item-info");
 
     _languageLoadedListener = (_) {
       _mtuText.text = _mtuMsg.toString();
+      _infoBubbleText.text = _hoverItemInfoMsg.toString();
 
       invalidate();
     };
@@ -324,11 +356,25 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
       _renderedFragmentYStart = yOffset - packetHeight / 2;
       _renderedFragmentYEnd = _renderedFragmentYStart + packetHeight;
 
+      bool isFirst = true;
+      double firstXOff = curX + totalWidthPerFragment / 2;
+      double firstYOff = yOffset;
       for (final fragment in _fragments) {
         _drawPacket(
             curX + totalWidthPerFragment / 2, yOffset, widthPerFragment, packetHeight, fragment == _hoveredFragment ? Colors.SPACE_BLUE : Colors.SLATE_GREY);
 
         curX += widthPerFragment + fragmentDividerSize;
+
+        if (isFirst) isFirst = false;
+      }
+
+      if (_infoShown) {
+        setFillColor(Color.opacity(Colors.BLACK, 0.2 - _backgroundFadeAnim.progress * 0.2));
+        ctx.fillRect(0, 0, size.width, size.height);
+
+        if (_infoBubble != null) {
+          _infoBubble.render(ctx, lastPassTimestamp, x: firstXOff, y: firstYOff - packetHeight / 2);
+        }
       }
     }
 
@@ -376,11 +422,11 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
   }
 
   @override
-  bool needsRepaint() => false;
+  bool needsRepaint() => _backgroundFadeAnim.running;
 
   @override
   void update(num timestamp) {
-    // Nothing to update
+    _backgroundFadeAnim.update(timestamp);
   }
 
   @override
@@ -419,7 +465,15 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
   }
 
   void _onHoverFragment(IPFragment fragment) {
+    if (_hoveredFragment == fragment) {
+      return;
+    }
     _hoveredFragment = fragment;
+
+    if (_infoShown && !_backgroundFadeAnim.running) {
+      _backgroundFadeAnim.start();
+      _infoBubble = null;
+    }
 
     _fragmentNumberDrawable.text = "${_fragmentMsg.toString()} ${fragment.number}";
     _fragmentSizeDrawable.text = "${_sizeMsg.toString()}: ${fragment.size} bytes";

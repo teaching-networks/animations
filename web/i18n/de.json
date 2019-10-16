@@ -319,5 +319,6 @@
   "ip-frag.fragment-info.fragment": "Fragment",
   "ip-frag.fragment-info.size": "Größe",
   "ip-frag.fragment-info.offset": "Offset",
-  "ip-frag.fragment-info.more-fragments-flag": "Mehr Fragmente Flag"
+  "ip-frag.fragment-info.more-fragments-flag": "Mehr Fragmente Flag",
+  "ip-frag.fragment-info.hover-item-info": "Führe die Cursor über eines dieser Pakete um mehr Informationen angezeigt zu bekommen"
 }

@@ -318,5 +318,6 @@
   "ip-frag.fragment-info.fragment": "Fragment",
   "ip-frag.fragment-info.size": "Size",
   "ip-frag.fragment-info.offset": "Offset",
-  "ip-frag.fragment-info.more-fragments-flag": "More fragments flag"
+  "ip-frag.fragment-info.more-fragments-flag": "More fragments flag",
+  "ip-frag.fragment-info.hover-item-info": "Hover one of these packets to see more info"
 }
