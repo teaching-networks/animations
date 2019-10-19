@@ -187,6 +187,7 @@ class ButtonDrawable extends Drawable implements MouseListener, FocusableDrawabl
     _roundRect.render(ctx, Rectangle<double>(shadowBlur, shadowBlur - shadowOffsetY, size.width - shadowBlur * 2, size.height - shadowBlur * 2));
     ctx.shadowBlur = 0;
     ctx.shadowColor = "";
+    ctx.shadowOffsetY = 0;
   }
 
   @override
@@ -357,12 +358,12 @@ class ButtonDrawableStyle {
     this.textSize = CanvasContextUtil.DEFAULT_FONT_SIZE_PX,
     this.fontFamilies = "sans-serif",
     this.buttonColor = Colors.WHITE,
-    this.buttonHoveredColor = Colors.LIGHTER_GRAY,
+    this.buttonHoveredColor = Colors.LIGHTGREY,
     this.buttonActiveColor = Colors.GRAY_BBB,
     this.buttonDisabledColor = Colors.GRAY,
     this.focusColor = Colors.SPACE_BLUE,
-    this.shadowBlur = 3,
-    this.shadowColor = Colors.DARK_GRAY,
+    this.shadowBlur = 5,
+    this.shadowColor = Colors.GRAY,
     this.shadowOffsetY = 1,
   });
 }

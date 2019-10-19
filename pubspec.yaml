@@ -1,6 +1,6 @@
 name: hm_animations
 description: A web app aiming at providing animations for students to enhance lecture learning effect.
-version: 2.2.2
+version: 2.3.0
 author: beder@hm.edu
 
 environment:

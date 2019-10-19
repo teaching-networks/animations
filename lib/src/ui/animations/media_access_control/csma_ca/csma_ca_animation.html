@@ -40,6 +40,21 @@
 			</li>
 
 			<li class="labeled centered">
+				<label>{{ "csma-ca-animation.ratio-tx-cs" | i18n }}</label>
+				<span class="slider-panel">
+					<material-slider [min]="1.0"
+									 [max]="2.0"
+									 [step]="0.1"
+									 [disabled]="!isInitState"
+									 [(value)]="txCsRatio">
+					</material-slider>
+					<div>
+						{{ txCsRatio.toStringAsFixed(1) }}
+					</div>
+				</span>
+			</li>
+
+			<li class="labeled centered">
 				<material-button raised (click)="switchPause()">
 					<material-icon [toggle]="isPaused" icon="pause" toggledIcon="play_arrow"></material-icon>
 				</material-button>

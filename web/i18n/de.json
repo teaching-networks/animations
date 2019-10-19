@@ -271,6 +271,7 @@
   "csma-ca-animation.settings": "Einstellungen",
   "csma-ca-animation.label.rts-cts": "RTS/CTS",
   "csma-ca-animation.animation-speed": "Geschwindigkeit",
+  "csma-ca-animation.ratio-tx-cs": "Verhältnis von RX- zu CS-Range",
   "editor.edit": "Bearbeiten",
   "editor.preview": "Vorschau",
   "onion-router.name": "Onion Routing",
@@ -310,8 +311,15 @@
   "cdma.description": "Code Divison Multiple Access, oder kurz CDMA, ist ein Verfahren um Mehrfachzugriff auf ein geteiltes Medium zu gewährleisten, indem Daten durch orthogonale Codes gespreizt werden.",
   "cdma.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von J. Roth von der TH Nürnberg entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
   "cdma.random-errors": "Zufallsfehler",
-  "ip-frag.name": "IP Fragmentierung",
+  "ip-frag.name": "IPv4 Fragmentierung",
   "ip-frag.short-description": "Aufteilung eines IP Datagrams, falls die Maximum Transmission Unit (MTU) zu klein zum Übertragen des Datagrams ist",
-  "ip-frag.description": "Falls die Maximum Transmission Unit (MTU) eines Teilstücks auf dem Weg von der Quelle zu Ziel kleiner ist, als die Größe eines IP Pakets (Datagram), muss das Datagram in mehrere kleinere aufgeteilt werden. Diesen Vorgang nennt man IP Fragmentierung.",
-  "ip-frag.credits": "No credits yet"
+  "ip-frag.description": "Falls die Maximum Transmission Unit (MTU) eines Teilstücks auf dem Weg von der Quelle zu Ziel kleiner ist, als die Größe eines IP Pakets (Datagram), muss das Datagram in mehrere kleinere aufgeteilt werden. Diesen Vorgang nennt man IP Fragmentierung. In der Animation können Sie die MTUs (Maximum Transmission Unit) auf zwei Teilstücken eines Netzwerks definieren. Der Router in der Mitte führt dann im Bedarfsfall eine Fragmentierung durch.",
+  "ip-frag.credits": "Die Gestaltung dieser Animation wurde von einem Java-Applet inspiriert, welches ursprünglich von Ryan Gilber von der Arizona State University entwickelt wurde. Obwohl die Animation von Grund auf neu geschrieben wurde und keinen Quellcode des ursprünglichen Java-Applets enthält, möchten wir uns dennoch bei den ursprünglichen Java-Applet-Autoren dafür bedanken, dass sie ihr Java-Applet öffentlich zugänglich gemacht haben.",
+  "ip-frag.mtu": "MTU",
+  "ip-frag.range-error": "Alle Werte müssen in folgendem Bereich liegen: ",
+  "ip-frag.fragment-info.fragment": "Fragment",
+  "ip-frag.fragment-info.size": "Größe",
+  "ip-frag.fragment-info.offset": "Offset",
+  "ip-frag.fragment-info.more-fragments-flag": "Mehr Fragmente Flag",
+  "ip-frag.fragment-info.hover-item-info": "Führe die Cursor über eines dieser Pakete um mehr Informationen angezeigt zu bekommen"
 }

@@ -4,7 +4,6 @@
  */
 
 import 'dart:html';
-
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/animations/shared/signal_emitter/impl/circular_signal_emitter.dart';
@@ -58,6 +57,9 @@ class WirelessNode<T> extends CanvasDrawable {
   /// Coordinates of the point (relative).
   Point<double> _coordinates;
 
+  /// Ratio of Transmission (TX) to Carrier Sense (CS) Range.
+  double _txCsRangeRatio = 1.0;
+
   /// Create node.
   WirelessNode({
     @required this.nodeName,
@@ -66,7 +68,9 @@ class WirelessNode<T> extends CanvasDrawable {
     this.rangeCircleColor = Colors.BLACK,
     this.nodeCircleColor = Colors.SLATE_GREY,
     this.rangeListener,
-  }) : _coordinates = initialCoordinates;
+    double txCsRangeRatio = 1.0,
+  })  : _coordinates = initialCoordinates,
+        _txCsRangeRatio = txCsRangeRatio;
 
   @override
   void render(CanvasRenderingContext2D context, Rectangle<double> rect, [num timestamp = -1]) {
@@ -87,12 +91,20 @@ class WirelessNode<T> extends CanvasDrawable {
       _signalEmitter.render(context, Rectangle<double>(0.0, 0.0, rect.width, rect.height), timestamp);
     }
 
-    // Draw range circle
+    // Draw transmission range circle
     setStrokeColor(context, rangeCircleColor);
     context.lineWidth = window.devicePixelRatio;
     context.beginPath();
     context.arc(0.0, 0.0, radius, 0, 2 * pi);
     context.stroke();
+
+    // Draw carrier sense range circle
+    if (_txCsRangeRatio > 1.0) {
+      context.setLineDash([5, 15]);
+      context.beginPath();
+      context.arc(0.0, 0.0, radius * _txCsRangeRatio, 0, 2 * pi);
+      context.stroke();
+    }
 
     if (_isHovered) {
       // Draw hover circle

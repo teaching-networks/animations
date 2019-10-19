@@ -213,6 +213,8 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
       bool isCtrl = event.ctrlKey;
 
       if (isBackSpaceKey) {
+        event.preventDefault();
+
         if (!isCtrl) {
           delete(); // Delete one character (or selection)
         } else {
