@@ -11,13 +11,13 @@ class IPFragmentationCalculator {
   static const int _ipHeaderSize = 20;
 
   /// Minimum MTU.
-  static const int minMTU = 31;
+  static const int minMTU = 68;
 
   /// Maxmimum MTU.
   static const int maxMTU = 65535;
 
   /// Minimum datagram size.
-  static const int minDatagramSize = 31;
+  static const int minDatagramSize = 68;
 
   /// Maximum datagram size.
   static const int maxDatagramSize = 65535;
