@@ -225,13 +225,13 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     v.Quaternion quaternion = v.Quaternion.axisAngle(v.Vector3(0.0, 0.0, 1.0), radiusOffset);
 
     final Point<double> client1Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client2Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
     quaternion.rotate(vector);
     final Point<double> client3Pos =
-        Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
+    Point<double>(_accessPointCoordinates.x + vector.x * _clientToAccessPointDistance, _accessPointCoordinates.y + vector.y * _clientToAccessPointDistance);
 
     _clients = <CSMACAClient>[
       CSMACAClient(
@@ -280,8 +280,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
 
   /// Update the help tooltip.
   void _updateHelpTooltips() {
-    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel.toString().length);
-    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel.toString().length);
+    _clickHereTooltip = Bubble(_clickHereTooltipLabel.toString(), _clickHereTooltipLabel
+        .toString()
+        .length);
+    _signalRangeTooltip = Bubble(_signalRangeTooltipLabel.toString(), _signalRangeTooltipLabel
+        .toString()
+        .length);
   }
 
   /// Initialize translations needed for the animation.
@@ -341,8 +345,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     String valueLabel = chart.valueLabelString;
     String statusLabel = chart.statusLabelString;
 
-    double valueLabelWidth = context.measureText(valueLabel).width;
-    double statusLabelWidth = context.measureText(statusLabel).width;
+    double valueLabelWidth = context
+        .measureText(valueLabel)
+        .width;
+    double statusLabelWidth = context
+        .measureText(statusLabel)
+        .width;
 
     return max(valueLabelWidth, statusLabelWidth);
   }
@@ -481,7 +489,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     // Get maximum font length
     double maxItemWidth = 0.0;
     for (final item in _legendItems) {
-      double labelWidth = context.measureText(item.item1.toString()).width;
+      double labelWidth = context
+          .measureText(item.item1.toString())
+          .width;
       if (labelWidth > maxItemWidth) {
         maxItemWidth = labelWidth;
       }
@@ -491,7 +501,15 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     double yOffset = 0.0;
 
     for (final item in _legendItems) {
-      _drawLegendItem(item.item1.toString(), item.item2, boxSize, padding, size.width - maxItemWidth, top + yOffset, maxItemWidth, offset);
+      _drawLegendItem(
+          item.item1.toString(),
+          item.item2,
+          boxSize,
+          padding,
+          size.width - maxItemWidth,
+          top + yOffset,
+          maxItemWidth,
+          offset);
 
       yOffset += offset;
     }
@@ -720,7 +738,6 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     List<CSMACAClient> nodesInRange = List<CSMACAClient>();
 
     for (final otherClient in _clients) {
-      print(node.coordinates.distanceTo(otherClient.wirelessNode.coordinates));
       if (otherClient != client && node.coordinates.distanceTo(otherClient.wirelessNode.coordinates) <= _relativeRadiusSize * txCsRatio) {
         nodesInRange.add(otherClient);
       }
