@@ -1,0 +1,495 @@
+/*
+ * Copyright (c) Munich University of Applied Sciences - https://hm.edu/
+ * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
+ */
+
+import 'dart:html';
+import 'dart:math' as math;
+
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/focus/focusable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
+import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
+import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/util/curves.dart';
+
+/// Formatter used to format a sliders value.
+typedef String ValueFormatter(double value);
+
+/// A slider input control.
+class SliderDrawable extends Drawable implements FocusableDrawable, MouseListener {
+  /// Internal state of the slider.
+  final _SliderState _state = _SliderState();
+
+  /// Style of the slider.
+  SliderStyle _style;
+
+  /// Minimum value of the slider.
+  double _min;
+
+  /// Maximum value of the slider.
+  double _max;
+
+  /// Step to do when changing the slider handle.
+  double _step;
+
+  /// Current value of the slider.
+  double _value;
+
+  /// Width of the slider.
+  double _width;
+
+  /// Drawable drawing the sliders current value if [_style.showValue] is truthy.
+  TextDrawable _valueDrawable;
+
+  /// Animation invoked when focusing the slider and [_style.animate] is truthy.
+  Anim _focusAnimation;
+
+  /// Subscription to key up events.
+  Function _windowKeyDownSub;
+
+  /// Create slider drawable.
+  SliderDrawable({
+    Drawable parent,
+    SliderStyle style = const SliderStyle(),
+    double min = -1,
+    double max = 1,
+    double step = 0.1,
+    double value = 0,
+    double width = 200,
+  })  : _style = style,
+        _min = min,
+        _max = max,
+        _step = step,
+        _value = value,
+        _width = width,
+        super(parent: parent) {
+    _init();
+  }
+
+  /// Initialize the drawable.
+  void _init() {
+    if (_style.showValue) {
+      _valueDrawable = TextDrawable(
+        parent: this,
+        text: _formattedValue,
+        color: _style.valueTextColor,
+        alignment: TextAlignment.CENTER,
+        textSize: _style.valueTextSize,
+        lineHeight: _style.valueTextLineHeight,
+      );
+    }
+
+    _focusAnimation = AnimHelper(
+      curve: Curves.easeOutCubic,
+      duration: Duration(milliseconds: 200),
+      onEnd: (_) => invalidate(),
+    );
+
+    _windowKeyDownSub = (event) => _onKeyDown(event);
+    window.addEventListener("keydown", _windowKeyDownSub);
+
+    _recalculateSize();
+  }
+
+  @override
+  void cleanup() {
+    window.removeEventListener("keydown", _windowKeyDownSub);
+
+    super.cleanup();
+  }
+
+  /// Set the style of the slider.
+  set style(SliderStyle value) {
+    _style = value;
+
+    invalidate();
+  }
+
+  /// Get the currently set style of the slider.
+  SliderStyle get style => _style;
+
+  /// Set the minimum value of the slider.
+  set min(double value) {
+    _min = value;
+
+    invalidate();
+  }
+
+  /// Get the minimum value of the slider.
+  double get min => _min;
+
+  /// Set the maximum value of the sider.
+  set max(double value) {
+    _max = value;
+
+    invalidate();
+  }
+
+  /// Get the maximum value of the slider.
+  double get max => _max;
+
+  /// Set the step to do when changing the slider handle.
+  set step(double value) {
+    _step = value;
+  }
+
+  /// Get the step to do when changing the slider handle.
+  double get step => _step;
+
+  /// Set the current value of the slider.
+  set value(double value) {
+    _value = math.min(math.max(value, _min), _max);
+
+    // Round to next nearest [step].
+    double rest = _value % step;
+    double lower = _value - rest;
+    double higher = lower + step;
+
+    if (_value - lower < higher - _value) {
+      _value = lower;
+    } else {
+      _value = higher;
+    }
+
+    if (_style.showValue) {
+      double oldHeight = _valueDrawable.size.height;
+      _valueDrawable.text = _formattedValue;
+
+      if (_valueDrawable.size.height != oldHeight) {
+        _recalculateSize();
+      }
+    }
+
+    invalidate();
+  }
+
+  /// Get the current value of the slider.
+  double get value => _value;
+
+  /// Set the current width of the slider.
+  set width(double value) {
+    _width = value;
+
+    _recalculateSize();
+  }
+
+  /// Get the current width of the slider.
+  double get width => _width;
+
+  /// Recalculate the size of the drawable.
+  void _recalculateSize() {
+    double maxHandleSize = _style.handleSize + (_style.handleBorderSize + _style.focusBorderSize) * 2;
+
+    double width = _width + maxHandleSize;
+    double height = math.max(_style.barSize, maxHandleSize);
+
+    if (_style.showValue) {
+      height += _valueDrawable.size.height;
+    }
+
+    setSize(
+      width: width * window.devicePixelRatio,
+      height: height * window.devicePixelRatio,
+    );
+  }
+
+  @override
+  bool hasFocus() => _state.focused;
+
+  @override
+  bool requestFocus() {
+    if (_state.disabled) {
+      return false;
+    }
+
+    if (!_state.focused) {
+      _state.focused = true;
+      invalidate();
+
+      if (_style.animate) {
+        _focusAnimation.reset(resetReverse: true);
+        _focusAnimation.start();
+      }
+    }
+
+    return true;
+  }
+
+  @override
+  void onBlur() {
+    if (_state.focused) {
+      _state.focused = false;
+      invalidate();
+
+      if (_style.animate) {
+        if (!_focusAnimation.reversed) _focusAnimation.reverse();
+        _focusAnimation.start();
+      }
+    }
+  }
+
+  @override
+  void onMouseDown(CanvasMouseEvent event) {
+    if (!containsPos(event.pos)) {
+      if (hasFocus()) {
+        onBlur();
+      }
+      return;
+    }
+
+    if (!hasFocus()) {
+      focus();
+    }
+
+    if (_state.disabled) {
+      return;
+    }
+
+    _state.dragged = true;
+    _setValueForMouseEvent(event);
+  }
+
+  @override
+  void onMouseMove(CanvasMouseEvent event) {
+    if (_state.disabled) {
+      return;
+    }
+
+    if (containsPos(event.pos)) {
+      if (!_state.hovered) {
+        _state.hovered = true;
+
+        _onMouseEnter(event);
+      }
+    } else {
+      if (_state.hovered) {
+        _state.hovered = false;
+
+        _onMouseLeave(event);
+      }
+    }
+
+    if (_state.dragged) {
+      _setValueForMouseEvent(event);
+    }
+  }
+
+  /// Set the value for the passed mouse [event].
+  void _setValueForMouseEvent(CanvasMouseEvent event) {
+    double handlePadding = (_style.handleSize / 2 + _style.handleBorderSize + _style.focusBorderSize) * window.devicePixelRatio;
+
+    double minX = lastRenderAbsoluteXOffset + handlePadding;
+    double maxX = lastRenderAbsoluteXOffset + size.width - handlePadding;
+
+    double curX = event.pos.x;
+
+    if (curX > minX && curX < maxX) {
+      double range = maxX - minX;
+      double relativePos = (curX - minX) / range;
+
+      value = min + (max - min) * relativePos;
+    } else if (curX >= maxX) {
+      value = max;
+    } else if (curX <= minX) {
+      value = min;
+    }
+  }
+
+  /// What should happen when the mouse enters the slider.
+  void _onMouseEnter(CanvasMouseEvent event) {
+    if (event.control.getCursorType() != "pointer") {
+      event.control.setCursorType("pointer");
+    }
+  }
+
+  /// What should happen when the mouse leaves the slider.
+  void _onMouseLeave(CanvasMouseEvent event) {
+    if (event.control.getCursorType() == "pointer") {
+      event.control.resetCursorType();
+    }
+  }
+
+  @override
+  void onMouseUp(CanvasMouseEvent event) {
+    if (_state.disabled) {
+      return;
+    }
+
+    if (_state.dragged) {
+      _state.dragged = false;
+    }
+  }
+
+  /// What should happen on the key down event.
+  void _onKeyDown(KeyboardEvent event) {
+    if (!_state.focused) {
+      return;
+    }
+
+    if (event.key == "ArrowLeft") {
+      value -= step;
+    } else if (event.key == "ArrowRight") {
+      value += step;
+    }
+  }
+
+  @override
+  void draw() {
+    double focusBorderSize = _style.focusBorderSize * window.devicePixelRatio;
+    double handleBorderSize = _style.handleBorderSize * window.devicePixelRatio;
+    double handleSize = _style.handleSize * window.devicePixelRatio;
+    double barSize = _style.barSize * window.devicePixelRatio;
+
+    _drawBar(((focusBorderSize + handleBorderSize) * 2 + handleSize) / 2, barSize);
+    _drawHandle(handleSize, handleBorderSize, focusBorderSize);
+
+    if (_style.showValue) {
+      _valueDrawable.render(
+        ctx,
+        lastPassTimestamp,
+        x: (size.width - _valueDrawable.size.width) / 2,
+        y: math.max(focusBorderSize * 2 + handleSize, barSize),
+      );
+    }
+  }
+
+  /// Draw the slider bar.
+  void _drawBar(double padding, double barSize) {
+    setFillColor(_style.barColor);
+    ctx.fillRect(padding, padding - barSize / 2, size.width - padding * 2, barSize);
+  }
+
+  /// Get the x offset of the handle for the current value.
+  double getHandleXOffset(double padding) => padding + ((_value - _min) / (_max - _min) * (size.width - padding * 2));
+
+  /// Draw the slider handle.
+  void _drawHandle(double handleSize, double handleBorderSize, double focusBorderSize) {
+    double radius = handleSize / 2;
+    double yOffset = radius + handleBorderSize + focusBorderSize;
+    double xOffset = getHandleXOffset(yOffset);
+
+    if (_state.focused || _focusAnimation.running) {
+      setFillColor(_focusAnimation.running ? Color.opacity(_style.focusedColor, _focusAnimation.progress * _style.focusedColor.alpha) : _style.focusedColor);
+      ctx.beginPath();
+      ctx.arc(xOffset, yOffset, radius + focusBorderSize + handleBorderSize, 0, 2 * math.pi);
+      ctx.fill();
+    }
+
+    setFillColor(_style.handleBorderColor);
+    ctx.beginPath();
+    ctx.arc(xOffset, yOffset, radius + handleBorderSize, 0, 2 * math.pi);
+    ctx.fill();
+
+    setFillColor(_style.handleColor);
+    ctx.beginPath();
+    ctx.arc(xOffset, yOffset, radius, 0, 2 * math.pi);
+    ctx.fill();
+  }
+
+  @override
+  bool needsRepaint() => _focusAnimation.running;
+
+  @override
+  void update(num timestamp) {
+    _focusAnimation.update(timestamp);
+  }
+
+  /// Get the current value in a formatted representation.
+  String get _formattedValue => _style.valueFormatter != null ? _style.valueFormatter(_value) : _value.toStringAsFixed(2);
+}
+
+/// Style of the slider drawable.
+class SliderStyle {
+  /// Whether the slider animations are enabled.
+  final bool animate;
+
+  /// Whether to show the value underneath the slider.
+  final bool showValue;
+
+  /// Formatter used to format the value before displaying when [showValue] is truthy.
+  final ValueFormatter valueFormatter;
+
+  /// Size of the slider bar.
+  final double barSize;
+
+  /// Size of the slider handle.
+  final double handleSize;
+
+  /// Size of the handle border.
+  final double handleBorderSize;
+
+  /// Color when disabled.
+  final Color disabledColor;
+
+  /// Color of the slider bar.
+  final Color barColor;
+
+  /// Color of the slider handle.
+  final Color handleColor;
+
+  /// Color of the slider handle border.
+  final Color handleBorderColor;
+
+  /// Color of the sliders focus.
+  final Color focusedColor;
+
+  /// Size of the focus border around the handle when the slider is focused.
+  final double focusBorderSize;
+
+  /// Color of the value.
+  final Color valueTextColor;
+
+  /// Size of the value text.
+  final double valueTextSize;
+
+  /// Line height of the value text.
+  final double valueTextLineHeight;
+
+  /// Create style.
+  const SliderStyle({
+    this.animate = true,
+    this.showValue = true,
+    this.valueFormatter = null,
+    this.barSize = 2,
+    this.handleSize = 20,
+    this.handleBorderSize = 2,
+    this.barColor = const Color.hex(0xFF4285F4),
+    this.handleColor = const Color.hex(0xFF4285F4),
+    this.handleBorderColor = Colors.WHITE,
+    this.disabledColor = Colors.LIGHTER_GRAY,
+    this.focusedColor = const Color.hex(0x99999999),
+    this.focusBorderSize = 7,
+    this.valueTextColor = Colors.BLACK,
+    this.valueTextSize = CanvasContextUtil.DEFAULT_FONT_SIZE_PX,
+    this.valueTextLineHeight = 1.0,
+  });
+}
+
+/// Internal state of the slider.
+class _SliderState {
+  /// Whether the slider is focused.
+  bool focused;
+
+  /// Whether the slider is hovered.
+  bool hovered;
+
+  /// Whether the slider handle is dragged.
+  bool dragged;
+
+  /// Whether the slider is disabled.
+  bool disabled;
+
+  /// Create state
+  _SliderState({
+    this.focused = false,
+    this.hovered = false,
+    this.dragged = false,
+    this.disabled = false,
+  });
+}
