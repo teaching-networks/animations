@@ -50,6 +50,11 @@ class CSMACAClient {
   /// Since when the channel is idle.
   num _channelIdleSince;
 
+  /// How many sends are currently waiting.
+  int _sendsWaiting = 0;
+
+  bool _readyToSendAnother = true;
+
   /// Create client.
   CSMACAClient({
     @required this.wirelessNode,
@@ -146,5 +151,15 @@ class CSMACAClient {
     _numberOfTimeouts = value;
   }
 
+  set sendsWaiting(int value) {
+    _sendsWaiting = value;
+  }
 
+  int get sendsWaiting => _sendsWaiting;
+
+  bool get readyToSendAnother => _readyToSendAnother;
+
+  set readyToSendAnother(bool value) {
+    _readyToSendAnother = value;
+  }
 }

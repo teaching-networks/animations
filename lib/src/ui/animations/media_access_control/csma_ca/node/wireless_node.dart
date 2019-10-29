@@ -21,10 +21,10 @@ class WirelessNode<T> extends CanvasDrawable {
   static const double _signalEmissionPropagationSpeed = 300000000.0;
 
   /// The ratio of the nodes range to its node circle size.
-  static const double _rangeToNodeCircleRatio = 10.0;
+  static const double rangeToNodeCircleRatio = 10.0;
 
   /// The ratio of the nodes range to its node hover circle size.
-  static const double rangeToHoverCircleRatio = _rangeToNodeCircleRatio / 2;
+  static const double rangeToHoverCircleRatio = rangeToNodeCircleRatio / 2;
 
   /// Color shown as hover circle.
   static const Color _hoverColor = Color.rgba(100, 100, 100, 0.2);
@@ -117,7 +117,7 @@ class WirelessNode<T> extends CanvasDrawable {
     // Draw node circle
     setFillColor(context, nodeCircleColor);
     context.beginPath();
-    context.arc(0.0, 0.0, radius / _rangeToNodeCircleRatio, 0, 2 * pi);
+    context.arc(0.0, 0.0, radius / rangeToNodeCircleRatio, 0, 2 * pi);
     context.fill();
 
     // Draw node name

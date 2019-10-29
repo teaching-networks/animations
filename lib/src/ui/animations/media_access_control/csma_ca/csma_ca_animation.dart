@@ -416,7 +416,13 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
             client.chart.setValueColor(Colors.WHITE);
             _emitSignalFrom(client, type, answerSignalType: answerType);
           });
+
+          return;
         }
+      }
+
+      if (client.readyToSendAnother && client.sendsWaiting > 0) {
+        _sendRequestToSend(client);
       }
     }
   }
@@ -432,6 +438,8 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
 
     for (final client in _clients) {
       client.wirelessNode.render(context, Rectangle<double>(width, height, radius, radius), timestamp);
+      _drawSendsWaitingBubble(
+          client.sendsWaiting, client.wirelessNode.coordinates.x * width + radius / WirelessNode.rangeToNodeCircleRatio, client.wirelessNode.coordinates.y * height - radius / WirelessNode.rangeToNodeCircleRatio);
     }
 
     _lastRenderRadius = radius;
@@ -440,6 +448,21 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     _lastMapRenderXOffset = left;
 
     context.restore();
+  }
+
+  void _drawSendsWaitingBubble(int sendsWaiting, double x, double y) {
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+
+    double height = defaultFontSize;
+
+    setFillColor(context, Colors.PINK_RED_2);
+    context.beginPath();
+    context.arc(x, y, height * 0.6, 0, 2 * pi);
+    context.fill();
+
+    setFillColor(context, Colors.WHITE);
+    context.fillText(sendsWaiting.toString(), x, y);
   }
 
   /// Draw the chart table.
@@ -520,6 +543,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     double dragDistance = _dragStart != null ? event.pos.distanceTo(_dragStart) : 0;
 
     if (client != null && _draggedNode != null && client.wirelessNode == _draggedNode && dragDistance < _dragDistanceThreshold && !_isDraggingNode) {
+      client.sendsWaiting++;
       _sendRequestToSend(client);
     }
 
@@ -544,6 +568,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     }
 
     client.numberOfTimeouts = 0;
+    client.readyToSendAnother = false;
 
     if (rtsCtsOn) {
       _emitSignalFrom(client, SignalType.RTS, answerSignalType: SignalType.CTS);
@@ -648,6 +673,9 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
     if (client != _accessPoint) {
       if (client.numberOfTimeouts <= _maxRetransmissions) {
         _backoff(client, type);
+      } else {
+        client.sendsWaiting--;
+        client.readyToSendAnother = true;
       }
     }
   }
@@ -836,6 +864,8 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
         client.mediumStatusType = MediumStatusType.FREE;
         client.chart.setStateColor(_getColorForMediumStatusType(MediumStatusType.FREE));
         client.numberOfCollisions = 0; // Reset number of collisions in case of successful transmission.
+        client.readyToSendAnother = true;
+        client.sendsWaiting--;
       }
     } else {
       if (type == SignalType.CTS) {
