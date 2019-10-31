@@ -102,10 +102,12 @@ abstract class Anim {
   }
 
   /// Reverse the animation.
-  /// Can only be called when the animation is not running.
   void reverse() {
     if (running) {
-      throw Exception("Cannot reverse animation in running state");
+      var curTS = _startTS + _duration.inMilliseconds * _progress;
+
+      _progress = 1.0 - _progress;
+      _startTS = curTS - _duration.inMilliseconds * _progress;
     }
 
     _reversed = !_reversed;

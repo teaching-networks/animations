@@ -137,7 +137,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
     _disabled = value;
 
     if (_disabled) {
-      onBlur(); // Remove focus
+      blur(); // Remove focus
     }
 
     invalidate();
@@ -196,7 +196,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
   /// What to do on mouse up on the window.
   void _onWindowMouseUp(MouseEvent event) {
     if (hasFocus()) {
-      onBlur();
+      blur();
     }
   }
 
@@ -637,7 +637,7 @@ class InputDrawable extends Drawable implements MouseListener, FocusableDrawable
 
     if (!containsPos(event.pos)) {
       if (hasFocus()) {
-        onBlur();
+        blur();
       }
       return;
     }

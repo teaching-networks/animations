@@ -64,6 +64,26 @@ class Color {
     return Color.rgb(red, green, blue);
   }
 
+  /// Merge two colors [c1] and [c2] and mix them using the passed [threshold].
+  /// [threshold] is in range [0.0; 1.0] and defines the strength of the color [c1].
+  /// If [threshold] is 1.0, the result will be the first color [c1]. If you pass 0.0 as [threshold]
+  /// the result will be [c2].
+  static Color merge(Color c1, Color c2, double threshold) {
+    if (threshold < 0.0 || threshold > 1.0) {
+      throw new Exception("threshold needs to be in range [0.0; 1.0]");
+    }
+
+    double t1 = 1.0 - threshold;
+    double t2 = threshold;
+
+    int red = (c1.red * t1 + c2.red * t2).round();
+    int green = (c1.green * t1 + c2.green * t2).round();
+    int blue = (c1.blue * t1 + c2.blue * t2).round();
+    double alpha = (c1.alpha * t1 + c2.alpha * t2);
+
+    return Color.rgba(red, green, blue, alpha);
+  }
+
   String toCSSColorString() => "rgba(${red},${green},${blue},${alpha})";
 
   @override

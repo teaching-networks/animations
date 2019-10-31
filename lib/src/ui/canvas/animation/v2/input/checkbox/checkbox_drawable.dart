@@ -93,7 +93,7 @@ class CheckboxDrawable extends Drawable implements MouseListener, FocusableDrawa
     _state.disabled = isDisabled;
 
     if (hasFocus()) {
-      onBlur();
+      blur();
     }
 
     invalidate();
@@ -304,7 +304,7 @@ class CheckboxDrawable extends Drawable implements MouseListener, FocusableDrawa
   void onMouseDown(CanvasMouseEvent event) {
     if (!containsPos(event.pos)) {
       if (hasFocus()) {
-        onBlur();
+        blur();
       }
       return;
     }

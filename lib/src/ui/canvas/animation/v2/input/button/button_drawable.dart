@@ -118,7 +118,7 @@ class ButtonDrawable extends Drawable implements MouseListener, FocusableDrawabl
     _state.disabled = isDisabled;
 
     if (hasFocus()) {
-      onBlur();
+      blur();
     }
 
     _initTextDrawable();
@@ -206,7 +206,7 @@ class ButtonDrawable extends Drawable implements MouseListener, FocusableDrawabl
 
     if (!containsPos(event.pos)) {
       if (hasFocus()) {
-        onBlur();
+        blur();
       }
       return;
     }

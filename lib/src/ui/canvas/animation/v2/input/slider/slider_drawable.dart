@@ -21,6 +21,9 @@ import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 /// Formatter used to format a sliders value.
 typedef String ValueFormatter(double value);
 
+/// Callback when the slider value changes.
+typedef void SliderValueChangeCallback(double value);
+
 /// A slider input control.
 class SliderDrawable extends Drawable implements FocusableDrawable, MouseListener {
   /// Internal state of the slider.
@@ -50,8 +53,17 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   /// Animation invoked when focusing the slider and [_style.animate] is truthy.
   Anim _focusAnimation;
 
+  /// Animation invoked when hovering the slider and [_style.animate] is truthy.
+  Anim _hoverAnimation;
+
   /// Subscription to key up events.
   Function _windowKeyDownSub;
+
+  /// Subscription to window mouse up events.
+  Function _windowMouseUpSub;
+
+  /// Callback to be called when the value of the slider changes.
+  SliderValueChangeCallback _changeCallback;
 
   /// Create slider drawable.
   SliderDrawable({
@@ -62,12 +74,14 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     double step = 0.1,
     double value = 0,
     double width = 200,
+    SliderValueChangeCallback changeCallback,
   })  : _style = style,
         _min = min,
         _max = max,
         _step = step,
         _value = value,
         _width = width,
+        _changeCallback = changeCallback,
         super(parent: parent) {
     _init();
   }
@@ -82,6 +96,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
         alignment: TextAlignment.CENTER,
         textSize: _style.valueTextSize,
         lineHeight: _style.valueTextLineHeight,
+        fontFamilies: _style.valueTextFontFamilies,
       );
     }
 
@@ -91,8 +106,17 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
       onEnd: (_) => invalidate(),
     );
 
+    _hoverAnimation = AnimHelper(
+      curve: Curves.easeInOutCubic,
+      duration: Duration(milliseconds: 200),
+      onEnd: (_) => invalidate(),
+    );
+
     _windowKeyDownSub = (event) => _onKeyDown(event);
     window.addEventListener("keydown", _windowKeyDownSub);
+
+    _windowMouseUpSub = (event) => _onWindowMouseUp(event);
+    window.addEventListener("mouseup", _windowMouseUpSub);
 
     _recalculateSize();
   }
@@ -100,9 +124,28 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   @override
   void cleanup() {
     window.removeEventListener("keydown", _windowKeyDownSub);
+    window.removeEventListener("mouseup", _windowMouseUpSub);
 
     super.cleanup();
   }
+
+  /// Set the disabled state of the slider drawable.
+  set disabled(bool value) {
+    if (value != _state.disabled) {
+      _state.disabled = value;
+
+      if (_state.disabled && hasFocus()) {
+        blur();
+      }
+
+      _state.dragged = false;
+
+      invalidate();
+    }
+  }
+
+  /// Check whether the slider drawable is disabled.
+  bool get disabled => _state.disabled;
 
   /// Set the style of the slider.
   set style(SliderStyle value) {
@@ -143,30 +186,38 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   double get step => _step;
 
   /// Set the current value of the slider.
-  set value(double value) {
-    _value = math.min(math.max(value, _min), _max);
+  set value(double v) {
+    double newValue = math.min(math.max(v, _min), _max);
 
     // Round to next nearest [step].
-    double rest = _value % step;
-    double lower = _value - rest;
+    double rest = newValue % step;
+    double lower = newValue - rest;
     double higher = lower + step;
 
-    if (_value - lower < higher - _value) {
-      _value = lower;
+    if (newValue - lower < higher - newValue) {
+      newValue = lower;
     } else {
-      _value = higher;
+      newValue = higher;
     }
 
-    if (_style.showValue) {
-      double oldHeight = _valueDrawable.size.height;
-      _valueDrawable.text = _formattedValue;
+    if (newValue != _value) {
+      _value = newValue;
 
-      if (_valueDrawable.size.height != oldHeight) {
-        _recalculateSize();
+      if (_style.showValue) {
+        double oldHeight = _valueDrawable.size.height;
+        _valueDrawable.text = _formattedValue;
+
+        if (_valueDrawable.size.height != oldHeight) {
+          _recalculateSize();
+        }
+      }
+
+      invalidate();
+
+      if (_changeCallback != null) {
+        _changeCallback(value);
       }
     }
-
-    invalidate();
   }
 
   /// Get the current value of the slider.
@@ -238,7 +289,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   void onMouseDown(CanvasMouseEvent event) {
     if (!containsPos(event.pos)) {
       if (hasFocus()) {
-        onBlur();
+        blur();
       }
       return;
     }
@@ -264,12 +315,14 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     if (containsPos(event.pos)) {
       if (!_state.hovered) {
         _state.hovered = true;
+        invalidate();
 
         _onMouseEnter(event);
       }
     } else {
       if (_state.hovered) {
         _state.hovered = false;
+        invalidate();
 
         _onMouseLeave(event);
       }
@@ -306,6 +359,11 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     if (event.control.getCursorType() != "pointer") {
       event.control.setCursorType("pointer");
     }
+
+    if (_style.animate) {
+      _hoverAnimation.reset(resetReverse: true);
+      _hoverAnimation.start();
+    }
   }
 
   /// What should happen when the mouse leaves the slider.
@@ -313,10 +371,26 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     if (event.control.getCursorType() == "pointer") {
       event.control.resetCursorType();
     }
+
+    if (_style.animate) {
+      if (!_hoverAnimation.reversed) _hoverAnimation.reverse();
+      _hoverAnimation.start();
+    }
   }
 
   @override
   void onMouseUp(CanvasMouseEvent event) {
+    if (_state.disabled) {
+      return;
+    }
+
+    if (_state.dragged) {
+      _state.dragged = false;
+    }
+  }
+
+  /// What should happen on the mouse up event on the window.
+  void _onWindowMouseUp(MouseEvent event) {
     if (_state.disabled) {
       return;
     }
@@ -332,10 +406,12 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
       return;
     }
 
+    double s = event.ctrlKey ? (max - min) * 0.1 : step;
+
     if (event.key == "ArrowLeft") {
-      value -= step;
+      value -= s;
     } else if (event.key == "ArrowRight") {
-      value += step;
+      value += s;
     }
   }
 
@@ -361,7 +437,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
 
   /// Draw the slider bar.
   void _drawBar(double padding, double barSize) {
-    setFillColor(_style.barColor);
+    setFillColor(_state.disabled ? _style.disabledColor : _style.barColor);
     ctx.fillRect(padding, padding - barSize / 2, size.width - padding * 2, barSize);
   }
 
@@ -386,18 +462,29 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     ctx.arc(xOffset, yOffset, radius + handleBorderSize, 0, 2 * math.pi);
     ctx.fill();
 
-    setFillColor(_style.handleColor);
+    if (_state.disabled) {
+      setFillColor(_style.disabledColor);
+    } else if (_state.hovered || _hoverAnimation.running) {
+      if (_hoverAnimation.running) {
+        setFillColor(Color.merge(_style.handleColor, _style.hoveredHandleColor, _hoverAnimation.progress));
+      } else {
+        setFillColor(_style.hoveredHandleColor);
+      }
+    } else {
+      setFillColor(_style.handleColor);
+    }
     ctx.beginPath();
     ctx.arc(xOffset, yOffset, radius, 0, 2 * math.pi);
     ctx.fill();
   }
 
   @override
-  bool needsRepaint() => _focusAnimation.running;
+  bool needsRepaint() => _focusAnimation.running || _hoverAnimation.running;
 
   @override
   void update(num timestamp) {
     _focusAnimation.update(timestamp);
+    _hoverAnimation.update(timestamp);
   }
 
   /// Get the current value in a formatted representation.
@@ -433,6 +520,9 @@ class SliderStyle {
   /// Color of the slider handle.
   final Color handleColor;
 
+  /// Color of the handle when the slider is hovered.
+  final Color hoveredHandleColor;
+
   /// Color of the slider handle border.
   final Color handleBorderColor;
 
@@ -451,6 +541,9 @@ class SliderStyle {
   /// Line height of the value text.
   final double valueTextLineHeight;
 
+  /// Font families to use for the value text.
+  final String valueTextFontFamilies;
+
   /// Create style.
   const SliderStyle({
     this.animate = true,
@@ -461,13 +554,15 @@ class SliderStyle {
     this.handleBorderSize = 2,
     this.barColor = const Color.hex(0xFF4285F4),
     this.handleColor = const Color.hex(0xFF4285F4),
+    this.hoveredHandleColor = const Color.hex(0xFF64A7F6),
     this.handleBorderColor = Colors.WHITE,
-    this.disabledColor = Colors.LIGHTER_GRAY,
+    this.disabledColor = Colors.GRAY,
     this.focusedColor = const Color.hex(0x99999999),
     this.focusBorderSize = 7,
     this.valueTextColor = Colors.BLACK,
     this.valueTextSize = CanvasContextUtil.DEFAULT_FONT_SIZE_PX,
     this.valueTextLineHeight = 1.0,
+    this.valueTextFontFamilies = "Consolas, 'Courier New', Courier, monospace",
   });
 }
 

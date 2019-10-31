@@ -154,4 +154,17 @@ class FocusManager {
 
     return acceptedFocus;
   }
+
+  /// Blur the passed drawables focus.
+  void blur(FocusableDrawable drawable) {
+    int index = _focusables.indexOf(drawable);
+    if (index == -1) {
+      return;
+    }
+
+    if (_focusedIndex != null && _focusedIndex == index) {
+      _focusables[_focusedIndex].onBlur();
+      _focusedIndex = null;
+    }
+  }
 }

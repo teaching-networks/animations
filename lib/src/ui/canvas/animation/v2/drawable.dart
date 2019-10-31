@@ -348,6 +348,14 @@ abstract class Drawable extends CanvasContextUtil {
     return false;
   }
 
+  /// Blur this drawables focus.
+  /// Only drawables of type FocusableDrawable can be blurred.
+  void blur() {
+    if (currentDrawableContext != null && currentDrawableContext.focusManager != null && this is FocusableDrawable) {
+      currentDrawableContext.focusManager.blur(this as FocusableDrawable);
+    }
+  }
+
   /// Check if the drawable needs to be repainted.
   /// It will be repainted no matter what this method is stating in case you
   /// call [invalidate()].

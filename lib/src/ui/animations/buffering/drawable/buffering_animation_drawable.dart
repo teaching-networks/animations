@@ -11,7 +11,25 @@ class BufferingAnimationDrawable extends Drawable {
   SliderDrawable test;
 
   BufferingAnimationDrawable() {
-    test = SliderDrawable(parent: this);
+    test = SliderDrawable(
+      parent: this,
+      value: 42,
+      min: 12,
+      max: 256,
+      step: 1,
+      changeCallback: (value) => print(value),
+      style: SliderStyle(
+        valueFormatter: (value) => value.toStringAsFixed(0),
+      ),
+    );
+
+    Future.delayed(Duration(seconds: 5)).then((_) {
+      test.disabled = true;
+
+      Future.delayed(Duration(seconds: 5)).then((_) {
+        test.disabled = false;
+      });
+    });
   }
 
   @override
