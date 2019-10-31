@@ -30,7 +30,7 @@ abstract class Drawable extends CanvasContextUtil {
   Drawable _parent;
 
   /// Canvas where to cache rendered content until it needs to be refreshed.
-  CanvasElement _cacheCanvas;
+  CanvasElement _cacheCanvas = CanvasElement();
 
   /// Size of the cached canvas.
   Size _cacheCanvasSize;
@@ -86,7 +86,6 @@ abstract class Drawable extends CanvasContextUtil {
 
   /// Initialize the drawable.
   void _init() {
-    _cacheCanvas = CanvasElement();
     setSize();
     _cacheCanvasContext = _cacheCanvas.getContext(_canvas2dRenderingContextId);
 
