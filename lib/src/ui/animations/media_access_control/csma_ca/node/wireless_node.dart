@@ -21,7 +21,7 @@ class WirelessNode<T> extends CanvasDrawable {
   static const double _signalEmissionPropagationSpeed = 300000000.0;
 
   /// The ratio of the nodes range to its node circle size.
-  static const double rangeToNodeCircleRatio = 10.0;
+  static const double rangeToNodeCircleRatio = 7.0;
 
   /// The ratio of the nodes range to its node hover circle size.
   static const double rangeToHoverCircleRatio = rangeToNodeCircleRatio / 2;
