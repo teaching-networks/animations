@@ -158,8 +158,11 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   SliderStyle get style => _style;
 
   /// Set the minimum value of the slider.
-  set min(double value) {
-    _min = value;
+  set min(double newMin) {
+    _min = newMin;
+    if (value < _min) {
+      value = _min;
+    }
 
     invalidate();
   }
@@ -168,8 +171,11 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   double get min => _min;
 
   /// Set the maximum value of the sider.
-  set max(double value) {
-    _max = value;
+  set max(double newMax) {
+    _max = newMax;
+    if (value > _max) {
+      value = _max;
+    }
 
     invalidate();
   }
