@@ -10,6 +10,8 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
 
+import 'alignment.dart';
+
 /// Drawable displaying text.
 class TextDrawable extends Drawable {
   /// Text to show in the drawable.
@@ -205,10 +207,4 @@ class TextDrawable extends Drawable {
 
     return lines;
   }
-}
-
-enum TextAlignment {
-  LEFT,
-  CENTER,
-  RIGHT,
 }

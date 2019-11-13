@@ -175,6 +175,8 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
         _onMouseDown(event, drawable);
       }
     }
+
+    event.event.preventDefault();
   }
 
   @override

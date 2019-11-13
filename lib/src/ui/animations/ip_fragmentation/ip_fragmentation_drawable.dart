@@ -17,6 +17,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_uti
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble_container.dart';
+import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';

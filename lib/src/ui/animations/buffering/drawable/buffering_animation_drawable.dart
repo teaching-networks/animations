@@ -14,13 +14,32 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_dra
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
+import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
+import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:vector_math/vector_math.dart' as vector;
 
 typedef _DataPacket _TransformFunction(_DataPacket packet);
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
+  /// Size of the media to be transmitted in bytes.
+  static final int _TRANSMISSION_SIZE = 1024 * 20;
+
+  /// Maximum transmission unit in bytes.
+  static final int _MTU = 1500;
+
+  /// Bitrate of the media to be transmitted (in bit per second).
+  static final int _BITRATE = 1000 * 1000 * 5;
+
+  /// Quaternion used to rotate an arrow head vector to the left.
+  static vector.Quaternion _rotateLeft = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), pi / 4 * 3);
+
+  /// Quaternion used to rotate an arrow head vector to the right.
+  static vector.Quaternion _rotateRight = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), -pi / 4 * 3);
+
   /// Random number generator used to generate seeds for another random number generator.
   static Random _rng = Random();
 
@@ -147,9 +166,9 @@ class BufferingAnimationDrawable extends Drawable {
     int meanNetworkRate,
     int networkRateVariance,
   }) {
-    int size = 1024 * 20;
-    int mtu = 1500;
-    int bitRate = 5 * 1000 * 1000;
+    int size = _TRANSMISSION_SIZE;
+    int mtu = _MTU;
+    int bitRate = _BITRATE;
 
     _graph.removeAll();
 
@@ -299,9 +318,122 @@ class BufferingAnimationDrawable extends Drawable {
       _reseedButton.size.height,
     );
 
-    _drawControls(controlsWidth, controlsHeight, controlsPadding);
+    _drawControls(
+      controlsWidth,
+      controlsHeight,
+      controlsPadding,
+    );
 
-    _graph.render(ctx, new Rectangle<double>(0, controlsHeight, size.width, size.height - controlsHeight));
+    double graphSpacing = 10 * window.devicePixelRatio;
+
+    _drawGraph(
+      x: 0,
+      y: controlsHeight + graphSpacing,
+      width: size.width,
+      height: size.height - controlsHeight - graphSpacing,
+    );
+
+    _drawLegend(
+      x: 0,
+      y: 0,
+      width: (size.width - controlsWidth) / 2,
+      height: controlsHeight,
+      items: [
+        _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
+        _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
+        _LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
+      ],
+    );
+  }
+
+  /// Draw the result graph.
+  void _drawGraph({
+    double x = 0,
+    double y = 0,
+    double width,
+    double height,
+  }) {
+    double axisLineWidth = 2 * window.devicePixelRatio;
+    double arrowHeadSize = 16 * window.devicePixelRatio;
+    double axisLineOffset = axisLineWidth / 2 + arrowHeadSize / 2 + defaultFontSize;
+
+    setStrokeColor(Colors.SLATE_GREY);
+    setFillColor(Colors.SLATE_GREY);
+
+    // Draw coordinate system axes first
+    ctx.lineWidth = axisLineWidth;
+    ctx.beginPath();
+    ctx.moveTo(x + axisLineOffset, y);
+    ctx.lineTo(x + axisLineOffset, y + height - axisLineOffset);
+    ctx.lineTo(x + width, y + height - axisLineOffset);
+    ctx.stroke();
+
+    // Draw y-axis arrow
+    _drawArrowHead(
+      x: x + axisLineOffset,
+      y: y,
+      size: arrowHeadSize,
+      direction: vector.Vector2(0, -1),
+    );
+
+    // Draw x-axis arrow
+    _drawArrowHead(
+      x: x + width,
+      y: y + height - axisLineOffset,
+      size: arrowHeadSize,
+      direction: vector.Vector2(1, 0),
+    );
+
+    // Draw y-axis label
+    setFillColor(Colors.BLACK);
+    ctx.save();
+    ctx.translate(x, y + arrowHeadSize);
+    ctx.rotate(-pi / 2);
+    setFont(
+      baseline: TextBaseline.TOP,
+      alignment: TextAlignment.RIGHT,
+    );
+    ctx.fillText("Cumulative data", 0, 0);
+    ctx.restore();
+
+    // Draw x-axis label
+    setFont(
+      baseline: TextBaseline.BOTTOM,
+      alignment: TextAlignment.RIGHT,
+    );
+    ctx.fillText("Time", x + width - arrowHeadSize, y + height);
+
+    // Draw actual graph
+    _graph.render(ctx, new Rectangle<double>(x + axisLineOffset, y, width - axisLineOffset, height - axisLineOffset));
+  }
+
+  /// Draw an arrow and return its bounds.
+  void _drawArrowHead({
+    vector.Vector2 direction,
+    double size = 10,
+    double x = 0,
+    double y = 0,
+  }) {
+    double hypo = sqrt(2 * pow(size / 2, 2));
+
+    vector.Vector3 dir3D = vector.Vector3(direction.x, direction.y, 0);
+
+    vector.Vector3 leftHead = _rotateLeft.rotated(dir3D);
+    leftHead.length = hypo;
+
+    vector.Vector3 rightHead = _rotateRight.rotated(dir3D);
+    rightHead.length = hypo;
+
+    double x1 = x + leftHead.x;
+    double x2 = x + rightHead.x;
+    double y1 = y + leftHead.y;
+    double y2 = y + rightHead.y;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.fill();
   }
 
   /// Draw the sliders to control the animation.
@@ -340,6 +472,51 @@ class BufferingAnimationDrawable extends Drawable {
     );
   }
 
+  /// Draw a legend explaining the graph.
+  void _drawLegend({
+    double x = 0,
+    double y = 0,
+    double width = 100,
+    double height = 100,
+    List<_LegendItem> items,
+    double itemSpacing = 5,
+  }) {
+    assert(items.isNotEmpty);
+
+    double totalSpacing = (items.length - 1) * itemSpacing;
+    double heightPerItem = (height - totalSpacing) / items.length;
+    double yOffset = y;
+
+    for (_LegendItem item in items) {
+      _drawLegendItem(
+        x: x,
+        y: yOffset,
+        width: width,
+        height: heightPerItem,
+        item: item,
+      );
+
+      yOffset += heightPerItem + itemSpacing;
+    }
+  }
+
+  /// Draw a legend item.
+  void _drawLegendItem({
+    double x,
+    double y,
+    double width,
+    double height,
+    _LegendItem item,
+  }) {
+    setFillColor(item.color);
+    double cWidth = min(0.25 * width, 30 * window.devicePixelRatio);
+    ctx.fillRect(x, y, cWidth, height);
+
+    setFillColor(Colors.BLACK);
+    setFont(baseline: TextBaseline.MIDDLE);
+    ctx.fillText(item.text, x + cWidth + 5, y + height / 2, width - cWidth - 5);
+  }
+
   @override
   bool needsRepaint() => false;
 
@@ -366,5 +543,20 @@ class _DataPacket {
   _DataPacket({
     this.size,
     this.receivedTime,
+  });
+}
+
+/// Item used in a legend.
+class _LegendItem {
+  /// Color to be explained.
+  final Color color;
+
+  /// Text explaining the colors meaning.
+  final String text;
+
+  /// Create item.
+  _LegendItem({
+    this.color,
+    this.text,
   });
 }

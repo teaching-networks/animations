@@ -13,6 +13,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/round_rectangle.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/edges.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/paint_mode.dart';
 import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
+import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';

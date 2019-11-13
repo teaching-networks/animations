@@ -9,6 +9,8 @@ import 'package:hm_animations/src/ui/canvas/image/alignment/image_alignment.dart
 import 'package:hm_animations/src/ui/canvas/image/layout/fill_layout.dart';
 import 'package:hm_animations/src/ui/canvas/image/layout/image_layout.dart';
 import 'package:hm_animations/src/ui/canvas/image/layout/stretch_layout.dart';
+import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
+import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 
 abstract class CanvasContextUtil {
@@ -101,6 +103,18 @@ abstract class CanvasContextUtil {
       default:
         throw Exception("Image draw mode unknown");
     }
+  }
+
+  /// Set the font settings for the current canvas context.
+  void setFont({
+    double size = DEFAULT_FONT_SIZE_PX,
+    List<String> fontFamilies = const ["sans-serif"],
+    TextAlignment alignment = TextAlignment.LEFT,
+    TextBaseline baseline = TextBaseline.ALPHABETIC,
+  }) {
+    _ctx.textAlign = textAlignmentNames[alignment].toLowerCase();
+    _ctx.textBaseline = textBaselineNames[baseline].toLowerCase();
+    _ctx.font = "${size * window.devicePixelRatio}px ${fontFamilies.join(", ")}";
   }
 }
 
