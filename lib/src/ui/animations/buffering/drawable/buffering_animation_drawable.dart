@@ -82,7 +82,7 @@ class BufferingAnimationDrawable extends Drawable {
       label: "Playout buffer size",
       changeCallback: changeCallback,
       min: 0,
-      max: 32768,
+      max: _TRANSMISSION_SIZE.toDouble(),
       value: 128,
       step: 8,
       valueFormatter: (value) => "${value.toInt()} Byte",
@@ -212,25 +212,28 @@ class BufferingAnimationDrawable extends Drawable {
       },
     );
 
-    // Add series to graph
-    _graph.add(_toGraph2DSeries(
-      constantBitRateTransmissionSeries,
-      style: Graph2DStyle(color: Colors.PINK_RED_2),
-    ));
-    _graph.add(_toGraph2DSeries(
-      networkDelayedSeries,
-      style: Graph2DStyle(color: Colors.BLUE_GRAY),
-    ));
-    _graph.add(_toGraph2DSeries(
-      playoutSeries,
-      style: Graph2DStyle(color: Colors.GREY_GREEN),
-    ));
-
     // Adjust graph axis dimensions
     _graph.minY = 0;
     _graph.minX = 0;
     _graph.maxY = size;
     _graph.maxX = max(playoutSeries.last.receivedTime, networkDelayedSeries.last.receivedTime);
+
+    // Add series to graph
+    _graph.add(_toGraph2DSeries(
+      constantBitRateTransmissionSeries,
+      style: Graph2DStyle(color: Colors.PINK_RED_2, fillArea: false),
+      maxX: _graph.maxX,
+    ));
+    _graph.add(_toGraph2DSeries(
+      networkDelayedSeries,
+      style: Graph2DStyle(color: Colors.BLUE_GRAY, fillArea: false),
+      maxX: _graph.maxX,
+    ));
+    _graph.add(_toGraph2DSeries(
+      playoutSeries,
+      style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true),
+      maxX: _graph.maxX,
+    ));
 
     invalidate();
   }
@@ -276,8 +279,9 @@ class BufferingAnimationDrawable extends Drawable {
   Graph2DSeries _toGraph2DSeries(
     List<_DataPacket> packets, {
     Graph2DStyle style = const Graph2DStyle(),
+    double maxX,
   }) {
-    List<Point<double>> result = new List<Point<double>>(packets.length * 2);
+    List<Point<double>> result = new List<Point<double>>(packets.length * 2 + 1);
 
     int cumSize = 0;
     for (int i = 0; i < packets.length; i++) {
@@ -290,6 +294,11 @@ class BufferingAnimationDrawable extends Drawable {
       cumSize += p.size;
       result[index + 1] = Point<double>(p.receivedTime, cumSize.toDouble());
     }
+
+    final lastReal = result[result.length - 2];
+
+    // Add imaginary last point to fill the graph until the end of the graphs coordinate system.
+    result.last = Point<double>(maxX, lastReal.y);
 
     return Graph2DSeries(series: result, style: style);
   }
@@ -385,7 +394,6 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     // Draw y-axis label
-    setFillColor(Colors.BLACK);
     ctx.save();
     ctx.translate(x, y + arrowHeadSize);
     ctx.rotate(-pi / 2);
