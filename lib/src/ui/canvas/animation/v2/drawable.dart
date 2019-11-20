@@ -21,10 +21,10 @@ abstract class Drawable extends CanvasContextUtil {
   static const _canvas2dRenderingContextId = "2d";
 
   /// Default width of the drawable.
-  static const double _defaultWidth = 100;
+  static const double defaultWidth = 100;
 
   /// Default height of the drawable.
-  static const double _defaultHeight = 150;
+  static const double defaultHeight = 150;
 
   /// Parent of the drawable (if any -> can be null).
   Drawable _parent;
@@ -174,8 +174,8 @@ abstract class Drawable extends CanvasContextUtil {
 
   /// Set the size of the drawable.
   void setSize({
-    double width = _defaultWidth,
-    double height = _defaultHeight,
+    double width = defaultWidth,
+    double height = defaultHeight,
   }) {
     if (_cacheCanvasSize == null || width != _cacheCanvasSize.width || height != _cacheCanvasSize.height) {
       Size oldSize = _cacheCanvasSize;

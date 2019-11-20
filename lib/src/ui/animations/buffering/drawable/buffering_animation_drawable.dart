@@ -9,12 +9,16 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable_function.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/axis_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/coordinate_system_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/plot_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
-import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
@@ -54,6 +58,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Graph to display the result in.
   Graph2D _graph;
+
+  /// Plot to display the result with.
+  Plot _plot;
 
   /// Button used to trigger reseeding the random number generator.
   ButtonDrawable _reseedButton;
@@ -112,6 +119,29 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     _graph = Graph2D(minX: 1, maxX: 3);
+    _plot = Plot(
+      parent: this,
+      yMax: 100,
+      xMax: 5,
+      style: PlotStyle(
+        coordinateSystem: CoordinateSystemStyle(
+          xAxis: AxisStyle(
+            label: "Time",
+            color: Colors.SLATE_GREY,
+            lineWidth: 2,
+          ),
+          yAxis: AxisStyle(
+            label: "Cumulative data",
+            color: Colors.SLATE_GREY,
+            lineWidth: 2,
+          ),
+        ),
+      ),
+    );
+
+    _plot.add(PlottableFunction(fct: (x) => x));
+    _plot.add(PlottableFunction(fct: (x) => pow(x, 2)));
+    _plot.add(PlottableFunction(fct: (x) => sin(x)));
 
     _reseedButton = ButtonDrawable(
       parent: this,
@@ -362,57 +392,16 @@ class BufferingAnimationDrawable extends Drawable {
     double width,
     double height,
   }) {
-    double axisLineWidth = 2 * window.devicePixelRatio;
-    double arrowHeadSize = 16 * window.devicePixelRatio;
-    double axisLineOffset = axisLineWidth / 2 + arrowHeadSize / 2 + defaultFontSize;
-
-    setStrokeColor(Colors.SLATE_GREY);
-    setFillColor(Colors.SLATE_GREY);
-
-    // Draw coordinate system axes first
-    ctx.lineWidth = axisLineWidth;
-    ctx.beginPath();
-    ctx.moveTo(x + axisLineOffset, y);
-    ctx.lineTo(x + axisLineOffset, y + height - axisLineOffset);
-    ctx.lineTo(x + width, y + height - axisLineOffset);
-    ctx.stroke();
-
-    // Draw y-axis arrow
-    _drawArrowHead(
-      x: x + axisLineOffset,
+    _plot.setSize(
+      width: width,
+      height: height,
+    );
+    _plot.render(
+      ctx,
+      lastPassTimestamp,
+      x: x,
       y: y,
-      size: arrowHeadSize,
-      direction: vector.Vector2(0, -1),
     );
-
-    // Draw x-axis arrow
-    _drawArrowHead(
-      x: x + width,
-      y: y + height - axisLineOffset,
-      size: arrowHeadSize,
-      direction: vector.Vector2(1, 0),
-    );
-
-    // Draw y-axis label
-    ctx.save();
-    ctx.translate(x, y + arrowHeadSize);
-    ctx.rotate(-pi / 2);
-    setFont(
-      baseline: TextBaseline.TOP,
-      alignment: TextAlignment.RIGHT,
-    );
-    ctx.fillText("Cumulative data", 0, 0);
-    ctx.restore();
-
-    // Draw x-axis label
-    setFont(
-      baseline: TextBaseline.BOTTOM,
-      alignment: TextAlignment.RIGHT,
-    );
-    ctx.fillText("Time", x + width - arrowHeadSize, y + height);
-
-    // Draw actual graph
-    _graph.render(ctx, new Rectangle<double>(x + axisLineOffset, y, width - axisLineOffset, height - axisLineOffset));
   }
 
   /// Draw an arrow and return its bounds.
