@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/axis_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/coordinate_system_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/util/coordinate_system.dart';
 import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
@@ -29,12 +30,17 @@ class CoordinateSystemDrawable extends Drawable {
   /// Coordinate system to draw.
   final CoordinateSystem2D coordinateSystem;
 
+  /// The default tick label renderer.
+  TickLabelRenderer _defaultTickLabelRenderer;
+
   /// Create the coordinate system drawable.
   CoordinateSystemDrawable({
     Drawable parent,
     this.style = const CoordinateSystemStyle(),
     @required this.coordinateSystem,
-  }) : super(parent: parent);
+  }) : super(parent: parent) {
+    _defaultTickLabelRenderer = TickStyle.precisionTickLabelRenderer(3);
+  }
 
   /// Current line width of the x axis.
   double _xAxisLineWidth;
@@ -54,6 +60,12 @@ class CoordinateSystemDrawable extends Drawable {
   /// Current offset of the y axis line.
   double _yAxisLineOffset;
 
+  /// Ticks of the x-axis.
+  List<double> _xTicks;
+
+  /// Ticks of the y-axis.
+  List<double> _yTicks;
+
   /// Recalculate visual metrics used by the drawing logic.
   void _recalculateVisualMetrics() {
     _xAxisLineWidth = style.xAxis.lineWidth * window.devicePixelRatio;
@@ -62,8 +74,39 @@ class CoordinateSystemDrawable extends Drawable {
     _xAxisArrowHeadSize = style.xAxis.arrowHeadSize * window.devicePixelRatio;
     _yAxisArrowHeadSize = style.yAxis.arrowHeadSize * window.devicePixelRatio;
 
-    _xAxisLineOffset = _xAxisLineWidth / 2 + _xAxisArrowHeadSize / 2 + defaultFontSize;
-    _yAxisLineOffset = _yAxisLineWidth / 2 + _yAxisArrowHeadSize / 2 + defaultFontSize;
+    _xAxisLineOffset = _xAxisLineWidth / 2 + _xAxisArrowHeadSize / 2;
+    if (style.xAxis.ticks != null) {
+      _xTicks = style.xAxis.ticks.generator(coordinateSystem.xRange.min, coordinateSystem.xRange.max);
+
+      _xAxisLineOffset += style.xAxis.ticks.labelFontSize * window.devicePixelRatio + style.xAxis.ticks.size;
+    }
+
+    _yAxisLineOffset = _yAxisLineWidth / 2 + _yAxisArrowHeadSize / 2;
+    if (style.yAxis.ticks != null) {
+      _yTicks = style.yAxis.ticks.generator(coordinateSystem.yRange.min, coordinateSystem.yRange.max);
+
+      // Find longest tick label
+      String longestTickLabel;
+      int longest = -1;
+      for (double tick in _yTicks) {
+        String label = _renderTickLabel(tick, style.yAxis);
+        if (label.length > longest) {
+          longest = label.length;
+          longestTickLabel = label;
+        }
+      }
+
+      // Calculate label width
+      setFont(size: style.yAxis.ticks.labelFontSize);
+      double labelWidth = ctx.measureText(longestTickLabel).width;
+
+      _yAxisLineOffset += labelWidth + style.yAxis.ticks.size;
+    }
+  }
+
+  /// Render a tick to label.
+  String _renderTickLabel(double tick, AxisStyle axisStyle) {
+    return axisStyle.ticks.labelRenderer != null ? axisStyle.ticks.labelRenderer(tick) : _defaultTickLabelRenderer(tick);
   }
 
   /// Draw an axis.
@@ -85,9 +128,6 @@ class CoordinateSystemDrawable extends Drawable {
       ctx.lineTo(_yAxisLineOffset, _yAxisLineWidth);
     ctx.stroke();
 
-    // Draw markers
-    // TODO
-
     // Draw arrow head
     if (axisType == _AxisType.X) {
       _drawArrowHead(
@@ -105,6 +145,46 @@ class CoordinateSystemDrawable extends Drawable {
       );
     }
 
+    // Draw ticks
+    if (axisStyle.ticks != null) {
+      Rectangle<double> drawingArea = getDrawingArea();
+
+      if (axisStyle.ticks.color != null) {
+        setStrokeColor(axisStyle.ticks.color);
+      }
+      setFillColor(axisStyle.ticks.labelColor);
+
+      double halfTick = axisStyle.ticks.size / 2 * window.devicePixelRatio;
+
+      if (axisType == _AxisType.X) {
+        setFont(size: axisStyle.ticks.labelFontSize, alignment: TextAlignment.CENTER, baseline: TextBaseline.TOP);
+        for (double tick in _xTicks) {
+          double x = drawingArea.left + tick / coordinateSystem.xRange.length * drawingArea.width;
+          double y = size.height - _xAxisLineOffset;
+
+          ctx.beginPath();
+          ctx.moveTo(x, y - halfTick);
+          ctx.lineTo(x, y + halfTick);
+          ctx.stroke();
+
+          ctx.fillText(_renderTickLabel(tick, axisStyle), x, y + halfTick);
+        }
+      } else {
+        setFont(size: axisStyle.ticks.labelFontSize, alignment: TextAlignment.RIGHT, baseline: TextBaseline.MIDDLE);
+        for (double tick in _yTicks) {
+          double y = drawingArea.top + drawingArea.height - tick / coordinateSystem.xRange.length * drawingArea.height;
+          double x = _yAxisLineOffset;
+
+          ctx.beginPath();
+          ctx.moveTo(x - halfTick, y);
+          ctx.lineTo(x + halfTick, y);
+          ctx.stroke();
+
+          ctx.fillText(_renderTickLabel(tick, axisStyle), x - halfTick, y);
+        }
+      }
+    }
+
     // Draw label
     if (axisStyle.label != null && axisStyle.label.isNotEmpty) {
       setFillColor(axisStyle.labelColor);
@@ -114,17 +194,13 @@ class CoordinateSystemDrawable extends Drawable {
           baseline: TextBaseline.BOTTOM,
           alignment: TextAlignment.RIGHT,
         );
-        ctx.fillText(axisStyle.label, size.width - _xAxisArrowHeadSize, size.height);
+        ctx.fillText(axisStyle.label, size.width, size.height - _xAxisLineOffset - _xAxisArrowHeadSize);
       } else {
-        ctx.save();
-        ctx.translate(0, _yAxisArrowHeadSize);
-        ctx.rotate(-pi / 2);
         setFont(
           baseline: TextBaseline.TOP,
-          alignment: TextAlignment.RIGHT,
+          alignment: TextAlignment.LEFT,
         );
-        ctx.fillText(axisStyle.label, 0, 0);
-        ctx.restore();
+        ctx.fillText(axisStyle.label, _yAxisLineOffset + _yAxisArrowHeadSize, 0);
       }
     }
   }
@@ -178,11 +254,19 @@ class CoordinateSystemDrawable extends Drawable {
     // Nothing to update.
   }
 
-  /// Get the current x offset of the coordinate systems x axis.
-  double get xOffset => _xAxisLineOffset;
+  /// Padding of the x axis to the graph.
+  double get _xPadding => style.xAxis.padding * window.devicePixelRatio;
 
-  /// Get teh current y offset of the coordinate systems y axis.
-  double get yOffset => _yAxisLineOffset;
+  /// Padding of the y axis to the graph.
+  double get _yPadding => style.yAxis.padding * window.devicePixelRatio;
+
+  /// Get the drawing area for the actual graph.
+  Rectangle<double> getDrawingArea() => new Rectangle(
+        _yAxisLineOffset + _yPadding,
+        _yAxisArrowHeadSize,
+        size.width - _yAxisLineOffset - _yPadding - _xAxisArrowHeadSize,
+        size.height - _xAxisLineOffset - _xPadding - _yAxisArrowHeadSize,
+      );
 }
 
 enum _AxisType { X, Y }

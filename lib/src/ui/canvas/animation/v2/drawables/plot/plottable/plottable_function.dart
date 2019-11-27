@@ -3,6 +3,7 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable.dart';
@@ -11,11 +12,10 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottabl
 typedef double Fct(double x);
 
 /// Function which is plottable.
-class PlottableFunction implements Plottable {
+class PlottableFunction extends Plottable {
   /// Function used to process values.
   final Fct fct;
 
-  /// Style of the plot.
   PlottableStyle _style;
 
   /// Create a plottable function.
@@ -41,5 +41,13 @@ class PlottableFunction implements Plottable {
   }
 
   @override
-  PlottableStyle get style => _style;
+  void draw(CanvasRenderingContext2D ctx, List<Point<double>> coordinates) {
+    ctx.setStrokeColorRgb(_style.color.red, _style.color.green, _style.color.blue, _style.color.alpha);
+
+    ctx.lineWidth = _style.lineWidth * window.devicePixelRatio;
+    ctx.lineJoin = _style.lineJoin;
+    ctx.lineCap = _style.lineCap;
+
+    super.draw(ctx, coordinates);
+  }
 }

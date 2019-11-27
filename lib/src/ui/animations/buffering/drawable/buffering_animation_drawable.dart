@@ -11,9 +11,11 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizo
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable_function.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/axis_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/coordinate_system_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/plot_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
@@ -121,27 +123,30 @@ class BufferingAnimationDrawable extends Drawable {
     _graph = Graph2D(minX: 1, maxX: 3);
     _plot = Plot(
       parent: this,
-      yMax: 100,
-      xMax: 5,
+      yMin: 0,
+      yMax: 25,
+      xMin: 0,
+      xMax: 25,
       style: PlotStyle(
         coordinateSystem: CoordinateSystemStyle(
           xAxis: AxisStyle(
             label: "Time",
             color: Colors.SLATE_GREY,
             lineWidth: 2,
+            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(5)),
           ),
           yAxis: AxisStyle(
             label: "Cumulative data",
             color: Colors.SLATE_GREY,
             lineWidth: 2,
+            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(8)),
           ),
         ),
       ),
     );
 
     _plot.add(PlottableFunction(fct: (x) => x));
-    _plot.add(PlottableFunction(fct: (x) => pow(x, 2)));
-    _plot.add(PlottableFunction(fct: (x) => sin(x)));
+    _plot.add(PlottableFunction(fct: (x) => x * x, style: PlottableStyle(color: Colors.AMBER, lineWidth: 2)));
 
     _reseedButton = ButtonDrawable(
       parent: this,

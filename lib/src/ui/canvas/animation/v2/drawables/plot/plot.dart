@@ -8,7 +8,6 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottabl
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/plot_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/util/coordinate_system.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/util/range.dart';
-import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
 /// A plot is able to show graphs via functions, series, ...
 /// It is basically the API v2 implementation of the [Graph2D].
@@ -201,6 +200,8 @@ class Plot extends Drawable {
 
   /// Draw all plottables.
   void _drawPlottables() {
+    Rectangle<double> drawingArea = _coordinateSystemDrawable.getDrawingArea();
+
     int sampleCount = max((size.width * quality).toInt(), 2);
 
     for (SampleCache sampleCache in _sampleCaches.values) {
@@ -214,29 +215,15 @@ class Plot extends Drawable {
         continue;
       }
 
-      ctx.lineWidth = window.devicePixelRatio;
-      setStrokeColor(Colors.BLACK);
-
-      ctx.beginPath();
-
-      Point<double> actP = _toActualPixel(samples.first);
-      ctx.moveTo(actP.x, actP.y);
-      for (int i = 1; i < samples.length; i++) {
-        actP = _toActualPixel(samples[i]);
-        ctx.lineTo(actP.x, actP.y);
-      }
-
-      ctx.stroke();
+      sampleCache.plottable.draw(ctx, samples.map((sample) => _toActualPixel(sample, drawingArea)).toList(growable: false));
     }
   }
 
   /// Convert the actual pixel of the passed relative point [p].
-  Point<double> _toActualPixel(Point<double> p) {
-    double height = (size.height - _coordinateSystemDrawable.yOffset);
-
+  Point<double> _toActualPixel(Point<double> p, Rectangle<double> drawingArea) {
     return Point<double>(
-      (p.x - _coordinateSystem.xRange.min) * (size.width - _coordinateSystemDrawable.xOffset),
-      height - (p.y - _coordinateSystem.yRange.min) * height,
+      drawingArea.left + p.x / _coordinateSystem.xRange.length * drawingArea.width,
+      drawingArea.top + drawingArea.height - p.y / _coordinateSystem.yRange.length * drawingArea.height,
     );
   }
 

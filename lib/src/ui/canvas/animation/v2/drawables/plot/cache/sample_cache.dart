@@ -3,10 +3,10 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable.dart';
-import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
 import 'package:meta/meta.dart';
 
 /// Cache for samples.
@@ -50,14 +50,16 @@ class SampleCache implements Plottable {
     return _cached;
   }
 
-  @override
-  PlottableStyle get style => plottable.style;
-
   /// Clear the cache.
   void clear() {
     _xMin = null;
     _xMax = null;
     _cachedCount = 0;
     _cached = null;
+  }
+
+  @override
+  void draw(CanvasRenderingContext2D ctx, List<Point<double>> coordinates) {
+    plottable.draw(ctx, coordinates);
   }
 }
