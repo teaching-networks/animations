@@ -46,6 +46,9 @@ class BufferingAnimationDrawable extends Drawable {
   /// Slider used to specify the variance of the network rate.
   _SliderContainer _networkRateVarianceSlider;
 
+  /// Slider used to specify the bit rate to stream with.
+  _SliderContainer _bitRateSlider;
+
   /// Plot to display the result with.
   Plot _plot;
 
@@ -69,6 +72,7 @@ class BufferingAnimationDrawable extends Drawable {
         playOutBufferSize: _playoutBufferSizeSlider.slider.value.toInt(),
         meanNetworkRate: _meanNetworkRateSlider.slider.value.toInt() * 1024,
         networkRateVariance: _networkRateVarianceSlider.slider.value.toInt() * 1024,
+        bitRate: _bitRateSlider.slider.value.toInt() * 1024,
       );
     };
 
@@ -104,6 +108,16 @@ class BufferingAnimationDrawable extends Drawable {
       value: 32,
       step: 8,
       valueFormatter: (value) => "${value.toInt()} kByte/s",
+    );
+
+    _bitRateSlider = _createSlider(
+      label: "Bit rate",
+      changeCallback: changeCallback,
+      min: 100,
+      max: 10000,
+      value: 5000,
+      step: 100,
+      valueFormatter: (value) => "${value.toInt()} kBit/s",
     );
 
     _plot = Plot(
@@ -185,10 +199,10 @@ class BufferingAnimationDrawable extends Drawable {
     int playOutBufferSize,
     int meanNetworkRate,
     int networkRateVariance,
+    int bitRate,
   }) {
-    int size = 10 * 1024;
+    int size = 10 * 1024; // TODO Remove for continuous streaming animation
     int mtu = _MTU;
-    int bitRate = _BITRATE;
 
     _plot.removeAll();
 
@@ -337,22 +351,33 @@ class BufferingAnimationDrawable extends Drawable {
         controlsPadding +
         _networkRateVarianceSlider.drawable.size.width +
         controlsPadding +
-        _reseedButton.size.width;
-    double controlsHeight = max(
-      max(
-        max(
-          _playoutBufferSizeSlider.drawable.size.height,
-          _meanNetworkRateSlider.drawable.size.height,
-        ),
-        _networkRateVarianceSlider.drawable.size.height,
-      ),
+        _reseedButton.size.width +
+        controlsPadding +
+        _bitRateSlider.drawable.size.width;
+    double controlsHeight = maxValue([
+      _playoutBufferSizeSlider.drawable.size.height,
+      _meanNetworkRateSlider.drawable.size.height,
+      _networkRateVarianceSlider.drawable.size.height,
+      _bitRateSlider.drawable.size.height,
       _reseedButton.size.height,
-    );
+    ]);
 
     _drawControls(
-      controlsWidth,
-      controlsHeight,
-      controlsPadding,
+      x: 0,
+      width: controlsWidth,
+      height: controlsHeight,
+      padding: controlsPadding,
+    );
+
+    _drawLegend(
+      x: controlsWidth + controlsPadding,
+      width: size.width - controlsWidth - controlsPadding,
+      height: controlsHeight,
+      items: [
+        _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
+        _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
+        _LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
+      ],
     );
 
     double graphSpacing = 10 * window.devicePixelRatio;
@@ -363,19 +388,10 @@ class BufferingAnimationDrawable extends Drawable {
       width: size.width,
       height: size.height - controlsHeight - graphSpacing,
     );
-
-    _drawLegend(
-      x: 0,
-      y: 0,
-      width: (size.width - controlsWidth) / 2,
-      height: controlsHeight,
-      items: [
-        _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
-        _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
-        _LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
-      ],
-    );
   }
+
+  /// Get the maximum value of the passed values.
+  double maxValue(List<double> values) => values.reduce((currentMax, value) => max(currentMax, value));
 
   /// Draw the result graph.
   void _drawGraph({
@@ -397,37 +413,42 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Draw the sliders to control the animation.
-  void _drawControls(double width, double height, double padding) {
-    double offsetX = (size.width - width) / 2;
+  void _drawControls({double x = 0, double y = 0, double width, double height, double padding}) {
+    double offsetX = x;
 
+    double currentOffset = offsetX;
     _playoutBufferSizeSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: offsetX,
+      x: currentOffset,
     );
 
+    currentOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
     _meanNetworkRateSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: offsetX + _playoutBufferSizeSlider.drawable.size.width + padding,
+      x: currentOffset,
     );
 
+    currentOffset += _meanNetworkRateSlider.drawable.size.width + padding;
     _networkRateVarianceSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: offsetX + _playoutBufferSizeSlider.drawable.size.width + padding + _meanNetworkRateSlider.drawable.size.width + padding,
+      x: currentOffset,
     );
 
+    currentOffset += _networkRateVarianceSlider.drawable.size.width + padding;
+    _bitRateSlider.drawable.render(
+      ctx,
+      lastPassTimestamp,
+      x: currentOffset,
+    );
+
+    currentOffset += _bitRateSlider.drawable.size.width + padding;
     _reseedButton.render(
       ctx,
       lastPassTimestamp,
-      x: offsetX +
-          _playoutBufferSizeSlider.drawable.size.width +
-          padding +
-          _meanNetworkRateSlider.drawable.size.width +
-          padding +
-          _networkRateVarianceSlider.drawable.size.width +
-          padding,
+      x: currentOffset,
       y: (height - _reseedButton.size.height) / 2,
     );
   }
