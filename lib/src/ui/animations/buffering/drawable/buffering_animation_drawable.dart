@@ -28,9 +28,6 @@ typedef _DataPacket _TransformFunction(_DataPacket packet);
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
-  /// Size of the media to be transmitted in bytes.
-  static final int _TRANSMISSION_SIZE = 1024 * 20;
-
   /// Maximum transmission unit in bytes.
   static final int _MTU = 1500;
 
@@ -79,7 +76,8 @@ class BufferingAnimationDrawable extends Drawable {
       label: "Playout buffer size",
       changeCallback: changeCallback,
       min: 0,
-      max: _TRANSMISSION_SIZE.toDouble(),
+      max: 20480,
+      // TODO Set to a realistic value
       value: 128,
       step: 8,
       valueFormatter: (value) => "${value.toInt()} Byte",
@@ -117,7 +115,7 @@ class BufferingAnimationDrawable extends Drawable {
       style: PlotStyle(
         coordinateSystem: CoordinateSystemStyle(
           xAxis: AxisStyle(
-            label: "Time",
+            label: "Time in s",
             color: Colors.LIGHTGREY,
             lineWidth: 2,
             ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(5)),
@@ -188,7 +186,7 @@ class BufferingAnimationDrawable extends Drawable {
     int meanNetworkRate,
     int networkRateVariance,
   }) {
-    int size = _TRANSMISSION_SIZE;
+    int size = 10 * 1024;
     int mtu = _MTU;
     int bitRate = _BITRATE;
 
