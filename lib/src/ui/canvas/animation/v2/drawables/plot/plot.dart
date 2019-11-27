@@ -130,6 +130,7 @@ class Plot extends Drawable {
     _coordinateSystem.yRange.min = yMin;
     _coordinateSystem.yRange.max = yMax;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
 
@@ -137,29 +138,45 @@ class Plot extends Drawable {
   void set minX(double newMinX) {
     _coordinateSystem.xRange.min = newMinX;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
+
+  /// Get the minimum x value.
+  double get minX => _coordinateSystem.xRange.min;
 
   /// Set a new maximum x value of the coordinate system.
   void set maxX(double newMaxX) {
     _coordinateSystem.xRange.max = newMaxX;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
+
+  /// Get the maximum x value.
+  double get maxX => _coordinateSystem.xRange.max;
 
   /// Set a new minimum y value of the coordinate system.
   void set minY(double newMinY) {
     _coordinateSystem.yRange.min = newMinY;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
+
+  /// Get the minimum y value.
+  double get minY => _coordinateSystem.yRange.min;
 
   /// Set a new maximum y value of the coordinate system.
   void set maxY(double newMaxY) {
     _coordinateSystem.yRange.max = newMaxY;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
+
+  /// Get the maximum y value.
+  double get maxY => _coordinateSystem.yRange.max;
 
   /// Set the x range of the coordinate system.
   void setXRange({
@@ -169,6 +186,7 @@ class Plot extends Drawable {
     _coordinateSystem.xRange.min = minX;
     _coordinateSystem.xRange.max = maxX;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
 
@@ -180,6 +198,7 @@ class Plot extends Drawable {
     _coordinateSystem.yRange.min = minY;
     _coordinateSystem.yRange.max = maxY;
 
+    _coordinateSystemDrawable.invalidate();
     invalidate();
   }
 

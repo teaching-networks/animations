@@ -172,7 +172,7 @@ class CoordinateSystemDrawable extends Drawable {
       } else {
         setFont(size: axisStyle.ticks.labelFontSize, alignment: TextAlignment.RIGHT, baseline: TextBaseline.MIDDLE);
         for (double tick in _yTicks) {
-          double y = drawingArea.top + drawingArea.height - tick / coordinateSystem.xRange.length * drawingArea.height;
+          double y = drawingArea.top + drawingArea.height - tick / coordinateSystem.yRange.length * drawingArea.height;
           double x = _yAxisLineOffset;
 
           ctx.beginPath();

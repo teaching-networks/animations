@@ -11,6 +11,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizo
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable_function.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable_series.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/axis_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/coordinate_system_style.dart';
@@ -18,14 +19,10 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/pl
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/graph2d.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/renderables/graph2d_series.dart';
-import 'package:hm_animations/src/ui/canvas/graph/2d/style/graph2d_style.dart';
 import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
-import 'package:vector_math/vector_math.dart' as vector;
 
 typedef _DataPacket _TransformFunction(_DataPacket packet);
 
@@ -40,12 +37,6 @@ class BufferingAnimationDrawable extends Drawable {
   /// Bitrate of the media to be transmitted (in bit per second).
   static final int _BITRATE = 1000 * 1000 * 5;
 
-  /// Quaternion used to rotate an arrow head vector to the left.
-  static vector.Quaternion _rotateLeft = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), pi / 4 * 3);
-
-  /// Quaternion used to rotate an arrow head vector to the right.
-  static vector.Quaternion _rotateRight = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), -pi / 4 * 3);
-
   /// Random number generator used to generate seeds for another random number generator.
   static Random _rng = Random();
 
@@ -57,9 +48,6 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Slider used to specify the variance of the network rate.
   _SliderContainer _networkRateVarianceSlider;
-
-  /// Graph to display the result in.
-  Graph2D _graph;
 
   /// Plot to display the result with.
   Plot _plot;
@@ -120,7 +108,6 @@ class BufferingAnimationDrawable extends Drawable {
       valueFormatter: (value) => "${value.toInt()} kByte/s",
     );
 
-    _graph = Graph2D(minX: 1, maxX: 3);
     _plot = Plot(
       parent: this,
       yMin: 0,
@@ -131,15 +118,15 @@ class BufferingAnimationDrawable extends Drawable {
         coordinateSystem: CoordinateSystemStyle(
           xAxis: AxisStyle(
             label: "Time",
-            color: Colors.SLATE_GREY,
+            color: Colors.LIGHTGREY,
             lineWidth: 2,
             ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(5)),
           ),
           yAxis: AxisStyle(
             label: "Cumulative data",
-            color: Colors.SLATE_GREY,
+            color: Colors.LIGHTGREY,
             lineWidth: 2,
-            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(8)),
+            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(5), labelRenderer: (tick) => tick.toString()),
           ),
         ),
       ),
@@ -205,7 +192,7 @@ class BufferingAnimationDrawable extends Drawable {
     int mtu = _MTU;
     int bitRate = _BITRATE;
 
-    _graph.removeAll();
+    _plot.removeAll();
 
     final constantBitRateTransmissionSeries = _generateConstantBitRateTransmissionSeries(
       size: size,
@@ -248,26 +235,28 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     // Adjust graph axis dimensions
-    _graph.minY = 0;
-    _graph.minX = 0;
-    _graph.maxY = size;
-    _graph.maxX = max(playoutSeries.last.receivedTime, networkDelayedSeries.last.receivedTime);
+    _plot.setCoordinateSystem(
+      yMin: 0,
+      yMax: size.toDouble(),
+      xMin: 0,
+      xMax: max(playoutSeries.last.receivedTime, networkDelayedSeries.last.receivedTime),
+    );
 
-    // Add series to graph
-    _graph.add(_toGraph2DSeries(
+    // Add series to plot
+    _plot.add(_toPlotSeries(
       constantBitRateTransmissionSeries,
-      style: Graph2DStyle(color: Colors.PINK_RED_2, fillArea: false),
-      maxX: _graph.maxX,
+      style: PlottableStyle(color: Colors.PINK_RED_2),
+      maxX: _plot.maxX,
     ));
-    _graph.add(_toGraph2DSeries(
+    _plot.add(_toPlotSeries(
       networkDelayedSeries,
-      style: Graph2DStyle(color: Colors.BLUE_GRAY, fillArea: false),
-      maxX: _graph.maxX,
+      style: PlottableStyle(color: Colors.BLUE_GRAY),
+      maxX: _plot.maxX,
     ));
-    _graph.add(_toGraph2DSeries(
+    _plot.add(_toPlotSeries(
       playoutSeries,
-      style: Graph2DStyle(color: Colors.GREY_GREEN, fillArea: true),
-      maxX: _graph.maxX,
+      style: PlottableStyle(color: Colors.GREY_GREEN),
+      maxX: _plot.maxX,
     ));
 
     invalidate();
@@ -311,9 +300,9 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Convert the passed list of data packets to a Graph2D series.
-  Graph2DSeries _toGraph2DSeries(
+  PlottableSeries _toPlotSeries(
     List<_DataPacket> packets, {
-    Graph2DStyle style = const Graph2DStyle(),
+    PlottableStyle style = const PlottableStyle(),
     double maxX,
   }) {
     List<Point<double>> result = new List<Point<double>>(packets.length * 2 + 1);
@@ -335,7 +324,7 @@ class BufferingAnimationDrawable extends Drawable {
     // Add imaginary last point to fill the graph until the end of the graphs coordinate system.
     result.last = Point<double>(maxX, lastReal.y);
 
-    return Graph2DSeries(series: result, style: style);
+    return PlottableSeries(points: result, style: style);
   }
 
   /// Reseed the random number generator used by the animation.
@@ -407,35 +396,6 @@ class BufferingAnimationDrawable extends Drawable {
       x: x,
       y: y,
     );
-  }
-
-  /// Draw an arrow and return its bounds.
-  void _drawArrowHead({
-    vector.Vector2 direction,
-    double size = 10,
-    double x = 0,
-    double y = 0,
-  }) {
-    double hypo = sqrt(2 * pow(size / 2, 2));
-
-    vector.Vector3 dir3D = vector.Vector3(direction.x, direction.y, 0);
-
-    vector.Vector3 leftHead = _rotateLeft.rotated(dir3D);
-    leftHead.length = hypo;
-
-    vector.Vector3 rightHead = _rotateRight.rotated(dir3D);
-    rightHead.length = hypo;
-
-    double x1 = x + leftHead.x;
-    double x2 = x + rightHead.x;
-    double y1 = y + leftHead.y;
-    double y2 = y + rightHead.y;
-
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x, y);
-    ctx.lineTo(x2, y2);
-    ctx.fill();
   }
 
   /// Draw the sliders to control the animation.
