@@ -31,4 +31,23 @@ abstract class Plottable {
 
     ctx.stroke();
   }
+
+  /// Whether the plottable is animated.
+  bool get animated => false;
+
+  /// Request update of the plottable.
+  /// Returns whether the plottable is changed and thus needs to be updated.
+  bool requestUpdate(num timestamp) {
+    if (!animated) {
+      return false;
+    }
+
+    return update(timestamp);
+  }
+
+  /// Update the plottable by the passed timestamp.
+  /// Return whether the plottable needs to be redrawn.
+  bool update(num timestamp) {
+    return false;
+  }
 }

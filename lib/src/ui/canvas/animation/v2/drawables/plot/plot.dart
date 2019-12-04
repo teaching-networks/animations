@@ -251,6 +251,6 @@ class Plot extends Drawable {
 
   @override
   void update(num timestamp) {
-    // Nothing to update
+    // Do nothing.
   }
 }

@@ -10,7 +10,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottabl
 import 'package:meta/meta.dart';
 
 /// Cache for samples.
-class SampleCache implements Plottable {
+class SampleCache extends Plottable {
   /// Plottable to cache samples for.
   final Plottable plottable;
 
@@ -33,7 +33,7 @@ class SampleCache implements Plottable {
 
   @override
   List<Point<double>> sample({double xStart = 0.0, double xEnd = 1.0, int count = 10}) {
-    bool refresh = xStart != _xMin || xEnd != _xMax || count != _cachedCount;
+    bool refresh = plottable.animated || xStart != _xMin || xEnd != _xMax || count != _cachedCount;
 
     if (refresh) {
       _cached = plottable.sample(
@@ -61,5 +61,13 @@ class SampleCache implements Plottable {
   @override
   void draw(CanvasRenderingContext2D ctx, List<Point<double>> coordinates) {
     plottable.draw(ctx, coordinates);
+  }
+
+  @override
+  bool get animated => super.animated;
+
+  @override
+  bool requestUpdate(num timestamp) {
+    return plottable.requestUpdate(timestamp);
   }
 }
