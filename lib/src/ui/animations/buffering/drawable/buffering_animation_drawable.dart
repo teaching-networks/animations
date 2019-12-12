@@ -3,6 +3,7 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
@@ -12,7 +13,10 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertic
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/animated/animated_plottable_series.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable_series.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/line/line_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/point/point_painter.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/point/point_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/axis_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/coordinate_system_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/plot_style.dart';
@@ -24,8 +28,6 @@ import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:tuple/tuple.dart';
-
-typedef _DataPacket _TransformFunction(_DataPacket packet);
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
@@ -60,8 +62,20 @@ class BufferingAnimationDrawable extends Drawable {
   /// Current seed for the random number generator.
   int _currentSeed;
 
-  AnimatedPlottableSeries _testSeries;
-  AnimatedPlottableSeries _testSeries2;
+  /// Animated plottable series showing the constant bit rate.
+  AnimatedPlottableSeries _constantBitRatePlottable;
+
+  /// Animated plottable series showing the network delayed series.
+  AnimatedPlottableSeries _networkDelayedPlottable;
+
+  /// Animated plottable series showing the playout at client series.
+  AnimatedPlottableSeries _clientPlayOutPlottable;
+
+  /// List of interruptions happened during client play out.
+  List<Point<double>> _playOutInterruptions = List<Point<double>>();
+
+  /// Operation running async to add the interrupt marker in the plot by the right time.
+  Completer<void> _interruptOperation;
 
   /// Create the buffering animation drawable.
   BufferingAnimationDrawable() {
@@ -84,12 +98,11 @@ class BufferingAnimationDrawable extends Drawable {
     _playoutBufferSizeSlider = _createSlider(
       label: "Playout buffer size",
       changeCallback: changeCallback,
-      min: 0,
-      max: 20480,
-      // TODO Set to a realistic value
-      value: 128,
-      step: 8,
-      valueFormatter: (value) => "${value.toInt()} Byte",
+      min: 1,
+      max: 10,
+      value: 2,
+      step: 1,
+      valueFormatter: (value) => "${value.toInt()} MTUs",
     );
 
     _meanNetworkRateSlider = _createSlider(
@@ -204,206 +217,193 @@ class BufferingAnimationDrawable extends Drawable {
     int bitRate,
   }) {
     final double secondsPerMTU = _MTU / (bitRate / 8);
-    final double secondsPerMTUInSimulation = secondsPerMTU * _SLOWDOWN_FACTOR;
-    final int millisecondsInSimulation = (secondsPerMTUInSimulation * 1000).toInt();
 
-    _plot.removeAll();
+    if (_interruptOperation != null && !_interruptOperation.isCompleted) {
+      _interruptOperation.complete();
+    }
 
-    // Create constant bit rate transmission series generator
-    Iterable<Tuple2<Iterable<Point<double>>, Duration>> constantBitRateSeriesIterable = () sync* {
-      yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
+    _plot.removeAll(); // Reset plot
 
-      double timeInSeconds = 0;
-      double mtuCount = 0;
-      while (true) {
-        timeInSeconds += secondsPerMTU;
-
-        yield Tuple2(
-          [
-            Point<double>(timeInSeconds, mtuCount),
-            Point<double>(timeInSeconds, ++mtuCount),
-          ],
-          Duration(milliseconds: millisecondsInSimulation),
-        );
-      }
-    }();
-
-    // Create network delayed series generator
-    final random = Random(_currentSeed);
-    Iterable<Tuple2<Iterable<Point<double>>, Duration>> networkDelayedSeriesIterable = () sync* {
-      yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
-
-      double mtuCount = 0;
-      bool isFirst = true;
-      while (true) {
-        double networkRate = meanNetworkRate.toDouble();
-        if (networkRateVariance > 0) {
-          networkRate += (random.nextDouble() - 0.5 * 2) * networkRateVariance;
-        }
-
-        // TODO There is not always the full bandwidth available. How to deal with that?
-        double timeForPacket = _MTU / networkRate;
-        double sendTime = (mtuCount + 1) * secondsPerMTU;
-
-        print(timeForPacket);
-
-        int ms;
-        if (isFirst) {
-          isFirst = false;
-          ms = ((timeForPacket + secondsPerMTU) * _SLOWDOWN_FACTOR * 1000).toInt();
-        } else {
-          ms = (secondsPerMTU * _SLOWDOWN_FACTOR * 1000).toInt();
-        }
-
-        yield Tuple2(
-          [
-            Point<double>(sendTime + timeForPacket, mtuCount),
-            Point<double>(sendTime + timeForPacket, ++mtuCount),
-          ],
-          Duration(milliseconds: ms),
-        );
-      }
-    }();
-
-//    final random = Random(_currentSeed);
-//    final networkDelayedSeries = _transformTransmissionSeries(
-//      constantBitRateTransmissionSeries,
-//      (packet) {
-//        double networkRate = meanNetworkRate + (networkRateVariance > 0 ? ((random.nextDouble() - 0.5 * 2) * networkRateVariance) : 0);
-//        double duration = packet.size / networkRate;
-//
-//        return _DataPacket(size: packet.size, receivedTime: packet.receivedTime + duration);
-//      },
-//    );
-//    networkDelayedSeries.sort((p1, p2) => p1.receivedTime.compareTo(p2.receivedTime));
-//
-//    double playoutTime;
-//    int remainingPlayOutBufferSize = playOutBufferSize;
-//    for (_DataPacket p in networkDelayedSeries) {
-//      remainingPlayOutBufferSize -= p.size;
-//
-//      if (remainingPlayOutBufferSize <= 0) {
-//        playoutTime = p.receivedTime;
-//        break;
-//      }
-//    }
-//    if (remainingPlayOutBufferSize > 0) {
-//      playoutTime = networkDelayedSeries.last.receivedTime;
-//    }
-//
-//    double playoutTimeDiff = playoutTime - constantBitRateTransmissionSeries.first.receivedTime;
-//    final playoutSeries = _transformTransmissionSeries(
-//      constantBitRateTransmissionSeries,
-//      (packet) {
-//        return _DataPacket(size: packet.size, receivedTime: packet.receivedTime + playoutTimeDiff);
-//      },
-//    );
-
-    // Adjust graph axis dimensions
-//    _plot.setCoordinateSystem(
-//      yMin: 0,
-////      yMax: size.toDouble(),
-//      yMax: 10,
-//      xMin: 0,
-////      xMax: max(playoutSeries.last.receivedTime, networkDelayedSeries.last.receivedTime),
-//      xMax: 10,
-//    );
-
-    // Add series to plot
-//    _plot.add(_toPlotSeries(
-//      constantBitRateTransmissionSeries,
-//      style: PlottableStyle(color: Colors.PINK_RED_2),
-//      maxX: _plot.maxX,
-//    ));
-//    _plot.add(_toPlotSeries(
-//      networkDelayedSeries,
-//      style: PlottableStyle(color: Colors.BLUE_GRAY),
-//      maxX: _plot.maxX,
-//    ));
-//    _plot.add(_toPlotSeries(
-//      playoutSeries,
-//      style: PlottableStyle(color: Colors.GREY_GREEN),
-//      maxX: _plot.maxX,
-//    ));
-
-    _testSeries = AnimatedPlottableSeries(
-      seriesGenerator: constantBitRateSeriesIterable.iterator,
-      style: PlottableStyle(color: Colors.PINK_RED_2),
+    // Create constant bit rate series
+    _constantBitRatePlottable = AnimatedPlottableSeries(
+      seriesGenerator: _constantBitRateSeriesGenerator(secondsPerMTU).iterator,
+      style: PlottableStyle(line: LineStyle(color: Colors.PINK_RED_2)),
     );
-    _plot.add(_testSeries);
+    _plot.add(_constantBitRatePlottable);
 
-    _testSeries2 = AnimatedPlottableSeries(
-      seriesGenerator: networkDelayedSeriesIterable.iterator,
-      style: PlottableStyle(color: Colors.BLUE_GRAY),
+    // Create network delayed series
+    _networkDelayedPlottable = AnimatedPlottableSeries(
+      seriesGenerator: _networkDelayedSeriesGenerator(secondsPerMTU, meanNetworkRate, networkRateVariance).iterator,
+      style: PlottableStyle(line: LineStyle(color: Colors.BLUE_GRAY)),
     );
-    _plot.add(_testSeries2);
+    _plot.add(_networkDelayedPlottable);
+
+    // Create client playout series
+    _clientPlayOutPlottable = AnimatedPlottableSeries(
+      seriesGenerator: _clientPlayOutSeriesGenerator(secondsPerMTU, playOutBufferSize).iterator,
+      style: PlottableStyle(line: LineStyle(color: Colors.GREY_GREEN)),
+    );
+    _plot.add(_clientPlayOutPlottable);
+
+    _playOutInterruptions.clear();
+    _plot.add(PlottableSeries(
+      points: _playOutInterruptions,
+      style: PlottableStyle(
+        line: null,
+        points: PointStyle(
+          painter: PointPainterFactory.getInstance("o"),
+          color: Colors.RED,
+        ),
+      ),
+    ));
 
     invalidate();
   }
 
-  /// Generate series for a constant bit rate media transmission.
-  List<_DataPacket> _generateConstantBitRateTransmissionSeries({
-    int size = 1024 * 1024 * 100, // Size of the media to transmit (bytes)
-    int mtu = 1500, // Maximum transmission unit (bytes)
-    int bitRate = 5 * 1000 * 1000, // Constant bit rate to play the media with (bit per second)
-  }) {
-    int packetCount = (size / mtu).ceil();
-    double secondsPerMTU = mtu / (bitRate / 8);
+  /// Generator of the constant bit rate series.
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _constantBitRateSeriesGenerator(double secondsPerMTU) sync* {
+    final double secondsPerMTUInSimulation = secondsPerMTU * _SLOWDOWN_FACTOR;
+    final int millisecondsInSimulation = (secondsPerMTUInSimulation * 1000).toInt();
 
-    List<_DataPacket> series = new List<_DataPacket>(packetCount);
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
 
-    int remainingBytes = size;
-    for (int i = 0; i < packetCount; i++) {
-      int size = i == packetCount - 1 ? remainingBytes : mtu;
+    double timeInSeconds = 0;
+    double mtuCount = 0;
+    while (true) {
+      timeInSeconds += secondsPerMTU;
 
-      series[i] = _DataPacket(
-        size: size,
-        receivedTime: (i + 1) * secondsPerMTU,
+      _ensureVisibleInPlot(0, mtuCount + 1);
+      yield Tuple2(
+        [
+          Point<double>(timeInSeconds, mtuCount),
+          Point<double>(timeInSeconds, ++mtuCount),
+        ],
+        Duration(milliseconds: millisecondsInSimulation),
       );
-
-      remainingBytes -= mtu;
     }
-
-    return series;
   }
 
-  /// Transform the passed series of data packets with the given transformation function.
-  List<_DataPacket> _transformTransmissionSeries(List<_DataPacket> series, _TransformFunction transformFct) {
-    List<_DataPacket> result = new List<_DataPacket>(series.length);
+  /// Generator of the network delayed series.
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _networkDelayedSeriesGenerator(double secondsPerMTU, int meanNetworkRate, int networkRateVariance) sync* {
+    final random = Random(_currentSeed);
 
-    for (int i = 0; i < result.length; i++) {
-      result[i] = transformFct(series[i]);
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
+
+    double mtuCount = 0;
+    bool isFirst = true;
+    num lastReceived = secondsPerMTU;
+    while (true) {
+      // Check if packet already sent, otherwise it cannot be received and we need to append additional time
+      bool readyToReceive = _constantBitRatePlottable.generatedCount - 1 > mtuCount + 1;
+
+      double networkRate = meanNetworkRate.toDouble();
+      if (networkRateVariance > 0) {
+        networkRate += (random.nextDouble() - 0.5 * 2) * networkRateVariance;
+      }
+
+      double timeForPacket = _MTU / networkRate;
+      if (!readyToReceive) {
+        double timeToWait = _constantBitRatePlottable.next.first.x - lastReceived;
+        timeForPacket += timeToWait;
+      }
+
+      int ms = (timeForPacket * _SLOWDOWN_FACTOR * 1000).toInt();
+      if (isFirst) {
+        isFirst = false;
+        ms += (lastReceived * _SLOWDOWN_FACTOR * 1000).toInt();
+      }
+
+      lastReceived += timeForPacket;
+
+      yield Tuple2(
+        [
+          Point<double>(lastReceived, mtuCount),
+          Point<double>(lastReceived, ++mtuCount),
+        ],
+        Duration(milliseconds: ms),
+      );
     }
-
-    return result;
   }
 
-  /// Convert the passed list of data packets to a Graph2D series.
-  PlottableSeries _toPlotSeries(
-    List<_DataPacket> packets, {
-    PlottableStyle style = const PlottableStyle(),
-    double maxX,
-  }) {
-    List<Point<double>> result = new List<Point<double>>(packets.length * 2 + 1);
+  /// Generator for the client playout series.
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _clientPlayOutSeriesGenerator(double secondsPerMTU, int bufferSize) sync* {
+    final int neededBufferedPackets = bufferSize;
 
-    int cumSize = 0;
-    for (int i = 0; i < packets.length; i++) {
-      _DataPacket p = packets[i];
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
 
-      int index = i * 2;
+    bool playingOut = false; // Whether the streamed data is currently played out at client or buffering
+    int playedOut = 0; // Number of packets played out.
+    double lastReceived = 0;
+    double lastPlayedOut = null;
+    while (true) {
+      double nextPacketReceivedTime = _networkDelayedPlottable.next.first.x;
+      int receivedPackets = _networkDelayedPlottable.generatedCount - 2;
+      int buffered = receivedPackets - playedOut;
 
-      result[index] = Point<double>(p.receivedTime, cumSize.toDouble());
+      if (!playingOut && buffered >= neededBufferedPackets) {
+        playingOut = true;
+      }
 
-      cumSize += p.size;
-      result[index + 1] = Point<double>(p.receivedTime, cumSize.toDouble());
+      final bool waitForPacket = !playingOut || buffered <= 0 && nextPacketReceivedTime > lastPlayedOut + secondsPerMTU;
+      if (waitForPacket) {
+        _ensureVisibleInPlot(nextPacketReceivedTime, 0);
+
+        if (playingOut) {
+          // No more packets to play out. Play out is interrupted!
+          double interruptionTime = lastPlayedOut + secondsPerMTU;
+
+          _onPlayOutInterrupted(interruptionTime, lastPlayedOut, playedOut);
+          yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, (++playedOut).toDouble())],
+              Duration(milliseconds: ((nextPacketReceivedTime - lastPlayedOut) * _SLOWDOWN_FACTOR * 1000).toInt()));
+          lastReceived = nextPacketReceivedTime;
+          lastPlayedOut = nextPacketReceivedTime;
+        } else {
+          if (buffered + 1 >= neededBufferedPackets) {
+            playingOut = true;
+            yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, (++playedOut).toDouble())],
+                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _SLOWDOWN_FACTOR * 1000).toInt()));
+            lastReceived = nextPacketReceivedTime;
+            lastPlayedOut = nextPacketReceivedTime;
+          } else {
+            yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
+                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _SLOWDOWN_FACTOR * 1000).toInt()));
+            lastReceived = nextPacketReceivedTime;
+          }
+        }
+      } else {
+        // Playing out buffered packet.
+        _ensureVisibleInPlot(lastPlayedOut + secondsPerMTU, 0);
+        yield Tuple2(
+            [Point<double>(lastPlayedOut + secondsPerMTU, playedOut.toDouble()), Point<double>(lastPlayedOut + secondsPerMTU, (++playedOut).toDouble())],
+            Duration(milliseconds: (secondsPerMTU * _SLOWDOWN_FACTOR * 1000).toInt()));
+        lastPlayedOut += secondsPerMTU;
+      }
+    }
+  }
+
+  /// Ensure that the passed x and y coordinates are visible in the plot.
+  void _ensureVisibleInPlot(double x, double y) {
+    if (x > _plot.maxX) {
+      _plot.maxX = x;
     }
 
-    final lastReal = result[result.length - 2];
+    if (y > _plot.maxY) {
+      _plot.maxY = y;
+    }
+  }
 
-    // Add imaginary last point to fill the graph until the end of the graphs coordinate system.
-    result.last = Point<double>(maxX, lastReal.y);
-
-    return PlottableSeries(points: result, style: style);
+  /// Called when the play out at client is interrupted.
+  void _onPlayOutInterrupted(double interruptionTime, double lastPlayedOutTime, int playedOut) {
+    final completer = Completer<void>();
+    _interruptOperation = completer;
+    Future.delayed(Duration(milliseconds: ((interruptionTime - lastPlayedOutTime) * _SLOWDOWN_FACTOR * 1000).toInt())).then(
+      (_) {
+        if (!completer.isCompleted) {
+          _playOutInterruptions.add(Point<double>(interruptionTime, playedOut.toDouble()));
+          _plot.invalidate();
+        }
+      },
+    );
   }
 
   /// Reseed the random number generator used by the animation.
@@ -570,8 +570,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   @override
   void update(num timestamp) {
-    if (_testSeries != null) if (_testSeries.requestUpdate(timestamp)) _plot.invalidate();
-    if (_testSeries2 != null) if (_testSeries2.requestUpdate(timestamp)) _plot.invalidate();
+    if (_constantBitRatePlottable != null) if (_constantBitRatePlottable.requestUpdate(timestamp)) _plot.invalidate();
+    if (_networkDelayedPlottable != null) if (_networkDelayedPlottable.requestUpdate(timestamp)) _plot.invalidate();
+    if (_clientPlayOutPlottable != null) if (_clientPlayOutPlottable.requestUpdate(timestamp)) _plot.invalidate();
   }
 }
 
@@ -580,19 +581,6 @@ class _SliderContainer {
   final Drawable drawable;
 
   _SliderContainer(this.slider, this.drawable);
-}
-
-class _DataPacket {
-  /// Size of the packet.
-  final int size;
-
-  /// Time the data is received.
-  final double receivedTime;
-
-  _DataPacket({
-    this.size,
-    this.receivedTime,
-  });
 }
 
 /// Item used in a legend.

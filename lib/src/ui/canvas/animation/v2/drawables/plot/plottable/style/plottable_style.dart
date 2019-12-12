@@ -3,28 +3,20 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
-import 'package:hm_animations/src/ui/canvas/util/color.dart';
-import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/line/line_style.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/point/point_style.dart';
 
 /// Style of a plottable.
 class PlottableStyle {
-  /// Color of the plottable.
-  final Color color;
+  /// Style of the plottable line or null if no line should be drawn.
+  final LineStyle line;
 
-  /// Width of the line.
-  final int lineWidth;
-
-  /// The join type of the line.
-  final String lineJoin;
-
-  /// Line cap type.
-  final String lineCap;
+  /// Style of the plottable points or null if no points should be drawn.
+  final PointStyle points;
 
   /// Create style.
   const PlottableStyle({
-    this.color = Colors.BLACK,
-    this.lineWidth = 1,
-    this.lineJoin = "round",
-    this.lineCap = "round",
+    this.line = const LineStyle(),
+    this.points = null,
   });
 }

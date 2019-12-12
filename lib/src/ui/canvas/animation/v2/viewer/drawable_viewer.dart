@@ -128,9 +128,9 @@ class DrawableViewer extends CanvasContextUtil implements CanvasMouseListener, O
     if (_killRenderingLoop) {
       _killRenderingLoop = false;
       _loopKilledController.add(null);
+    } else {
+      window.requestAnimationFrame(_renderLoop);
     }
-
-    window.requestAnimationFrame(_renderLoop);
   }
 
   /// Initialize the context for a rendering iteration.

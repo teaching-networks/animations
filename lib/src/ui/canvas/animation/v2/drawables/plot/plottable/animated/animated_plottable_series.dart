@@ -6,17 +6,14 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/line_plottable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
 import 'package:tuple/tuple.dart';
 
 /// An animated series plottable.
-class AnimatedPlottableSeries extends Plottable {
+class AnimatedPlottableSeries extends LinePlottable {
   /// Generator of the series to plot.
   final Iterator<Tuple2<Iterable<Point<double>>, Duration>> seriesGenerator;
-
-  /// Style of the plottable.
-  final PlottableStyle style;
 
   /// Grow series by 1 every elapsed [_growDuration].
   Duration _growDuration;
@@ -30,11 +27,14 @@ class AnimatedPlottableSeries extends Plottable {
   /// Series to plot.
   List<Point<double>> _series = new List<Point<double>>();
 
+  /// Number of generator calls up to now.
+  int _generatedCount = 0;
+
   /// Create plottable.
   AnimatedPlottableSeries({
     this.seriesGenerator,
-    this.style = const PlottableStyle(),
-  }) {
+    PlottableStyle style = const PlottableStyle(),
+  }) : super(style: style) {
     _init();
   }
 
@@ -64,6 +64,10 @@ class AnimatedPlottableSeries extends Plottable {
     double progress = diff / _growDuration.inMilliseconds;
 
     if (progress >= 1.0) {
+      if (progress.isInfinite) {
+        progress = 1.0;
+      }
+
       // Generate new point in series
       int count = progress.toInt();
       progress -= count; // Adjust progress for later last point adjustments
@@ -86,6 +90,7 @@ class AnimatedPlottableSeries extends Plottable {
     _lastGenerateTimestamp = currentTimestamp;
 
     seriesGenerator.moveNext();
+    _generatedCount++;
     return seriesGenerator.current;
   }
 
@@ -99,14 +104,9 @@ class AnimatedPlottableSeries extends Plottable {
     );
   }
 
-  @override
-  void draw(CanvasRenderingContext2D ctx, List<Point<double>> coordinates) {
-    ctx.setStrokeColorRgb(style.color.red, style.color.green, style.color.blue, style.color.alpha);
+  /// Get the next point of the series currently in animation.
+  Iterable<Point<double>> get next => _tmpNext;
 
-    ctx.lineWidth = style.lineWidth * window.devicePixelRatio;
-    ctx.lineJoin = style.lineJoin;
-    ctx.lineCap = style.lineCap;
-
-    super.draw(ctx, coordinates);
-  }
+  /// Get the current count of generator calls.
+  int get generatedCount => _generatedCount;
 }

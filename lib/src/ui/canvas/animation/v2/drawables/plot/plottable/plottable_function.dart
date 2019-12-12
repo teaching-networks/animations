@@ -6,23 +6,21 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/plottable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/line_plottable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/style/plottable_style.dart';
 
 typedef double Fct(double x);
 
 /// Function which is plottable.
-class PlottableFunction extends Plottable {
+class PlottableFunction extends LinePlottable {
   /// Function used to process values.
   final Fct fct;
-
-  PlottableStyle _style;
 
   /// Create a plottable function.
   PlottableFunction({
     this.fct,
     PlottableStyle style = const PlottableStyle(),
-  }) : _style = style;
+  }) : super(style: style);
 
   @override
   List<Point<double>> sample({
@@ -38,16 +36,5 @@ class PlottableFunction extends Plottable {
       curX += xInc;
       return p;
     });
-  }
-
-  @override
-  void draw(CanvasRenderingContext2D ctx, List<Point<double>> coordinates) {
-    ctx.setStrokeColorRgb(_style.color.red, _style.color.green, _style.color.blue, _style.color.alpha);
-
-    ctx.lineWidth = _style.lineWidth * window.devicePixelRatio;
-    ctx.lineJoin = _style.lineJoin;
-    ctx.lineCap = _style.lineCap;
-
-    super.draw(ctx, coordinates);
   }
 }

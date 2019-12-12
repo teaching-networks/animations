@@ -230,7 +230,7 @@ class Plot extends Drawable {
         count: sampleCount,
       );
 
-      if (samples.length < 2) {
+      if (samples.isEmpty) {
         continue;
       }
 
