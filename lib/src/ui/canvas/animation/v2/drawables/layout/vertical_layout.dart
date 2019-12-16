@@ -115,13 +115,7 @@ class VerticalLayout extends Layout {
   @override
   void onChildSizeChange(SizeChange change) {
     if (layoutMode == LayoutMode.FIT) {
-      double widthChange = change.newSize.width - change.oldSize.width;
-      double heightChange = change.newSize.height - change.oldSize.height;
-
-      setSize(
-        width: size.width + widthChange,
-        height: size.height + heightChange,
-      );
+      _recalculateSize();
     }
   }
 

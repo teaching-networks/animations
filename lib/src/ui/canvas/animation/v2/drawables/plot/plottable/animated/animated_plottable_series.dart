@@ -30,6 +30,9 @@ class AnimatedPlottableSeries extends LinePlottable {
   /// Number of generator calls up to now.
   int _generatedCount = 0;
 
+  /// Timestamp of the pause.
+  num _pauseTimestamp;
+
   /// Create plottable.
   AnimatedPlottableSeries({
     this.seriesGenerator,
@@ -60,6 +63,10 @@ class AnimatedPlottableSeries extends LinePlottable {
 
   @override
   bool update(num timestamp) {
+    if (paused) {
+      return false;
+    }
+
     num diff = timestamp - _lastGenerateTimestamp;
     double progress = diff / _growDuration.inMilliseconds;
 
@@ -109,4 +116,27 @@ class AnimatedPlottableSeries extends LinePlottable {
 
   /// Get the current count of generator calls.
   int get generatedCount => _generatedCount;
+
+  /// Pause the series animation.
+  void pause() {
+    if (paused) {
+      return;
+    }
+
+    _pauseTimestamp = window.performance.now();
+  }
+
+  /// Unpause the series animation.
+  void unpause() {
+    if (!paused) {
+      return;
+    }
+
+    num pauseTime = window.performance.now() - _pauseTimestamp;
+    _lastGenerateTimestamp += pauseTime;
+    _pauseTimestamp = null;
+  }
+
+  /// Check if series animation is currently paused.
+  bool get paused => _pauseTimestamp != null;
 }

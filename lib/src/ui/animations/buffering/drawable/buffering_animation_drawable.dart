@@ -9,6 +9,7 @@ import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/animated/animated_plottable_series.dart';
@@ -27,6 +28,7 @@ import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/size.dart';
 import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
@@ -56,8 +58,11 @@ class BufferingAnimationDrawable extends Drawable {
   /// Plot to display the result with.
   Plot _plot;
 
-  /// Button used to trigger reseeding the random number generator.
-  ButtonDrawable _reseedButton;
+  /// Column containing the control buttons.
+  VerticalLayout _buttonColumn;
+
+  /// Button used to pause the animation.
+  ButtonDrawable _pauseButton;
 
   /// Current seed for the random number generator.
   int _currentSeed;
@@ -105,6 +110,16 @@ class BufferingAnimationDrawable extends Drawable {
       valueFormatter: (value) => "${value.toInt()} MTUs",
     );
 
+    _bitRateSlider = _createSlider(
+      label: "Bit rate",
+      changeCallback: changeCallback,
+      min: 100,
+      max: 20000,
+      value: 5000,
+      step: 100,
+      valueFormatter: (value) => "${value.toInt()} kBit/s",
+    );
+
     _meanNetworkRateSlider = _createSlider(
       label: "Mean network rate",
       changeCallback: (value) {
@@ -126,16 +141,6 @@ class BufferingAnimationDrawable extends Drawable {
       value: 5,
       step: 1,
       valueFormatter: (value) => "${value.toInt()} Mbit/s",
-    );
-
-    _bitRateSlider = _createSlider(
-      label: "Bit rate",
-      changeCallback: changeCallback,
-      min: 100,
-      max: 20000,
-      value: 5000,
-      step: 100,
-      valueFormatter: (value) => "${value.toInt()} kBit/s",
     );
 
     _plot = Plot(
@@ -162,16 +167,62 @@ class BufferingAnimationDrawable extends Drawable {
       ),
     );
 
-    _reseedButton = ButtonDrawable(
+    _buttonColumn = VerticalLayout(
       parent: this,
-      text: "Reseed",
-      onClick: () {
-        _reseed();
-        changeCallback(null);
-      },
+      alignment: HorizontalAlignment.CENTER,
+      layoutMode: LayoutMode.FIT,
+      children: [
+        ButtonDrawable(
+          text: "Reseed",
+          onClick: () {
+            _unpause();
+            _reseed();
+            changeCallback(null);
+          },
+        ),
+        ButtonDrawable(
+          text: "Reset",
+          onClick: () {
+            _unpause();
+            changeCallback(null);
+          },
+        ),
+        _pauseButton = ButtonDrawable(
+          text: "Pause",
+          onClick: () {
+            _switchPause();
+          },
+        )
+      ],
     );
 
     changeCallback(null);
+  }
+
+  /// Unpause the animation.
+  void _unpause() {
+    if (_constantBitRatePlottable.paused) {
+      _switchPause();
+    }
+  }
+
+  /// Switch the pause state.
+  void _switchPause() {
+    bool isPaused = _constantBitRatePlottable.paused;
+
+    if (isPaused) {
+      _constantBitRatePlottable.unpause();
+      _networkDelayedPlottable.unpause();
+      _clientPlayOutPlottable.unpause();
+
+      _pauseButton.text = "Pause";
+    } else {
+      _constantBitRatePlottable.pause();
+      _networkDelayedPlottable.pause();
+      _clientPlayOutPlottable.pause();
+
+      _pauseButton.text = "Run";
+    }
   }
 
   /// Create a slider input control.
@@ -222,7 +273,10 @@ class BufferingAnimationDrawable extends Drawable {
       _interruptOperation.complete();
     }
 
-    _plot.removeAll(); // Reset plot
+    // Reset plot
+    _plot.removeAll();
+    _plot.maxY = 10;
+    _plot.maxX = 0.05;
 
     // Create constant bit rate series
     _constantBitRatePlottable = AnimatedPlottableSeries(
@@ -407,34 +461,16 @@ class BufferingAnimationDrawable extends Drawable {
   @override
   void draw() {
     double controlsPadding = 10 * window.devicePixelRatio;
-    double controlsWidth = _playoutBufferSizeSlider.drawable.size.width +
-        controlsPadding +
-        _meanNetworkRateSlider.drawable.size.width +
-        controlsPadding +
-        _networkRateVarianceSlider.drawable.size.width +
-        controlsPadding +
-        _reseedButton.size.width +
-        controlsPadding +
-        _bitRateSlider.drawable.size.width;
-    double controlsHeight = maxValue([
-      _playoutBufferSizeSlider.drawable.size.height,
-      _meanNetworkRateSlider.drawable.size.height,
-      _networkRateVarianceSlider.drawable.size.height,
-      _bitRateSlider.drawable.size.height,
-      _reseedButton.size.height,
-    ]);
-
-    _drawControls(
+    Size controlsSize = _drawControls(
       x: 0,
-      width: controlsWidth,
-      height: controlsHeight,
+      y: 0,
       padding: controlsPadding,
     );
 
     _drawLegend(
-      x: controlsWidth + controlsPadding,
-      width: size.width - controlsWidth - controlsPadding,
-      height: controlsHeight,
+      x: controlsSize.width + controlsPadding,
+      width: size.width - controlsSize.width - controlsPadding,
+      height: controlsSize.height,
       items: [
         _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
         _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
@@ -446,9 +482,9 @@ class BufferingAnimationDrawable extends Drawable {
 
     _drawGraph(
       x: 0,
-      y: controlsHeight + graphSpacing,
+      y: controlsSize.height + graphSpacing,
       width: size.width,
-      height: size.height - controlsHeight - graphSpacing,
+      height: size.height - controlsSize.height - graphSpacing,
     );
   }
 
@@ -475,44 +511,59 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Draw the sliders to control the animation.
-  void _drawControls({double x = 0, double y = 0, double width, double height, double padding}) {
-    double offsetX = x;
-
-    double currentOffset = offsetX;
+  Size _drawControls({
+    double x = 0,
+    double y = 0,
+    double padding,
+  }) {
+    double currentXOffset = x;
+    double currentYOffset = y;
     _playoutBufferSizeSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: currentOffset,
+      x: currentXOffset,
+      y: currentYOffset,
     );
 
-    currentOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
+    currentXOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
     _meanNetworkRateSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: currentOffset,
+      x: currentXOffset,
+      y: currentYOffset,
     );
 
-    currentOffset += _meanNetworkRateSlider.drawable.size.width + padding;
-    _networkRateVarianceSlider.drawable.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentOffset,
-    );
-
-    currentOffset += _networkRateVarianceSlider.drawable.size.width + padding;
+    currentYOffset += _playoutBufferSizeSlider.drawable.size.height;
+    currentXOffset = x;
     _bitRateSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: currentOffset,
+      x: currentXOffset,
+      y: currentYOffset,
     );
 
-    currentOffset += _bitRateSlider.drawable.size.width + padding;
-    _reseedButton.render(
+    currentXOffset += _bitRateSlider.drawable.size.width + padding;
+    _networkRateVarianceSlider.drawable.render(
       ctx,
       lastPassTimestamp,
-      x: currentOffset,
-      y: (height - _reseedButton.size.height) / 2,
+      x: currentXOffset,
+      y: currentYOffset,
     );
+
+    currentXOffset += _networkRateVarianceSlider.drawable.size.width + padding;
+
+    double sliderHeight = currentYOffset + _networkRateVarianceSlider.drawable.size.height;
+    double buttonColumnYOffset = max(0, (sliderHeight - _buttonColumn.size.height) / 2);
+
+    _buttonColumn.render(
+      ctx,
+      lastPassTimestamp,
+      x: currentXOffset,
+      y: buttonColumnYOffset,
+    );
+
+    currentXOffset += _buttonColumn.size.width;
+    return Size(currentXOffset, max(sliderHeight, _buttonColumn.size.height));
   }
 
   /// Draw a legend explaining the graph.
