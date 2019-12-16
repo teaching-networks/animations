@@ -334,15 +334,11 @@ class BufferingAnimationDrawable extends Drawable {
     bool playingOut = false; // Whether the streamed data is currently played out at client or buffering
     int playedOut = 0; // Number of packets played out.
     double lastReceived = 0;
-    double lastPlayedOut = null;
+    double lastPlayedOut = 0;
     while (true) {
       double nextPacketReceivedTime = _networkDelayedPlottable.next.first.x;
       int receivedPackets = _networkDelayedPlottable.generatedCount - 2;
       int buffered = receivedPackets - playedOut;
-
-      if (!playingOut && buffered >= neededBufferedPackets) {
-        playingOut = true;
-      }
 
       final bool waitForPacket = !playingOut || buffered <= 0 && nextPacketReceivedTime > lastPlayedOut + secondsPerMTU;
       if (waitForPacket) {
@@ -351,12 +347,11 @@ class BufferingAnimationDrawable extends Drawable {
         if (playingOut) {
           // No more packets to play out. Play out is interrupted!
           double interruptionTime = lastPlayedOut + secondsPerMTU;
-
+          playingOut = false;
           _onPlayOutInterrupted(interruptionTime, lastPlayedOut, playedOut);
-          yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, (++playedOut).toDouble())],
+          yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
               Duration(milliseconds: ((nextPacketReceivedTime - lastPlayedOut) * _SLOWDOWN_FACTOR * 1000).toInt()));
           lastReceived = nextPacketReceivedTime;
-          lastPlayedOut = nextPacketReceivedTime;
         } else {
           if (buffered + 1 >= neededBufferedPackets) {
             playingOut = true;
