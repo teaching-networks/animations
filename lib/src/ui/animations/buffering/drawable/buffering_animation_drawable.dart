@@ -8,6 +8,7 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/grid_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
@@ -28,7 +29,6 @@ import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
-import 'package:hm_animations/src/util/size.dart';
 import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
@@ -58,8 +58,8 @@ class BufferingAnimationDrawable extends Drawable {
   /// Plot to display the result with.
   Plot _plot;
 
-  /// Column containing the control buttons.
-  VerticalLayout _buttonColumn;
+  /// Layout containing all controls of the animation.
+  GridLayout _controlsLayout;
 
   /// Button used to pause the animation.
   ButtonDrawable _pauseButton;
@@ -167,8 +167,7 @@ class BufferingAnimationDrawable extends Drawable {
       ),
     );
 
-    _buttonColumn = VerticalLayout(
-      parent: this,
+    VerticalLayout buttonColumn = VerticalLayout(
       alignment: HorizontalAlignment.CENTER,
       layoutMode: LayoutMode.FIT,
       children: [
@@ -193,6 +192,17 @@ class BufferingAnimationDrawable extends Drawable {
             _switchPause();
           },
         )
+      ],
+    );
+
+    _controlsLayout = GridLayout(
+      parent: this,
+      cells: [
+        CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
+        CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
+        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
+        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
+        CellSpec(row: 0, column: 2, rowSpan: 2, drawable: buttonColumn),
       ],
     );
 
@@ -247,7 +257,6 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     var drawable = VerticalLayout(
-      parent: this,
       alignment: HorizontalAlignment.CENTER,
       children: [
         TextDrawable(
@@ -461,16 +470,12 @@ class BufferingAnimationDrawable extends Drawable {
   @override
   void draw() {
     double controlsPadding = 10 * window.devicePixelRatio;
-    Size controlsSize = _drawControls(
-      x: 0,
-      y: 0,
-      padding: controlsPadding,
-    );
+    _controlsLayout.render(ctx, lastPassTimestamp);
 
     _drawLegend(
-      x: controlsSize.width + controlsPadding,
-      width: size.width - controlsSize.width - controlsPadding,
-      height: controlsSize.height,
+      x: _controlsLayout.size.width + controlsPadding,
+      width: size.width - _controlsLayout.size.width - controlsPadding,
+      height: _controlsLayout.size.height,
       items: [
         _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
         _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
@@ -482,9 +487,9 @@ class BufferingAnimationDrawable extends Drawable {
 
     _drawGraph(
       x: 0,
-      y: controlsSize.height + graphSpacing,
+      y: _controlsLayout.size.height + graphSpacing,
       width: size.width,
-      height: size.height - controlsSize.height - graphSpacing,
+      height: size.height - _controlsLayout.size.height - graphSpacing,
     );
   }
 
@@ -510,61 +515,61 @@ class BufferingAnimationDrawable extends Drawable {
     );
   }
 
-  /// Draw the sliders to control the animation.
-  Size _drawControls({
-    double x = 0,
-    double y = 0,
-    double padding,
-  }) {
-    double currentXOffset = x;
-    double currentYOffset = y;
-    _playoutBufferSizeSlider.drawable.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentXOffset,
-      y: currentYOffset,
-    );
-
-    currentXOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
-    _meanNetworkRateSlider.drawable.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentXOffset,
-      y: currentYOffset,
-    );
-
-    currentYOffset += _playoutBufferSizeSlider.drawable.size.height;
-    currentXOffset = x;
-    _bitRateSlider.drawable.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentXOffset,
-      y: currentYOffset,
-    );
-
-    currentXOffset += _bitRateSlider.drawable.size.width + padding;
-    _networkRateVarianceSlider.drawable.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentXOffset,
-      y: currentYOffset,
-    );
-
-    currentXOffset += _networkRateVarianceSlider.drawable.size.width + padding;
-
-    double sliderHeight = currentYOffset + _networkRateVarianceSlider.drawable.size.height;
-    double buttonColumnYOffset = max(0, (sliderHeight - _buttonColumn.size.height) / 2);
-
-    _buttonColumn.render(
-      ctx,
-      lastPassTimestamp,
-      x: currentXOffset,
-      y: buttonColumnYOffset,
-    );
-
-    currentXOffset += _buttonColumn.size.width;
-    return Size(currentXOffset, max(sliderHeight, _buttonColumn.size.height));
-  }
+//  /// Draw the sliders to control the animation.
+//  Size _drawControls({
+//    double x = 0,
+//    double y = 0,
+//    double padding,
+//  }) {
+//    double currentXOffset = x;
+//    double currentYOffset = y;
+//    _playoutBufferSizeSlider.drawable.render(
+//      ctx,
+//      lastPassTimestamp,
+//      x: currentXOffset,
+//      y: currentYOffset,
+//    );
+//
+//    currentXOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
+//    _meanNetworkRateSlider.drawable.render(
+//      ctx,
+//      lastPassTimestamp,
+//      x: currentXOffset,
+//      y: currentYOffset,
+//    );
+//
+//    currentYOffset += _playoutBufferSizeSlider.drawable.size.height;
+//    currentXOffset = x;
+//    _bitRateSlider.drawable.render(
+//      ctx,
+//      lastPassTimestamp,
+//      x: currentXOffset,
+//      y: currentYOffset,
+//    );
+//
+//    currentXOffset += _bitRateSlider.drawable.size.width + padding;
+//    _networkRateVarianceSlider.drawable.render(
+//      ctx,
+//      lastPassTimestamp,
+//      x: currentXOffset,
+//      y: currentYOffset,
+//    );
+//
+//    currentXOffset += _networkRateVarianceSlider.drawable.size.width + padding;
+//
+//    double sliderHeight = currentYOffset + _networkRateVarianceSlider.drawable.size.height;
+//    double buttonColumnYOffset = max(0, (sliderHeight - _buttonColumn.size.height) / 2);
+//
+//    _buttonColumn.render(
+//      ctx,
+//      lastPassTimestamp,
+//      x: currentXOffset,
+//      y: buttonColumnYOffset,
+//    );
+//
+//    currentXOffset += _buttonColumn.size.width;
+//    return Size(currentXOffset, max(sliderHeight, _buttonColumn.size.height));
+//  }
 
   /// Draw a legend explaining the graph.
   void _drawLegend({

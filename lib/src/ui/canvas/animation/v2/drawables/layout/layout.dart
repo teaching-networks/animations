@@ -6,6 +6,7 @@
 import 'dart:async';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:meta/meta.dart';
 
 /// Layout laying multiple drawable out.
 abstract class Layout extends Drawable {
@@ -17,7 +18,7 @@ abstract class Layout extends Drawable {
 
   /// Create layout.
   Layout({
-    Drawable parent,
+    @required Drawable parent,
   }) : super(parent: parent) {
     _init();
   }
