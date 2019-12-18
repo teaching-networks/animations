@@ -6,7 +6,9 @@
 import 'dart:math';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_alignment.dart';
 import 'package:hm_animations/src/util/size.dart';
 import 'package:meta/meta.dart';
 
@@ -14,7 +16,16 @@ import 'package:meta/meta.dart';
 /// Cell sizes are set by using the child drawable size.
 class GridLayout extends Layout {
   /// Cells positioned in the grid.
-  List<CellSpec> cells;
+  final List<CellSpec> cells;
+
+  /// Padding of each cell.
+  final double padding;
+
+  /// Vertical alignment of content in cells that are too tall for them.
+  final VerticalAlignment verticalAlignment;
+
+  /// Horizontal alignment of content in cells that are too wide for them.
+  final HorizontalAlignment horizontalAlignment;
 
   /// Offset for each row.
   List<double> _rowOffsets;
@@ -38,6 +49,9 @@ class GridLayout extends Layout {
   GridLayout({
     Drawable parent,
     @required this.cells,
+    this.padding = 0,
+    this.verticalAlignment = VerticalAlignment.CENTER,
+    this.horizontalAlignment = HorizontalAlignment.CENTER,
   })  : _childrenView = cells.map((c) => c.drawable).toList(growable: false),
         super(parent: parent) {
     _init();
@@ -105,7 +119,7 @@ class GridLayout extends Layout {
 
     // Find row and column sizes by cells that do not span multiple cells.
     for (CellSpec spec in _singleRowColumnCells) {
-      Size size = spec.drawable.size;
+      Size size = spec.drawable.size + 2 * padding;
 
       if (size.height > rowSizes[spec.row]) rowSizes[spec.row] = size.height;
       if (size.width > columnSizes[spec.column]) columnSizes[spec.column] = size.width;
@@ -113,7 +127,7 @@ class GridLayout extends Layout {
 
     // Adjust row and column sizes by cells that span multiple cells and do not have enough space.
     for (CellSpec spec in _multiRowColumnCells) {
-      Size size = spec.drawable.size;
+      Size size = spec.drawable.size + 2 * padding;
 
       double currentHeight = 0;
       for (int row = spec.row; row < spec.row + spec.rowSpan; row++) {
@@ -194,9 +208,37 @@ class GridLayout extends Layout {
       spec.drawable.render(
         ctx,
         lastPassTimestamp,
-        x: spec.bounds.left + (spec.bounds.width - spec.drawable.size.width) / 2,
-        y: spec.bounds.top + (spec.bounds.height - spec.drawable.size.height) / 2,
+        x: _alignHorizontallyInCell(spec),
+        y: _alignVerticallyInCell(spec),
       );
+    }
+  }
+
+  /// Align the passed cell specifications content horizontally in the cell.
+  double _alignHorizontallyInCell(CellSpec spec) {
+    switch (horizontalAlignment) {
+      case HorizontalAlignment.CENTER:
+        return spec.bounds.left + (spec.bounds.width - spec.drawable.size.width) / 2;
+      case HorizontalAlignment.LEFT:
+        return spec.bounds.left + padding;
+      case HorizontalAlignment.RIGHT:
+        return spec.bounds.right - spec.drawable.size.width - padding;
+      default:
+        throw new Exception("Horizontal alignment type unknown");
+    }
+  }
+
+  /// Align the passed cell specifications content vertically in the cell.
+  double _alignVerticallyInCell(CellSpec spec) {
+    switch (verticalAlignment) {
+      case VerticalAlignment.CENTER:
+        return spec.bounds.top + (spec.bounds.height - spec.drawable.size.height) / 2;
+      case VerticalAlignment.TOP:
+        return spec.bounds.top + padding;
+      case VerticalAlignment.BOTTOM:
+        return spec.bounds.bottom - spec.drawable.size.height - padding;
+      default:
+        throw new Exception("Vertical alignment type unknown");
     }
   }
 

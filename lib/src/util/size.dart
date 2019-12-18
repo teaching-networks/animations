@@ -15,6 +15,8 @@ class Size {
 
   Size operator *(double factor) => Size(width * factor, height * factor);
 
+  Size operator +(double value) => Size(width + value, height + value);
+
   @override
   String toString() {
     return "{width: $width, height: $height}";

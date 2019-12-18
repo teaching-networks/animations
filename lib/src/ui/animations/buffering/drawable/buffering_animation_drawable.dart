@@ -7,6 +7,8 @@ import 'dart:async';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/ui/animations/shared/legend/legend_drawable.dart';
+import 'package:hm_animations/src/ui/animations/shared/legend/legend_item.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/grid_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
@@ -25,9 +27,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/pl
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
-import 'package:hm_animations/src/ui/canvas/text/baseline.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
-import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:tuple/tuple.dart';
 
@@ -195,6 +195,14 @@ class BufferingAnimationDrawable extends Drawable {
       ],
     );
 
+    LegendDrawable legend = LegendDrawable(
+      items: [
+        LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
+        LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
+        LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
+      ],
+    );
+
     _controlsLayout = GridLayout(
       parent: this,
       cells: [
@@ -203,6 +211,7 @@ class BufferingAnimationDrawable extends Drawable {
         CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
         CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
         CellSpec(row: 0, column: 2, rowSpan: 2, drawable: buttonColumn),
+        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: legend),
       ],
     );
 
@@ -469,19 +478,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   @override
   void draw() {
-    double controlsPadding = 10 * window.devicePixelRatio;
-    _controlsLayout.render(ctx, lastPassTimestamp);
-
-    _drawLegend(
-      x: _controlsLayout.size.width + controlsPadding,
-      width: size.width - _controlsLayout.size.width - controlsPadding,
-      height: _controlsLayout.size.height,
-      items: [
-        _LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
-        _LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
-        _LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
-      ],
-    );
+    _controlsLayout.render(ctx, lastPassTimestamp, x: max(0, (size.width - _controlsLayout.size.width) / 2));
 
     double graphSpacing = 10 * window.devicePixelRatio;
 
@@ -515,107 +512,6 @@ class BufferingAnimationDrawable extends Drawable {
     );
   }
 
-//  /// Draw the sliders to control the animation.
-//  Size _drawControls({
-//    double x = 0,
-//    double y = 0,
-//    double padding,
-//  }) {
-//    double currentXOffset = x;
-//    double currentYOffset = y;
-//    _playoutBufferSizeSlider.drawable.render(
-//      ctx,
-//      lastPassTimestamp,
-//      x: currentXOffset,
-//      y: currentYOffset,
-//    );
-//
-//    currentXOffset += _playoutBufferSizeSlider.drawable.size.width + padding;
-//    _meanNetworkRateSlider.drawable.render(
-//      ctx,
-//      lastPassTimestamp,
-//      x: currentXOffset,
-//      y: currentYOffset,
-//    );
-//
-//    currentYOffset += _playoutBufferSizeSlider.drawable.size.height;
-//    currentXOffset = x;
-//    _bitRateSlider.drawable.render(
-//      ctx,
-//      lastPassTimestamp,
-//      x: currentXOffset,
-//      y: currentYOffset,
-//    );
-//
-//    currentXOffset += _bitRateSlider.drawable.size.width + padding;
-//    _networkRateVarianceSlider.drawable.render(
-//      ctx,
-//      lastPassTimestamp,
-//      x: currentXOffset,
-//      y: currentYOffset,
-//    );
-//
-//    currentXOffset += _networkRateVarianceSlider.drawable.size.width + padding;
-//
-//    double sliderHeight = currentYOffset + _networkRateVarianceSlider.drawable.size.height;
-//    double buttonColumnYOffset = max(0, (sliderHeight - _buttonColumn.size.height) / 2);
-//
-//    _buttonColumn.render(
-//      ctx,
-//      lastPassTimestamp,
-//      x: currentXOffset,
-//      y: buttonColumnYOffset,
-//    );
-//
-//    currentXOffset += _buttonColumn.size.width;
-//    return Size(currentXOffset, max(sliderHeight, _buttonColumn.size.height));
-//  }
-
-  /// Draw a legend explaining the graph.
-  void _drawLegend({
-    double x = 0,
-    double y = 0,
-    double width = 100,
-    double height = 100,
-    List<_LegendItem> items,
-    double itemSpacing = 5,
-  }) {
-    assert(items.isNotEmpty);
-
-    double totalSpacing = (items.length - 1) * itemSpacing;
-    double heightPerItem = (height - totalSpacing) / items.length;
-    double yOffset = y;
-
-    for (_LegendItem item in items) {
-      _drawLegendItem(
-        x: x,
-        y: yOffset,
-        width: width,
-        height: heightPerItem,
-        item: item,
-      );
-
-      yOffset += heightPerItem + itemSpacing;
-    }
-  }
-
-  /// Draw a legend item.
-  void _drawLegendItem({
-    double x,
-    double y,
-    double width,
-    double height,
-    _LegendItem item,
-  }) {
-    setFillColor(item.color);
-    double cWidth = min(0.25 * width, 30 * window.devicePixelRatio);
-    ctx.fillRect(x, y, cWidth, height);
-
-    setFillColor(Colors.BLACK);
-    setFont(baseline: TextBaseline.MIDDLE);
-    ctx.fillText(item.text, x + cWidth + 5, y + height / 2, width - cWidth - 5);
-  }
-
   @override
   bool needsRepaint() => false;
 
@@ -632,19 +528,4 @@ class _SliderContainer {
   final Drawable drawable;
 
   _SliderContainer(this.slider, this.drawable);
-}
-
-/// Item used in a legend.
-class _LegendItem {
-  /// Color to be explained.
-  final Color color;
-
-  /// Text explaining the colors meaning.
-  final String text;
-
-  /// Create item.
-  _LegendItem({
-    this.color,
-    this.text,
-  });
 }
