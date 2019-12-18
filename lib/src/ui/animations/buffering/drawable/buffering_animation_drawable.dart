@@ -12,7 +12,9 @@ import 'package:hm_animations/src/ui/animations/shared/legend/legend_item.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/grid_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plottable/animated/animated_plottable_series.dart';
@@ -27,12 +29,19 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/pl
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
+  /// Allowed runes as seed (only numeric).
+  static const List<int> _numericalRunes = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
+
+  /// Max seed for the random number generator.
+  static final int _MAX_SEED = 9999999;
+
   /// Maximum transmission unit in bytes.
   static final int _MTU = 1500;
 
@@ -63,6 +72,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Button used to pause the animation.
   ButtonDrawable _pauseButton;
+
+  /// Input field to input a custom seed for the random number generator.
+  InputDrawable _seedInput;
 
   /// Current seed for the random number generator.
   int _currentSeed;
@@ -171,13 +183,33 @@ class BufferingAnimationDrawable extends Drawable {
       alignment: HorizontalAlignment.CENTER,
       layoutMode: LayoutMode.FIT,
       children: [
-        ButtonDrawable(
-          text: "Reseed",
-          onClick: () {
-            _unpause();
-            _reseed();
-            changeCallback(null);
-          },
+        HorizontalLayout(
+          alignment: VerticalAlignment.CENTER,
+          layoutMode: LayoutMode.FIT,
+          children: [
+            _seedInput = InputDrawable(
+              maxLength: _MAX_SEED.toString().length,
+              width: 80,
+              value: _currentSeed.toString(),
+              filter: (toInsert) => toInsert.runes.firstWhere((c) => !_numericalRunes.contains(c), orElse: () => -1) == -1,
+              onChange: (value) {
+                int v = int.tryParse(value);
+                if (v != null) {
+                  _currentSeed = v;
+                  _unpause();
+                  changeCallback(null);
+                }
+              },
+            ),
+            ButtonDrawable(
+              text: "Reseed",
+              onClick: () {
+                _unpause();
+                _reseed();
+                changeCallback(null);
+              },
+            ),
+          ],
         ),
         ButtonDrawable(
           text: "Reset",
@@ -220,7 +252,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Unpause the animation.
   void _unpause() {
-    if (_constantBitRatePlottable.paused) {
+    if (_constantBitRatePlottable != null && _constantBitRatePlottable.paused) {
       _switchPause();
     }
   }
@@ -474,7 +506,13 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Reseed the random number generator used by the animation.
-  void _reseed() => _currentSeed = _rng.nextInt(9999999);
+  void _reseed() {
+    _currentSeed = _rng.nextInt(_MAX_SEED);
+
+    if (_seedInput != null) {
+      _seedInput.value = _currentSeed.toString();
+    }
+  }
 
   @override
   void draw() {
