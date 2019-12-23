@@ -47,7 +47,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Factor to slow the animation down.
   /// For example 1000: The animation is 1000 times slower.
-  static final int _SLOWDOWN_FACTOR = 1000;
+  static final int _DEFAULT_SLOWDOWN_FACTOR = 1000;
 
   /// Random number generator used to generate seeds for another random number generator.
   static Random _rng = Random();
@@ -93,6 +93,12 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Operation running async to add the interrupt marker in the plot by the right time.
   Completer<void> _interruptOperation;
+
+  /// Layout on the bottom.
+  HorizontalLayout _bottomLayout;
+
+  /// Container for the speed slider.
+  _SliderContainer _speedSlider;
 
   /// Create the buffering animation drawable.
   BufferingAnimationDrawable() {
@@ -179,12 +185,42 @@ class BufferingAnimationDrawable extends Drawable {
       ),
     );
 
-    VerticalLayout buttonColumn = VerticalLayout(
-      alignment: HorizontalAlignment.CENTER,
+    LegendDrawable legend = LegendDrawable(
+      items: [
+        LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
+        LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
+        LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
+      ],
+    );
+
+    _controlsLayout = GridLayout(
+      parent: this,
+      cells: [
+        CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
+        CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
+        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
+        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
+        CellSpec(row: 0, column: 2, rowSpan: 2, drawable: legend),
+      ],
+    );
+
+    _speedSlider = _createSlider(
+      label: "Geschwindigkeitsmaßstab",
+      min: 100,
+      max: 2000,
+      value: _DEFAULT_SLOWDOWN_FACTOR.toDouble(),
+      step: 100,
+      valueFormatter: (i) => "1:$i",
+      changeCallback: changeCallback,
+    );
+    _bottomLayout = HorizontalLayout(
+      parent: this,
+      alignment: VerticalAlignment.CENTER,
       layoutMode: LayoutMode.FIT,
       children: [
-        HorizontalLayout(
-          alignment: VerticalAlignment.CENTER,
+        _speedSlider.drawable,
+        VerticalLayout(
+          alignment: HorizontalAlignment.CENTER,
           layoutMode: LayoutMode.FIT,
           children: [
             _seedInput = InputDrawable(
@@ -223,27 +259,7 @@ class BufferingAnimationDrawable extends Drawable {
           onClick: () {
             _switchPause();
           },
-        )
-      ],
-    );
-
-    LegendDrawable legend = LegendDrawable(
-      items: [
-        LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
-        LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
-        LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
-      ],
-    );
-
-    _controlsLayout = GridLayout(
-      parent: this,
-      cells: [
-        CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
-        CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
-        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
-        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
-        CellSpec(row: 0, column: 2, rowSpan: 2, drawable: buttonColumn),
-        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: legend),
+        ),
       ],
     );
 
@@ -275,6 +291,9 @@ class BufferingAnimationDrawable extends Drawable {
       _pauseButton.text = "Run";
     }
   }
+
+  /// Get the currently set slow down factor.
+  int get _slowDownFactor => _speedSlider != null ? _speedSlider.slider.value.toInt() : _DEFAULT_SLOWDOWN_FACTOR;
 
   /// Create a slider input control.
   _SliderContainer _createSlider({
@@ -366,7 +385,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Generator of the constant bit rate series.
   Iterable<Tuple2<Iterable<Point<double>>, Duration>> _constantBitRateSeriesGenerator(double secondsPerMTU) sync* {
-    final double secondsPerMTUInSimulation = secondsPerMTU * _SLOWDOWN_FACTOR;
+    final double secondsPerMTUInSimulation = secondsPerMTU * _slowDownFactor;
     final int millisecondsInSimulation = (secondsPerMTUInSimulation * 1000).toInt();
 
     yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
@@ -411,10 +430,10 @@ class BufferingAnimationDrawable extends Drawable {
         timeForPacket += timeToWait;
       }
 
-      int ms = (timeForPacket * _SLOWDOWN_FACTOR * 1000).toInt();
+      int ms = (timeForPacket * _slowDownFactor * 1000).toInt();
       if (isFirst) {
         isFirst = false;
-        ms += (lastReceived * _SLOWDOWN_FACTOR * 1000).toInt();
+        ms += (lastReceived * _slowDownFactor * 1000).toInt();
       }
 
       lastReceived += timeForPacket;
@@ -454,18 +473,18 @@ class BufferingAnimationDrawable extends Drawable {
           playingOut = false;
           _onPlayOutInterrupted(interruptionTime, lastPlayedOut, playedOut);
           yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
-              Duration(milliseconds: ((nextPacketReceivedTime - lastPlayedOut) * _SLOWDOWN_FACTOR * 1000).toInt()));
+              Duration(milliseconds: ((nextPacketReceivedTime - lastPlayedOut) * _slowDownFactor * 1000).toInt()));
           lastReceived = nextPacketReceivedTime;
         } else {
           if (buffered + 1 >= neededBufferedPackets) {
             playingOut = true;
             yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, (++playedOut).toDouble())],
-                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _SLOWDOWN_FACTOR * 1000).toInt()));
+                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _slowDownFactor * 1000).toInt()));
             lastReceived = nextPacketReceivedTime;
             lastPlayedOut = nextPacketReceivedTime;
           } else {
             yield Tuple2([Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
-                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _SLOWDOWN_FACTOR * 1000).toInt()));
+                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _slowDownFactor * 1000).toInt()));
             lastReceived = nextPacketReceivedTime;
           }
         }
@@ -474,7 +493,7 @@ class BufferingAnimationDrawable extends Drawable {
         _ensureVisibleInPlot(lastPlayedOut + secondsPerMTU, 0);
         yield Tuple2(
             [Point<double>(lastPlayedOut + secondsPerMTU, playedOut.toDouble()), Point<double>(lastPlayedOut + secondsPerMTU, (++playedOut).toDouble())],
-            Duration(milliseconds: (secondsPerMTU * _SLOWDOWN_FACTOR * 1000).toInt()));
+            Duration(milliseconds: (secondsPerMTU * _slowDownFactor * 1000).toInt()));
         lastPlayedOut += secondsPerMTU;
       }
     }
@@ -495,7 +514,7 @@ class BufferingAnimationDrawable extends Drawable {
   void _onPlayOutInterrupted(double interruptionTime, double lastPlayedOutTime, int playedOut) {
     final completer = Completer<void>();
     _interruptOperation = completer;
-    Future.delayed(Duration(milliseconds: ((interruptionTime - lastPlayedOutTime) * _SLOWDOWN_FACTOR * 1000).toInt())).then(
+    Future.delayed(Duration(milliseconds: ((interruptionTime - lastPlayedOutTime) * _slowDownFactor * 1000).toInt())).then(
       (_) {
         if (!completer.isCompleted) {
           _playOutInterruptions.add(Point<double>(interruptionTime, playedOut.toDouble()));
@@ -524,8 +543,10 @@ class BufferingAnimationDrawable extends Drawable {
       x: 0,
       y: _controlsLayout.size.height + graphSpacing,
       width: size.width,
-      height: size.height - _controlsLayout.size.height - graphSpacing,
+      height: size.height - _controlsLayout.size.height - _bottomLayout.size.height - graphSpacing * 2,
     );
+
+    _bottomLayout.render(ctx, lastPassTimestamp, x: 0, y: size.height - _bottomLayout.size.height);
   }
 
   /// Get the maximum value of the passed values.
