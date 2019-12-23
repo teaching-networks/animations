@@ -30,6 +30,8 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/ti
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
+import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:tuple/tuple.dart';
@@ -99,6 +101,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Container for the speed slider.
   _SliderContainer _speedSlider;
+
+  /// Label of the interruption counter.
+  TextDrawable _interruptionCounterLabel;
 
   /// Create the buffering animation drawable.
   BufferingAnimationDrawable() {
@@ -259,6 +264,12 @@ class BufferingAnimationDrawable extends Drawable {
           onClick: () {
             _switchPause();
           },
+        ),
+        _interruptionCounterLabel = TextDrawable(
+          alignment: TextAlignment.LEFT,
+          color: Colors.PINK_RED_2,
+          text: "Interruptions: 0",
+          textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
         ),
       ],
     );
@@ -519,6 +530,8 @@ class BufferingAnimationDrawable extends Drawable {
         if (!completer.isCompleted) {
           _playOutInterruptions.add(Point<double>(interruptionTime, playedOut.toDouble()));
           _plot.invalidate();
+
+          _interruptionCounterLabel.text = "Interruptions: ${_playOutInterruptions.length}";
         }
       },
     );
