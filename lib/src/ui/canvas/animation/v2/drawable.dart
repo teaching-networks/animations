@@ -327,6 +327,16 @@ abstract class Drawable extends CanvasContextUtil {
     }
   }
 
+  /// Get the root drawable.
+  /// If the drawable does not have a parent it is the root.
+  Drawable getRoot() {
+    if (hasParent) {
+      return parent.getRoot();
+    } else {
+      return this;
+    }
+  }
+
   /// Check if the passed absolute [pos] is contained within
   /// this drawable.
   bool containsPos(Point<double> pos) {
@@ -370,6 +380,14 @@ abstract class Drawable extends CanvasContextUtil {
   /// The current pass timestamp is available via [lastPassTimestamp].
   /// The current x & y offset is available via [lastPassXOffset] & [lastPassYOffset].
   void draw();
+
+  /// Whether the size of this drawable may change its size often.
+  /// For example the drawable is child of a parent and inherits the size of the parent, but
+  /// the parent is trying to inherit its size from the child as well.
+  /// Via this method you're able to handle these situations specially.
+  bool hasTransientSize() {
+    return false;
+  }
 }
 
 /// Change event of a drawables size.

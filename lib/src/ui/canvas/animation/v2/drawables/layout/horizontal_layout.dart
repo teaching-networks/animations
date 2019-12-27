@@ -60,7 +60,9 @@ class HorizontalLayout extends Layout {
     for (Drawable child in children) {
       Size childSize = child.size;
 
-      height = max(height, childSize.height);
+      if (!child.hasTransientSize()) {
+        height = max(height, childSize.height);
+      }
       width += childSize.width;
     }
 

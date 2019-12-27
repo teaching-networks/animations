@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
-import 'package:meta/meta.dart';
 
 /// Layout laying multiple drawable out.
 abstract class Layout extends Drawable {
@@ -18,7 +17,7 @@ abstract class Layout extends Drawable {
 
   /// Create layout.
   Layout({
-    @required Drawable parent,
+    Drawable parent,
   }) : super(parent: parent) {
     _init();
   }
@@ -33,7 +32,9 @@ abstract class Layout extends Drawable {
 
     _childSizeChangeStreamSubscriptions = List<StreamSubscription<SizeChange>>();
     for (Drawable child in children) {
-      _childSizeChangeStreamSubscriptions.add(child.sizeChanges.listen(onChildSizeChange));
+      if (!child.hasTransientSize()) {
+        _childSizeChangeStreamSubscriptions.add(child.sizeChanges.listen(onChildSizeChange));
+      }
       child.setParent(this);
     }
   }

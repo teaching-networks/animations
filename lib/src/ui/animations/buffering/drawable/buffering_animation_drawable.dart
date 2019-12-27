@@ -28,6 +28,9 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/co
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/plot_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/combo_box_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/item/combo_box_item.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/simple_combo_box_model.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_util.dart';
@@ -105,6 +108,9 @@ class BufferingAnimationDrawable extends Drawable {
   /// Label of the interruption counter.
   TextDrawable _interruptionCounterLabel;
 
+  /// Combo box input for previously saved settings.
+  ComboBoxDrawable _savedSettingsComboBox;
+
   /// Create the buffering animation drawable.
   BufferingAnimationDrawable() {
     _init();
@@ -130,7 +136,7 @@ class BufferingAnimationDrawable extends Drawable {
       max: 10,
       value: 2,
       step: 1,
-      valueFormatter: (value) => "${value.toInt()} MTUs",
+      valueFormatter: (value) => "${value.toInt()}",
     );
 
     _bitRateSlider = _createSlider(
@@ -184,7 +190,7 @@ class BufferingAnimationDrawable extends Drawable {
             label: "Cumulative data",
             color: Colors.LIGHTGREY,
             lineWidth: 2,
-            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(2), labelRenderer: (value) => "$value × MTU"),
+            ticks: null,
           ),
         ),
       ),
@@ -270,6 +276,18 @@ class BufferingAnimationDrawable extends Drawable {
           color: Colors.PINK_RED_2,
           text: "Interruptions: 0",
           textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
+        ),
+        _savedSettingsComboBox = ComboBoxDrawable(
+          model: SimpleComboBoxModel(
+            items: [
+              ComboBoxItem(label: "Hier geht garnichts!"),
+              ComboBoxItem(label: "Special settings"),
+              ComboBoxItem(label: "Langweilig"),
+              ComboBoxItem(label: "Even more!"),
+              ComboBoxItem(label: "It doesn't work..."),
+              ComboBoxItem(label: "It does work?"),
+            ],
+          ),
         ),
       ],
     );
@@ -380,6 +398,9 @@ class BufferingAnimationDrawable extends Drawable {
     _plot.add(_clientPlayOutPlottable);
 
     _playOutInterruptions.clear();
+    if (_interruptionCounterLabel != null) {
+      _interruptionCounterLabel.text = "Interruptions: 0";
+    }
     _plot.add(PlottableSeries(
       points: _playOutInterruptions,
       style: PlottableStyle(

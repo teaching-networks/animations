@@ -119,6 +119,10 @@ class GridLayout extends Layout {
 
     // Find row and column sizes by cells that do not span multiple cells.
     for (CellSpec spec in _singleRowColumnCells) {
+      if (spec.drawable.hasTransientSize()) {
+        continue;
+      }
+
       Size size = spec.drawable.size + 2 * padding;
 
       if (size.height > rowSizes[spec.row]) rowSizes[spec.row] = size.height;
@@ -127,6 +131,10 @@ class GridLayout extends Layout {
 
     // Adjust row and column sizes by cells that span multiple cells and do not have enough space.
     for (CellSpec spec in _multiRowColumnCells) {
+      if (spec.drawable.hasTransientSize()) {
+        continue;
+      }
+
       Size size = spec.drawable.size + 2 * padding;
 
       double currentHeight = 0;

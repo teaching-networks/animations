@@ -60,7 +60,9 @@ class VerticalLayout extends Layout {
     for (Drawable child in children) {
       Size childSize = child.size;
 
-      width = max(width, childSize.width);
+      if (!child.hasTransientSize()) {
+        width = max(width, childSize.width);
+      }
       height += childSize.height;
     }
 

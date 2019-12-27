@@ -42,14 +42,22 @@ abstract class CanvasContextUtil {
   void setFillColor(Color color) {
     _checkContextAvailable();
 
-    _ctx.setFillColorRgb(color.red, color.green, color.blue, color.alpha);
+    if (color != null) {
+      _ctx.setFillColorRgb(color.red, color.green, color.blue, color.alpha);
+    } else {
+      _ctx.setFillColorRgb(0, 0, 0, 0.0); // Transparent
+    }
   }
 
   /// Convenience method to set a color as stroke color of a context.
   void setStrokeColor(Color color) {
     _checkContextAvailable();
 
-    _ctx.setStrokeColorRgb(color.red, color.green, color.blue, color.alpha);
+    if (color != null) {
+      _ctx.setStrokeColorRgb(color.red, color.green, color.blue, color.alpha);
+    } else {
+      _ctx.setStrokeColorRgb(0, 0, 0, 0.0); // Transparent
+    }
   }
 
   /// Draw image on the canvas.
