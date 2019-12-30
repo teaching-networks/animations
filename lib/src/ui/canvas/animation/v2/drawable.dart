@@ -127,13 +127,13 @@ abstract class Drawable extends CanvasContextUtil {
 
     update(timestamp);
 
-    if (isInvalid) {
-      if (hasParent) {
-        // Calculate the absolute position of the cached canvas from the root canvas.
-        _lastRenderAbsoluteXOffset = _lastRenderOffset.x + _parent.lastRenderAbsoluteXOffset;
-        _lastRenderAbsoluteYOffset = _lastRenderOffset.y + _parent.lastRenderAbsoluteYOffset;
-      }
+    if (hasParent) {
+      // Calculate the absolute position of the cached canvas from the root canvas.
+      _lastRenderAbsoluteXOffset = _lastRenderOffset.x + _parent.lastRenderAbsoluteXOffset;
+      _lastRenderAbsoluteYOffset = _lastRenderOffset.y + _parent.lastRenderAbsoluteYOffset;
+    }
 
+    if (isInvalid) {
       // Repaint drawable
       _cacheCanvasContext.clearRect(0, 0, size.width, size.height);
       draw();

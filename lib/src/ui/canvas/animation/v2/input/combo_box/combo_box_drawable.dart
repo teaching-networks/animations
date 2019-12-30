@@ -12,6 +12,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/separa
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/drawable/select_combo_box_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/event/combo_box_model_event.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/event/combo_box_model_event_types.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/event/removed_event.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/listener/combo_box_model_change_listener.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/style/combo_box_style.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
@@ -74,6 +75,19 @@ class ComboBoxDrawable extends Drawable {
       parent: this,
       child: HorizontalLayout(
         children: [
+          SelectComboBoxDrawable(
+            color: Colors.SLATE_GREY,
+            orientation: SelectArrowOrientation.LEFT,
+            callBack: () {
+              final itemList = model.items.toList();
+              int currentIndex = itemList.indexOf(model.selected);
+
+              if (currentIndex > 0) {
+                model.select(model.get(currentIndex - 1));
+              }
+            },
+          ),
+          VerticalSeparatorDrawable(xPadding: 4),
           _labelDrawable = TextDrawable(
             text: "Select...",
             color: style.unselectedLabelColor,
@@ -81,17 +95,17 @@ class ComboBoxDrawable extends Drawable {
           ),
           VerticalSeparatorDrawable(xPadding: 4),
           SelectComboBoxDrawable(
-              color: Colors.SLATE_GREY,
-              callBack: (isUp) {
-                final itemList = model.items.toList();
-                int currentIndex = itemList.indexOf(model.selected);
+            color: Colors.SLATE_GREY,
+            orientation: SelectArrowOrientation.RIGHT,
+            callBack: () {
+              final itemList = model.items.toList();
+              int currentIndex = itemList.indexOf(model.selected);
 
-                if (isUp && currentIndex > 0) {
-                  model.select(model.get(currentIndex - 1));
-                } else if (!isUp && currentIndex + 1 < itemList.length) {
-                  model.select(model.get(currentIndex + 1));
-                }
-              }),
+              if (currentIndex + 1 < itemList.length) {
+                model.select(model.get(currentIndex + 1));
+              }
+            },
+          ),
         ],
       ),
       style: RoundRectStyle(
@@ -118,8 +132,15 @@ class ComboBoxDrawable extends Drawable {
   void _onModelChange(ComboBoxModelEvent event) {
     switch (event.type) {
       case ComboBoxModelEventType.REMOVED:
-        // TODO Check if the currently selected item is removed
-        invalidate();
+        if (model.hasSelected) {
+          final selected = model.selected;
+
+          RemovedEvent re = event as RemovedEvent;
+          if (re.removedItems.contains(selected)) {
+            model.select(null);
+            invalidate();
+          }
+        }
         break;
       case ComboBoxModelEventType.SELECTED:
         _onSelectionChanged(true);
@@ -128,7 +149,7 @@ class ComboBoxDrawable extends Drawable {
         _onSelectionChanged(false);
         break;
       default:
-        throw Exception("Event type unknown");
+        break;
     }
   }
 

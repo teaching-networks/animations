@@ -7,6 +7,7 @@ import 'package:angular/angular.dart';
 import 'package:angular/core.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/base/connector/animation_component_connector.dart';
 import 'package:hm_animations/src/ui/animations/buffering/buffering_animation.template.dart' as template;
@@ -47,8 +48,14 @@ class BufferingAnimation extends AnimationComponentConnector {
   /// Root drawable of the animation.
   final BufferingAnimationDrawable _drawable;
 
+  /// Storage service used to store data locally.
+  final StorageService _storageService;
+
   /// Create animation.
-  BufferingAnimation(this._i18n) : _drawable = BufferingAnimationDrawable();
+  BufferingAnimation(
+    this._i18n,
+    this._storageService,
+  ) : _drawable = BufferingAnimationDrawable(_storageService);
 
   @override
   AnimationDescriptor get animationDescriptor => descriptor;

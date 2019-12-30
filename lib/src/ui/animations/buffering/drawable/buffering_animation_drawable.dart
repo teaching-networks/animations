@@ -4,9 +4,12 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/services/storage_service/storage_service.dart';
+import 'package:hm_animations/src/ui/animations/buffering/configuration/buffering_animation_configuration.dart';
 import 'package:hm_animations/src/ui/animations/shared/legend/legend_drawable.dart';
 import 'package:hm_animations/src/ui/animations/shared/legend/legend_item.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
@@ -29,7 +32,10 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/pl
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/tick_style.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/combo_box_drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/event/combo_box_model_event.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/event/combo_box_model_event_types.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/item/combo_box_item.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/listener/combo_box_model_change_listener.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/combo_box/model/simple_combo_box_model.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/slider/slider_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
@@ -41,6 +47,9 @@ import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
+  /// Base key of saved configurations in local storage.
+  static const String _local_storage_key = "buffering-animation.configuration.v1";
+
   /// Allowed runes as seed (only numeric).
   static const List<int> _numericalRunes = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
 
@@ -56,6 +65,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Random number generator used to generate seeds for another random number generator.
   static Random _rng = Random();
+
+  /// Storage service used to store data locally.
+  final StorageService _storageService;
 
   /// Slider used to specify the playback buffer size.
   _SliderContainer _playoutBufferSizeSlider;
@@ -111,9 +123,78 @@ class BufferingAnimationDrawable extends Drawable {
   /// Combo box input for previously saved settings.
   ComboBoxDrawable _savedSettingsComboBox;
 
+  /// Change listener of the saved settings combo box model.
+  ComboBoxModelChangeListener _savedSettingsComboBoxModelChangeListener;
+
+  /// The current configuration of the animation.
+  BufferingAnimationConfiguration _currentConfiguration;
+
+  /// Button used to save the current configuration of the animation.
+  ButtonDrawable _saveButton;
+
+  /// Button used to restore the configuration for the animation.
+  ButtonDrawable _restoreButton;
+
+  /// Button used to remove a selected configuration.
+  ButtonDrawable _removeConfigButton;
+
   /// Create the buffering animation drawable.
-  BufferingAnimationDrawable() {
+  BufferingAnimationDrawable(this._storageService) {
     _init();
+  }
+
+  /// Set the current animation configuration.
+  void _setConfiguration({
+    int seed,
+    int bitRate,
+    int bufferSize,
+    int meanNetworkRate,
+    int networkRateVariance,
+  }) {
+    if (bitRate == null) {
+      bitRate = _bitRateSlider.slider.value.toInt() * 1000;
+    } else {
+      _bitRateSlider.slider.setValue(bitRate / 1000, informChangeListener: false);
+    }
+
+    if (bufferSize == null) {
+      bufferSize = _playoutBufferSizeSlider.slider.value.toInt();
+    } else {
+      _playoutBufferSizeSlider.slider.setValue(bufferSize.toDouble(), informChangeListener: false);
+    }
+
+    if (meanNetworkRate == null) {
+      meanNetworkRate = _meanNetworkRateSlider.slider.value.toInt() * 1000 * 1000;
+    } else {
+      _meanNetworkRateSlider.slider.setValue(meanNetworkRate / 1000000, informChangeListener: false);
+    }
+
+    if (networkRateVariance == null) {
+      networkRateVariance = _networkRateVarianceSlider.slider.value.toInt() * 1000 * 1000;
+    } else {
+      _networkRateVarianceSlider.slider.setValue(networkRateVariance / 1000000, informChangeListener: false);
+    }
+
+    if (seed == null) {
+      seed = _currentSeed;
+    } else {
+      _setSeed(seed);
+    }
+
+    _currentConfiguration = BufferingAnimationConfiguration(
+      seed: seed,
+      bitRate: bitRate,
+      bufferSize: bufferSize,
+      meanNetworkRate: meanNetworkRate,
+      networkRateVariance: networkRateVariance,
+    );
+
+    _recalculateGraph(
+      bitRate: _currentConfiguration.bitRate,
+      playOutBufferSize: _currentConfiguration.bufferSize,
+      meanNetworkRate: _currentConfiguration.meanNetworkRate ~/ 8,
+      networkRateVariance: _currentConfiguration.networkRateVariance ~/ 8,
+    );
   }
 
   /// Initialize the drawable.
@@ -121,12 +202,7 @@ class BufferingAnimationDrawable extends Drawable {
     _reseed(); // Initially seeding the random number generator.
 
     SliderValueChangeCallback changeCallback = (_) {
-      _recalculateGraph(
-        playOutBufferSize: _playoutBufferSizeSlider.slider.value.toInt(),
-        meanNetworkRate: _meanNetworkRateSlider.slider.value.toInt() * 1000 * 1000 ~/ 8,
-        networkRateVariance: _networkRateVarianceSlider.slider.value.toInt() * 1000 * 1000 ~/ 8,
-        bitRate: _bitRateSlider.slider.value.toInt() * 1000,
-      );
+      _setConfiguration();
     };
 
     _playoutBufferSizeSlider = _createSlider(
@@ -278,21 +354,122 @@ class BufferingAnimationDrawable extends Drawable {
           textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
         ),
         _savedSettingsComboBox = ComboBoxDrawable(
-          model: SimpleComboBoxModel(
+          model: SimpleComboBoxModel<BufferingAnimationConfiguration>(
             items: [
-              ComboBoxItem(label: "Hier geht garnichts!"),
-              ComboBoxItem(label: "Special settings"),
-              ComboBoxItem(label: "Langweilig"),
-              ComboBoxItem(label: "Even more!"),
-              ComboBoxItem(label: "It doesn't work..."),
-              ComboBoxItem(label: "It does work?"),
-            ],
+              ComboBoxItem<BufferingAnimationConfiguration>(label: "<Neue Konfiguration>", obj: null),
+            ]..addAll(_loadConfigurations()),
           ),
+        ),
+        _saveButton = ButtonDrawable(
+          text: "Save",
+          onClick: () => _saveConfiguration(),
+        ),
+        _restoreButton = ButtonDrawable(
+          text: "Load",
+          onClick: () => _restoreConfiguration(),
+          disabled: true,
+        ),
+        _removeConfigButton = ButtonDrawable(
+          text: "Remove",
+          onClick: () => _removeConfiguration(),
+          disabled: true,
         ),
       ],
     );
 
+    _savedSettingsComboBox.model.select(_savedSettingsComboBox.model.get(0)); // Select first item by default
+    _savedSettingsComboBoxModelChangeListener = (event) => _onSavedSettingsComboBoxModelChanged(event);
+    _savedSettingsComboBox.model.addChangeListener(_savedSettingsComboBoxModelChangeListener);
+
     changeCallback(null);
+  }
+
+  @override
+  void cleanup() {
+    if (_savedSettingsComboBoxModelChangeListener != null) {
+      _savedSettingsComboBox.model.removeChangeListener(_savedSettingsComboBoxModelChangeListener);
+    }
+
+    super.cleanup();
+  }
+
+  /// What to do when the saved settings combo box model changes.
+  void _onSavedSettingsComboBoxModelChanged(ComboBoxModelEvent event) {
+    if (event.type == ComboBoxModelEventType.SELECTED) {
+      ComboBoxItem<BufferingAnimationConfiguration> selected = _savedSettingsComboBox.model.selected;
+
+      if (selected.obj == null) {
+        // Is new configuration selected -> Only enable the save button
+        _saveButton.disabled = false;
+        _restoreButton.disabled = true;
+        _removeConfigButton.disabled = true;
+      } else {
+        // Is saved configuration selected -> Enable both the save and load button
+        _saveButton.disabled = false;
+        _restoreButton.disabled = false;
+        _removeConfigButton.disabled = false;
+      }
+    }
+  }
+
+  /// Load all available configurations from local storage.
+  List<ComboBoxItem<BufferingAnimationConfiguration>> _loadConfigurations() {
+    List<String> keys = _storageService.getKeys();
+    List<ComboBoxItem<BufferingAnimationConfiguration>> result = [];
+    for (final key in keys) {
+      if (key.startsWith(_local_storage_key)) {
+        result.add(ComboBoxItem<BufferingAnimationConfiguration>(
+          label: keyToItemLabel(key),
+          obj: BufferingAnimationConfiguration.fromJson(json.decode(_storageService.get(key))),
+        ));
+      }
+    }
+
+    return result;
+  }
+
+  /// Save the current configuration in the currently selected combo box item.
+  void _saveConfiguration() {
+    final item = ComboBoxItem<BufferingAnimationConfiguration>(
+      label: "NEW CONFIGURATION $_currentSeed",
+      obj: _currentConfiguration,
+    );
+
+    _savedSettingsComboBox.model.add(item);
+    _savedSettingsComboBox.model.select(item);
+
+    _storageService.set(getKeyForItem(item), json.encode(item.obj.toJson()));
+  }
+
+  String itemLabelToKey(String label) => label.replaceAll(new RegExp(r"\s+\b|\b\s"), "_");
+
+  String keyToItemLabel(String key) {
+    String labelKey = key.substring(_local_storage_key.length + 1);
+    return labelKey.replaceAll("_", " ");
+  }
+
+  String getKeyForItem(ComboBoxItem item) => "${_local_storage_key}.${itemLabelToKey(item.label)}";
+
+  /// Restore the configuration in the currently selected combo box item.
+  void _restoreConfiguration() {
+    BufferingAnimationConfiguration config = _savedSettingsComboBox.model.selected.obj;
+
+    _setConfiguration(
+      seed: config.seed,
+      bitRate: config.bitRate,
+      bufferSize: config.bufferSize,
+      meanNetworkRate: config.meanNetworkRate,
+      networkRateVariance: config.networkRateVariance,
+    );
+  }
+
+  /// Remove the currently selected configuration.
+  void _removeConfiguration() {
+    final item = _savedSettingsComboBox.model.selected;
+    _savedSettingsComboBox.model.select(_savedSettingsComboBox.model.get(0));
+    _savedSettingsComboBox.model.remove(item);
+
+    _storageService.remove(getKeyForItem(item));
   }
 
   /// Unpause the animation.
@@ -560,10 +737,15 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Reseed the random number generator used by the animation.
   void _reseed() {
-    _currentSeed = _rng.nextInt(_MAX_SEED);
+    _setSeed(_rng.nextInt(_MAX_SEED));
+  }
+
+  /// Set a seed to the animation.
+  void _setSeed(int seed) {
+    _currentSeed = seed;
 
     if (_seedInput != null) {
-      _seedInput.value = _currentSeed.toString();
+      _seedInput.value = seed.toString();
     }
   }
 

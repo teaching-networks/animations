@@ -162,7 +162,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   set min(double newMin) {
     _min = newMin;
     if (value < _min) {
-      value = _min;
+      setValue(_min);
     }
 
     invalidate();
@@ -175,7 +175,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   set max(double newMax) {
     _max = newMax;
     if (value > _max) {
-      value = _max;
+      setValue(_max);
     }
 
     invalidate();
@@ -193,7 +193,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
   double get step => _step;
 
   /// Set the current value of the slider.
-  set value(double v) {
+  setValue(double v, {bool informChangeListener = true}) {
     double newValue = math.min(math.max(v, _min), _max);
 
     // Round to next nearest [step].
@@ -221,7 +221,7 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
 
       invalidate();
 
-      if (_changeCallback != null) {
+      if (_changeCallback != null && informChangeListener) {
         _changeCallback(value);
       }
     }
@@ -353,11 +353,11 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
       double range = maxX - minX;
       double relativePos = (curX - minX) / range;
 
-      value = min + (max - min) * relativePos;
+      setValue(min + (max - min) * relativePos);
     } else if (curX >= maxX) {
-      value = max;
+      setValue(max);
     } else if (curX <= minX) {
-      value = min;
+      setValue(min);
     }
   }
 
@@ -416,9 +416,9 @@ class SliderDrawable extends Drawable implements FocusableDrawable, MouseListene
     double s = event.ctrlKey ? (max - min) * 0.1 : step;
 
     if (event.key == "ArrowLeft") {
-      value -= s;
+      setValue(value - s);
     } else if (event.key == "ArrowRight") {
-      value += s;
+      setValue(value + s);
     }
   }
 
