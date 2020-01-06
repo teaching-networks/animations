@@ -16,15 +16,17 @@ import 'package:hm_animations/src/services/user_service/user_service.dart';
 
 import 'main.template.dart' as self;
 
-@GenerateInjector([
-  routerProvidersHash,
-  ClassProvider(I18nService),
-  ClassProvider(StorageService),
-  ClassProvider(AuthenticationService),
-  ClassProvider(NetworkService),
-  ClassProvider(UserService),
-  ClassProvider(GroupService),
-])
+@GenerateInjector(
+  [
+    routerProvidersHash,
+    ClassProvider(I18nService),
+    ClassProvider(StorageService),
+    ClassProvider(AuthenticationService),
+    ClassProvider(NetworkService),
+    ClassProvider(UserService),
+    ClassProvider(GroupService),
+  ],
+)
 final InjectorFactory injector = self.injector$Injector;
 
 /// Angular entry component reference.

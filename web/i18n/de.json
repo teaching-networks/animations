@@ -35,6 +35,7 @@
   "login.submit": "Anmelden",
   "login.username": "Benutzername",
   "login.password": "Passwort",
+  "dialog.prompt.input": "Eingabe",
   "user-management.title": "Benutzerverwaltung",
   "user-management.add-user": "Benutzer hinzufügen",
   "user-management.no-users": "Es gibt noch keine Benutzer, versuchen Sie einen zu erstellen!",

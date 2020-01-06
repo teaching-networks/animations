@@ -13,6 +13,7 @@ import 'package:hm_animations/src/ui/animations/base/connector/animation_compone
 import 'package:hm_animations/src/ui/animations/buffering/buffering_animation.template.dart' as template;
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/viewer/drawable_viewer.dart';
+import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
 
 import '../animations.dart';
 import 'drawable/buffering_animation_drawable.dart';
@@ -48,14 +49,12 @@ class BufferingAnimation extends AnimationComponentConnector {
   /// Root drawable of the animation.
   final BufferingAnimationDrawable _drawable;
 
-  /// Storage service used to store data locally.
-  final StorageService _storageService;
-
   /// Create animation.
   BufferingAnimation(
     this._i18n,
-    this._storageService,
-  ) : _drawable = BufferingAnimationDrawable(_storageService);
+    StorageService storageService,
+    DialogService dialogService,
+  ) : _drawable = BufferingAnimationDrawable(storageService, dialogService);
 
   @override
   AnimationDescriptor get animationDescriptor => descriptor;

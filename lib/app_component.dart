@@ -17,6 +17,8 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'package:hm_animations/src/ui/misc/angular_components/selection_options.dart' as so;
+import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
+import 'package:hm_animations/src/ui/misc/dialog/dialog_wrapper/dialog_wrapper_component.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
@@ -41,8 +43,14 @@ import 'version.dart';
       routerDirectives,
       formDirectives,
       coreDirectives,
+      DialogWrapperComponent,
     ],
-    providers: [materialProviders, ClassProvider(AnimationService), ClassProvider(Routes)],
+    providers: [
+      materialProviders,
+      ClassProvider(AnimationService),
+      ClassProvider(Routes),
+      ClassProvider(DialogService),
+    ],
     pipes: [I18nPipe])
 class AppComponent implements OnInit, OnDestroy {
   /**

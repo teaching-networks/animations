@@ -1,0 +1,28 @@
+<div class="prompt-dialog-container">
+    <material-dialog>
+
+        <form (ngSubmit)="close()">
+
+            <h1 header>{{ "dialog.prompt.input" | i18n }}</h1>
+
+            <p>
+                {{ question }}
+            </p>
+
+            <div>
+                <material-input class="answer-field" [(ngModel)]="answer" name="answer"></material-input>
+            </div>
+
+            <div footer class="prompt-footer">
+                <material-button (click)="cancel()">
+                    {{ "cancel" | i18n }}
+                </material-button>
+                <material-button autoFocus type="submit" (click)="close()">
+                    {{ "ok" | i18n }}
+                </material-button>
+            </div>
+
+        </form>
+
+    </material-dialog>
+</div>

@@ -35,6 +35,7 @@
   "login.submit": "Login",
   "login.username": "Username",
   "login.password": "Password",
+  "dialog.prompt.input": "Input",
   "user-management.title": "User management",
   "user-management.add-user": "Add user",
   "user-management.no-users": "There are no users yet. Try creating one!",

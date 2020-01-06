@@ -43,6 +43,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/util/canvas_context_uti
 import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
 import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
@@ -68,6 +69,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Storage service used to store data locally.
   final StorageService _storageService;
+
+  /// Service used to show dialogs.
+  final DialogService _dialogService;
 
   /// Slider used to specify the playback buffer size.
   _SliderContainer _playoutBufferSizeSlider;
@@ -139,7 +143,10 @@ class BufferingAnimationDrawable extends Drawable {
   ButtonDrawable _removeConfigButton;
 
   /// Create the buffering animation drawable.
-  BufferingAnimationDrawable(this._storageService) {
+  BufferingAnimationDrawable(
+    this._storageService,
+    this._dialogService,
+  ) {
     _init();
   }
 
@@ -429,16 +436,45 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Save the current configuration in the currently selected combo box item.
-  void _saveConfiguration() {
-    final item = ComboBoxItem<BufferingAnimationConfiguration>(
-      label: "NEW CONFIGURATION $_currentSeed",
-      obj: _currentConfiguration,
-    );
+  Future<void> _saveConfiguration() async {
+    // Check whether the currently selected configuration is pointing to "new configuration" or a already existing one.
+    ComboBoxItem<BufferingAnimationConfiguration> selectedConfiguration = _savedSettingsComboBox.model.selected;
+    bool isNew = selectedConfiguration.obj == null;
+
+    ComboBoxItem<BufferingAnimationConfiguration> item;
+    if (isNew) {
+      String name;
+      do {
+        name = await _askForConfigurationName();
+      } while (name != null && name.trim().isEmpty);
+
+      if (name == null) {
+        // Cancel the save process
+        return;
+      }
+
+      item = ComboBoxItem<BufferingAnimationConfiguration>(
+        label: name,
+        obj: _currentConfiguration,
+      );
+    } else {
+      item = ComboBoxItem<BufferingAnimationConfiguration>(
+        label: selectedConfiguration.label,
+        obj: _currentConfiguration,
+      );
+
+      _savedSettingsComboBox.model.remove(selectedConfiguration);
+    }
 
     _savedSettingsComboBox.model.add(item);
     _savedSettingsComboBox.model.select(item);
 
     _storageService.set(getKeyForItem(item), json.encode(item.obj.toJson()));
+  }
+
+  /// Ask for a configuration name.
+  Future<String> _askForConfigurationName() async {
+    return await _dialogService.prompt("Welchen Namen soll die Konfiguration haben?").result();
   }
 
   String itemLabelToKey(String label) => label.replaceAll(new RegExp(r"\s+\b|\b\s"), "_");
