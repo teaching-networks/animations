@@ -48,6 +48,9 @@ class VerticalLayout extends Layout {
       case LayoutMode.GROW:
         _recalculateSizeGrowMode();
         break;
+      case LayoutMode.NONE:
+        // Do nothing
+        break;
       default:
         throw Exception("Layout mode unknown");
     }

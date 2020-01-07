@@ -32,6 +32,9 @@ class SelectComboBoxDrawable extends Drawable implements MouseListener {
   /// Color of a hovered arrow.
   final Color hoveredColor;
 
+  /// Color of an disabled arrow.
+  final Color disabledColor;
+
   /// Callback called when the up or down arrow is clicked.
   final SelectCallback callBack;
 
@@ -47,6 +50,9 @@ class SelectComboBoxDrawable extends Drawable implements MouseListener {
   /// The currently hovered arrow.
   bool _hovered = false;
 
+  /// Wether the arrow is disabled.
+  bool _disabled = false;
+
   /// Create drawable.
   SelectComboBoxDrawable({
     Drawable parent,
@@ -54,6 +60,7 @@ class SelectComboBoxDrawable extends Drawable implements MouseListener {
     this.padding = 2,
     this.color = Colors.DARK_GRAY,
     this.hoveredColor = Colors.BLACK,
+    this.disabledColor = Colors.LIGHTGREY,
     this.callBack,
     this.orientation = SelectArrowOrientation.LEFT,
   }) : super(parent: parent) {
@@ -71,10 +78,18 @@ class SelectComboBoxDrawable extends Drawable implements MouseListener {
     );
   }
 
+  /// Set the arrow disabled.
+  void set disabled(bool value) {
+    if (value != _disabled) {
+      _disabled = value;
+      invalidate();
+    }
+  }
+
   @override
   void draw() {
     ctx.translate(_currentPadding, _currentPadding);
-    setFillColor(_hovered ? hoveredColor : color);
+    setFillColor(_disabled ? disabledColor : _hovered ? hoveredColor : color);
 
     ctx.beginPath();
     if (orientation == SelectArrowOrientation.RIGHT) {
@@ -103,6 +118,10 @@ class SelectComboBoxDrawable extends Drawable implements MouseListener {
 
   /// Called when the arrow is clicked.
   void _clicked() {
+    if (_disabled) {
+      return;
+    }
+
     if (callBack != null) {
       callBack();
     }

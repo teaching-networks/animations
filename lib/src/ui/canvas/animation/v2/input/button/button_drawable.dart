@@ -353,17 +353,17 @@ class ButtonDrawableStyle {
   /// Create style.
   const ButtonDrawableStyle({
     this.padding = 4,
-    this.roundedRadius = 3,
-    this.textColor = Colors.BLACK,
-    this.textDisabledColor = Colors.DARK_GRAY,
+    this.roundedRadius = 2,
+    this.textColor = Colors.DARK_GRAY,
+    this.textDisabledColor = Colors.GRAY,
     this.textSize = CanvasContextUtil.DEFAULT_FONT_SIZE_PX,
     this.fontFamilies = "sans-serif",
     this.buttonColor = Colors.WHITE,
-    this.buttonHoveredColor = Colors.LIGHTGREY,
+    this.buttonHoveredColor = Colors.LIGHTER_GRAY,
     this.buttonActiveColor = Colors.GRAY_BBB,
-    this.buttonDisabledColor = Colors.GRAY,
+    this.buttonDisabledColor = Colors.LIGHTGREY,
     this.focusColor = Colors.SPACE_BLUE,
-    this.shadowBlur = 5,
+    this.shadowBlur = 3,
     this.shadowColor = Colors.GRAY,
     this.shadowOffsetY = 1,
   });

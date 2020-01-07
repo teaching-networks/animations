@@ -17,6 +17,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/grid_l
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/layout_mode.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/separator/vertical_separator_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/plot.dart';
@@ -287,14 +288,22 @@ class BufferingAnimationDrawable extends Drawable {
       ],
     );
 
+    _interruptionCounterLabel = TextDrawable(
+      alignment: TextAlignment.LEFT,
+      color: Colors.PINK_RED_2,
+      text: "Interruptions: 0",
+      textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
+    );
+
     _controlsLayout = GridLayout(
       parent: this,
       cells: [
-        CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
-        CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
-        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
-        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
-        CellSpec(row: 0, column: 2, rowSpan: 2, drawable: legend),
+        CellSpec(row: 0, column: 0, rowSpan: 2, drawable: _interruptionCounterLabel),
+        CellSpec(row: 0, column: 1, drawable: _bitRateSlider.drawable),
+        CellSpec(row: 0, column: 2, drawable: _meanNetworkRateSlider.drawable),
+        CellSpec(row: 1, column: 1, drawable: _playoutBufferSizeSlider.drawable),
+        CellSpec(row: 1, column: 2, drawable: _networkRateVarianceSlider.drawable),
+        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: legend),
       ],
     );
 
@@ -354,11 +363,8 @@ class BufferingAnimationDrawable extends Drawable {
             _switchPause();
           },
         ),
-        _interruptionCounterLabel = TextDrawable(
-          alignment: TextAlignment.LEFT,
-          color: Colors.PINK_RED_2,
-          text: "Interruptions: 0",
-          textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
+        VerticalSeparatorDrawable(
+          xPadding: 15,
         ),
         _savedSettingsComboBox = ComboBoxDrawable(
           model: SimpleComboBoxModel<BufferingAnimationConfiguration>(
@@ -798,7 +804,7 @@ class BufferingAnimationDrawable extends Drawable {
       height: size.height - _controlsLayout.size.height - _bottomLayout.size.height - graphSpacing * 2,
     );
 
-    _bottomLayout.render(ctx, lastPassTimestamp, x: 0, y: size.height - _bottomLayout.size.height);
+    _bottomLayout.render(ctx, lastPassTimestamp, x: max(0, (size.width - _bottomLayout.size.width) / 2), y: size.height - _bottomLayout.size.height);
   }
 
   /// Get the maximum value of the passed values.

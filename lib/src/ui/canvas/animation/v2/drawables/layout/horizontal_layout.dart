@@ -48,6 +48,9 @@ class HorizontalLayout extends Layout {
       case LayoutMode.GROW:
         _recalculateSizeGrowMode();
         break;
+      case LayoutMode.NONE:
+        // Do nothing.
+        break;
       default:
         throw Exception("Layout mode unknown");
     }
@@ -116,7 +119,7 @@ class HorizontalLayout extends Layout {
 
   @override
   void onChildSizeChange(SizeChange change) {
-    if (layoutMode == LayoutMode.FIT) {
+    if (layoutMode == LayoutMode.FIT || layoutMode == LayoutMode.NONE) {
       _recalculateSize();
     }
   }

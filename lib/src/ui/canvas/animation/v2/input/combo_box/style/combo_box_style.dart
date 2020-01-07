@@ -11,9 +11,6 @@ class ComboBoxStyle {
   /// Background color of the combo box.
   final Color backgroundColor;
 
-  /// Color of the unselected label.
-  final Color unselectedLabelColor;
-
   /// Color of a label.
   final Color labelColor;
 
@@ -24,7 +21,6 @@ class ComboBoxStyle {
   const ComboBoxStyle({
     this.backgroundColor = Colors.WHITE,
     this.labelColor = Colors.BLACK,
-    this.unselectedLabelColor = Colors.GRAY,
     this.itemPadding = 4,
   });
 }
