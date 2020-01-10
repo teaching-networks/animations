@@ -6,12 +6,12 @@
 import 'package:hm_animations/src/ui/misc/dialog/instance/dialog_instance.dart';
 
 /// Component which can be opened as dialog by the dialog service.
-abstract class DialogComponent<R, D> {
+abstract class DialogComponent<R, T, D> {
   /// Instance of this dialog.
-  DialogInstance<R, dynamic, D> instance;
+  DialogInstance<dynamic, T, D> instance;
 
   /// Set the dialog instance this component is showing.
-  void setInstance(DialogInstance<R, dynamic, D> value) {
+  void setInstance(DialogInstance<dynamic, T, D> value) {
     if (instance != null) {
       throw Exception("Instance should only be set once");
     }

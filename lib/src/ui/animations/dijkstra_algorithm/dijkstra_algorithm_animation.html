@@ -126,7 +126,7 @@
 
 			<li class="labeled" style="text-align: center">
 				<label>{{ "dijkstra-algorithm-animation.help" | i18n }}</label>
-				<material-button raised (trigger)="showHelpDialog = true">
+				<material-button raised (trigger)="showHelpDialog()">
 					<material-icon icon="help"></material-icon>
 					{{ "dijkstra-algorithm-animation.help" | i18n }}
 				</material-button>
@@ -171,57 +171,3 @@
 		{{ "dijkstra-algorithm-animation.credits" | i18n }}
 	</p>
 </div>
-
-<modal [visible]="showInputDialog">
-	<material-dialog
-			info
-			class="info-dialog">
-
-		<div header>
-			<material-button icon (trigger)="showInputDialog = false">
-				<material-icon icon="close"></material-icon>
-			</material-button>
-
-			<h1>{{ "dijkstra-algorithm-animation.dialog.edit-weight" | i18n }}</h1>
-		</div>
-
-		<form style="text-align: center">
-			<material-input autoFocus autoSelect #newWeightTextField name="content" [ngModel]="inputDialogContent"
-							(ngModelChange)="setInputDialogContent($event)"></material-input>
-		</form>
-
-		<div style="text-align: center; padding: 0.5em 0.0em">
-			<material-button raised style="background-color: lightcoral; color: white"
-							 (click)="onInputDialogRemoveClicked()">
-				<material-icon icon="delete_forever"></material-icon>
-				<span *ngIf="!showDeleteConnectionSecurityQuestion">{{ "dijkstra-algorithm-animation.dialog.remove-connection" | i18n }}</span>
-				<span *ngIf="showDeleteConnectionSecurityQuestion">{{ "dijkstra-algorithm-animation.dialog.remove-connection.security-question" | i18n }}</span>
-			</material-button>
-		</div>
-
-		<div style="text-align: right">
-			<material-button style="background-color: lightgreen" (trigger)="showInputDialog = false">
-				<material-icon icon="done"></material-icon>
-				{{ "ok" | i18n }}
-			</material-button>
-		</div>
-
-	</material-dialog>
-</modal>
-
-<modal [visible]="showHelpDialog">
-	<material-dialog info class="info-dialog" style="width: 500px">
-		<div header>
-			<material-button icon (trigger)="showHelpDialog = false">
-				<material-icon icon="close"></material-icon>
-			</material-button>
-
-			<h1>{{ "dijkstra-algorithm-animation.help" | i18n }}</h1>
-		</div>
-
-		<p>
-			{{ helpLabel.toString() }}
-		</p>
-
-	</material-dialog>
-</modal>

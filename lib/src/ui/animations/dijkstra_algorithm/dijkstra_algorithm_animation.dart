@@ -25,6 +25,8 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_ui.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/arrow/dijkstra_arrow.dart';
+import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dialog/dijkstra_input_dialog/dijkstra_input_dialog.template.dart'
+    as $dijkstraInputDialogTemplate;
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/dijkstra/dijkstra.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/mouse/dijkstra_node_mouse_listener.dart';
 import 'package:hm_animations/src/ui/animations/dijkstra_algorithm/node/dijkstra_node.dart';
@@ -35,6 +37,8 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/text_util.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
+import 'package:hm_animations/src/ui/misc/dialog/impl/info/info_dialog_data.dart';
 import 'package:hm_animations/src/ui/misc/directives/auto_select_directive.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
@@ -97,6 +101,9 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
   /// Quaternion used to rotate an arrow head vector to the right.
   static vector.Quaternion _rotateRight = vector.Quaternion.axisAngle(vector.Vector3(0.0, 0.0, 1.0), -pi / 4 * 3);
 
+  /// Service to show dialogs with.
+  final DialogService _dialogService;
+
   /// Window key down listener.
   Function _windowKeyDownListener;
 
@@ -121,19 +128,7 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
   /// Bounding boxes of the weights.
   List<DijkstraArrow> _weightBoundingBoxes = List<DijkstraArrow>();
 
-  /// Whether to show the input dialog for new weights.
-  bool _showInputDialog = false;
-
-  /// Whether to show the connection deletion security question.
-  bool _showDeleteConnectionSecurityQuestion = false;
-
-  /// Whether to show the help dialog.
-  bool _showHelpDialog = false;
-
   StreamSubscription<DijkstraNodeConnection> _showInputDialogStreamSubscription;
-
-  /// Currently editing node connection.
-  DijkstraNodeConnection _currentlyEditingConnection;
 
   /// The start node for the algorithm.
   DijkstraNode _startNode;
@@ -149,10 +144,6 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
 
   /// Duration until the next step in the animation will be called.
   Duration _nextStepDuration = Duration(seconds: 4);
-
-  /// Text field where the user can set a new weight for a connection between nodes.
-  @ViewChild("newWeightTextField", read: HtmlElement)
-  HtmlElement newWeightTextField;
 
   /// Service to retrieve translations from.
   final I18nService _i18n;
@@ -177,7 +168,11 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
   Message helpLabel;
 
   /// Create animation.
-  DijkstraAlgorithmAnimation(this._i18n, this._storage) {
+  DijkstraAlgorithmAnimation(
+    this._i18n,
+    this._storage,
+    this._dialogService,
+  ) {
     mouseListener = DijkstraNodeMouseListener(
       nodes: _nodes,
       nodeSize: _nodeSize,
@@ -207,39 +202,6 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
 
   /// Get the default height of the canvas.
   int get canvasHeight => 600;
-
-  bool get showInputDialog => _showInputDialog;
-
-  void set showInputDialog(bool value) {
-    _showInputDialog = value;
-
-    if (value) {
-      // Select all text in text field
-      final inputField = newWeightTextField.querySelector("input");
-      if (inputField != null && inputField is TextInputElement) {
-        inputField.setSelectionRange(0, inputField.text.length);
-      }
-    } else {
-      // Reset the dialog.
-      showDeleteConnectionSecurityQuestion = false;
-    }
-  }
-
-  /// Whether the help dialog is shown.
-  bool get showHelpDialog => _showHelpDialog;
-
-  /// Set whether to show the help dialog.
-  void set showHelpDialog(bool value) {
-    _showHelpDialog = value;
-  }
-
-  /// Whether the delete connection security question is shown.
-  bool get showDeleteConnectionSecurityQuestion => _showDeleteConnectionSecurityQuestion;
-
-  /// Set whether to show the delete connection security question.
-  void set showDeleteConnectionSecurityQuestion(bool value) {
-    _showDeleteConnectionSecurityQuestion = value;
-  }
 
   /// The dijkstra start node name
   String get startNodeName => _startNode != null ? _startNode.nodeName : "...";
@@ -271,9 +233,13 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
     };
     window.addEventListener(_keyPressEventName, _windowKeyPressListener);
 
-    _showInputDialogStreamSubscription = mouseListener.showInputDialogStream.listen((connection) {
-      showInputDialog = true;
-      _currentlyEditingConnection = connection;
+    _showInputDialogStreamSubscription = mouseListener.showInputDialogStream.listen((connection) async {
+      final instance = _dialogService.openComponent($dijkstraInputDialogTemplate.DijkstraInputDialogNgFactory, connection);
+
+      bool removeConnection = await instance.result();
+      if (removeConnection) {
+        _removeConnection(connection);
+      }
     });
 
     if (hasModelToRestore) {
@@ -549,13 +515,6 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
         redo();
       }
     }
-
-    if (showInputDialog) {
-      if (event.keyCode == 13) {
-        // Enter
-        showInputDialog = false;
-      }
-    }
   }
 
   // Convert coordinates to position point.
@@ -646,48 +605,32 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
     }
   }
 
-  String get inputDialogContent => _currentlyEditingConnection != null ? _currentlyEditingConnection.weight.toString() : "";
-
-  void setInputDialogContent(String content) {
-    int value = int.tryParse(content) ?? 0;
-
-    if (_currentlyEditingConnection != null) {
-      _currentlyEditingConnection.weight = value;
-    }
-  }
-
   /// In case the remove button has been clicked within the input dialog.
-  void onInputDialogRemoveClicked() {
-    if (!_showDeleteConnectionSecurityQuestion) {
-      _showDeleteConnectionSecurityQuestion = true;
+  void _removeConnection(DijkstraNodeConnection connection) {
+    if (connection == null) {
       return;
     }
 
-    if (_currentlyEditingConnection != null) {
-      _currentlyEditingConnection.from.disconnect(_currentlyEditingConnection.to);
+    connection.from.disconnect(connection.to);
 
-      int fromId = _currentlyEditingConnection.from.id;
-      int toId = _currentlyEditingConnection.to.id;
-      int weight = _currentlyEditingConnection.weight;
+    int fromId = connection.from.id;
+    int toId = connection.to.id;
+    int weight = connection.weight;
 
-      _undoRedoManager.addStep(UndoRedoStep(
-        undoFunction: () {
-          DijkstraNode from = _getNodeById(fromId);
-          DijkstraNode to = _getNodeById(toId);
+    _undoRedoManager.addStep(UndoRedoStep(
+      undoFunction: () {
+        DijkstraNode from = _getNodeById(fromId);
+        DijkstraNode to = _getNodeById(toId);
 
-          from.connectTo(to, weight: weight);
-        },
-        redoFunction: () {
-          DijkstraNode from = _getNodeById(fromId);
-          DijkstraNode to = _getNodeById(toId);
+        from.connectTo(to, weight: weight);
+      },
+      redoFunction: () {
+        DijkstraNode from = _getNodeById(fromId);
+        DijkstraNode to = _getNodeById(toId);
 
-          from.disconnect(to);
-        },
-      ));
-
-      showInputDialog = false;
-      _currentlyEditingConnection = null;
-    }
+        from.disconnect(to);
+      },
+    ));
   }
 
   /// Switch between normal and create mode.
@@ -836,4 +779,12 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
 
   /// Serialize a node list.
   String serializeNodeList(List<DijkstraNode> nodes) => nodes.map((node) => node.nodeName).toString();
+
+  /// Show the help dialog.
+  void showHelpDialog() {
+    _dialogService.info(InfoDialogData(
+      title: _i18n.get("dijkstra-algorithm-animation.help").toString(),
+      message: helpLabel.toString(),
+    ));
+  }
 }

@@ -1,0 +1,39 @@
+<material-dialog [error]="errorMessageToShow?.toString()">
+
+    <h1 header>{{ "login.title" | i18n }}</h1>
+
+    <div *ngIf="isCheckingCredentials">
+        <material-progress [indeterminate]="true"></material-progress>
+    </div>
+
+    <form (ngSubmit)="login()" #loginForm="ngForm">
+
+        <div>
+            <div>
+                <material-input [(ngModel)]="username" ngControl="username" label="{{ 'login.username' | i18n }}" autoFocus required
+                                [disabled]="isCheckingCredentials"></material-input>
+            </div>
+
+            <div>
+                <material-input [(ngModel)]="password" ngControl="password" label="{{ 'login.password' | i18n }}" type="password"
+                                [disabled]="isCheckingCredentials"></material-input>
+            </div>
+        </div>
+
+        <div footer style="display: flex; flex-flow: row; justify-content: space-between">
+            <material-button clear-size (trigger)="cancel()">
+                <material-icon icon="close"></material-icon>
+                {{ "login.close" | i18n }}
+            </material-button>
+
+            <material-button clear-size [disabled]="!loginForm.form.valid" (trigger)="login()">
+                <material-icon icon="check_circle"></material-icon>
+                {{ "login.submit" | i18n }}
+            </material-button>
+
+            <button type="submit" style="display:none" [disabled]="!loginForm.form.valid"></button>
+        </div>
+
+    </form>
+
+</material-dialog>

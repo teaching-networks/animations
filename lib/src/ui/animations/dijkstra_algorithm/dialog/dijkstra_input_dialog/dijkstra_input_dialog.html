@@ -1,0 +1,36 @@
+<material-dialog info class="info-dialog">
+
+    <div header>
+        <material-button icon (trigger)="cancel()">
+            <material-icon icon="close"></material-icon>
+        </material-button>
+
+        <h1>{{ "dijkstra-algorithm-animation.dialog.edit-weight" | i18n }}</h1>
+    </div>
+
+    <form (ngSubmit)="ok()" style="text-align: center">
+        <div>
+            <material-input autoFocus autoSelect #newWeightTextField
+                            [(ngModel)]="currentWeight" ngControl="currentWeight"></material-input>
+        </div>
+
+        <div style="text-align: center; padding: 0.5em 0.0em">
+            <material-button raised style="background-color: lightcoral; color: white"
+                             (click)="removeArrow()">
+                <material-icon icon="delete_forever"></material-icon>
+                <span *ngIf="!showDeleteConnectionSecurityQuestion">{{ "dijkstra-algorithm-animation.dialog.remove-connection" | i18n }}</span>
+                <span *ngIf="showDeleteConnectionSecurityQuestion">{{ "dijkstra-algorithm-animation.dialog.remove-connection.security-question" | i18n }}</span>
+            </material-button>
+        </div>
+
+        <div style="text-align: right">
+            <material-button style="background-color: lightgreen" (trigger)="ok()">
+                <material-icon icon="done"></material-icon>
+                {{ "ok" | i18n }}
+            </material-button>
+        </div>
+
+        <button type="submit" style="display:none"></button>
+    </form>
+
+</material-dialog>

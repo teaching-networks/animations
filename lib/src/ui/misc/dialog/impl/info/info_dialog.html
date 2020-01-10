@@ -1,0 +1,15 @@
+<material-dialog info class="info-dialog">
+
+    <div header>
+        <material-button icon (trigger)="close()">
+            <material-icon icon="close"></material-icon>
+        </material-button>
+
+        <h1>{{ instance.data.title }}</h1>
+    </div>
+
+    <p>
+        {{ instance.data.message }}
+    </p>
+
+</material-dialog>

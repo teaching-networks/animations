@@ -6,7 +6,6 @@
 import 'dart:async';
 
 import 'package:angular/angular.dart';
-import 'package:angular_components/angular_components.dart';
 import 'package:hm_animations/src/ui/misc/dialog/dialog_component/dialog_component.dart';
 import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
 import 'package:hm_animations/src/ui/misc/dialog/event/dialog_event.dart';
@@ -53,16 +52,19 @@ class DialogWrapperComponent implements OnInit, OnDestroy {
   @override
   void ngOnInit() {
     _eventSub = _service.events.listen((event) {
-      _displayDialog(event.instance);
+      _displayDialog(event.instance, event.dialogLayoutComponentFactory);
     });
   }
 
   /// Display a dialog instance.
-  void _displayDialog(DialogInstance instance) {
+  void _displayDialog(DialogInstance instance, ComponentFactory dialogLayoutComponentFactory) {
     instances.add(instance);
     _cd.markForCheck(); // Update container list
 
-    ComponentRef<DialogComponent> componentRef = _componentLoader.loadNextToLocation(instance.componentFactory, container);
+    ComponentRef<DialogComponent> componentRef = _componentLoader.loadNextToLocation(
+      dialogLayoutComponentFactory != null ? dialogLayoutComponentFactory : instance.componentFactory,
+      container,
+    );
     componentRef.instance.setInstance(instance);
 
     instance.result().then((_) {
@@ -83,6 +85,6 @@ class DialogWrapperComponent implements OnInit, OnDestroy {
   }
 
   String getModalVisibility() {
-    return isDialogShown() ? "block": "none";
+    return isDialogShown() ? "block" : "none";
   }
 }

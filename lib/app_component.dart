@@ -23,6 +23,7 @@ import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/misc/language/language_item_component.template.dart' as languageItemComponent;
 import 'package:hm_animations/src/util/component.dart';
 import 'package:hm_animations/version.dart';
+import 'package:hm_animations/src/ui/view/general/login_dialog/login_dialog.template.dart' as $loginDialogTemplate;
 
 import 'version.dart';
 
@@ -63,6 +64,9 @@ class AppComponent implements OnInit, OnDestroy {
    */
   final I18nService _i18n;
 
+  /// Service used to show dialogs.
+  final DialogService _dialogService;
+
   SelectionModel<Language> languageSelectionModel;
   so.SelectionOptions<Language> languageSelectionOptions;
 
@@ -70,26 +74,22 @@ class AppComponent implements OnInit, OnDestroy {
 
   StreamSubscription<bool> _loggedInStreamSub;
 
-  /*
-  LOGIN DIALOG PROPERTIES
-   */
-  bool showLoginDialog = false;
-  bool isCheckingCredentials = false;
   bool isLoggedIn = false;
-  String username = "";
-  String password = "";
-  Message loginErrorMessageToShow;
-  Message _loginErrorMessageLabel;
 
   final UserService _userService;
   User authenticatedUser;
 
-  AppComponent(this._i18n, this.routes, this._authenticationService, this._userService);
+  /// Create component.
+  AppComponent(
+    this._i18n,
+    this.routes,
+    this._authenticationService,
+    this._userService,
+    this._dialogService,
+  );
 
   @override
   ngOnInit() {
-    _initTranslations();
-
     languageSelectionModel = SelectionModel.single(selected: _i18n.getLanguages()[0], keyProvider: (language) => language.locale);
     languageSelectionOptions = so.SelectionOptions(_i18n.getLanguages());
 
@@ -130,10 +130,6 @@ class AppComponent implements OnInit, OnDestroy {
     });
   }
 
-  void _initTranslations() {
-    _loginErrorMessageLabel = _i18n.get("login.error");
-  }
-
   /**
    * Called when a language has been selected.
    */
@@ -154,25 +150,7 @@ class AppComponent implements OnInit, OnDestroy {
     if (_authenticationService.isLoggedIn) {
       _authenticationService.logout();
     } else {
-      showLoginDialog = true;
-      loginErrorMessageToShow = null;
-    }
-  }
-
-  /**
-   * Login process entry.
-   */
-  void login() async {
-    isCheckingCredentials = true;
-
-    var success = await _authenticationService.login(username, password);
-
-    isCheckingCredentials = false;
-
-    if (success) {
-      showLoginDialog = false;
-    } else {
-      loginErrorMessageToShow = _loginErrorMessageLabel;
+      _dialogService.openComponent($loginDialogTemplate.LoginDialogNgFactory, true);
     }
   }
 

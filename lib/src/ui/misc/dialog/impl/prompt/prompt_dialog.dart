@@ -28,7 +28,7 @@ import 'package:hm_animations/src/ui/misc/dialog/dialog_component/dialog_compone
   ],
   pipes: [I18nPipe],
 )
-class PromptDialog extends DialogComponent<String, String> {
+class PromptDialog extends DialogComponent<String, PromptDialog, String> {
   /// Typed in answer.
   String answer = "";
 
