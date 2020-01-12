@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:html';
 import 'dart:math';
 
+import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
 import 'package:hm_animations/src/ui/animations/buffering/configuration/buffering_animation_configuration.dart';
 import 'package:hm_animations/src/ui/animations/shared/legend/legend_drawable.dart';
@@ -74,6 +75,9 @@ class BufferingAnimationDrawable extends Drawable {
   /// Service used to show dialogs.
   final DialogService _dialogService;
 
+  /// Service used to fetch translations.
+  final I18nService _i18nService;
+
   /// Slider used to specify the playback buffer size.
   _SliderContainer _playoutBufferSizeSlider;
 
@@ -94,6 +98,12 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Button used to pause the animation.
   ButtonDrawable _pauseButton;
+
+  /// Button used to reset the animation.
+  ButtonDrawable _resetButton;
+
+  /// Button used to reseed the animations rng.
+  ButtonDrawable _reseedButton;
 
   /// Input field to input a custom seed for the random number generator.
   InputDrawable _seedInput;
@@ -143,8 +153,36 @@ class BufferingAnimationDrawable extends Drawable {
   /// Button used to remove a selected configuration.
   ButtonDrawable _removeConfigButton;
 
+  /// Drawable showing the animations legend.
+  LegendDrawable _legend;
+
+  Message _interruptionsMsg;
+  Message _bitRateMsg;
+  Message _playoutBufferSizeMsg;
+  Message _meanNetworkRateMsg;
+  Message _networkRateVarianceMsg;
+  Message _constantBitRateTransmissionMsg;
+  Message _networkDelayedReceivingAtClientMsg;
+  Message _constantBitRatePlayOutAtClientMsg;
+  Message _cumulativeDataMsg;
+  Message _timeInSMsg;
+  Message _speedScaleMsg;
+  Message _reseedMsg;
+  Message _runMsg;
+  Message _pauseMsg;
+  Message _resetMsg;
+  Message _newConfigurationMsg;
+  Message _newConfigurationPromptMsg;
+  Message _saveMsg;
+  Message _loadMsg;
+  Message _removeMsg;
+
+  /// Listener getting notifications once the language changes.
+  LanguageLoadedListener _languageLoadedListener;
+
   /// Create the buffering animation drawable.
   BufferingAnimationDrawable(
+    this._i18nService,
     this._storageService,
     this._dialogService,
   ) {
@@ -205,8 +243,62 @@ class BufferingAnimationDrawable extends Drawable {
     );
   }
 
+  /// Initialize needed translations for the animation.
+  void _initTranslations() {
+    _interruptionsMsg = _i18nService.get("buffering.interruptions");
+    _bitRateMsg = _i18nService.get("buffering.bit-rate");
+    _playoutBufferSizeMsg = _i18nService.get("buffering.playout-buffer-size");
+    _meanNetworkRateMsg = _i18nService.get("buffering.mean-network-rate");
+    _networkRateVarianceMsg = _i18nService.get("buffering.network-rate-variance");
+    _constantBitRateTransmissionMsg = _i18nService.get("buffering.constant-bit-rate-transmission");
+    _networkDelayedReceivingAtClientMsg = _i18nService.get("buffering.network-delayed-receiving-at-client");
+    _constantBitRatePlayOutAtClientMsg = _i18nService.get("buffering.constant-bit-rate-play-out-at-client");
+    _cumulativeDataMsg = _i18nService.get("buffering.cumulative-data");
+    _timeInSMsg = _i18nService.get("buffering.time-in-s");
+    _speedScaleMsg = _i18nService.get("buffering.speed-scale");
+    _reseedMsg = _i18nService.get("buffering.reseed");
+    _runMsg = _i18nService.get("buffering.run");
+    _pauseMsg = _i18nService.get("buffering.pause");
+    _resetMsg = _i18nService.get("buffering.reset");
+    _newConfigurationMsg = _i18nService.get("buffering.new-configuration");
+    _newConfigurationPromptMsg = _i18nService.get("buffering.new-configuration.prompt");
+    _saveMsg = _i18nService.get("buffering.save");
+    _loadMsg = _i18nService.get("buffering.load");
+    _removeMsg = _i18nService.get("buffering.remove");
+
+    _languageLoadedListener = (_) => _updateTranslations();
+    _i18nService.addLanguageLoadedListener(_languageLoadedListener);
+  }
+
+  /// Update the translations used in the animation.
+  void _updateTranslations() {
+    _playoutBufferSizeSlider.label.text = _playoutBufferSizeMsg.toString();
+    _bitRateSlider.label.text = _bitRateMsg.toString();
+    _meanNetworkRateSlider.label.text = _bitRateMsg.toString();
+    _networkRateVarianceSlider.label.text = _networkRateVarianceMsg.toString();
+    _interruptionCounterLabel.text = _interruptionsMsg.toString() + ": ${_playOutInterruptions.length}";
+    _speedSlider.label.text = _speedScaleMsg.toString();
+    _reseedButton.text = _reseedMsg.toString();
+    _resetButton.text = _resetMsg.toString();
+    _pauseButton.text = _constantBitRatePlottable.paused ? _pauseMsg.toString() : _runMsg.toString();
+    _savedSettingsComboBox.model.items.first.label = _newConfigurationMsg.toString();
+    if (_savedSettingsComboBox.model.selected == _savedSettingsComboBox.model.items.first) {
+      _savedSettingsComboBox.model.select(_savedSettingsComboBox.model.selected);
+    }
+    _saveButton.text = _saveMsg.toString();
+    _restoreButton.text = _loadMsg.toString();
+    _removeConfigButton.text = _removeMsg.toString();
+    _legend.updateItems([
+      LegendItem(color: Colors.PINK_RED_2, text: _constantBitRateTransmissionMsg.toString()),
+      LegendItem(color: Colors.BLUE_GRAY, text: _networkDelayedReceivingAtClientMsg.toString()),
+      LegendItem(color: Colors.GREY_GREEN, text: _constantBitRatePlayOutAtClientMsg.toString()),
+    ]);
+    _plot.invalidateCoordinateSystem();
+  }
+
   /// Initialize the drawable.
   void _init() {
+    _initTranslations();
     _reseed(); // Initially seeding the random number generator.
 
     SliderValueChangeCallback changeCallback = (_) {
@@ -214,7 +306,7 @@ class BufferingAnimationDrawable extends Drawable {
     };
 
     _playoutBufferSizeSlider = _createSlider(
-      label: "Playout buffer size",
+      label: _playoutBufferSizeMsg.toString(),
       changeCallback: changeCallback,
       min: 1,
       max: 10,
@@ -224,7 +316,7 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     _bitRateSlider = _createSlider(
-      label: "Bit rate",
+      label: _bitRateMsg.toString(),
       changeCallback: changeCallback,
       min: 100,
       max: 20000,
@@ -234,7 +326,7 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     _meanNetworkRateSlider = _createSlider(
-      label: "Mean network rate",
+      label: _meanNetworkRateMsg.toString(),
       changeCallback: (value) {
         _networkRateVarianceSlider.slider.max = value;
         changeCallback(value);
@@ -247,7 +339,7 @@ class BufferingAnimationDrawable extends Drawable {
     );
 
     _networkRateVarianceSlider = _createSlider(
-      label: "Network rate variance",
+      label: _networkRateVarianceMsg.toString(),
       changeCallback: changeCallback,
       min: 0,
       max: _meanNetworkRateSlider.slider.value,
@@ -265,13 +357,13 @@ class BufferingAnimationDrawable extends Drawable {
       style: PlotStyle(
         coordinateSystem: CoordinateSystemStyle(
           xAxis: AxisStyle(
-            label: "Time in s",
+            labelGenerator: () => _timeInSMsg.toString(),
             color: Colors.LIGHTGREY,
             lineWidth: 2,
             ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(5)),
           ),
           yAxis: AxisStyle(
-            label: "Cumulative data",
+            labelGenerator: () => _cumulativeDataMsg.toString(),
             color: Colors.LIGHTGREY,
             lineWidth: 2,
             ticks: null,
@@ -280,18 +372,18 @@ class BufferingAnimationDrawable extends Drawable {
       ),
     );
 
-    LegendDrawable legend = LegendDrawable(
+    _legend = LegendDrawable(
       items: [
-        LegendItem(color: Colors.PINK_RED_2, text: "Constant bitrate transmission"),
-        LegendItem(color: Colors.BLUE_GRAY, text: "Network delayed receiving at client"),
-        LegendItem(color: Colors.GREY_GREEN, text: "Constant bitrate playout at client"),
+        LegendItem(color: Colors.PINK_RED_2, text: _constantBitRateTransmissionMsg.toString()),
+        LegendItem(color: Colors.BLUE_GRAY, text: _networkDelayedReceivingAtClientMsg.toString()),
+        LegendItem(color: Colors.GREY_GREEN, text: _constantBitRatePlayOutAtClientMsg.toString()),
       ],
     );
 
     _interruptionCounterLabel = TextDrawable(
       alignment: TextAlignment.LEFT,
       color: Colors.PINK_RED_2,
-      text: "Interruptions: 0",
+      text: _interruptionsMsg.toString() + ": 0",
       textSize: CanvasContextUtil.DEFAULT_FONT_SIZE_PX * 1.3,
     );
 
@@ -303,12 +395,12 @@ class BufferingAnimationDrawable extends Drawable {
         CellSpec(row: 0, column: 2, drawable: _meanNetworkRateSlider.drawable),
         CellSpec(row: 1, column: 1, drawable: _playoutBufferSizeSlider.drawable),
         CellSpec(row: 1, column: 2, drawable: _networkRateVarianceSlider.drawable),
-        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: legend),
+        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: _legend),
       ],
     );
 
     _speedSlider = _createSlider(
-      label: "Geschwindigkeitsmaßstab",
+      label: _speedScaleMsg.toString(),
       min: 100,
       max: 2000,
       value: _DEFAULT_SLOWDOWN_FACTOR.toDouble(),
@@ -340,8 +432,8 @@ class BufferingAnimationDrawable extends Drawable {
                 }
               },
             ),
-            ButtonDrawable(
-              text: "Reseed",
+            _reseedButton = ButtonDrawable(
+              text: _reseedMsg.toString(),
               onClick: () {
                 _unpause();
                 _reseed();
@@ -350,18 +442,26 @@ class BufferingAnimationDrawable extends Drawable {
             ),
           ],
         ),
-        ButtonDrawable(
-          text: "Reset",
-          onClick: () {
-            _unpause();
-            changeCallback(null);
-          },
+        VerticalSeparatorDrawable(
+          xPadding: 15,
         ),
-        _pauseButton = ButtonDrawable(
-          text: "Pause",
-          onClick: () {
-            _switchPause();
-          },
+        VerticalLayout(
+          alignment: HorizontalAlignment.CENTER,
+          children: [
+            _pauseButton = ButtonDrawable(
+              text: _pauseMsg.toString(),
+              onClick: () {
+                _switchPause();
+              },
+            ),
+            _resetButton = ButtonDrawable(
+              text: _resetMsg.toString(),
+              onClick: () {
+                _unpause();
+                changeCallback(null);
+              },
+            ),
+          ],
         ),
         VerticalSeparatorDrawable(
           xPadding: 15,
@@ -369,21 +469,21 @@ class BufferingAnimationDrawable extends Drawable {
         _savedSettingsComboBox = ComboBoxDrawable(
           model: SimpleComboBoxModel<BufferingAnimationConfiguration>(
             items: [
-              ComboBoxItem<BufferingAnimationConfiguration>(label: "<Neue Konfiguration>", obj: null),
+              ComboBoxItem<BufferingAnimationConfiguration>(label: _newConfigurationMsg.toString(), obj: null),
             ]..addAll(_loadConfigurations()),
           ),
         ),
         _saveButton = ButtonDrawable(
-          text: "Save",
+          text: _saveMsg.toString(),
           onClick: () => _saveConfiguration(),
         ),
         _restoreButton = ButtonDrawable(
-          text: "Load",
+          text: _loadMsg.toString(),
           onClick: () => _restoreConfiguration(),
           disabled: true,
         ),
         _removeConfigButton = ButtonDrawable(
-          text: "Remove",
+          text: _removeMsg.toString(),
           onClick: () => _removeConfiguration(),
           disabled: true,
         ),
@@ -402,6 +502,8 @@ class BufferingAnimationDrawable extends Drawable {
     if (_savedSettingsComboBoxModelChangeListener != null) {
       _savedSettingsComboBox.model.removeChangeListener(_savedSettingsComboBoxModelChangeListener);
     }
+
+    _i18nService.removeLanguageLoadedListener(_languageLoadedListener);
 
     super.cleanup();
   }
@@ -480,7 +582,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Ask for a configuration name.
   Future<String> _askForConfigurationName() async {
-    return await _dialogService.prompt("Welchen Namen soll die Konfiguration haben?").result();
+    return await _dialogService.prompt(_newConfigurationPromptMsg.toString()).result();
   }
 
   String itemLabelToKey(String label) => label.replaceAll(new RegExp(r"\s+\b|\b\s"), "_");
@@ -530,13 +632,13 @@ class BufferingAnimationDrawable extends Drawable {
       _networkDelayedPlottable.unpause();
       _clientPlayOutPlottable.unpause();
 
-      _pauseButton.text = "Pause";
+      _pauseButton.text = _pauseMsg.toString();
     } else {
       _constantBitRatePlottable.pause();
       _networkDelayedPlottable.pause();
       _clientPlayOutPlottable.pause();
 
-      _pauseButton.text = "Run";
+      _pauseButton.text = _runMsg.toString();
     }
   }
 
@@ -564,17 +666,16 @@ class BufferingAnimationDrawable extends Drawable {
       ),
     );
 
-    var drawable = VerticalLayout(
-      alignment: HorizontalAlignment.CENTER,
-      children: [
-        TextDrawable(
-          text: label,
-        ),
-        slider
-      ],
+    var labelDrawable = TextDrawable(
+      text: label,
     );
 
-    return _SliderContainer(slider, drawable);
+    var drawable = VerticalLayout(
+      alignment: HorizontalAlignment.CENTER,
+      children: [labelDrawable, slider],
+    );
+
+    return _SliderContainer(slider, drawable, labelDrawable);
   }
 
   /// Recalculate the result graph.
@@ -618,7 +719,7 @@ class BufferingAnimationDrawable extends Drawable {
 
     _playOutInterruptions.clear();
     if (_interruptionCounterLabel != null) {
-      _interruptionCounterLabel.text = "Interruptions: 0";
+      _interruptionCounterLabel.text = _interruptionsMsg.toString() + ": 0";
     }
     _plot.add(PlottableSeries(
       points: _playOutInterruptions,
@@ -771,7 +872,7 @@ class BufferingAnimationDrawable extends Drawable {
           _playOutInterruptions.add(Point<double>(interruptionTime, playedOut.toDouble()));
           _plot.invalidate();
 
-          _interruptionCounterLabel.text = "Interruptions: ${_playOutInterruptions.length}";
+          _interruptionCounterLabel.text = _interruptionsMsg.toString() + ": ${_playOutInterruptions.length}";
         }
       },
     );
@@ -843,6 +944,7 @@ class BufferingAnimationDrawable extends Drawable {
 class _SliderContainer {
   final SliderDrawable slider;
   final Drawable drawable;
+  final TextDrawable label;
 
-  _SliderContainer(this.slider, this.drawable);
+  _SliderContainer(this.slider, this.drawable, this.label);
 }

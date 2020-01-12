@@ -7,6 +7,8 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/plot/style/ti
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 
+typedef String LabelGenerator();
+
 /// Style of the axis of a coordinate system for a plot.
 class AxisStyle {
   /// Color of the axis.
@@ -14,6 +16,9 @@ class AxisStyle {
 
   /// Label of the axis.
   final String label;
+
+  /// Generator to use for generating the axis label.
+  final LabelGenerator labelGenerator;
 
   /// Color of the label.
   final Color labelColor;
@@ -34,6 +39,7 @@ class AxisStyle {
   const AxisStyle({
     this.color = Colors.BLACK,
     this.label = "",
+    this.labelGenerator,
     this.labelColor = Colors.BLACK,
     this.lineWidth = 1,
     this.arrowHeadSize = 16,

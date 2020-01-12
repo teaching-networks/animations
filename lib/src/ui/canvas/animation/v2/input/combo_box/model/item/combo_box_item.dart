@@ -6,7 +6,7 @@
 /// Item description of the combo box.
 class ComboBoxItem<T> {
   /// Label of the item.
-  final String label;
+  String label;
 
   /// The held item object.
   final T obj;

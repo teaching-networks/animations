@@ -208,6 +208,11 @@ class Plot extends Drawable {
     _drawPlottables();
   }
 
+  /// Invalidate the coordinate system drawable.
+  void invalidateCoordinateSystem() {
+    _coordinateSystemDrawable.invalidate();
+  }
+
   /// Draw the coordinate system.
   void _drawCoordinateSystem() {
     if (style.coordinateSystem == null) {

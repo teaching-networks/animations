@@ -12,12 +12,11 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/grid_l
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
-import 'package:meta/meta.dart';
 
 /// Drawable used to display a legend explaining color meanings.
 class LegendDrawable extends Drawable {
   /// Items to display in the legend.
-  final List<LegendItem> items;
+  List<LegendItem> items;
 
   /// Spacing between the items.
   final double spacing;
@@ -30,9 +29,15 @@ class LegendDrawable extends Drawable {
 
   /// Create drawable.
   LegendDrawable({
-    @required this.items,
+    this.items,
     this.spacing = 2,
   }) {
+    _init();
+  }
+
+  /// Update items in the drawable.
+  void updateItems(List<LegendItem> items) {
+    this.items = items;
     _init();
   }
 

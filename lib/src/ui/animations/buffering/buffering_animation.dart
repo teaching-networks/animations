@@ -54,7 +54,7 @@ class BufferingAnimation extends AnimationComponentConnector {
     this._i18n,
     StorageService storageService,
     DialogService dialogService,
-  ) : _drawable = BufferingAnimationDrawable(storageService, dialogService);
+  ) : _drawable = BufferingAnimationDrawable(_i18n, storageService, dialogService);
 
   @override
   AnimationDescriptor get animationDescriptor => descriptor;

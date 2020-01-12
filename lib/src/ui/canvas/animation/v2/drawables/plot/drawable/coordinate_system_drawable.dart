@@ -186,7 +186,13 @@ class CoordinateSystemDrawable extends Drawable {
     }
 
     // Draw label
-    if (axisStyle.label != null && axisStyle.label.isNotEmpty) {
+    String label = axisStyle.label;
+    bool hasLabel = label != null && label.isNotEmpty;
+    if (!hasLabel) {
+      label = axisStyle.labelGenerator();
+      hasLabel = true;
+    }
+    if (hasLabel) {
       setFillColor(axisStyle.labelColor);
 
       if (axisType == _AxisType.X) {
@@ -194,13 +200,13 @@ class CoordinateSystemDrawable extends Drawable {
           baseline: TextBaseline.BOTTOM,
           alignment: TextAlignment.RIGHT,
         );
-        ctx.fillText(axisStyle.label, size.width, size.height - _xAxisLineOffset - _xAxisArrowHeadSize);
+        ctx.fillText(label, size.width, size.height - _xAxisLineOffset - _xAxisArrowHeadSize);
       } else {
         setFont(
           baseline: TextBaseline.TOP,
           alignment: TextAlignment.LEFT,
         );
-        ctx.fillText(axisStyle.label, _yAxisLineOffset + _yAxisArrowHeadSize, 0);
+        ctx.fillText(label, _yAxisLineOffset + _yAxisArrowHeadSize, 0);
       }
     }
   }
