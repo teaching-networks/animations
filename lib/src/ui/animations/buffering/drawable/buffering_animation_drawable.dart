@@ -176,6 +176,7 @@ class BufferingAnimationDrawable extends Drawable {
   Message _saveMsg;
   Message _loadMsg;
   Message _removeMsg;
+  Message _packetsMsg;
 
   /// Listener getting notifications once the language changes.
   LanguageLoadedListener _languageLoadedListener;
@@ -265,6 +266,7 @@ class BufferingAnimationDrawable extends Drawable {
     _saveMsg = _i18nService.get("buffering.save");
     _loadMsg = _i18nService.get("buffering.load");
     _removeMsg = _i18nService.get("buffering.remove");
+    _packetsMsg = _i18nService.get("buffering.packets");
 
     _languageLoadedListener = (_) => _updateTranslations();
     _i18nService.addLanguageLoadedListener(_languageLoadedListener);
@@ -294,6 +296,9 @@ class BufferingAnimationDrawable extends Drawable {
       LegendItem(color: Colors.GREY_GREEN, text: _constantBitRatePlayOutAtClientMsg.toString()),
     ]);
     _plot.invalidateCoordinateSystem();
+    double oldBufferSize = _playoutBufferSizeSlider.slider.value;
+    _playoutBufferSizeSlider.slider.setValue(oldBufferSize + 1, informChangeListener: false);
+    _playoutBufferSizeSlider.slider.setValue(oldBufferSize, informChangeListener: false);
   }
 
   /// Initialize the drawable.
@@ -312,7 +317,7 @@ class BufferingAnimationDrawable extends Drawable {
       max: 10,
       value: 2,
       step: 1,
-      valueFormatter: (value) => "${value.toInt()}",
+      valueFormatter: (value) => "${value.toInt()} ${_packetsMsg.toString()}",
     );
 
     _bitRateSlider = _createSlider(
@@ -366,7 +371,7 @@ class BufferingAnimationDrawable extends Drawable {
             labelGenerator: () => _cumulativeDataMsg.toString(),
             color: Colors.LIGHTGREY,
             lineWidth: 2,
-            ticks: null,
+            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(2), labelRenderer: (value) => value.toInt().toString()),
           ),
         ),
       ),
@@ -390,12 +395,12 @@ class BufferingAnimationDrawable extends Drawable {
     _controlsLayout = GridLayout(
       parent: this,
       cells: [
-        CellSpec(row: 0, column: 0, rowSpan: 2, drawable: _interruptionCounterLabel),
-        CellSpec(row: 0, column: 1, drawable: _bitRateSlider.drawable),
-        CellSpec(row: 0, column: 2, drawable: _meanNetworkRateSlider.drawable),
-        CellSpec(row: 1, column: 1, drawable: _playoutBufferSizeSlider.drawable),
-        CellSpec(row: 1, column: 2, drawable: _networkRateVarianceSlider.drawable),
-        CellSpec(row: 0, column: 3, rowSpan: 2, drawable: _legend),
+        CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
+        CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
+        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
+        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
+        CellSpec(row: 0, column: 2, drawable: _legend),
+        CellSpec(row: 1, column: 2, drawable: _interruptionCounterLabel),
       ],
     );
 

@@ -325,17 +325,17 @@
   "ip-frag.fragment-info.hover-item-info": "Führe die Cursor über eines dieser Pakete um mehr Informationen angezeigt zu bekommen",
   "buffering.name": "Buffering",
   "buffering.short-description": "Einfluss von Play-out Buffer Größe und variabler Netzwerkbandbreite auf Abspiel-Unterbrechungen am Client.",
-  "buffering.description": "Beim Streaming von Daten spielt die Größe des Play-out Buffer und die Netzwerkbandbreite eine große Rolle bezogen auf die Abspiel-Qualität am Client. Eine schlechte Verbindung führt zu Unterbrechungen des Streams, da das Netzwerk nicht mit der benötigten konstanten Bitrate mithalten kann. Eine niedrigere Bitrate (beispielsweise eine niedrigere Medienqualtät) oder ein größerer Puffer können dabei helfen.",
+  "buffering.description": "Beim Streaming von Daten spielt die Größe des Play-out Buffer und die Netzwerkbandbreite eine große Rolle bezogen auf die Abspiel-Qualität am Client. Eine schlechte Verbindung führt zu Unterbrechungen des Streams, da das Netzwerk nicht mit der benötigten konstanten Bitrate mithalten kann. Eine niedrigere Bitrate (beispielsweise eine niedrigere Medienqualtät) oder ein größerer Puffer können dabei helfen. Es wird eine Packetdatengröße von 1500 Bytes angenommen.",
   "buffering.credits": "-",
   "buffering.interruptions": "Unterbrechungen",
   "buffering.bit-rate": "Bitrate",
   "buffering.playout-buffer-size": "Play-out Buffer Größe",
   "buffering.mean-network-rate": "Mittlere Netzwerkrate",
   "buffering.network-rate-variance": "Varianz der Netzwerkrate",
-  "buffering.constant-bit-rate-transmission": "Übertragung mit konstanter Bitrate",
+  "buffering.constant-bit-rate-transmission": "Gesendete Daten (konstante Bitrate)",
   "buffering.network-delayed-receiving-at-client": "Netzwerkverzögerter Empfang am Client",
   "buffering.constant-bit-rate-play-out-at-client": "Konstante Wiedergabe am Client",
-  "buffering.cumulative-data": "Kumulative Daten",
+  "buffering.cumulative-data": "Kumulative Daten (in Packete)",
   "buffering.time-in-s": "Zeit in s",
   "buffering.speed-scale": "Geschwindigkeitsmaßstab",
   "buffering.reseed": "Reseed",
@@ -346,5 +346,6 @@
   "buffering.new-configuration.prompt": "Welchen Namen soll die neue Konfiguration erhalten?",
   "buffering.save": "Speichern",
   "buffering.load": "Laden",
-  "buffering.remove": "Löschen"
+  "buffering.remove": "Löschen",
+  "buffering.packets": "Packete"
 }

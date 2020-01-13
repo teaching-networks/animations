@@ -324,17 +324,17 @@
   "ip-frag.fragment-info.hover-item-info": "Hover one of these packets to see more info",
   "buffering.name": "Buffering",
   "buffering.short-description": "Animation illustrating the influence of play-out buffer size and variable network rate on interruptions of play-out at client.",
-  "buffering.description": "When streaming data the play-out buffer size and variable network rate greatly influence the play-out quality on the client. A bad connection will result in interruptions of the stream as the network cannot keep up with the needed bit rate for constant play-out. Either a lower bit-rate (for example lower quality of the streamed media) or greater buffer size will help dealing with that.",
+  "buffering.description": "When streaming data the play-out buffer size and variable network rate greatly influence the play-out quality on the client. A bad connection will result in interruptions of the stream as the network cannot keep up with the needed bit rate for constant play-out. Either a lower bit-rate (for example lower quality of the streamed media) or greater buffer size will help dealing with that. A packet data size of 1500 Bytes is assumed.",
   "buffering.credits": "-",
   "buffering.interruptions": "Interruptions",
   "buffering.bit-rate": "Bit rate",
   "buffering.playout-buffer-size": "Play-out-buffer size",
   "buffering.mean-network-rate": "Mean network rate",
   "buffering.network-rate-variance": "Network rate variance",
-  "buffering.constant-bit-rate-transmission": "Constant bit rate transmission",
+  "buffering.constant-bit-rate-transmission": "Sent data (constant bit rate)",
   "buffering.network-delayed-receiving-at-client": "Network delayed receiving at client",
   "buffering.constant-bit-rate-play-out-at-client": "Constant bit rate play-out at client",
-  "buffering.cumulative-data": "Cumulative data",
+  "buffering.cumulative-data": "Cumulative data (in Packets)",
   "buffering.time-in-s": "Time in s",
   "buffering.speed-scale": "Speed scale",
   "buffering.reseed": "Reseed",
@@ -345,5 +345,6 @@
   "buffering.new-configuration.prompt": "Specify the name of the new configuration.",
   "buffering.save": "Save",
   "buffering.load": "Load",
-  "buffering.remove": "Remove"
+  "buffering.remove": "Remove",
+  "buffering.packets": "Packets"
 }
