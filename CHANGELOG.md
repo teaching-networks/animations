@@ -7,6 +7,11 @@
 
 ### 2.4.0
 - Added Carrier Sense range to the CSMA/CA animation
+- Animation about buffering
+- Some new input drawables for the drawing APIv2
+    - Combo-Box (more like a carousel)
+    - Slider
+- Bugfixes
 
 ### 2.3.0
 - Added IP Fragmentation animation
