@@ -9,7 +9,10 @@ import 'dart:math';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/ip_fragmentation/fragment/ip_fragmentation_calculator.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
+import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
@@ -131,7 +134,7 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
       parent: this,
       value: _defaultDatagramSize.toString(),
       maxLength: 5,
-      width: 40 * window.devicePixelRatio,
+      width: 50 * window.devicePixelRatio,
       filter: (toInsert) => toInsert.runes.firstWhere((c) => !_allowedRunes.contains(c), orElse: () => -1) == -1,
       onChange: (value) {
         int number = int.tryParse(value);
@@ -142,7 +145,8 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
           _showError = false;
         } else {
           _showError = true;
-          _errorTextDrawable.text = _rangeErrorMsg.toString() + "[${IPFragmentationCalculator.minDatagramSize}; ${IPFragmentationCalculator.maxDatagramSize}]";
+          _errorTextDrawable.text =
+              _rangeErrorMsg.toString() + "[${IPFragmentationCalculator.minDatagramSize}; ${IPFragmentationCalculator.maxDatagramSize}]";
         }
       },
     );
@@ -151,7 +155,7 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
       parent: this,
       value: _defaultMTU.toString(),
       maxLength: 5,
-      width: 40 * window.devicePixelRatio,
+      width: 50 * window.devicePixelRatio,
       filter: (toInsert) => toInsert.runes.firstWhere((c) => !_allowedRunes.contains(c), orElse: () => -1) == -1,
       onChange: (value) {
         int number = int.tryParse(value);
@@ -162,7 +166,8 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
           _showError = false;
         } else {
           _showError = true;
-          _errorTextDrawable.text = _rangeErrorMsg.toString() + "[${IPFragmentationCalculator.minMTU}; ${IPFragmentationCalculator.maxMTU}]";
+          _errorTextDrawable.text =
+              _rangeErrorMsg.toString() + "[${IPFragmentationCalculator.minMTU}; ${IPFragmentationCalculator.maxMTU}]";
         }
       },
     );
@@ -332,7 +337,8 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
 
     double clientRouterMid = ((clientBounds.left + clientBounds.width / 2) + routerBounds.left) / 2;
     double xOff = clientRouterMid - (_datagramSizeInput.size.width + _mtuText.size.width) / 2;
-    _mtuText.render(ctx, lastPassTimestamp, x: xOff, y: yOffset + (_datagramSizeInput.size.height - _mtuText.size.height) / 2 + textFieldOffset);
+    _mtuText.render(ctx, lastPassTimestamp,
+        x: xOff, y: yOffset + (_datagramSizeInput.size.height - _mtuText.size.height) / 2 + textFieldOffset);
     _datagramSizeInput.render(ctx, lastPassTimestamp, x: xOff + _mtuText.size.width, y: yOffset + textFieldOffset);
 
     _drawPacket(clientRouterMid, yOffset, imgWidth, packetHeight, Colors.SPACE_BLUE);
@@ -343,7 +349,8 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
     _mtuInput.render(ctx, lastPassTimestamp, x: xOff + _mtuText.size.width, y: yOffset + textFieldOffset);
 
     // Draw fragmented packets
-    double totalFragmentSpace = (serverBounds.left + serverBounds.width / 2) - (routerBounds.left + routerBounds.width) - fragmentSpacePadding * 2;
+    double totalFragmentSpace =
+        (serverBounds.left + serverBounds.width / 2) - (routerBounds.left + routerBounds.width) - fragmentSpacePadding * 2;
     if (_fragments != null && _fragments.isNotEmpty) {
       double totalWidthPerFragment = totalFragmentSpace / _fragments.length;
       double fragmentDividerSize = max(totalWidthPerFragment * 0.05, window.devicePixelRatio);
@@ -361,8 +368,8 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
       double firstXOff = curX + totalWidthPerFragment / 2;
       double firstYOff = yOffset;
       for (final fragment in _fragments) {
-        _drawPacket(
-            curX + totalWidthPerFragment / 2, yOffset, widthPerFragment, packetHeight, fragment == _hoveredFragment ? Colors.SPACE_BLUE : Colors.SLATE_GREY);
+        _drawPacket(curX + totalWidthPerFragment / 2, yOffset, widthPerFragment, packetHeight,
+            fragment == _hoveredFragment ? Colors.SPACE_BLUE : Colors.SLATE_GREY);
 
         curX += widthPerFragment + fragmentDividerSize;
 
@@ -385,23 +392,28 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
 
     if (_showError) {
       _errorTextDrawable.render(ctx, lastPassTimestamp,
-          x: (size.width - _errorTextDrawable.size.width) / 2, y: yOffset + textFieldOffset + _datagramSizeInput.size.height + textFieldOffset);
+          x: (size.width - _errorTextDrawable.size.width) / 2,
+          y: yOffset + textFieldOffset + _datagramSizeInput.size.height + textFieldOffset);
     }
   }
 
   void _drawFragmentInfo(IPFragment fragment, double xMid, double yBottom) {
     double curY = yBottom;
 
-    _fragmentFlagDrawable.render(ctx, lastPassTimestamp, x: xMid - _fragmentFlagDrawable.size.width / 2, y: curY - _fragmentFlagDrawable.size.height);
+    _fragmentFlagDrawable.render(ctx, lastPassTimestamp,
+        x: xMid - _fragmentFlagDrawable.size.width / 2, y: curY - _fragmentFlagDrawable.size.height);
     curY -= _fragmentFlagDrawable.size.height;
 
-    _fragmentOffsetDrawable.render(ctx, lastPassTimestamp, x: xMid - _fragmentOffsetDrawable.size.width / 2, y: curY - _fragmentOffsetDrawable.size.height);
+    _fragmentOffsetDrawable.render(ctx, lastPassTimestamp,
+        x: xMid - _fragmentOffsetDrawable.size.width / 2, y: curY - _fragmentOffsetDrawable.size.height);
     curY -= _fragmentOffsetDrawable.size.height;
 
-    _fragmentSizeDrawable.render(ctx, lastPassTimestamp, x: xMid - _fragmentSizeDrawable.size.width / 2, y: curY - _fragmentSizeDrawable.size.height);
+    _fragmentSizeDrawable.render(ctx, lastPassTimestamp,
+        x: xMid - _fragmentSizeDrawable.size.width / 2, y: curY - _fragmentSizeDrawable.size.height);
     curY -= _fragmentSizeDrawable.size.height;
 
-    _fragmentNumberDrawable.render(ctx, lastPassTimestamp, x: xMid - _fragmentNumberDrawable.size.width / 2, y: curY - _fragmentNumberDrawable.size.height);
+    _fragmentNumberDrawable.render(ctx, lastPassTimestamp,
+        x: xMid - _fragmentNumberDrawable.size.width / 2, y: curY - _fragmentNumberDrawable.size.height);
   }
 
   void _drawPacket(double x, double y, double width, double height, Color color) {

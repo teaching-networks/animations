@@ -16,9 +16,6 @@ import 'package:hm_animations/src/ui/misc/dialog/instance/dialog_instance.dart';
   changeDetection: ChangeDetectionStrategy.OnPush,
 )
 class BaseDialog extends DialogComponent {
-  /// Change detector reference.
-  final ChangeDetectorRef _cd;
-
   /// Loader to resolve the correct Angular component.
   final ComponentLoader _componentLoader;
 
@@ -27,7 +24,7 @@ class BaseDialog extends DialogComponent {
   ViewContainerRef baseContainer;
 
   /// Create base dialog.
-  BaseDialog(this._cd, this._componentLoader);
+  BaseDialog(this._componentLoader);
 
   @override
   void setInstance(DialogInstance value) {

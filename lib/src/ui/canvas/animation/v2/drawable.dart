@@ -13,7 +13,7 @@ import 'package:meta/meta.dart';
 
 import 'input/focus/focusable.dart';
 
-typedef void CanvasPainter(CanvasImageSource src, Point<double> offset);
+typedef void CanvasPainter(CanvasImageSource src, Point<int> offset);
 
 /// Next generation canvas animation class.
 abstract class Drawable extends CanvasContextUtil {
@@ -51,7 +51,7 @@ abstract class Drawable extends CanvasContextUtil {
   double _lastPassYOffset = 0;
 
   /// Relative offset of the cached canvas on the parent canvas of the last rendering.
-  Point<double> _lastRenderOffset = Point<double>(0, 0);
+  Point<int> _lastRenderOffset = Point<int>(0, 0);
 
   /// X Offset of the last rendering loop pass (Absolute means from the root drawable).
   double _lastRenderAbsoluteXOffset;
@@ -154,10 +154,10 @@ abstract class Drawable extends CanvasContextUtil {
   /// Override this method to position the canvas somewhere else.
   /// For example the x and y parameters of the render method could be interpreted as the center
   /// of the canvas to draw by returning something like Point<double>(x - size.width / 2, y - size.width / 2);
-  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(x, y);
+  Point<int> calculateRenderingPosition(double x, double y) => Point<int>(x.round(), y.round());
 
   /// Draw cached canvas on the passed [context].
-  void _drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, Point<double> offset) {
+  void _drawOnCanvas(CanvasRenderingContext2D context, CanvasImageSource src, Point<int> offset) {
     context.drawImage(src, offset.x, offset.y);
   }
 
@@ -295,7 +295,7 @@ abstract class Drawable extends CanvasContextUtil {
   double get lastPassYOffset => _lastPassYOffset;
 
   /// Get the (relative) render offset of the last rendering.
-  Point<double> get lastRenderOffset => _lastRenderOffset;
+  Point<int> get lastRenderOffset => _lastRenderOffset;
 
   /// Get the x offset of the last rendering loop pass (Absolute -> From the root drawable).
   double get lastRenderAbsoluteXOffset => _lastRenderAbsoluteXOffset != null ? _lastRenderAbsoluteXOffset : _lastRenderOffset.x;

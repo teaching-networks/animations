@@ -100,14 +100,14 @@ class BubbleContainer extends Drawable {
   }
 
   @override
-  Point<double> calculateRenderingPosition(double x, double y) {
+  Point<int> calculateRenderingPosition(double x, double y) {
     if (isInvalid) {
       _determineArrowOrientation(x: x, y: y); // Recalculate the arrow position
     }
 
-    return Point<double>(
-      _horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff,
-      _verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y,
+    return Point<int>(
+      (_horizontalArrowOrientation == HorizontalArrowOrientation.START ? x - _scaledPadding * 2 : x - _scaledPadding * 2 - _horizontalFreeDiff).round(),
+      (_verticalArrowOrientation == VerticalArrowOrientation.BOTTOM ? y - size.height : y).round(),
     );
   }
 

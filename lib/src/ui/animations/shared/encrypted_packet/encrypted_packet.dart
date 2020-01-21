@@ -90,7 +90,7 @@ class EncryptedPacket extends Drawable {
   }
 
   @override
-  Point<double> calculateRenderingPosition(double x, double y) => Point<double>(x - size.width / 2, y - size.height / 2);
+  Point<int> calculateRenderingPosition(double x, double y) => Point<int>((x - size.width / 2).round(), (y - size.height / 2).round());
 
   @override
   bool needsRepaint() => _animation.running;
