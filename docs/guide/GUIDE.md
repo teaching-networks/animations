@@ -29,6 +29,7 @@ If you haven't head over to https://dart.dev/get-dart and get it!
 Since the version might have been changed by now, check the file `pubspec.yaml` in the root of the client repository.
 That should look something like the following screenshot where I highlighted the version boundaries of the Dart SDK.
 It should work just fine if you install a version **within** this boundaries.
+However I recommend getting the oldest possible version listed (2.6.1).
 
 ![Pubspec screenshot](res/pubspec-screenshot.png)
 
@@ -52,6 +53,10 @@ Head over to https://www.postgresql.org/ and install the database server for you
 
 Once that is done create a database called `hmserver` and make sure the username is `postgres` and the password is `root`.
 The server will use that one later on.
+
+> You may wonder why the name of the database. 
+> It is defined in the file at `animation-server/src/main/resources/META-INF/persistence.xml` which defines the JPA configuration. 
+> A great extension of the server application would be a dynamic creation at runtime where you can specify the used database options for example by command line arguments.
 
 
 ### Cloning
@@ -98,6 +103,7 @@ Once that is done you are pretty much about to start developing!
 
 ## Development
 
+
 ### Start the Server
 
 Before running the Client you'll have to start the Server.
@@ -119,10 +125,16 @@ The `--jwt-salt` argument is need for the authentication mechanism the app is us
 
 Start up the server and you should see a message like `[main] INFO io.javalin.Javalin - Javalin started in 490ms \o/` in the last line of the console.
 
+
 ### Start the Client
 
 Starting the Client easier than starting the Server as it does not involve any command line arguments to be passed over.
 I recommend you simply open up a terminal/console and run `pub run build_runner serve --live-reload` in the root of the Client repository.
+
+After a while it should display a line stating that the development server is running at `localhost:8080`.
+You can type that into Google Chrome (It needs to have Dart support in order to run in development mode) and the application client will be loaded.
+
+Once you apply any changes to the clients source code the build runner will automatically recompile all needed files and reload the website.
 
 
 ## Testing
@@ -134,6 +146,76 @@ Feel free to add unit tests!
 
 
 ## Deployment
+
+Since the projects are hosted on GitLab we use a GitLab runner to continuously build and deploy the application on `www.sam.cs.hm.edu`.
+See the `.gitlab-ci.yml` files in both projects to see how that's done in detail.
+
+
+### Server
+
+The server is deployed as service on the host machine.
+
+
+#### Building
+
+Build the production artifact by calling `./gradlew -Dorg.gradle.java.home=/opt/jdk-12 shadowJar`.
+After success the built artifact will be located at `{SERVER_PROJECT_ROOT}/build/libs/animation-server.jar`.
+
+
+#### Service
+
+To start the service call `sudo systemctl stop hm-animations-server.service`.
+
+To start it call `sudo systemctl restart hm-animations-server.service`.
+
+You can also see the logs of the running server by calling `journalctl -u hm-animations-server.service -b -e -f`.
+
+
+#### Certificate renewal process
+
+The servers REST API is served via HTTPS.
+Thus it needs a valid certificate which we get from Let's encrypt.
+
+The servers underlying framework Javalin uses Jetty as application server.
+We register a file watcher which will listen on a keystore file (which contains the certificate and private key to use).
+Once the keystore file is updated automatically once every few months the server will pick up and use the new certificate from the changed keystore.
+Thus there is no downtime to the server even when running a long time.
+
+But where does the certificate really come from?
+We use an Apache HTTPD web server to serve the Client application from.
+The Let's Encrypt `certbot` is already registered for the Apache web server and renews automatically.
+Therefore we do not need to call the certbot ourselves but just use the certificate of the Apache web server for our application server.
+The current certificate and private key are always stored at `/etc/letsencrypt/live/www.sam.cs.hm.edu`.
+
+Using a renewal hook on the certbot we call a script called `convertkeystore.sh` at `/etc/letsencrypt/renewal-hooks/post` to convert a newly fetched certificate and private key from Let's Encrypt to a keystore format which is a usable format for Java.
+It copies the generated keystore to `/opt/keystore/keystore.p12` on which the file watcher of the server application is listening to.
+
+
+### Client
+
+The client is deployed on the same machine as the server.
+
+
+#### Building
+
+Run `pub run build_runner build --release --output build` to execute a release build of the web application in the folder `build`.
+
+> Note that you won't need Google Chrome (or another Dart-supporting browser) to run release builds of the web application since they are compiled to pure JavaScript.
+
+
+#### Deployment Notes
+
+The build output (in the build folder when doing a release build) is deployed on an Apache HTTPD web server on `www.sam.cs.hm.edu`.
+You can find the deployed files and folders on the host machine at `/var/www/html/`.
+
+The deployment process varies by branch.
+A master branch build will be deployed directly under `/var/www/html` while another branch build for example `develop` will be deployed to `/var/www/html/develop`.
+That way you can access all built branches over the Apache web server: `https:///www.sam.cs.hm.edu/develop`.
+
+All previously and currently released versions of the client web application are also listed under `/var/www/html/version/index.html`.
+You can access this page with `https://www.sam.cs.hm.edu/version`.
+Note that this page is managed manually and will not update automatically.
+
 
 ## Architecture
 
