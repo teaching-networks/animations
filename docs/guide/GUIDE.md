@@ -18,8 +18,14 @@ This Guide will lead you through development with the Networks animation Web App
 
 ## Introduction
 
+The application systems aims at providing animations for students to support lecture comprehensibility.
+Previous to the application there were several Java applets. Unfortunately the Java applet technology suffered from severe security issues and are now deprecated in most modern browsers, thus not easy accessible.
+To solve this issue this application has been created, which is served as web application using modern web technologies and therefore accessible using any browser.
+
 
 ## Installation
+
+The following chapters will guide you through the installation of the development environment for the application system.
 
 
 ### Prerequisites
@@ -219,4 +225,62 @@ Note that this page is managed manually and will not update automatically.
 
 ## Architecture
 
+To gain deeper understanding of the projects the following points will describe some aspects of the current architecture.
+
+
 ### Project structure
+
+In order to find where stuff belongs to it's key to understand the project structure.
+
+
+#### Client
+
+Below you'll find a short description of the most important top-level directories and files.
+
+```
+    - docs -> This guide
+    - lib -> Source folder of the client application (Dart)
+        - src
+            - router -> Logic regarding app routing
+            - services -> Some services used all over the app (for example for translations)
+            - ui -> All UI related things
+                - animations -> HTML5 Canvas animation components are located here
+                - canvas -> Generic logic and drawables used in the animations
+                - view -> Other angular views (management views for example)
+            - util -> Things generally useful for the application which does not really fall under a specify category
+        - app_component.dart -> Main angular component
+    - res -> Generally for resources which are not served (for example Adobe Illustrator project files for the application icons)
+    - web -> Resource files for the web application + entry point of the application (index.html + main.dart)
+    - .gitlab-ci.yml -> Gitlab build configuration
+    - CHANGELOG.md -> Short notes about new stuff in releases
+    - pubspec.lock -> Lock file for the pub package manager to ensure reproducible builds
+    - pubspec.yaml -> Description of the project for the Dart package manager "pub" + Dependencies
+    - README.md -> General information about the client project
+```
+
+During development of the Client you'll be working in the `lib` folder most of the time as it contains all the program logic.
+
+
+#### Server
+
+The Server is a Gradle project and thus has the normal directory structure.
+
+```
+    - src
+        - main
+            - kotlin
+                - edu.hm.cs.animation.server
+                    - animation -> Logic/Model regarding animations
+                    - animgroup -> Logic/Model regarding animation groups
+                    - security -> Authentication of the service
+                    - user -> User model and services
+                    - Main.kt -> Entry point of the application
+            - resources
+                - META-INF
+                    - persistence.xml -> JPA configuration
+    - .gitlab-ci.yml -> Gitlab build configuration
+    - build.gradle -> Gradle build configuration + Dependencies
+    - CHANGELOG.md -> Short notes about new features in releases
+    - README.md -> General information about the server project
+```
+
