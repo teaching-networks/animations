@@ -3,115 +3,23 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
-.manage-wrapper {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
-
-  & > .sidebar {
-    flex: 0 0 auto;
-    border-right: 1px solid #e0e0e0;
-
-    material-list {
-      border-radius: 5px;
-    }
-
-    .actions > material-list-item {
-      background-color: #F9F9F9;
-
-      &:hover {
-        background-color: #EAEAEA;
-      }
-
-      &.updated {
-        background-color: white;
-      }
-
-      & > material-icon {
-        color: slategray;
-      }
-
-      material-spinner {
-        width: 24px;
-        height: 24px;
-        margin: 0.5em 1.0em 0.5em 0;
-      }
-
-      transition: background-color 200ms ease-in-out;
-    }
-
-    .centered-list-item {
-      justify-content: center;
-      padding-top: 1.0em;
-      padding-bottom: 1.0em;
-      white-space: normal;
-      line-height: 1.0;
-    }
-
-    .group-sidebar-label {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-
-      & > material-icon {
-        margin-right: 0.5em;
-      }
-    }
-
-    material-select-item {
-      padding: 0 24px;
-    }
-
-    material-list-item, material-select-item {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      box-sizing: border-box;
-      width: 100%;
-    }
-
-    material-list-item material-icon {
-      padding: 0.5em 1.0em 0.5em 0;
-    }
+.group-form {
+  & label {
+    margin-right: 1.0em;
+    color: white;
+    background-color: slategray;
+    border-radius: 1.0em;
+    padding: 0.1em 0.5em;
+    font-weight: bold;
   }
+}
 
-  & > .content {
-    flex: 1 1 auto;
-    padding: 2.0em;
-
-    &.disabled {
-      background-color: #77889929;
-    }
-
-    .placeholder {
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.5em;
-      color: slategray;
-    }
-
-    .group-form {
-      & label {
-        margin-right: 1.0em;
-        color: white;
-        background-color: slategray;
-        border-radius: 1.0em;
-        padding: 0.1em 0.5em;
-        font-weight: bold;
-      }
-    }
-
-    .animation-list {
-      .progress {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100px;
-        width: 100%;
-      }
-    }
+.animation-list {
+  .progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    width: 100%;
   }
 }

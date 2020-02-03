@@ -16,6 +16,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "transmission-animation",
@@ -128,9 +129,9 @@ class TransmissionAnimation extends CanvasAnimation with AnimationUI implements 
 
   List<String> get sizeSuggestions => _sizeSuggestions;
 
-  Message _senderMessage;
-  Message _receiverMessage;
-  Message _propagationSpeed;
+  IdMessage<String>_senderMessage;
+  IdMessage<String>_receiverMessage;
+  IdMessage<String>_propagationSpeed;
 
   /**
    * Get set length of the connection (in meter).

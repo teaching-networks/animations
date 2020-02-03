@@ -23,6 +23,7 @@ import 'package:hm_animations/src/ui/canvas/progress/mutable_progress.dart';
 import 'package:hm_animations/src/ui/canvas/progress/progress.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "http-delay-animation",
@@ -61,7 +62,7 @@ class HttpDelayAnimation extends CanvasAnimation with AnimationUI implements OnD
 
   I18nService _i18n;
 
-  List<Message> _connectionStepLabels;
+  List<IdMessage<String>> _connectionStepLabels;
 
   double maxLabelWidth;
 
@@ -79,14 +80,14 @@ class HttpDelayAnimation extends CanvasAnimation with AnimationUI implements OnD
 
   HttpConnectionConfiguration config;
 
-  Message _infoLabel;
+  IdMessage<String> _infoLabel;
 
   HttpDelayAnimation(this._i18n) {
     initTranslations();
   }
 
   void initTranslations() {
-    _connectionStepLabels = new List<Message>();
+    _connectionStepLabels = new List<IdMessage<String>>();
 
     for (int i = 0; i < ConnectionStepType.values.length; i++) {
       _connectionStepLabels.add(_i18n.get("http-delay-animation.connection-step.$i"));
@@ -160,7 +161,7 @@ class HttpDelayAnimation extends CanvasAnimation with AnimationUI implements OnD
   void calcMaxLabelWidth(CanvasRenderingContext2D context) {
     maxLabelWidth = 0.0;
 
-    for (Message msg in _connectionStepLabels) {
+    for (IdMessage<String> msg in _connectionStepLabels) {
       var width = context.measureText(msg.toString()).width;
 
       if (width > maxLabelWidth) {

@@ -44,6 +44,8 @@
   "user-management.error-message": "An error occurred",
   "user-management.user-dialog-error-message": "An error occurred",
   "user-management.not-changed": "(unchanged)",
+  "user-management.delete.prompt": "Type in the name of the user to delete.",
+  "user-management.delete.error": "The username provided does not match the name of the user to delete. Aborting operation.",
   "management-component.error": "Error",
   "management-component.save": "Save",
   "management-component.saved": "Saved!",

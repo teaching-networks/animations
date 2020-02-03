@@ -11,12 +11,12 @@
         <div>
             <div>
                 <material-input [(ngModel)]="username" ngControl="username" label="{{ 'login.username' | i18n }}" autoFocus required
-                                [disabled]="isCheckingCredentials"></material-input>
+                                [disabled]="isCheckingCredentials" class="login-input"></material-input>
             </div>
 
             <div>
                 <material-input [(ngModel)]="password" ngControl="password" label="{{ 'login.password' | i18n }}" type="password"
-                                [disabled]="isCheckingCredentials"></material-input>
+                                [disabled]="isCheckingCredentials" class="login-input"></material-input>
             </div>
         </div>
 

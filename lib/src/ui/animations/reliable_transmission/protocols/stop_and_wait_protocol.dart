@@ -9,6 +9,7 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/pac
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Slow but reliable protocol for the reliable transmission.
 class StopAndWaitProtocol extends ReliableTransmissionProtocol {
@@ -22,15 +23,15 @@ class StopAndWaitProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _senderSendsPktLabel;
-  Message _senderResendsPktLabel1;
-  Message _senderResendsPktLabel2;
-  Message _receiverReceivedPktLabel;
-  Message _receiverReceivedPktDupLabel1;
-  Message _receiverReceivedPktDupLabel2;
-  Message _senderReceivedAckLabel;
-  Message _senderReceivedAckDupLabel1;
-  Message _senderReceivedAckDupLabel2;
+  IdMessage<String> _senderSendsPktLabel;
+  IdMessage<String> _senderResendsPktLabel1;
+  IdMessage<String> _senderResendsPktLabel2;
+  IdMessage<String> _receiverReceivedPktLabel;
+  IdMessage<String> _receiverReceivedPktDupLabel1;
+  IdMessage<String> _receiverReceivedPktDupLabel2;
+  IdMessage<String> _senderReceivedAckLabel;
+  IdMessage<String> _senderReceivedAckDupLabel1;
+  IdMessage<String> _senderReceivedAckDupLabel2;
 
   StopAndWaitProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _loadTranslations();

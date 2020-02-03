@@ -16,6 +16,7 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/window/tra
 import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "reliable-transmission-animation",
@@ -46,8 +47,8 @@ class ReliableTransmissionAnimation extends CanvasAnimation implements OnInit, O
   @ViewChild("logcontainer", read: HtmlElement)
   HtmlElement logContainer;
 
-  Message _senderLabel;
-  Message _receiverLabel;
+  IdMessage<String> _senderLabel;
+  IdMessage<String> _receiverLabel;
 
   I18nService _i18n;
 

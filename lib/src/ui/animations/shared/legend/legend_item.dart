@@ -3,8 +3,8 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Item used in a legend.
 class LegendItem {
@@ -27,7 +27,7 @@ class MessageLegendItem implements LegendItem {
   final Color color;
 
   /// Message explaining the colors meaning.
-  final Message msg;
+  final IdMessage<String> msg;
 
   @override
   String get text => msg.toString();

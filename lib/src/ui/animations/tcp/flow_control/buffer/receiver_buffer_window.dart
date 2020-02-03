@@ -6,7 +6,6 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/tcp/flow_control/buffer/buffer_window.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/horizontal_progress_bar.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/vertical_progress_bar.dart';
@@ -15,6 +14,7 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/canvas/util/direction.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 class ReceiverBufferWindow extends BufferWindow {
   /// When to consume the next package at the receiver.
@@ -22,7 +22,7 @@ class ReceiverBufferWindow extends BufferWindow {
 
   Random _rng = new Random();
 
-  ReceiverBufferWindow({int dataSize = 4096, int bufferSize = 2048, int speed = 1500, Message bufferLabel = null, Message dataLabel = null})
+  ReceiverBufferWindow({int dataSize = 4096, int bufferSize = 2048, int speed = 1500, IdMessage<String> bufferLabel = null, IdMessage<String> dataLabel = null})
       : super(dataSize: dataSize, bufferSize: bufferSize, speed: speed, dataLabel: dataLabel, bufferLabel: bufferLabel);
 
   int get maxConsumeDuration => speed * 5;

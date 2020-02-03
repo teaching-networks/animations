@@ -29,6 +29,7 @@ import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:meta/meta.dart';
 
 /// Scenario where the service is routed only within the onion network.
@@ -87,18 +88,18 @@ class HiddenServiceDrawable extends Drawable with ScenarioDrawable implements Sc
 
   final I18nService _i18n;
 
-  Message _name;
-  Message _continueMsg;
-  Message _serviceCreationMsg;
-  Message _introductionPointMsg;
-  Message _hiddenServiceDescriptorUploadMsg;
-  Message _oneTimeSecretMsg;
-  Message _requestHiddenServiceDescriptorMsg;
-  Message _descriptorResultMsg;
-  Message _rendezvousPointCircuitMsg;
-  Message _introduceMsg;
-  Message _rendezvousMsg;
-  Message _connectMsg;
+  IdMessage<String> _name;
+  IdMessage<String> _continueMsg;
+  IdMessage<String> _serviceCreationMsg;
+  IdMessage<String>_introductionPointMsg;
+  IdMessage<String>_hiddenServiceDescriptorUploadMsg;
+  IdMessage<String>_oneTimeSecretMsg;
+  IdMessage<String>_requestHiddenServiceDescriptorMsg;
+  IdMessage<String>_descriptorResultMsg;
+  IdMessage<String>_rendezvousPointCircuitMsg;
+  IdMessage<String>_introduceMsg;
+  IdMessage<String>_rendezvousMsg;
+  IdMessage<String>_connectMsg;
 
   /// Create service.
   HiddenServiceDrawable(this._name, this._i18n) {

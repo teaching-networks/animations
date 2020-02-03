@@ -13,6 +13,7 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/misc/dnd_list/renderer/list_item_renderer.dart';
 import 'package:hm_animations/src/ui/view/group-management/selected_group.service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Renderer to render animation items in a drag and drop list.
 @Component(
@@ -67,7 +68,7 @@ class AnimationListItemComponent implements ListItemRenderer<AnimationDescriptor
   AnimationDescriptor<dynamic> get descriptor => _descriptor;
 
   /// Get the animation name of the passed [descriptor].
-  Message getAnimationName(AnimationDescriptor<dynamic> descriptor) => _i18n.get("${descriptor.baseTranslationKey}.name");
+  IdMessage<String> getAnimationName(AnimationDescriptor<dynamic> descriptor) => _i18n.get("${descriptor.baseTranslationKey}.name");
 
   /// Check whether the passed [animationId] is already part of the currently selected group.
   bool isAnimationEnabled(int animationId) => _selectedGroupService.isAnimationInGroup(animationId);

@@ -18,6 +18,7 @@ import 'package:hm_animations/src/ui/canvas/animation/canvas_animation.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_component.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "queue-simulation-animation",
@@ -70,11 +71,11 @@ class QueueSimulationAnimation extends CanvasAnimation with AnimationUI implemen
   I18nService _i18n;
 
   /// Translations.
-  Message _incomingLabel;
-  Message _queueOfRouterLabel;
-  Message _droppedPacketsLabel;
-  Message _timePassedLabel;
-  Message _outgoingLabel;
+  IdMessage<String>_incomingLabel;
+  IdMessage<String>_queueOfRouterLabel;
+  IdMessage<String>_droppedPacketsLabel;
+  IdMessage<String>_timePassedLabel;
+  IdMessage<String>_outgoingLabel;
 
   QueueSimulationAnimation(this._i18n) {
     reset();

@@ -27,6 +27,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as v;
@@ -131,12 +132,12 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
 
   LanguageLoadedListener _languageChangedListener;
 
-  Message _valueBarLabel;
-  Message _statusBarLabel;
-  Message _accessPointLabel;
-  Message _clickHereTooltipLabel;
-  Message _signalRangeTooltipLabel;
-  Message _rtsCtsSettingsLabel;
+  IdMessage<String> _valueBarLabel;
+  IdMessage<String> _statusBarLabel;
+  IdMessage<String> _accessPointLabel;
+  IdMessage<String> _clickHereTooltipLabel;
+  IdMessage<String> _signalRangeTooltipLabel;
+  IdMessage<String> _rtsCtsSettingsLabel;
 
   /// Scheduled functions which will be executed some time in the future.
   List<_ScheduledFunction> _scheduled;
@@ -153,7 +154,7 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   /// Whether the animation is in its initial state.
   bool _isInitState = true;
 
-  List<Tuple2<Message, Color>> _legendItems;
+  List<Tuple2<IdMessage<String>, Color>> _legendItems;
 
   /// Animation speed factor.
   double animationSpeedFactor = 1.0;
@@ -189,14 +190,14 @@ class CSMACAAnimation extends CanvasAnimation with CanvasPausableMixin, Animatio
   /// Initialized legend items display in the animations legend.
   void _initLegendItems() {
     _legendItems = [
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.rts"), _getColorForSignalType(SignalType.RTS)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.backoff"), Colors.LIGHTGREY),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
-      Tuple2<Message, Color>(_i18n.get("csma-ca-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.rts"), _getColorForSignalType(SignalType.RTS)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.cts"), _getColorForSignalType(SignalType.CTS)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.data"), _getColorForSignalType(SignalType.DATA)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.ack"), _getColorForSignalType(SignalType.ACK)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.backoff"), Colors.LIGHTGREY),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.free"), _getColorForMediumStatusType(MediumStatusType.FREE)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.busy"), _getColorForMediumStatusType(MediumStatusType.BUSY)),
+      Tuple2<IdMessage<String>, Color>(_i18n.get("csma-ca-animation.legend.nav"), _getColorForMediumStatusType(MediumStatusType.NAV)),
     ];
   }
 

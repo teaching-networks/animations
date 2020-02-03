@@ -9,6 +9,7 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/pac
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Commonly used protocol for reliable transmission.
 class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
@@ -22,13 +23,13 @@ class SelectiveRepeatProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _receiverReceivedPktDup1;
-  Message _receiverReceivedPktDup2;
-  Message _receiverReceivedPkt1;
-  Message _receiverReceivedPkt2;
-  Message _senderReceivedAckDup1;
-  Message _senderReceivedAckDup2;
-  Message _senderReceivedAck;
+  IdMessage<String> _receiverReceivedPktDup1;
+  IdMessage<String> _receiverReceivedPktDup2;
+  IdMessage<String> _receiverReceivedPkt1;
+  IdMessage<String> _receiverReceivedPkt2;
+  IdMessage<String> _senderReceivedAckDup1;
+  IdMessage<String> _senderReceivedAckDup2;
+  IdMessage<String> _senderReceivedAck;
 
   SelectiveRepeatProtocol(this._i18n) : super(NAME_KEY, INITIAL_WINDOW_SIZE) {
     _initTranslations();

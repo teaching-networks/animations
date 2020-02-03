@@ -8,7 +8,6 @@ import 'dart:html';
 import 'dart:math';
 
 import 'package:angular/core.dart';
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_drawable.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/packet_slot.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
@@ -22,6 +21,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/util/size.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 typedef int LabelSupplier(int index);
 
@@ -60,12 +60,12 @@ class TransmissionWindow extends CanvasDrawable with CanvasPausableMixin {
   /**
    * Sender label.
    */
-  Message senderLabel;
+  IdMessage<String> senderLabel;
 
   /**
    * Receiver label.
    */
-  Message receiverLabel;
+  IdMessage<String> receiverLabel;
 
   /**
    * Protocol to use.

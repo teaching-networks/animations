@@ -142,6 +142,12 @@ You can type that into Google Chrome (It needs to have Dart support in order to 
 
 Once you apply any changes to the clients source code the build runner will automatically recompile all needed files and reload the website.
 
+#### Debugging
+
+Once ready to develop you might miss debugging.
+With IntelliJ you need to install the JetBrains Plugin within your browser.
+Once that is done create a new JavaScript Debug launch configuration with is configured to use `localhost:8080` and fire it up.
+Debugging should work as expected.
 
 ## Testing
 

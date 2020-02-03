@@ -30,6 +30,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Drawable illustrating the onion network, where a service is routed within
 /// the internet, but accessible from within the onion network, via
@@ -128,16 +129,16 @@ class InternetServiceDrawable extends Drawable with ScenarioDrawable implements 
   AnimHelper _tcpConnectionAnimation;
   AnimHelper _keyExchangeAnimation;
 
-  Message _name;
-  Message _circuitConnectingMsg;
-  Message _circuitEncryptingMsg;
-  Message _sendingDataMsg;
-  Message _circuitEncryptionMechanismMsg;
-  Message _decryptionMsg;
-  Message _exitORMsg;
-  Message _atServiceMsg;
-  Message _decryptionAtSenderMsg;
-  Message _continueMsg;
+  IdMessage<String> _name;
+  IdMessage<String>_circuitConnectingMsg;
+  IdMessage<String>_circuitEncryptingMsg;
+  IdMessage<String>_sendingDataMsg;
+  IdMessage<String>_circuitEncryptionMechanismMsg;
+  IdMessage<String>_decryptionMsg;
+  IdMessage<String>_exitORMsg;
+  IdMessage<String>_atServiceMsg;
+  IdMessage<String>_decryptionAtSenderMsg;
+  IdMessage<String>_continueMsg;
 
   Future<void> _tcpConnectionFuture;
   Future<void> _keyExchangeBubbleFuture;

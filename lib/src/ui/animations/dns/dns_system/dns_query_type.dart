@@ -3,10 +3,10 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 abstract class DNSQueryType {
-  final Message _name;
+  final IdMessage<String> _name;
 
   DNSQueryType(this._name);
 
@@ -16,13 +16,13 @@ abstract class DNSQueryType {
 }
 
 class RecursiveDNSQueryType extends DNSQueryType {
-  RecursiveDNSQueryType(Message name) : super(name);
+  RecursiveDNSQueryType(IdMessage<String> name) : super(name);
 
   int get id => 1;
 }
 
 class IterativeDNSQueryType extends DNSQueryType {
-  IterativeDNSQueryType(Message name) : super(name);
+  IterativeDNSQueryType(IdMessage<String> name) : super(name);
 
   int get id => 2;
 }

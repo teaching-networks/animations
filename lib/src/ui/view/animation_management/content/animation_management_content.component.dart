@@ -18,6 +18,7 @@ import 'package:hm_animations/src/ui/misc/editor/editor.component.dart';
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
 import 'package:hm_animations/src/util/name_util.dart';
 import 'package:hm_animations/src/util/network/network_util.dart';
+import 'package:hm_animations/src/util/options/save_options.dart';
 
 /// Component displaying animation info.
 @Component(
@@ -204,12 +205,14 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
   }
 
   @override
-  void setEntity(AnimationDescriptor<dynamic> entity) async {
+  Future<SaveOption> setEntity(AnimationDescriptor<dynamic> entity) async {
     _animationDescriptor = entity;
 
     await _load();
 
     _cd.markForCheck();
+
+    return SaveOption.LOSE;
   }
 
   String getCompliantURL() {

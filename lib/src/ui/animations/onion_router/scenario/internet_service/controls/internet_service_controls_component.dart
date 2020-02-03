@@ -13,6 +13,7 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/internet_service/internet_service_drawable.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "internet-service-controls",
@@ -41,8 +42,8 @@ class InternetServiceControlsComponent implements ControlsComponent, OnInit, OnD
 
   bool showHelpBubbles = true;
 
-  Message _showHelpMsg;
-  Message _skipAuto;
+  IdMessage<String> _showHelpMsg;
+  IdMessage<String> _skipAuto;
 
   LanguageLoadedListener _languageLoadedListener;
 

@@ -9,10 +9,7 @@ import 'dart:math';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/ip_fragmentation/fragment/ip_fragmentation_calculator.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/drawable.dart';
-import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/horizontal_alignment.dart';
-import 'package:hm_animations/src/ui/canvas/animation/v2/drawables/layout/vertical_layout.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/extension/mouse_listener.dart';
-import 'package:hm_animations/src/ui/canvas/animation/v2/input/button/button_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim.dart';
 import 'package:hm_animations/src/ui/canvas/animation/v2/util/anim/anim_helper.dart';
@@ -27,6 +24,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/util/curves.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 import 'fragment/ip_fragment.dart';
 
@@ -100,13 +98,13 @@ class IPFragmentationDrawable extends Drawable implements MouseListener {
   TextDrawable _errorTextDrawable;
   bool _showError = false;
 
-  Message _mtuMsg;
-  Message _rangeErrorMsg;
-  Message _fragmentMsg;
-  Message _sizeMsg;
-  Message _offsetMsg;
-  Message _moreFragmentsFlagMsg;
-  Message _hoverItemInfoMsg;
+  IdMessage<String> _mtuMsg;
+  IdMessage<String> _rangeErrorMsg;
+  IdMessage<String> _fragmentMsg;
+  IdMessage<String> _sizeMsg;
+  IdMessage<String> _offsetMsg;
+  IdMessage<String> _moreFragmentsFlagMsg;
+  IdMessage<String> _hoverItemInfoMsg;
 
   LanguageLoadedListener _languageLoadedListener;
 

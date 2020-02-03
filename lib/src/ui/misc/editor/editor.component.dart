@@ -11,6 +11,7 @@ import 'package:angular_components/material_tab/fixed_material_tab_strip.dart';
 import 'package:angular_components/material_tab/tab_change_event.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:markdown/markdown.dart';
 
 /// Text editor with markdown support and preview.
@@ -56,8 +57,8 @@ class EditorComponent implements OnInit, OnDestroy {
   /// Listener getting notified whenever the language changes.
   LanguageLoadedListener _languageLoadedListener;
 
-  Message _previewLabel;
-  Message _editLabel;
+  IdMessage<String> _previewLabel;
+  IdMessage<String> _editLabel;
 
   /// Stream controller emitting text changes.
   StreamController<String> _textChangedController = StreamController<String>.broadcast(sync: false);

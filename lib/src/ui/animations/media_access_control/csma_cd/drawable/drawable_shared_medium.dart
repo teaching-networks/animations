@@ -7,7 +7,6 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium_peer.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
@@ -16,6 +15,7 @@ import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:meta/meta.dart';
 import 'package:tuple/tuple.dart';
 
@@ -55,7 +55,7 @@ class DrawableSharedMedium extends CanvasDrawable with CanvasPausableMixin imple
   final int signalSize;
 
   /// Mapping for translations.
-  final Map<String, Message> labelMap;
+  final Map<String, IdMessage<String>> labelMap;
 
   /// Make the animation faster or slower with the multiplier.
   final double speedMultiplier;

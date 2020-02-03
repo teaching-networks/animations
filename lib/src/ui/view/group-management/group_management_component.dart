@@ -17,6 +17,7 @@ import 'package:hm_animations/src/ui/view/group-management/content/group_managem
 import 'package:hm_animations/src/ui/view/group-management/content/group_management_content.component.template.dart' as groupManagementContentComponent;
 import 'package:hm_animations/src/ui/view/group-management/selected_group.service.dart';
 import 'package:hm_animations/src/ui/view/management/management.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Component to manage animation groups.
 @Component(
@@ -61,7 +62,7 @@ class GroupManagementComponent implements OnInit, OnDestroy {
 
   Future<List<Group>> _loadFuture;
 
-  Message _newGroupLabel;
+  IdMessage<String> _newGroupLabel;
 
   /// Create new group management component.
   GroupManagementComponent(
