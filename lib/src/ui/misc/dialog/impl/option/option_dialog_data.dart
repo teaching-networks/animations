@@ -30,8 +30,8 @@ abstract class Option<T> {
 }
 
 class LabeledOption<T> implements Option<T> {
-  /// Value of the option.
-  final String label;
+  /// Label of the option.
+  final Message label;
 
   /// Value of the option.
   final T value;
@@ -41,6 +41,6 @@ class LabeledOption<T> implements Option<T> {
 
   @override
   String toString() {
-    return label;
+    return label.toString();
   }
 }

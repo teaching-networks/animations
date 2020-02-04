@@ -205,14 +205,12 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
   }
 
   @override
-  Future<SaveOption> setEntity(AnimationDescriptor<dynamic> entity) async {
+  Future<void> setEntity(AnimationDescriptor<dynamic> entity) async {
     _animationDescriptor = entity;
 
     await _load();
 
     _cd.markForCheck();
-
-    return SaveOption.LOSE;
   }
 
   String getCompliantURL() {
@@ -247,5 +245,10 @@ class AnimationManagementContentComponent implements ManagementComponentContent<
     shortDescription = _i18n.get("${_animationDescriptor.baseTranslationKey}.short-description").toString();
     description = _i18n.get("${_animationDescriptor.baseTranslationKey}.description").toString();
     url = "";
+  }
+
+  @override
+  Future<SaveOption> checkIfUnsaved() async {
+    return SaveOption.LOSE;
   }
 }

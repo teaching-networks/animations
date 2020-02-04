@@ -9,7 +9,11 @@ import 'package:hm_animations/src/util/options/save_options.dart';
 abstract class ManagementComponentContent<T> {
   /// Set the entity to show.
   /// Returns what should happen with the old set entity.
-  Future<SaveOption> setEntity(T entity);
+  Future<void> setEntity(T entity);
+
+  /// Check whether the current entity contains unsaved changes.
+  /// Returns how to proceed.
+  Future<SaveOption> checkIfUnsaved();
 
   /// When a deletion is requested.
   /// Return whether it was successful.

@@ -155,7 +155,7 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
   }
 
   @override
-  Future<SaveOption> setEntity(Group entity) async {
+  Future<void> setEntity(Group entity) async {
     // First and foremost save the current animation order.
     if (group != null) {
       group.animationIdOrder = currentAnimationsDescriptorsView.map((descriptor) => descriptor.id).toList();
@@ -178,8 +178,6 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
     }
 
     _cd.markForCheck();
-
-    return SaveOption.LOSE;
   }
 
   /// Get the URL format of the passed groups name.
@@ -211,4 +209,9 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
 
   /// Get the item renderer for the animation descriptor items.
   ComponentFactory<AnimationListItemComponent> get animationItemRenderer => animationListItemRenderer.AnimationListItemComponentNgFactory;
+
+  @override
+  Future<SaveOption> checkIfUnsaved() async {
+    return SaveOption.LOSE;
+  }
 }

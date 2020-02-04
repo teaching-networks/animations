@@ -289,3 +289,9 @@ ul.highlighted-fields {
 .info-dialog {
   width: $mat-grid * 40;
 }
+
+.dialog-base {
+  h1 {
+    white-space: nowrap;
+  }
+}

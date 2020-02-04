@@ -118,6 +118,10 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
         _user.password,
       ));
 
+      if (newUser == null) {
+        return null;
+      }
+
       _originalUser = newUser;
       _user = User(
         newUser.id,
@@ -149,21 +153,20 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
     }
   }
 
-  /// Check whether the current user contains unsaved changes.
-  /// Returns whether to proceed.
-  Future<SaveOption> _checkIfUnsaved() async {
+  @override
+  Future<SaveOption> checkIfUnsaved() async {
     if (!isModified) {
       return SaveOption.LOSE;
     }
 
     final option = await _dialogService
         .option(OptionDialogData(
-          title: Msg("Unsaved changes"),
-          message: Msg("The currently selected user contains unsaved changes. What do you want to do?"),
+          title: _i18n.get("user-management.unsaved-changes"),
+          message: _i18n.get("user-management.unsaved-changes.msg"),
           options: [
-            LabeledOption("Save unsaved changes...", SaveOption.SAVE),
-            LabeledOption("Lose unsaved changes...", SaveOption.LOSE),
-            LabeledOption("Keep editing...", SaveOption.CANCEL),
+            LabeledOption(_i18n.get("user-management.unsaved-changes.save"), SaveOption.SAVE),
+            LabeledOption(_i18n.get("user-management.unsaved-changes.lose"), SaveOption.LOSE),
+            LabeledOption(_i18n.get("user-management.unsaved-changes.keep-editing"), SaveOption.CANCEL),
           ],
         ))
         .result();
@@ -176,21 +179,15 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
   }
 
   @override
-  Future<SaveOption> setEntity(User entity) async {
-    final option = await _checkIfUnsaved();
+  Future<void> setEntity(User entity) async {
+    _originalUser = entity;
+    _user = User(
+      entity.id,
+      entity.name,
+      entity.password,
+    );
 
-    if (option != SaveOption.CANCEL) {
-      _originalUser = entity;
-      _user = User(
-        entity.id,
-        entity.name,
-        entity.password,
-      );
-
-      _cd.markForCheck();
-    }
-
-    return option;
+    _cd.markForCheck();
   }
 
   /// Get the user to display.

@@ -15,7 +15,8 @@ import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/services/user_service/user_service.dart';
 import 'package:hm_animations/src/ui/view/management/management.component.dart';
 import 'package:hm_animations/src/ui/view/user_management/content/user_management_content.component.dart';
-import 'package:hm_animations/src/ui/view/user_management/content/user_management_content.component.template.dart' as userManagementContentComponent;
+import 'package:hm_animations/src/ui/view/user_management/content/user_management_content.component.template.dart'
+    as userManagementContentComponent;
 
 /// Component for managing users.
 @Component(
@@ -99,14 +100,18 @@ class UserManagementComponent implements OnInit, OnDestroy {
 
   /// Load users to be shown in the management component.
   Future<List<User>> _loadUsers() {
-    return _userService.getUsers();
+    return _userService.getUsers().then((users) {
+      users.sort((u1, u2) => u1.name.compareTo(u2.name));
+      return users;
+    });
   }
 
   /// Factory for user entities.
   EntityFactory<User> get userFactory => () => User.empty();
 
   /// Factory for the content component showing user objects.
-  ComponentFactory<UserManagementContentComponent> get contentComponentFactory => userManagementContentComponent.UserManagementContentComponentNgFactory;
+  ComponentFactory<UserManagementContentComponent> get contentComponentFactory =>
+      userManagementContentComponent.UserManagementContentComponentNgFactory;
 
   /// The future loading all users.
   Future<List<User>> get loadFuture => _loadFuture;

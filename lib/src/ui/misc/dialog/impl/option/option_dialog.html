@@ -1,4 +1,4 @@
-<material-dialog info class="info-dialog">
+<material-dialog info class="dialog-base info-dialog">
 
     <div header>
         <material-button icon (trigger)="close()">
@@ -12,8 +12,9 @@
         {{ instance.data.message }}
     </p>
 
-    <material-list>
+    <material-list class="option-list">
         <material-list-item *ngFor="let option of instance.data.options"
+                            class="option-item"
                             (trigger)="onOptionSelected(option)">
             {{ option.toString() }}
         </material-list-item>

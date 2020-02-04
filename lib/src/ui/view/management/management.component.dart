@@ -14,6 +14,7 @@ import 'package:angular_components/material_select/material_select_item.dart';
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
 import 'package:hm_animations/src/util/options/save_options.dart';
 import 'package:hm_animations/src/util/str/message.dart';
@@ -269,29 +270,30 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
 
   /// Select the passed [entity].
   void selectEntity(T entity) {
-    _contentComponent.setEntity(entity).then((option) async {
+    if (entity == _selectedEntity) {
+      return;
+    }
+
+    _contentComponent.checkIfUnsaved().then((option) async {
       if (_selectedEntity != null) {
         switch (option) {
           case SaveOption.SAVE:
-            await saveEntity(_selectedEntity);
-
-            _selectedEntity = entity;
-            _cd.markForCheck();
+            await saveEntity(_selectedEntity, reselect: false);
             break;
           case SaveOption.LOSE:
-            _selectedEntity = entity;
-            _cd.markForCheck();
             break;
           case SaveOption.CANCEL:
-            // Do nothing
-            break;
+            return;
           default:
             throw Exception("Save option unknown");
         }
-      } else {
-        _selectedEntity = entity;
-        _cd.markForCheck();
       }
+
+      if (entity != null) {
+        await _contentComponent.setEntity(entity);
+      }
+      _selectedEntity = entity;
+      _cd.markForCheck();
     });
   }
 
@@ -339,7 +341,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   }
 
   /// Save the passed [entity].
-  Future<void> saveEntity(T entity) async {
+  Future<void> saveEntity(T entity, {bool reselect = true}) async {
     if (_contentComponent == null) {
       return;
     }
@@ -353,7 +355,9 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     T saved = await _contentComponent.onSave();
     if (saved != null) {
       entities[index] = saved;
-      selectEntity(saved);
+      if (reselect) {
+        selectEntity(saved);
+      }
 
       _recentlySaved = true;
       Future.delayed(_waitDuration).then((_) {
