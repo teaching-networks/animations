@@ -14,6 +14,7 @@ This Guide will lead you through development with the Networks animation Web App
 1. [Testing](#testing)
 1. [Deployment](#deployment)
 1. [Architecture](#architecture)
+1. [Updating Dependencies](#updating-dependencies)
 
 
 ## Introduction
@@ -290,3 +291,17 @@ The Server is a Gradle project and thus has the normal directory structure.
     - README.md -> General information about the server project
 ```
 
+## Updating Dependencies
+
+> Whenever updating dependencies please make sure to have a return point (for example a branch containing no unsaved changes) ready in case the application won't build afterwards.
+
+### Client
+
+Go to the `pubspec.yaml` file and check for each of the dependencies whether there are new versions available on `pub.dev`.
+
+### Server
+
+The server is based on Gradle which allows to call `gradlew.bat dependencyUpdates -Drevision=release` (by using a plugin).
+The commands output will show new available versions and allows you to manually edit the `build.gradle` file with the new versions.
+
+To update Gradle itself call `gradlew.bat wrapper --gradle-version=X.X.X` where `X.X.X` is the version to update to. Afterwards the file `gradle/wrapper/gradle-wrapper.properties` file is updated to use the new version which will be downloaded and used by the next Gradle call.
