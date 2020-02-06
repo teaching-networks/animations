@@ -21,3 +21,5 @@ webapp_build:
     - sudo cp -r build/web/* /var/www/html/${CI_COMMIT_REF_SLUG}
     # Replace base href because the base path is no more /
     - sudo sed -i 's:<base href="/">:<base href="/'${CI_COMMIT_REF_SLUG}'/">:g' /var/www/html/${CI_COMMIT_REF_SLUG}/index.html
+    # Update version overview
+    - /var/renew_version_html.sh --template /var/www/html/version/version_template.html --directory /var/www/html --target /var/www/html/version/index.html
