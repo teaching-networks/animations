@@ -22,5 +22,5 @@ webapp_build:
     # Replace base href because the base path is no more /
     - sudo sed -i 's:<base href="/">:<base href="/'${CI_COMMIT_REF_SLUG}'/">:g' /var/www/html/${CI_COMMIT_REF_SLUG}/index.html
     # Update version overview
-    - pwd
-    - sudo ./scripts/renew_version_overview/renew_version_html.sh --template scripts/renew_version_overview/res/version_template.html --directory /var/www/html --target /var/www/html/version/index.html
+    - tree
+    - sudo scripts/renew_version_overview/renew_version_html.sh --template scripts/renew_version_overview/res/version_template.html --directory /var/www/html --target /var/www/html/version/index.html
