@@ -35,6 +35,11 @@
 			</div>
 		</template>
 		<template [ngIf]="!animationDescriptorsToShow.isEmpty">
+
+			<!-- TODO Only test-wise START -->
+			<carousel-component [items]="animationDescriptorsToShow" [itemComponentFactory]="itemComponentFactory"></carousel-component>
+			<!-- TODO Only test-wise END -->
+
 			<div class="animation-overview">
 				<section *ngFor="let anim of animationDescriptorsToShow" class="animation-card">
 					<div class="mdc-card mdc-card--outlined animation-card-size">

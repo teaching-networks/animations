@@ -22,7 +22,10 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
+import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.dart';
+import 'package:hm_animations/src/ui/view/carousel/carousel.component.dart';
 import 'package:hm_animations/src/util/name_util.dart';
+import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.template.dart' as $template;
 
 /// Component listing all available animations.
 @Component(
@@ -40,7 +43,8 @@ import 'package:hm_animations/src/util/name_util.dart';
     MaterialToggleComponent,
     MaterialSpinnerComponent,
     MaterialIconComponent,
-    MaterialButtonComponent
+    MaterialButtonComponent,
+    CarouselComponent,
   ],
   pipes: [
     I18nPipe,
@@ -288,6 +292,10 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   _CompState get errorState => _CompState.ERROR;
 
   _CompState get successState => _CompState.SUCCESS;
+
+  /// Get the component factory of the animation carousel item.
+  ComponentFactory<AnimationCarouselItemVisualizerComponent> get itemComponentFactory =>
+      $template.AnimationCarouselItemVisualizerComponentNgFactory;
 }
 
 /// State of the component.
