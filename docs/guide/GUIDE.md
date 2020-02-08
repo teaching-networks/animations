@@ -227,7 +227,6 @@ That way you can access all built branches over the Apache web server: `https://
 
 All previously and currently released versions of the client web application are also listed under `/var/www/html/version/index.html`.
 You can access this page with `https://www.sam.cs.hm.edu/version`.
-Note that this page is managed manually and will not update automatically.
 
 
 ## Architecture
