@@ -17,6 +17,8 @@ class CarouselService implements OnDestroy {
   /// Controller emitting item sizes.
   StreamController<ItemSizeChange> _itemSizeController = StreamController<ItemSizeChange>.broadcast();
 
+  StreamController<SpinChange> _spinController = StreamController<SpinChange>.broadcast();
+
   /// Inform the service of an items size.
   void informAboutSize(dynamic item, Size size) {
     _itemSizeController.add(ItemSizeChange(item, size));
@@ -30,8 +32,21 @@ class CarouselService implements OnDestroy {
     _selectedController.add(ItemSelectedChange(item, index));
   }
 
+  /// Select the next item.
+  void selectNext() {
+    _spinController.add(SpinChange(true));
+  }
+
+  /// Select the previous item.
+  void selectPrev() {
+    _spinController.add(SpinChange(false));
+  }
+
   /// Get the stream of selected items.
   Stream<ItemSelectedChange> get selectedStream => _selectedController.stream;
+
+  /// Get the stream of spin changes.
+  Stream<SpinChange> get spinStream => _spinController.stream;
 
   @override
   void ngOnDestroy() {
@@ -52,4 +67,11 @@ class ItemSelectedChange {
   final int index;
 
   ItemSelectedChange(this.item, this.index);
+}
+
+class SpinChange {
+  /// Whether the spin is the next or the previous item.
+  final bool next;
+
+  SpinChange(this.next);
 }

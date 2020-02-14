@@ -9,6 +9,7 @@ import 'package:angular/angular.dart';
 import 'package:angular/core.dart';
 import 'package:angular_components/material_button/material_button.dart';
 import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:hm_animations/src/ui/view/carousel/config/auto_spin.dart';
 import 'package:hm_animations/src/ui/view/carousel/item/carousel_item.component.dart';
 import 'package:hm_animations/src/ui/view/carousel/service/carousel.service.dart';
 import 'package:hm_animations/src/ui/view/carousel/visualizer/carousel_item_visualizier.dart';
@@ -55,14 +56,40 @@ class CarouselComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   /// Subscription to selected item changes.
   StreamSubscription<ItemSelectedChange> _selectedStreamSub;
 
+  /// Subscription to spin changes.
+  StreamSubscription<SpinChange> _spinStreamSub;
+
   /// Currently selected item.
   int _selected = 0;
+
+  /// The current auto spin configuration.
+  AutoSpinConfig _autoSpinConfig = AutoSpinConfig();
+
+  /// Auto spin currently in progress.
+  StreamSubscription<dynamic> _onGoingAutoSpin;
+
+  /// Whether the view is initialized.
+  bool _viewInit = false;
 
   /// Create component.
   CarouselComponent(
     this._cd,
     this._carouselService,
   );
+
+  /// Set whether the carousel should spin automatically.
+  @Input("auto-spin")
+  void set autoSpin(AutoSpinConfig value) {
+    _cancelAutoSpin();
+    _autoSpinConfig = value;
+
+    if (_viewInit) {
+      _autoSpinNext();
+    }
+  }
+
+  /// Get the current auto spin configuration.
+  AutoSpinConfig get autoSpin => _autoSpinConfig;
 
   /// Set the items to display in the carousel.
   @Input()
@@ -97,6 +124,14 @@ class CarouselComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     _selectedStreamSub = _carouselService.selectedStream.listen((change) {
       _selected = change.index;
     });
+
+    _spinStreamSub = _carouselService.spinStream.listen((change) {
+      if (change.next) {
+        next();
+      } else {
+        prev();
+      }
+    });
   }
 
   @override
@@ -112,11 +147,38 @@ class CarouselComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   @override
   void ngAfterViewInit() {
+    _viewInit = true;
     _carouselService.select(items.first, 0);
+
+    _autoSpinNext();
+  }
+
+  /// Cancel an auto spin in progress.
+  void _cancelAutoSpin() {
+    if (_onGoingAutoSpin != null) {
+      _onGoingAutoSpin.cancel();
+      _onGoingAutoSpin = null;
+    }
+  }
+
+  /// Do the next auto spin (if enabled).
+  Future<void> _autoSpinNext() async {
+    _cancelAutoSpin();
+
+    if (!_autoSpinConfig.enabled) {
+      return;
+    }
+
+    _onGoingAutoSpin = Future.delayed(_autoSpinConfig.duration).asStream().listen((_) {
+      next();
+      _autoSpinNext();
+    });
   }
 
   /// Select the next item.
   void next() {
+    _autoSpinNext();
+
     if (_selected == items.length - 1) {
       _carouselService.select(items.first, 0);
     } else {
@@ -126,6 +188,8 @@ class CarouselComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   /// Select the previous item.
   void prev() {
+    _autoSpinNext();
+
     if (_selected == 0) {
       _carouselService.select(items.last, items.length - 1);
     } else {
