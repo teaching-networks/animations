@@ -3,72 +3,75 @@
   ~ Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
   -->
 
-<h1 *ngIf="group != null">{{ group.name }}&nbsp;{{ "animation-list.title" | i18n }}</h1>
+<div style="padding: 2.0em 3.0em 0 3.0em;">
+    <h1 *ngIf="group != null">{{ group.name }}&nbsp;{{ "animation-list.title" | i18n }}</h1>
+</div>
 
 <div [ngSwitch]="state">
 
-	<template [ngSwitchCase]="loadingState">
-		<!-- In loading state -->
+    <template [ngSwitchCase]="loadingState">
+        <!-- In loading state -->
 
-		<div class="centered-panel info-box">
-			<material-spinner></material-spinner>
-		</div>
-	</template>
+        <div class="centered-panel info-box">
+            <material-spinner></material-spinner>
+        </div>
+    </template>
 
-	<template [ngSwitchCase]="errorState">
-		<!-- In error state -->
+    <template [ngSwitchCase]="errorState">
+        <!-- In error state -->
 
-		<div class="centered-panel info-box">
-			{{ "animation-list.error" | i18n }}
-		</div>
-	</template>
+        <div class="centered-panel info-box">
+            {{ "animation-list.error" | i18n }}
+        </div>
+    </template>
 
-	<template [ngSwitchCase]="successState">
-		<!-- In success state -->
-		<!-- Display all animations -->
+    <template [ngSwitchCase]="successState">
+        <!-- In success state -->
+        <!-- Display all animations -->
 
-		<template [ngIf]="animationDescriptorsToShow.isEmpty">
-			<!-- No groups to display -->
+        <template [ngIf]="animationDescriptorsToShow.isEmpty">
+            <!-- No groups to display -->
 
-			<div class="centered-panel info-box">
-				{{ "animation-list.no-animations-available" | i18n }}
-			</div>
-		</template>
-		<template [ngIf]="!animationDescriptorsToShow.isEmpty">
+            <div class="centered-panel info-box">
+                {{ "animation-list.no-animations-available" | i18n }}
+            </div>
+        </template>
+        <template [ngIf]="!animationDescriptorsToShow.isEmpty">
 
-			<!-- TODO Only test-wise START -->
-			<carousel-component [items]="animationDescriptorsToShow" [itemComponentFactory]="itemComponentFactory"></carousel-component>
-			<!-- TODO Only test-wise END -->
+            <div class="carousel-container">
+                <carousel-component [items]="animationDescriptorsToShow"
+                                    [itemComponentFactory]="itemComponentFactory"></carousel-component>
+            </div>
 
-			<div class="animation-overview">
-				<section *ngFor="let anim of animationDescriptorsToShow" class="animation-card">
-					<div class="mdc-card mdc-card--outlined animation-card-size">
-						<div class="mdc-card__media mdc-card__media--16-9 animation-card-image"
-							 [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + '), linear-gradient(to bottom, #EAEAEA 0%, transparent 100%)'}"></div>
-						<div class="animation-card-primary">
-							<h2 class="animation-card-title">{{ getAnimationName(anim) }}</h2>
-						</div>
-						<div class="animation-card-secondary">
-							{{ getAnimationDescription(anim) }}
-						</div>
-						<div class="mdc-card__actions">
-							<div class="mdc-card__action-buttons">
-								<material-button [routerLink]="animationUrl(anim)">
-									{{ "goto-animation" | i18n }}
-									<material-icon icon="play_arrow"></material-icon>
-								</material-button>
-							</div>
-							<div *restricted class="mdc-card__action-icons">
-								<material-toggle *restricted
-												 [checked]="isAnimationVisible(anim.id)"
-												 (checkedChange)="onVisibilityChange(anim.id, $event)">
-								</material-toggle>
-							</div>
-						</div>
-					</div>
-				</section>
-			</div>
-		</template>
-	</template>
+            <div class="animation-overview">
+                <section *ngFor="let anim of animationDescriptorsToShow" class="animation-card">
+                    <div class="mdc-card mdc-card--outlined animation-card-size">
+                        <div class="mdc-card__media mdc-card__media--16-9 animation-card-image"
+                             [ngStyle]="{'background-image': 'url(' + anim.previewImagePath + '), linear-gradient(to bottom, #EAEAEA 0%, transparent 100%)'}"></div>
+                        <div class="animation-card-primary">
+                            <h2 class="animation-card-title">{{ getAnimationName(anim) }}</h2>
+                        </div>
+                        <div class="animation-card-secondary">
+                            {{ getAnimationDescription(anim) }}
+                        </div>
+                        <div class="mdc-card__actions">
+                            <div class="mdc-card__action-buttons">
+                                <material-button [routerLink]="animationUrl(anim)">
+                                    {{ "goto-animation" | i18n }}
+                                    <material-icon icon="play_arrow"></material-icon>
+                                </material-button>
+                            </div>
+                            <div *restricted class="mdc-card__action-icons">
+                                <material-toggle *restricted
+                                                 [checked]="isAnimationVisible(anim.id)"
+                                                 (checkedChange)="onVisibilityChange(anim.id, $event)">
+                                </material-toggle>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </template>
+    </template>
 
 </div>

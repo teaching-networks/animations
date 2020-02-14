@@ -7,6 +7,9 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:angular/angular.dart';
+import 'package:angular_components/material_button/material_button.dart';
+import 'package:angular_components/material_icon/material_icon.dart';
+import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/animation_service/animation_service.dart';
 import 'package:hm_animations/src/services/authentication_service/authentication_service.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
@@ -15,6 +18,7 @@ import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/view/carousel/service/carousel.service.dart';
 import 'package:hm_animations/src/ui/view/carousel/visualizer/carousel_item_visualizier.dart';
 import 'package:hm_animations/src/util/size.dart';
+import 'package:hm_animations/src/router/route_paths.dart' as paths;
 
 /// Carousel item visualizer to visualize animation descriptor items.
 @Component(
@@ -24,6 +28,9 @@ import 'package:hm_animations/src/util/size.dart';
   changeDetection: ChangeDetectionStrategy.OnPush,
   directives: [
     coreDirectives,
+    routerDirectives,
+    MaterialButtonComponent,
+    MaterialIconComponent,
   ],
 )
 class AnimationCarouselItemVisualizerComponent implements CarouselItemVisualizer<AnimationDescriptor>, OnInit, OnDestroy, AfterViewChecked {
@@ -178,5 +185,11 @@ class AnimationCarouselItemVisualizerComponent implements CarouselItemVisualizer
       _element.clientWidth,
       _element.clientHeight,
     );
+  }
+
+  String getNavigationUrl(AnimationDescriptor desc) {
+    return paths.animation.toUrl(parameters: {
+      paths.idParam: desc.id.toString(),
+    });
   }
 }

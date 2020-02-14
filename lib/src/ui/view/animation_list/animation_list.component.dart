@@ -92,6 +92,8 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   /// Lookup for animations.
   Map<int, Animation> _animationLookup;
 
+//  Iterable<AnimationCarouselItem> animationCarouselItems;
+
   /// Create component.
   AnimationListComponent(
     this._cd,
@@ -104,9 +106,9 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   @override
   void ngOnInit() {
     _languageLoadedListener = (_) {
-      _cd.markForCheck();
-
       _loadAnimationProperties();
+      _updateAnimationCarouselItems();
+      _cd.markForCheck();
     };
     _i18n.addLanguageLoadedListener(_languageLoadedListener);
     _loadAnimationProperties();
@@ -199,11 +201,24 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
 
       await _loadAnimations();
 
+      _updateAnimationCarouselItems();
+
       state = _CompState.SUCCESS;
     } catch (e) {
       state = _CompState.ERROR;
     } finally {
       _cd.markForCheck();
+    }
+  }
+
+  void _updateAnimationCarouselItems() {
+    if (animationDescriptors != null) {
+//      animationCarouselItems = animationDescriptorsToShow.map((desc) => AnimationCarouselItem(
+//            desc.previewImagePath,
+//            getAnimationName(desc),
+//            getAnimationDescription(desc),
+//            animationUrl(desc),
+//          ));
     }
   }
 

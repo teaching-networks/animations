@@ -1,3 +1,24 @@
-<img src="{{ anim.previewImagePath }}" height="300">
-<p>{{ getAnimationName(anim) }}</p>
-<p>{{ getAnimationDescription(anim) }}</p>
+<div class="stack">
+
+    <div>
+        <img src="{{ anim.previewImagePath }}" height="300">
+    </div>
+
+    <div class="anim-description">
+        <div>
+            <div>
+                <span class="title">{{ getAnimationName(anim) }}</span>
+            </div>
+            <div>
+                <span>{{ getAnimationDescription(anim) }}</span>
+            </div>
+        </div>
+        <div class="button-panel">
+            <material-button raised icon style="background-color: white; color: black"
+                             [routerLink]="getNavigationUrl(anim)">
+                <material-icon icon="play_arrow"></material-icon>
+            </material-button>
+        </div>
+    </div>
+
+</div>

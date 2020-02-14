@@ -94,9 +94,10 @@ class CarouselComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   /// Set the items to display in the carousel.
   @Input()
   void set items(Iterable<T> value) {
-    _items = value;
-    height = 0; // Reset height
-    _cd.markForCheck();
+    if (_items != value) {
+      _items = value;
+      _cd.markForCheck();
+    }
   }
 
   /// Get the items to display in the carousel.
