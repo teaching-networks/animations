@@ -8,6 +8,8 @@
 #### 2.4.1
 
 - Development Guide
+- Added settings
+- Added carousel to the animation overview
 
 ### 2.4.0
 - Added Carrier Sense range to the CSMA/CA animation

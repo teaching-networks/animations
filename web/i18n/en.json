@@ -12,6 +12,7 @@
   "copyright": "Copyright",
   "description": "Description",
   "settings": "Settings",
+  "settings.carousel.enable": "Enable carousel in animation overview",
   "back": "Back",
   "cancel": "Cancel",
   "create": "Create",

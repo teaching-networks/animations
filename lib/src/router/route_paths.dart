@@ -14,6 +14,7 @@ final detail = new RoutePath(path: "detail/:$idParam");
 final userManagement = new RoutePath(path: "management/user");
 final groupManagement = new RoutePath(path: "management/group");
 final animationManagement = new RoutePath(path: "management/animation");
+final settingsManagement = new RoutePath(path: "management/settings");
 final notFound = new RoutePath(path: ".+");
 
 String getId(Map<String, String> parameters) {

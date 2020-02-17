@@ -12,6 +12,7 @@
   "copyright": "Copyright",
   "description": "Beschreibung",
   "settings": "Einstellungen",
+  "settings.carousel.enable": "Aktiviere Carousel in der Animationsübersicht",
   "back": "Zurück",
   "cancel": "Abbrechen",
   "create": "Erstellen",

@@ -19,11 +19,13 @@ import 'package:hm_animations/src/services/group_service/group_service.dart';
 import 'package:hm_animations/src/services/group_service/model/group.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/settings_service/settings_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
 import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.dart';
 import 'package:hm_animations/src/ui/view/carousel/carousel.component.dart';
+import 'package:hm_animations/src/ui/view/settings/settings_component.dart';
 import 'package:hm_animations/src/util/name_util.dart';
 import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.template.dart' as $template;
 
@@ -66,6 +68,9 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   /// Get authentication information from this service.
   final AuthenticationService _authService;
 
+  /// Service to get settings from.
+  final SettingsService _settingsService;
+
   /// State of the component.
   _CompState state = _CompState.LOADING;
 
@@ -92,7 +97,8 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   /// Lookup for animations.
   Map<int, Animation> _animationLookup;
 
-//  Iterable<AnimationCarouselItem> animationCarouselItems;
+  /// Whether the carousel should be shown.
+  bool showCarousel = false;
 
   /// Create component.
   AnimationListComponent(
@@ -101,6 +107,7 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
     this._groupService,
     this._animationService,
     this._authService,
+    this._settingsService,
   );
 
   @override
@@ -118,6 +125,18 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
       _cd.markForCheck();
     });
     _isLoggedIn = _authService.isLoggedIn;
+
+    _settingsService.read<bool>("carousel.enabled").then((v) {
+      bool show = SettingsComponent.defaultSettings["carousel.enabled"];
+      if (v != null) {
+        show = v.value;
+      }
+
+      if (show != showCarousel) {
+        showCarousel = show;
+        _cd.markForCheck();
+      }
+    });
   }
 
   @override

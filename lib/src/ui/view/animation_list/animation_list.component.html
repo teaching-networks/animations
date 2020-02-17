@@ -38,7 +38,7 @@
         </template>
         <template [ngIf]="!animationDescriptorsToShow.isEmpty">
 
-            <div class="carousel-container">
+            <div class="carousel-container" *ngIf="showCarousel">
                 <carousel-component [items]="animationDescriptorsToShow"
                                     [itemComponentFactory]="itemComponentFactory"></carousel-component>
             </div>
