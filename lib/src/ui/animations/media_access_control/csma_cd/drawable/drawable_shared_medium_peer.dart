@@ -6,7 +6,6 @@
 import 'dart:html';
 import 'dart:math';
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/drawable/drawable_shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/medium/shared_medium.dart';
 import 'package:hm_animations/src/ui/animations/media_access_control/csma_cd/peer/shared_medium_peer.dart';
@@ -20,6 +19,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:meta/meta.dart';
 
 /// A Drawable shared medium peer.
@@ -90,7 +90,7 @@ class DrawableSharedMediumPeer extends CanvasDrawable with CanvasPausableMixin i
   bool _sendAwaited = false;
 
   /// Map for translations.
-  final Map<String, Message> labelMap;
+  final Map<String, IdMessage<String>> labelMap;
 
   /// When the after backoff signal should be sent.
   num _scheduledAfterBackoffSignalTimestamp;

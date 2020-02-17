@@ -9,10 +9,13 @@ import 'package:angular/angular.dart';
 import 'package:hm_animations/src/ui/misc/dialog/event/dialog_event.dart';
 import 'package:hm_animations/src/ui/misc/dialog/impl/info/info_dialog.dart';
 import 'package:hm_animations/src/ui/misc/dialog/impl/info/info_dialog_data.dart';
+import 'package:hm_animations/src/ui/misc/dialog/impl/option/option_dialog.dart';
+import 'package:hm_animations/src/ui/misc/dialog/impl/option/option_dialog_data.dart';
 import 'package:hm_animations/src/ui/misc/dialog/impl/prompt/prompt_dialog.dart';
 import 'package:hm_animations/src/ui/misc/dialog/impl/prompt/prompt_dialog.template.dart' as $promptDialogTemplate;
 import 'package:hm_animations/src/ui/misc/dialog/impl/base_dialog/base_dialog.template.dart' as $baseDialogTemplate;
 import 'package:hm_animations/src/ui/misc/dialog/impl/info/info_dialog.template.dart' as $infoDialogTemplate;
+import 'package:hm_animations/src/ui/misc/dialog/impl/option/option_dialog.template.dart' as $optionDialogTemplate;
 import 'package:hm_animations/src/ui/misc/dialog/instance/dialog_instance.dart';
 
 /// Service to easily open dialogs.
@@ -43,6 +46,11 @@ class DialogService implements OnDestroy {
   /// Open info dialog.
   DialogInstance<void, InfoDialog, InfoDialogData> info(InfoDialogData data) {
     return openComponent($infoDialogTemplate.InfoDialogNgFactory, data);
+  }
+
+  /// Open option dialog providing several options the user can choose from.
+  DialogInstance<Option<T>, OptionDialog, OptionDialogData<T>> option<T>(OptionDialogData<T> data) {
+    return openComponent($optionDialogTemplate.OptionDialogNgFactory, data);
   }
 
   @override

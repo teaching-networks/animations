@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>HM Animations | Version Overview</title>
+	
+	<style>
+		body { margin: 0 auto; width: 90vw; font-family: sans-serif; }
+		h1.title {
+			border-bottom: 2px solid #EAEAEA;
+			line-height: 0.0;
+			font-weight: lighter;
+			display: flex;
+			align-items: center;
+		}
+		ul {
+			list-style-type: none;
+			margin: 0;
+			padding: 0;
+		}
+		li {
+			margin: 10px 0;
+		}
+		li > a {
+			padding: 0.2em 0.5em;
+			margin: 10px 0 10px 0;
+			border: 1px solid lightgray;
+			border-radius: 0.2em;
+			text-decoration: none;
+			color: #333;
+		}
+		li > a:hover {
+			background-color: #EAEAEA;
+		}
+
+		li.newest > a {
+			background-color: lightcoral;
+			color: white;
+			font-weight: bold;
+			border: 1px solid #d05050;
+		}
+		li.newest > a:hover {
+			background-color: #f2A2A2;
+		}
+	</style>
+</head>
+
+<body>
+	<h1 class="title"><img src="https://www.sam.cs.hm.edu/img/hm_logo.svg" width="150"> HM Animations | Versions</h1>
+
+	<h2>Releases</h2>
+	<ul>
+		${TO_REPLACE}
+	</ul>
+
+	<h2>Development Builds</h2>
+	<ul>
+		<li>
+			<a href="/develop">Develop Branch (May be unstable)</a>
+		</li>
+	</ul>
+</body>
+
+</html>

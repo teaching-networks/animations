@@ -22,6 +22,8 @@ import 'package:hm_animations/src/ui/view/group-management/selected_group.servic
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
 import 'package:hm_animations/src/util/name_util.dart';
 import 'package:hm_animations/src/util/network/network_util.dart';
+import 'package:hm_animations/src/util/options/save_options.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// The group management content (form).
 @Component(
@@ -153,7 +155,7 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
   }
 
   @override
-  void setEntity(Group entity) {
+  Future<void> setEntity(Group entity) async {
     // First and foremost save the current animation order.
     if (group != null) {
       group.animationIdOrder = currentAnimationsDescriptorsView.map((descriptor) => descriptor.id).toList();
@@ -185,7 +187,7 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
   }
 
   /// Get the animation name of the passed [descriptor].
-  Message getAnimationName(AnimationDescriptor<dynamic> descriptor) => _i18n.get("${descriptor.baseTranslationKey}.name");
+  IdMessage<String> getAnimationName(AnimationDescriptor<dynamic> descriptor) => _i18n.get("${descriptor.baseTranslationKey}.name");
 
   /// Add or remove an animation from the passed [group].
   toggleAnimationInGroup(Group group, int animationId) {
@@ -207,4 +209,9 @@ class GroupManagementContentComponent implements ManagementComponentContent<Grou
 
   /// Get the item renderer for the animation descriptor items.
   ComponentFactory<AnimationListItemComponent> get animationItemRenderer => animationListItemRenderer.AnimationListItemComponentNgFactory;
+
+  @override
+  Future<SaveOption> checkIfUnsaved() async {
+    return SaveOption.LOSE;
+  }
 }

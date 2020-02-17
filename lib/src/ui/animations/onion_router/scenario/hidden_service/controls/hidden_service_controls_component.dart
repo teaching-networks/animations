@@ -13,6 +13,7 @@ import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/controls_component.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/hidden_service/hidden_service_drawable.dart';
 import 'package:hm_animations/src/ui/animations/onion_router/scenario/scenario.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 @Component(
   selector: "hidden-service-controls",
@@ -38,8 +39,8 @@ class HiddenServiceControlsComponent implements ControlsComponent, OnInit, OnDes
 
   bool showHelpBubbles = true;
 
-  Message _showHelpMsg;
-  Message _skipAuto;
+  IdMessage<String> _showHelpMsg;
+  IdMessage<String>_skipAuto;
 
   LanguageLoadedListener _languageLoadedListener;
 

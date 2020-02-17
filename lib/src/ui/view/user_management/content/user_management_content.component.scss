@@ -3,3 +3,9 @@
  * Licensed under GNU General Public License 3 (See LICENSE.md in the repositories root)
  */
 
+:host {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

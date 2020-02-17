@@ -6,17 +6,21 @@
 @import "package:angular_components/material_icon/mixins";
 @import "package:angular_components/css/material/material";
 
+:host {
+  display: block;
+}
+
 .custom-size {
   @include material-icon-size(3.0em);
 }
 
 .animation-overview {
-
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  padding: 1.0em 2.0em;
 
   & > section.animation-card {
 
@@ -47,4 +51,8 @@
     }
 
   }
+}
+
+.carousel-container {
+  background-color: #333;
 }

@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  overflow: hidden;
+}
+
+.carousel {
+  position: relative;
+  height: 100%;
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+}
+
+.carousel-navigation {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5em;
+
+  &.next {
+    right: 0;
+  }
+
+  &.prev {
+    left: 0;
+  }
+}
+
+.whitened-button {
+  background-color: white;
+}

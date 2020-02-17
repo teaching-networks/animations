@@ -5,6 +5,12 @@
 > - 1.3 for example is a minor release which means it adds some minor features (nothing too spectacular)
 > - 1.0.0 is a major release since it means a breaking point (first release), important features, etc.
 
+#### 2.4.1
+
+- Development Guide
+- Added settings
+- Added carousel to the animation overview
+
 ### 2.4.0
 - Added Carrier Sense range to the CSMA/CA animation
 - Animation about buffering

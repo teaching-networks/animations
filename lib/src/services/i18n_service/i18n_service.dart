@@ -10,6 +10,7 @@ import 'dart:html';
 import 'package:angular/angular.dart';
 import 'package:angular_router/angular_router.dart';
 import 'package:hm_animations/src/services/storage_service/storage_service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import "package:intl/intl_browser.dart";
 
 typedef void LanguageLoadedListener(String newLocale);
@@ -52,7 +53,7 @@ class I18nService {
   /**
    * Key to message lookup.
    */
-  Map<String, Message> _lookup = new Map<String, Message>();
+  Map<String, IdMessage<String>> _lookup = new Map<String, IdMessage<String>>();
 
   /**
    * Used to get the base url of the application.
@@ -117,13 +118,13 @@ class I18nService {
     Map<String, String> map = (jsonMap as Map).cast<String, String>();
 
     for (String key in map.keys) {
-      Message msg = _lookup[key];
+      IdMessage<String> msg = _lookup[key];
 
       if (msg == null) {
-        msg = new Message(key, map[key]);
+        msg = new IdMessage<String>(identifier: key, value: map[key]);
         _lookup[key] = msg;
       } else {
-        msg.content = map[key];
+        msg.value = map[key];
       }
     }
   }
@@ -131,12 +132,12 @@ class I18nService {
   /**
    * Get translated message for the passed key.
    */
-  Message get(String key) {
-    Message msg = _lookup[key];
+  IdMessage<String> get(String key) {
+    IdMessage<String> msg = _lookup[key];
 
     if (msg == null) {
       // Create new message to be filled later (or not if not translated yet).
-      msg = new Message.empty(key);
+      msg = new IdMessage<String>.empty(identifier: key);
       _lookup[key] = msg;
     }
 
@@ -145,16 +146,16 @@ class I18nService {
 
   /// Get translated messsage for the passed key and return a
   /// future of when the message if fully loaded.
-  Future<Message> getAsync(String key) async {
-    Message msg = get(key);
+  Future<IdMessage<String>> getAsync(String key) async {
+    IdMessage<String> msg = get(key);
 
-    if (msg.content.isEmpty) {
+    if (msg.value.isEmpty) {
       // Wait until message is loaded
       final completer = Completer();
       _fetchCompleter.add(completer);
       await completer.future;
 
-      if (msg.content.isEmpty) {
+      if (msg.value.isEmpty) {
         throw Exception("the requested Message is still empty, even after loading a locale language file");
       }
 
@@ -312,39 +313,5 @@ class Language {
   @override
   String toString() {
     return name;
-  }
-}
-
-/**
- * Message object holding a translation for a key.
- * This is used primarily as string replacement when the translations are
- * not yet loaded. When the translation file is loaded, the message object is receiving a content.
- */
-class Message {
-  /**
-   * Key of a translation.
-   */
-  String key;
-
-  /**
-   * Content of a translation.
-   */
-  String content;
-
-  /**
-   * Create new message.
-   */
-  Message(this.key, this.content);
-
-  /**
-   * Create empty message.
-   */
-  Message.empty(this.key) {
-    content = "";
-  }
-
-  @override
-  String toString() {
-    return content;
   }
 }

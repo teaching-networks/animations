@@ -43,6 +43,7 @@ import 'package:hm_animations/src/ui/misc/directives/auto_select_directive.dart'
 import 'package:hm_animations/src/ui/misc/undo_redo/impl/simple_undo_redo_manager.dart';
 import 'package:hm_animations/src/ui/misc/undo_redo/undo_redo_step.dart';
 import 'package:hm_animations/src/util/size.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 
@@ -151,21 +152,21 @@ class DijkstraAlgorithmAnimation extends CanvasAnimation with AnimationUI implem
   /// Store and retrieve things.
   final StorageService _storage;
 
-  Message modeTooltip;
-  Message undoTooltip;
-  Message redoTooltip;
-  Message selectNodeAsStartTooltip;
-  Message removeNodeTooltip;
-  Message disconnectNodeTooltip;
-  Message clearSelectionTooltip;
-  Message startOrPauseTooltip;
-  Message nextStepTooltip;
-  Message resetAlgorithmTooltip;
-  Message timeToNextStepTooltip;
-  Message saveModelTooltip;
-  Message restoreModelTooltip;
-  Message clearModelTooltip;
-  Message helpLabel;
+  IdMessage<String> modeTooltip;
+  IdMessage<String> undoTooltip;
+  IdMessage<String> redoTooltip;
+  IdMessage<String> selectNodeAsStartTooltip;
+  IdMessage<String> removeNodeTooltip;
+  IdMessage<String> disconnectNodeTooltip;
+  IdMessage<String> clearSelectionTooltip;
+  IdMessage<String> startOrPauseTooltip;
+  IdMessage<String> nextStepTooltip;
+  IdMessage<String> resetAlgorithmTooltip;
+  IdMessage<String> timeToNextStepTooltip;
+  IdMessage<String> saveModelTooltip;
+  IdMessage<String> restoreModelTooltip;
+  IdMessage<String> clearModelTooltip;
+  IdMessage<String> helpLabel;
 
   /// Create animation.
   DijkstraAlgorithmAnimation(

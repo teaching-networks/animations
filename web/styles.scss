@@ -269,10 +269,7 @@ ul.highlighted-fields {
 }
 
 .info-box {
-  border-radius: 0.5em;
-  border: 2px solid #F9F9F9;
   padding: 2.0em;
-  margin: 2.0em 0;
 }
 
 .basic-dialog,
@@ -288,4 +285,10 @@ ul.highlighted-fields {
 
 .info-dialog {
   width: $mat-grid * 40;
+}
+
+.dialog-base {
+  h1 {
+    white-space: nowrap;
+  }
 }

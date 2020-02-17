@@ -5,6 +5,7 @@ import 'package:hm_animations/src/services/authentication_service/authentication
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/misc/dialog/dialog_component/dialog_component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Login dialog of the app.
 @Component(
@@ -20,6 +21,7 @@ import 'package:hm_animations/src/ui/misc/dialog/dialog_component/dialog_compone
     materialInputDirectives,
     formDirectives,
     MaterialProgressComponent,
+    MaterialIconComponent,
   ],
   pipes: [I18nPipe],
 )
@@ -43,10 +45,10 @@ class LoginDialog extends DialogComponent<bool, LoginDialog, void> {
   String password = "";
 
   /// A error message to show.
-  Message errorMessageToShow;
+  IdMessage<String> errorMessageToShow;
 
   /// Default error message for the login dialog.
-  Message _loginFailedMessage;
+  IdMessage<String> _loginFailedMessage;
 
   /// Create the dialog component.
   LoginDialog(

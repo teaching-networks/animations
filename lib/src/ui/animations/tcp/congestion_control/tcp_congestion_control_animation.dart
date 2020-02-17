@@ -38,6 +38,7 @@ import 'package:hm_animations/src/ui/canvas/shapes/util/size_type.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Animation showing the TCP congestion control mechanism.
 @Component(
@@ -127,13 +128,13 @@ class TCPCongestionControlAnimation extends CanvasAnimation with CanvasPausableM
   SelectionOptions<TCPCongestionControlAlgorithm> algorithmOptions;
   static ItemRenderer<TCPCongestionControlAlgorithm> algorithmItemRenderer = (dynamic algorithm) => algorithm.getName();
 
-  Message pauseTooltip;
-  Message addWorkstationTooltip;
-  Message removeWorkstationTooltip;
-  Message algorithmTooltip;
-  Message timeoutTooltip;
-  Message threeAcksTooltip;
-  Message resetTooltip;
+  IdMessage<String> pauseTooltip;
+  IdMessage<String> addWorkstationTooltip;
+  IdMessage<String> removeWorkstationTooltip;
+  IdMessage<String> algorithmTooltip;
+  IdMessage<String> timeoutTooltip;
+  IdMessage<String> threeAcksTooltip;
+  IdMessage<String> resetTooltip;
 
   /// Whether it is the first unpause action.
   bool _isResetting;

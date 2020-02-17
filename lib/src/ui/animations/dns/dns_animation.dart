@@ -26,6 +26,7 @@ import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/description/description.component.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:tuple/tuple.dart';
 
 @Component(
@@ -97,7 +98,7 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
   List<DNSScenario> scenarios;
   DNSScenario selectedScenario;
 
-  List<Tuple2<Message, Color>> _legendItems;
+  List<Tuple2<IdMessage<String>, Color>> _legendItems;
 
   DNSAnimation(this._i18n) {
     _fillLocationSource();
@@ -107,8 +108,10 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
     _locationSource.add(Tuple4(_ORIGIN_LOCATION, _originDot, _originBubble, DNSServerType.LOCAL));
     _locationSource.add(Tuple4(_DESTINATION_LOCATION, _destinationDot, _destinationBubble, DNSServerType.DESTINATION));
     _locationSource.add(Tuple4(_ROOT_DNS_SERVER_LOCATION, _rootDNSServerDot, _rootDNSServerBubble, DNSServerType.ROOT));
-    _locationSource.add(Tuple4(_INTERMEDIATE_DNS_SERVER_LOCATION, _intermediateDNSServerDot, _intermediateDNSServerBubble, DNSServerType.INTERMEDIATE));
-    _locationSource.add(Tuple4(_AUTHORITATIVE_DNS_SERVER_LOCATION, _authoritativeDNSServerDot, _authoritativeDNSServerBubble, DNSServerType.AUTHORITATIVE));
+    _locationSource.add(
+        Tuple4(_INTERMEDIATE_DNS_SERVER_LOCATION, _intermediateDNSServerDot, _intermediateDNSServerBubble, DNSServerType.INTERMEDIATE));
+    _locationSource.add(
+        Tuple4(_AUTHORITATIVE_DNS_SERVER_LOCATION, _authoritativeDNSServerDot, _authoritativeDNSServerBubble, DNSServerType.AUTHORITATIVE));
   }
 
   @override
@@ -124,7 +127,7 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
   }
 
   void _initLegend() {
-    _legendItems = new List<Tuple2<Message, Color>>();
+    _legendItems = new List<Tuple2<IdMessage<String>, Color>>();
 
     _legendItems.add(Tuple2(_i18n.get("dns-animation.legend.query"), Colors.SLATE_GREY));
     _legendItems.add(Tuple2(_i18n.get("dns-animation.legend.response"), Colors.CORAL));
@@ -146,9 +149,10 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
     scenarios = List<DNSScenario>();
 
     scenarios.add(DNSScenario(0, _i18n.get("dns-animation.scenario.root-has-destination-cached"), [DNSServerType.ROOT]));
+    scenarios.add(DNSScenario(1, _i18n.get("dns-animation.scenario.root-has-intermediate-cached"),
+        [DNSServerType.ROOT, DNSServerType.INTERMEDIATE, DNSServerType.AUTHORITATIVE]));
     scenarios.add(DNSScenario(
-        1, _i18n.get("dns-animation.scenario.root-has-intermediate-cached"), [DNSServerType.ROOT, DNSServerType.INTERMEDIATE, DNSServerType.AUTHORITATIVE]));
-    scenarios.add(DNSScenario(2, _i18n.get("dns-animation.scenario.root-has-authoritative-cached"), [DNSServerType.ROOT, DNSServerType.AUTHORITATIVE]));
+        2, _i18n.get("dns-animation.scenario.root-has-authoritative-cached"), [DNSServerType.ROOT, DNSServerType.AUTHORITATIVE]));
 
     scenarios.add(DNSScenario(3, _i18n.get("dns-animation.scenario.local-has-destination-cached"), []));
 
@@ -348,7 +352,8 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
     if (wayIndex < _ways.length) {
       Tuple3<DNSServerType, DNSServerType, bool> way = _ways[wayIndex];
 
-      _routeDrawables.add(WaypointRouteDrawable(_currentProgress, way.item1, way.item2, color: way.item3 ? Colors.SLATE_GREY : Colors.CORAL, curved: true));
+      _routeDrawables.add(
+          WaypointRouteDrawable(_currentProgress, way.item1, way.item2, color: way.item3 ? Colors.SLATE_GREY : Colors.CORAL, curved: true));
 
       _currentProgressListener = _currentProgress.progressChanges.listen((progress) {
         if (progress >= 1.0) {
@@ -369,7 +374,8 @@ class DNSAnimation extends CanvasAnimation with AnimationUI implements OnInit, O
         }
       });
 
-      _routeDrawables.add(WaypointRouteDrawable(_currentProgress, DNSServerType.LOCAL, DNSServerType.DESTINATION, color: Colors.TEAL, curved: false));
+      _routeDrawables
+          .add(WaypointRouteDrawable(_currentProgress, DNSServerType.LOCAL, DNSServerType.DESTINATION, color: Colors.TEAL, curved: false));
     }
   }
 }

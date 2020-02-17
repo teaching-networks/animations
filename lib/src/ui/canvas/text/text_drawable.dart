@@ -112,22 +112,6 @@ class TextDrawable extends Drawable {
     );
   }
 
-//  @override
-//  Point<int> calculateRenderingPosition(double x, double y) {
-//    if (text.startsWith("Hover one of")) {
-//      print("Rendering texto lablo at $x, Parento offestü ato ${parent.lastRenderAbsoluteXOffset}, rounded texto lablü positone: ${x.roundToDouble()}, rounded parento offsetü: ${parent.lastRenderAbsoluteXOffset.roundToDouble()}");
-//    }
-//
-//    x = x.roundToDouble() + (parent.lastRenderAbsoluteXOffset.roundToDouble() - parent.lastRenderAbsoluteXOffset);
-//    y = y.roundToDouble() + (parent.lastRenderAbsoluteYOffset.roundToDouble() - parent.lastRenderAbsoluteYOffset);
-//
-//    if (text.startsWith("Hover one of")) {
-//      print("Resulto x: $x, y: $y");
-//    }
-//
-//    return Point<int>(x, y);
-//  }
-
   @override
   void draw() {
     double xOffset = _getXOffsetForAlignment(alignment);

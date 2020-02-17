@@ -46,27 +46,16 @@ import 'package:hm_animations/src/ui/canvas/text/alignment.dart';
 import 'package:hm_animations/src/ui/canvas/text/text_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:tuple/tuple.dart';
 
 /// The root drawable of the buffering animation.
 class BufferingAnimationDrawable extends Drawable {
   /// Base key of saved configurations in local storage.
-  static const String _local_storage_key =
-      "buffering-animation.configuration.v1";
+  static const String _local_storage_key = "buffering-animation.configuration.v1";
 
   /// Allowed runes as seed (only numeric).
-  static const List<int> _numericalRunes = [
-    48,
-    49,
-    50,
-    51,
-    52,
-    53,
-    54,
-    55,
-    56,
-    57
-  ];
+  static const List<int> _numericalRunes = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57];
 
   /// Max seed for the random number generator.
   static final int _MAX_SEED = 9999999;
@@ -168,27 +157,27 @@ class BufferingAnimationDrawable extends Drawable {
   /// Drawable showing the animations legend.
   LegendDrawable _legend;
 
-  Message _interruptionsMsg;
-  Message _bitRateMsg;
-  Message _playoutBufferSizeMsg;
-  Message _meanNetworkRateMsg;
-  Message _networkRateVarianceMsg;
-  Message _constantBitRateTransmissionMsg;
-  Message _networkDelayedReceivingAtClientMsg;
-  Message _constantBitRatePlayOutAtClientMsg;
-  Message _cumulativeDataMsg;
-  Message _timeInSMsg;
-  Message _speedScaleMsg;
-  Message _reseedMsg;
-  Message _runMsg;
-  Message _pauseMsg;
-  Message _resetMsg;
-  Message _newConfigurationMsg;
-  Message _newConfigurationPromptMsg;
-  Message _saveMsg;
-  Message _loadMsg;
-  Message _removeMsg;
-  Message _packetsMsg;
+  IdMessage<String> _interruptionsMsg;
+  IdMessage<String> _bitRateMsg;
+  IdMessage<String> _playoutBufferSizeMsg;
+  IdMessage<String> _meanNetworkRateMsg;
+  IdMessage<String> _networkRateVarianceMsg;
+  IdMessage<String> _constantBitRateTransmissionMsg;
+  IdMessage<String> _networkDelayedReceivingAtClientMsg;
+  IdMessage<String> _constantBitRatePlayOutAtClientMsg;
+  IdMessage<String> _cumulativeDataMsg;
+  IdMessage<String> _timeInSMsg;
+  IdMessage<String> _speedScaleMsg;
+  IdMessage<String> _reseedMsg;
+  IdMessage<String> _runMsg;
+  IdMessage<String> _pauseMsg;
+  IdMessage<String> _resetMsg;
+  IdMessage<String> _newConfigurationMsg;
+  IdMessage<String> _newConfigurationPromptMsg;
+  IdMessage<String> _saveMsg;
+  IdMessage<String> _loadMsg;
+  IdMessage<String> _removeMsg;
+  IdMessage<String> _packetsMsg;
 
   /// Listener getting notifications once the language changes.
   LanguageLoadedListener _languageLoadedListener;
@@ -213,31 +202,25 @@ class BufferingAnimationDrawable extends Drawable {
     if (bitRate == null) {
       bitRate = _bitRateSlider.slider.value.toInt() * 1000;
     } else {
-      _bitRateSlider.slider
-          .setValue(bitRate / 1000, informChangeListener: false);
+      _bitRateSlider.slider.setValue(bitRate / 1000, informChangeListener: false);
     }
 
     if (bufferSize == null) {
       bufferSize = _playoutBufferSizeSlider.slider.value.toInt();
     } else {
-      _playoutBufferSizeSlider.slider
-          .setValue(bufferSize.toDouble(), informChangeListener: false);
+      _playoutBufferSizeSlider.slider.setValue(bufferSize.toDouble(), informChangeListener: false);
     }
 
     if (meanNetworkRate == null) {
-      meanNetworkRate =
-          _meanNetworkRateSlider.slider.value.toInt() * 1000 * 1000;
+      meanNetworkRate = _meanNetworkRateSlider.slider.value.toInt() * 1000 * 1000;
     } else {
-      _meanNetworkRateSlider.slider
-          .setValue(meanNetworkRate / 1000000, informChangeListener: false);
+      _meanNetworkRateSlider.slider.setValue(meanNetworkRate / 1000000, informChangeListener: false);
     }
 
     if (networkRateVariance == null) {
-      networkRateVariance =
-          _networkRateVarianceSlider.slider.value.toInt() * 1000 * 1000;
+      networkRateVariance = _networkRateVarianceSlider.slider.value.toInt() * 1000 * 1000;
     } else {
-      _networkRateVarianceSlider.slider
-          .setValue(networkRateVariance / 1000000, informChangeListener: false);
+      _networkRateVarianceSlider.slider.setValue(networkRateVariance / 1000000, informChangeListener: false);
     }
 
     if (seed == null) {
@@ -268,14 +251,10 @@ class BufferingAnimationDrawable extends Drawable {
     _bitRateMsg = _i18nService.get("buffering.bit-rate");
     _playoutBufferSizeMsg = _i18nService.get("buffering.playout-buffer-size");
     _meanNetworkRateMsg = _i18nService.get("buffering.mean-network-rate");
-    _networkRateVarianceMsg =
-        _i18nService.get("buffering.network-rate-variance");
-    _constantBitRateTransmissionMsg =
-        _i18nService.get("buffering.constant-bit-rate-transmission");
-    _networkDelayedReceivingAtClientMsg =
-        _i18nService.get("buffering.network-delayed-receiving-at-client");
-    _constantBitRatePlayOutAtClientMsg =
-        _i18nService.get("buffering.constant-bit-rate-play-out-at-client");
+    _networkRateVarianceMsg = _i18nService.get("buffering.network-rate-variance");
+    _constantBitRateTransmissionMsg = _i18nService.get("buffering.constant-bit-rate-transmission");
+    _networkDelayedReceivingAtClientMsg = _i18nService.get("buffering.network-delayed-receiving-at-client");
+    _constantBitRatePlayOutAtClientMsg = _i18nService.get("buffering.constant-bit-rate-play-out-at-client");
     _cumulativeDataMsg = _i18nService.get("buffering.cumulative-data");
     _timeInSMsg = _i18nService.get("buffering.time-in-s");
     _speedScaleMsg = _i18nService.get("buffering.speed-scale");
@@ -284,8 +263,7 @@ class BufferingAnimationDrawable extends Drawable {
     _pauseMsg = _i18nService.get("buffering.pause");
     _resetMsg = _i18nService.get("buffering.reset");
     _newConfigurationMsg = _i18nService.get("buffering.new-configuration");
-    _newConfigurationPromptMsg =
-        _i18nService.get("buffering.new-configuration.prompt");
+    _newConfigurationPromptMsg = _i18nService.get("buffering.new-configuration.prompt");
     _saveMsg = _i18nService.get("buffering.save");
     _loadMsg = _i18nService.get("buffering.load");
     _removeMsg = _i18nService.get("buffering.remove");
@@ -301,41 +279,27 @@ class BufferingAnimationDrawable extends Drawable {
     _bitRateSlider.label.text = _bitRateMsg.toString();
     _meanNetworkRateSlider.label.text = _bitRateMsg.toString();
     _networkRateVarianceSlider.label.text = _networkRateVarianceMsg.toString();
-    _interruptionCounterLabel.text =
-        _interruptionsMsg.toString() + ": ${_playOutInterruptions.length}";
+    _interruptionCounterLabel.text = _interruptionsMsg.toString() + ": ${_playOutInterruptions.length}";
     _speedSlider.label.text = _speedScaleMsg.toString();
     _reseedButton.text = _reseedMsg.toString();
     _resetButton.text = _resetMsg.toString();
-    _pauseButton.text = _constantBitRatePlottable.paused
-        ? _pauseMsg.toString()
-        : _runMsg.toString();
-    _savedSettingsComboBox.model.items.first.label =
-        _newConfigurationMsg.toString();
-    if (_savedSettingsComboBox.model.selected ==
-        _savedSettingsComboBox.model.items.first) {
-      _savedSettingsComboBox.model
-          .select(_savedSettingsComboBox.model.selected);
+    _pauseButton.text = _constantBitRatePlottable.paused ? _pauseMsg.toString() : _runMsg.toString();
+    _savedSettingsComboBox.model.items.first.label = _newConfigurationMsg.toString();
+    if (_savedSettingsComboBox.model.selected == _savedSettingsComboBox.model.items.first) {
+      _savedSettingsComboBox.model.select(_savedSettingsComboBox.model.selected);
     }
     _saveButton.text = _saveMsg.toString();
     _restoreButton.text = _loadMsg.toString();
     _removeConfigButton.text = _removeMsg.toString();
     _legend.updateItems([
-      LegendItem(
-          color: Colors.PINK_RED_2,
-          text: _constantBitRateTransmissionMsg.toString()),
-      LegendItem(
-          color: Colors.BLUE_GRAY,
-          text: _networkDelayedReceivingAtClientMsg.toString()),
-      LegendItem(
-          color: Colors.GREY_GREEN,
-          text: _constantBitRatePlayOutAtClientMsg.toString()),
+      LegendItem(color: Colors.PINK_RED_2, text: _constantBitRateTransmissionMsg.toString()),
+      LegendItem(color: Colors.BLUE_GRAY, text: _networkDelayedReceivingAtClientMsg.toString()),
+      LegendItem(color: Colors.GREY_GREEN, text: _constantBitRatePlayOutAtClientMsg.toString()),
     ]);
     _plot.invalidateCoordinateSystem();
     double oldBufferSize = _playoutBufferSizeSlider.slider.value;
-    _playoutBufferSizeSlider.slider
-        .setValue(oldBufferSize + 1, informChangeListener: false);
-    _playoutBufferSizeSlider.slider
-        .setValue(oldBufferSize, informChangeListener: false);
+    _playoutBufferSizeSlider.slider.setValue(oldBufferSize + 1, informChangeListener: false);
+    _playoutBufferSizeSlider.slider.setValue(oldBufferSize, informChangeListener: false);
   }
 
   /// Initialize the drawable.
@@ -408,9 +372,7 @@ class BufferingAnimationDrawable extends Drawable {
             labelGenerator: () => _cumulativeDataMsg.toString(),
             color: Colors.LIGHTGREY,
             lineWidth: 2,
-            ticks: TickStyle(
-                generator: TickStyle.fixedCountTicksGenerator(2),
-                labelRenderer: (value) => value.toInt().toString()),
+            ticks: TickStyle(generator: TickStyle.fixedCountTicksGenerator(2), labelRenderer: (value) => value.toInt().toString()),
           ),
         ),
       ),
@@ -418,15 +380,9 @@ class BufferingAnimationDrawable extends Drawable {
 
     _legend = LegendDrawable(
       items: [
-        LegendItem(
-            color: Colors.PINK_RED_2,
-            text: _constantBitRateTransmissionMsg.toString()),
-        LegendItem(
-            color: Colors.BLUE_GRAY,
-            text: _networkDelayedReceivingAtClientMsg.toString()),
-        LegendItem(
-            color: Colors.GREY_GREEN,
-            text: _constantBitRatePlayOutAtClientMsg.toString()),
+        LegendItem(color: Colors.PINK_RED_2, text: _constantBitRateTransmissionMsg.toString()),
+        LegendItem(color: Colors.BLUE_GRAY, text: _networkDelayedReceivingAtClientMsg.toString()),
+        LegendItem(color: Colors.GREY_GREEN, text: _constantBitRatePlayOutAtClientMsg.toString()),
       ],
     );
 
@@ -442,10 +398,8 @@ class BufferingAnimationDrawable extends Drawable {
       cells: [
         CellSpec(row: 0, column: 0, drawable: _bitRateSlider.drawable),
         CellSpec(row: 0, column: 1, drawable: _meanNetworkRateSlider.drawable),
-        CellSpec(
-            row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
-        CellSpec(
-            row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
+        CellSpec(row: 1, column: 0, drawable: _playoutBufferSizeSlider.drawable),
+        CellSpec(row: 1, column: 1, drawable: _networkRateVarianceSlider.drawable),
         CellSpec(row: 0, column: 2, drawable: _legend),
         CellSpec(row: 1, column: 2, drawable: _interruptionCounterLabel),
       ],
@@ -474,10 +428,7 @@ class BufferingAnimationDrawable extends Drawable {
               maxLength: _MAX_SEED.toString().length,
               width: 80,
               value: _currentSeed.toString(),
-              filter: (toInsert) =>
-                  toInsert.runes.firstWhere((c) => !_numericalRunes.contains(c),
-                      orElse: () => -1) ==
-                  -1,
+              filter: (toInsert) => toInsert.runes.firstWhere((c) => !_numericalRunes.contains(c), orElse: () => -1) == -1,
               onChange: (value) {
                 int v = int.tryParse(value);
                 if (v != null) {
@@ -524,8 +475,7 @@ class BufferingAnimationDrawable extends Drawable {
         _savedSettingsComboBox = ComboBoxDrawable(
           model: SimpleComboBoxModel<BufferingAnimationConfiguration>(
             items: [
-              ComboBoxItem<BufferingAnimationConfiguration>(
-                  label: _newConfigurationMsg.toString(), obj: null),
+              ComboBoxItem<BufferingAnimationConfiguration>(label: _newConfigurationMsg.toString(), obj: null),
             ]..addAll(_loadConfigurations()),
           ),
         ),
@@ -546,12 +496,9 @@ class BufferingAnimationDrawable extends Drawable {
       ],
     );
 
-    _savedSettingsComboBox.model.select(
-        _savedSettingsComboBox.model.get(0)); // Select first item by default
-    _savedSettingsComboBoxModelChangeListener =
-        (event) => _onSavedSettingsComboBoxModelChanged(event);
-    _savedSettingsComboBox.model
-        .addChangeListener(_savedSettingsComboBoxModelChangeListener);
+    _savedSettingsComboBox.model.select(_savedSettingsComboBox.model.get(0)); // Select first item by default
+    _savedSettingsComboBoxModelChangeListener = (event) => _onSavedSettingsComboBoxModelChanged(event);
+    _savedSettingsComboBox.model.addChangeListener(_savedSettingsComboBoxModelChangeListener);
 
     changeCallback(null);
   }
@@ -559,8 +506,7 @@ class BufferingAnimationDrawable extends Drawable {
   @override
   void cleanup() {
     if (_savedSettingsComboBoxModelChangeListener != null) {
-      _savedSettingsComboBox.model
-          .removeChangeListener(_savedSettingsComboBoxModelChangeListener);
+      _savedSettingsComboBox.model.removeChangeListener(_savedSettingsComboBoxModelChangeListener);
     }
 
     _i18nService.removeLanguageLoadedListener(_languageLoadedListener);
@@ -571,8 +517,7 @@ class BufferingAnimationDrawable extends Drawable {
   /// What to do when the saved settings combo box model changes.
   void _onSavedSettingsComboBoxModelChanged(ComboBoxModelEvent event) {
     if (event.type == ComboBoxModelEventType.SELECTED) {
-      ComboBoxItem<BufferingAnimationConfiguration> selected =
-          _savedSettingsComboBox.model.selected;
+      ComboBoxItem<BufferingAnimationConfiguration> selected = _savedSettingsComboBox.model.selected;
 
       if (selected.obj == null) {
         // Is new configuration selected -> Only enable the save button
@@ -596,8 +541,7 @@ class BufferingAnimationDrawable extends Drawable {
       if (key.startsWith(_local_storage_key)) {
         result.add(ComboBoxItem<BufferingAnimationConfiguration>(
           label: keyToItemLabel(key),
-          obj: BufferingAnimationConfiguration.fromJson(
-              json.decode(_storageService.get(key))),
+          obj: BufferingAnimationConfiguration.fromJson(json.decode(_storageService.get(key))),
         ));
       }
     }
@@ -608,8 +552,7 @@ class BufferingAnimationDrawable extends Drawable {
   /// Save the current configuration in the currently selected combo box item.
   Future<void> _saveConfiguration() async {
     // Check whether the currently selected configuration is pointing to "new configuration" or a already existing one.
-    ComboBoxItem<BufferingAnimationConfiguration> selectedConfiguration =
-        _savedSettingsComboBox.model.selected;
+    ComboBoxItem<BufferingAnimationConfiguration> selectedConfiguration = _savedSettingsComboBox.model.selected;
     bool isNew = selectedConfiguration.obj == null;
 
     ComboBoxItem<BufferingAnimationConfiguration> item;
@@ -645,26 +588,21 @@ class BufferingAnimationDrawable extends Drawable {
 
   /// Ask for a configuration name.
   Future<String> _askForConfigurationName() async {
-    return await _dialogService
-        .prompt(_newConfigurationPromptMsg.toString())
-        .result();
+    return await _dialogService.prompt(_newConfigurationPromptMsg.toString()).result();
   }
 
-  String itemLabelToKey(String label) =>
-      label.replaceAll(new RegExp(r"\s+\b|\b\s"), "_");
+  String itemLabelToKey(String label) => label.replaceAll(new RegExp(r"\s+\b|\b\s"), "_");
 
   String keyToItemLabel(String key) {
     String labelKey = key.substring(_local_storage_key.length + 1);
     return labelKey.replaceAll("_", " ");
   }
 
-  String getKeyForItem(ComboBoxItem item) =>
-      "${_local_storage_key}.${itemLabelToKey(item.label)}";
+  String getKeyForItem(ComboBoxItem item) => "${_local_storage_key}.${itemLabelToKey(item.label)}";
 
   /// Restore the configuration in the currently selected combo box item.
   void _restoreConfiguration() {
-    BufferingAnimationConfiguration config =
-        _savedSettingsComboBox.model.selected.obj;
+    BufferingAnimationConfiguration config = _savedSettingsComboBox.model.selected.obj;
 
     _setConfiguration(
       seed: config.seed,
@@ -711,9 +649,7 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Get the currently set slow down factor.
-  int get _slowDownFactor => _speedSlider != null
-      ? _speedSlider.slider.value.toInt()
-      : _DEFAULT_SLOWDOWN_FACTOR;
+  int get _slowDownFactor => _speedSlider != null ? _speedSlider.slider.value.toInt() : _DEFAULT_SLOWDOWN_FACTOR;
 
   /// Create a slider input control.
   _SliderContainer _createSlider({
@@ -775,18 +711,14 @@ class BufferingAnimationDrawable extends Drawable {
 
     // Create network delayed series
     _networkDelayedPlottable = AnimatedPlottableSeries(
-      seriesGenerator: _networkDelayedSeriesGenerator(
-              secondsPerMTU, meanNetworkRate, networkRateVariance)
-          .iterator,
+      seriesGenerator: _networkDelayedSeriesGenerator(secondsPerMTU, meanNetworkRate, networkRateVariance).iterator,
       style: PlottableStyle(line: LineStyle(color: Colors.BLUE_GRAY)),
     );
     _plot.add(_networkDelayedPlottable);
 
     // Create client playout series
     _clientPlayOutPlottable = AnimatedPlottableSeries(
-      seriesGenerator:
-          _clientPlayOutSeriesGenerator(secondsPerMTU, playOutBufferSize)
-              .iterator,
+      seriesGenerator: _clientPlayOutSeriesGenerator(secondsPerMTU, playOutBufferSize).iterator,
       style: PlottableStyle(line: LineStyle(color: Colors.GREY_GREEN)),
     );
     _plot.add(_clientPlayOutPlottable);
@@ -810,14 +742,11 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Generator of the constant bit rate series.
-  Iterable<Tuple2<Iterable<Point<double>>, Duration>>
-      _constantBitRateSeriesGenerator(double secondsPerMTU) sync* {
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _constantBitRateSeriesGenerator(double secondsPerMTU) sync* {
     final double secondsPerMTUInSimulation = secondsPerMTU * _slowDownFactor;
-    final int millisecondsInSimulation =
-        (secondsPerMTUInSimulation * 1000).toInt();
+    final int millisecondsInSimulation = (secondsPerMTUInSimulation * 1000).toInt();
 
-    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)],
-        Duration(seconds: 0)); // Initial point
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
 
     double timeInSeconds = 0;
     double mtuCount = 0;
@@ -836,21 +765,18 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Generator of the network delayed series.
-  Iterable<Tuple2<Iterable<Point<double>>, Duration>>
-      _networkDelayedSeriesGenerator(double secondsPerMTU, int meanNetworkRate,
-          int networkRateVariance) sync* {
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _networkDelayedSeriesGenerator(
+      double secondsPerMTU, int meanNetworkRate, int networkRateVariance) sync* {
     final random = Random(_currentSeed);
 
-    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)],
-        Duration(seconds: 0)); // Initial point
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
 
     double mtuCount = 0;
     bool isFirst = true;
     num lastReceived = secondsPerMTU;
     while (true) {
       // Check if packet already sent, otherwise it cannot be received and we need to append additional time
-      bool readyToReceive =
-          _constantBitRatePlottable.generatedCount - 1 > mtuCount + 1;
+      bool readyToReceive = _constantBitRatePlottable.generatedCount - 1 > mtuCount + 1;
 
       double networkRate = meanNetworkRate.toDouble();
       if (networkRateVariance > 0) {
@@ -859,8 +785,7 @@ class BufferingAnimationDrawable extends Drawable {
 
       double timeForPacket = _MTU / networkRate;
       if (!readyToReceive) {
-        double timeToWait =
-            _constantBitRatePlottable.next.first.x - lastReceived;
+        double timeToWait = _constantBitRatePlottable.next.first.x - lastReceived;
         timeForPacket += timeToWait;
       }
 
@@ -883,16 +808,12 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Generator for the client playout series.
-  Iterable<Tuple2<Iterable<Point<double>>, Duration>>
-      _clientPlayOutSeriesGenerator(
-          double secondsPerMTU, int bufferSize) sync* {
+  Iterable<Tuple2<Iterable<Point<double>>, Duration>> _clientPlayOutSeriesGenerator(double secondsPerMTU, int bufferSize) sync* {
     final int neededBufferedPackets = bufferSize;
 
-    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)],
-        Duration(seconds: 0)); // Initial point
+    yield Tuple2([Point<double>(0, 0), Point<double>(0, 0)], Duration(seconds: 0)); // Initial point
 
-    bool playingOut =
-        false; // Whether the streamed data is currently played out at client or buffering
+    bool playingOut = false; // Whether the streamed data is currently played out at client or buffering
     int playedOut = 0; // Number of packets played out.
     double lastReceived = 0;
     double lastPlayedOut = 0;
@@ -901,9 +822,7 @@ class BufferingAnimationDrawable extends Drawable {
       int receivedPackets = _networkDelayedPlottable.generatedCount - 2;
       int buffered = receivedPackets - playedOut;
 
-      final bool waitForPacket = !playingOut ||
-          buffered <= 0 &&
-              nextPacketReceivedTime > lastPlayedOut + secondsPerMTU;
+      final bool waitForPacket = !playingOut || buffered <= 0 && nextPacketReceivedTime > lastPlayedOut + secondsPerMTU;
       if (waitForPacket) {
         _ensureVisibleInPlot(nextPacketReceivedTime, 0);
 
@@ -913,59 +832,32 @@ class BufferingAnimationDrawable extends Drawable {
           playingOut = false;
           _onPlayOutInterrupted(interruptionTime, lastPlayedOut, playedOut);
           yield Tuple2(
-              [
-                Point<double>(nextPacketReceivedTime, playedOut.toDouble()),
-                Point<double>(nextPacketReceivedTime, playedOut.toDouble())
-              ],
-              Duration(
-                  milliseconds: ((nextPacketReceivedTime - lastPlayedOut) *
-                          _slowDownFactor *
-                          1000)
-                      .toInt()));
+              [Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
+              Duration(milliseconds: ((nextPacketReceivedTime - lastPlayedOut) * _slowDownFactor * 1000).toInt()));
           lastReceived = nextPacketReceivedTime;
         } else {
           if (buffered + 1 >= neededBufferedPackets) {
             playingOut = true;
-            yield Tuple2(
-                [
-                  Point<double>(nextPacketReceivedTime, playedOut.toDouble()),
-                  Point<double>(
-                      nextPacketReceivedTime, (++playedOut).toDouble())
-                ],
-                Duration(
-                    milliseconds: ((nextPacketReceivedTime - lastReceived) *
-                            _slowDownFactor *
-                            1000)
-                        .toInt()));
+            yield Tuple2([
+              Point<double>(nextPacketReceivedTime, playedOut.toDouble()),
+              Point<double>(nextPacketReceivedTime, (++playedOut).toDouble())
+            ], Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _slowDownFactor * 1000).toInt()));
             lastReceived = nextPacketReceivedTime;
             lastPlayedOut = nextPacketReceivedTime;
           } else {
             yield Tuple2(
-                [
-                  Point<double>(nextPacketReceivedTime, playedOut.toDouble()),
-                  Point<double>(nextPacketReceivedTime, playedOut.toDouble())
-                ],
-                Duration(
-                    milliseconds: ((nextPacketReceivedTime - lastReceived) *
-                            _slowDownFactor *
-                            1000)
-                        .toInt()));
+                [Point<double>(nextPacketReceivedTime, playedOut.toDouble()), Point<double>(nextPacketReceivedTime, playedOut.toDouble())],
+                Duration(milliseconds: ((nextPacketReceivedTime - lastReceived) * _slowDownFactor * 1000).toInt()));
             lastReceived = nextPacketReceivedTime;
           }
         }
       } else {
         // Playing out buffered packet.
         _ensureVisibleInPlot(lastPlayedOut + secondsPerMTU, 0);
-        yield Tuple2(
-            [
-              Point<double>(
-                  lastPlayedOut + secondsPerMTU, playedOut.toDouble()),
-              Point<double>(
-                  lastPlayedOut + secondsPerMTU, (++playedOut).toDouble())
-            ],
-            Duration(
-                milliseconds:
-                    (secondsPerMTU * _slowDownFactor * 1000).toInt()));
+        yield Tuple2([
+          Point<double>(lastPlayedOut + secondsPerMTU, playedOut.toDouble()),
+          Point<double>(lastPlayedOut + secondsPerMTU, (++playedOut).toDouble())
+        ], Duration(milliseconds: (secondsPerMTU * _slowDownFactor * 1000).toInt()));
         lastPlayedOut += secondsPerMTU;
       }
     }
@@ -983,24 +875,16 @@ class BufferingAnimationDrawable extends Drawable {
   }
 
   /// Called when the play out at client is interrupted.
-  void _onPlayOutInterrupted(
-      double interruptionTime, double lastPlayedOutTime, int playedOut) {
+  void _onPlayOutInterrupted(double interruptionTime, double lastPlayedOutTime, int playedOut) {
     final completer = Completer<void>();
     _interruptOperation = completer;
-    Future.delayed(Duration(
-            milliseconds: ((interruptionTime - lastPlayedOutTime) *
-                    _slowDownFactor *
-                    1000)
-                .toInt()))
-        .then(
+    Future.delayed(Duration(milliseconds: ((interruptionTime - lastPlayedOutTime) * _slowDownFactor * 1000).toInt())).then(
       (_) {
         if (!completer.isCompleted) {
-          _playOutInterruptions
-              .add(Point<double>(interruptionTime, playedOut.toDouble()));
+          _playOutInterruptions.add(Point<double>(interruptionTime, playedOut.toDouble()));
           _plot.invalidate();
 
-          _interruptionCounterLabel.text = _interruptionsMsg.toString() +
-              ": ${_playOutInterruptions.length}";
+          _interruptionCounterLabel.text = _interruptionsMsg.toString() + ": ${_playOutInterruptions.length}";
         }
       },
     );
@@ -1022,8 +906,7 @@ class BufferingAnimationDrawable extends Drawable {
 
   @override
   void draw() {
-    _controlsLayout.render(ctx, lastPassTimestamp,
-        x: max(0, (size.width - _controlsLayout.size.width) / 2));
+    _controlsLayout.render(ctx, lastPassTimestamp, x: max(0, (size.width - _controlsLayout.size.width) / 2));
 
     double graphSpacing = 10 * window.devicePixelRatio;
 
@@ -1031,20 +914,15 @@ class BufferingAnimationDrawable extends Drawable {
       x: 0,
       y: _controlsLayout.size.height + graphSpacing,
       width: size.width,
-      height: size.height -
-          _controlsLayout.size.height -
-          _bottomLayout.size.height -
-          graphSpacing * 2,
+      height: size.height - _controlsLayout.size.height - _bottomLayout.size.height - graphSpacing * 2,
     );
 
     _bottomLayout.render(ctx, lastPassTimestamp,
-        x: max(0, (size.width - _bottomLayout.size.width) / 2),
-        y: size.height - _bottomLayout.size.height);
+        x: max(0, (size.width - _bottomLayout.size.width) / 2), y: size.height - _bottomLayout.size.height);
   }
 
   /// Get the maximum value of the passed values.
-  double maxValue(List<double> values) =>
-      values.reduce((currentMax, value) => max(currentMax, value));
+  double maxValue(List<double> values) => values.reduce((currentMax, value) => max(currentMax, value));
 
   /// Draw the result graph.
   void _drawGraph({
@@ -1070,12 +948,9 @@ class BufferingAnimationDrawable extends Drawable {
 
   @override
   void update(num timestamp) {
-    if (_constantBitRatePlottable != null) if (_constantBitRatePlottable
-        .requestUpdate(timestamp)) _plot.invalidate();
-    if (_networkDelayedPlottable != null) if (_networkDelayedPlottable
-        .requestUpdate(timestamp)) _plot.invalidate();
-    if (_clientPlayOutPlottable != null) if (_clientPlayOutPlottable
-        .requestUpdate(timestamp)) _plot.invalidate();
+    if (_constantBitRatePlottable != null) if (_constantBitRatePlottable.requestUpdate(timestamp)) _plot.invalidate();
+    if (_networkDelayedPlottable != null) if (_networkDelayedPlottable.requestUpdate(timestamp)) _plot.invalidate();
+    if (_clientPlayOutPlottable != null) if (_clientPlayOutPlottable.requestUpdate(timestamp)) _plot.invalidate();
   }
 }
 

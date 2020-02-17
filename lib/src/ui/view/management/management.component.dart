@@ -14,7 +14,10 @@ import 'package:angular_components/material_select/material_select_item.dart';
 import 'package:angular_components/material_spinner/material_spinner.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
+import 'package:hm_animations/src/util/options/save_options.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Factory for entities.
 typedef T EntityFactory<T>();
@@ -108,12 +111,12 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   /// Listener listening for language changes.
   LanguageLoadedListener _languageLoadedListener;
 
-  Message _errorLabel;
-  Message _saveLabel;
-  Message _savedLabel;
-  Message _deleteLabel;
-  Message _deletedLabel;
-  Message _emptyNameLabel;
+  IdMessage<String> _errorLabel;
+  IdMessage<String> _saveLabel;
+  IdMessage<String> _savedLabel;
+  IdMessage<String> _deleteLabel;
+  IdMessage<String> _deletedLabel;
+  IdMessage<String> _emptyNameLabel;
 
   /// Create new management component.
   ManagementComponent(
@@ -121,7 +124,8 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     this._i18n,
     this._componentLoader,
   ) {
-    _labelFactory = (entity) => entity != null && entity.toString() != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
+    _labelFactory = (entity) =>
+        entity != null && entity.toString() != null && entity.toString().length > 0 ? entity.toString() : _emptyNameLabel.toString();
   }
 
   @override
@@ -266,11 +270,31 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
 
   /// Select the passed [entity].
   void selectEntity(T entity) {
-    _selectedEntity = entity;
-
-    if (_selectedEntity != null) {
-      _contentComponent.setEntity(_selectedEntity);
+    if (entity == _selectedEntity) {
+      return;
     }
+
+    _contentComponent.checkIfUnsaved().then((option) async {
+      if (_selectedEntity != null) {
+        switch (option) {
+          case SaveOption.SAVE:
+            await saveEntity(_selectedEntity, reselect: false);
+            break;
+          case SaveOption.LOSE:
+            break;
+          case SaveOption.CANCEL:
+            return;
+          default:
+            throw Exception("Save option unknown");
+        }
+      }
+
+      if (entity != null) {
+        await _contentComponent.setEntity(entity);
+      }
+      _selectedEntity = entity;
+      _cd.markForCheck();
+    });
   }
 
   /// Create a new entity.
@@ -317,7 +341,7 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
   }
 
   /// Save the passed [entity].
-  Future<void> saveEntity(T entity) async {
+  Future<void> saveEntity(T entity, {bool reselect = true}) async {
     if (_contentComponent == null) {
       return;
     }
@@ -331,7 +355,9 @@ class ManagementComponent<T, C extends ManagementComponentContent> implements On
     T saved = await _contentComponent.onSave();
     if (saved != null) {
       entities[index] = saved;
-      selectEntity(saved);
+      if (reselect) {
+        selectEntity(saved);
+      }
 
       _recentlySaved = true;
       Future.delayed(_waitDuration).then((_) {

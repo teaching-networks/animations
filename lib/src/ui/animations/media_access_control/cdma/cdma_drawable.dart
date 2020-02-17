@@ -15,6 +15,7 @@ import 'package:hm_animations/src/ui/canvas/animation/v2/input/text/input_drawab
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/misc/image/image_info.dart';
 import 'package:hm_animations/src/ui/misc/image/images.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:tuple/tuple.dart';
 import 'package:vector_math/vector_math.dart' as vector;
 
@@ -108,7 +109,7 @@ class CDMADrawable extends Drawable {
   final I18nService _i18n;
   LanguageLoadedListener _languageLoadedListener;
 
-  Message _randomErrorsMsg;
+  IdMessage<String>_randomErrorsMsg;
 
   /// Create drawable.
   CDMADrawable(this._i18n) {

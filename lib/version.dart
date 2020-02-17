@@ -5,5 +5,5 @@
 
 class Version {
   /// Current application version.
-  static const String version = "v2.4.0";
+  static const String version = "v2.4.1";
 }

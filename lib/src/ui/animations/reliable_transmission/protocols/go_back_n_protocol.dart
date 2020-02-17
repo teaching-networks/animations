@@ -9,6 +9,7 @@ import 'package:hm_animations/src/ui/animations/reliable_transmission/packet/pac
 import 'package:hm_animations/src/ui/animations/reliable_transmission/protocols/reliable_transmission_protocol.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/transmission_window.dart';
 import 'package:hm_animations/src/ui/animations/reliable_transmission/window/window_space.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Popular implementation of a reliable transmission protocol, the Go-Back-N Protocol.
 class GoBackNProtocol extends ReliableTransmissionProtocol {
@@ -23,14 +24,14 @@ class GoBackNProtocol extends ReliableTransmissionProtocol {
 
   I18nService _i18n;
 
-  Message _senderRetransmitts1;
-  Message _senderRetransmitts2;
-  Message _receiverReceivedOutOfOrder1;
-  Message _receiverReceivedOutOfOrder2;
-  Message _receiverReceivedInOrder1;
-  Message _receiverReceivedInOrder2;
-  Message _senderReceivedResetTimeout1;
-  Message _senderReceivedResetTimeout2;
+  IdMessage<String> _senderRetransmitts1;
+  IdMessage<String> _senderRetransmitts2;
+  IdMessage<String> _receiverReceivedOutOfOrder1;
+  IdMessage<String> _receiverReceivedOutOfOrder2;
+  IdMessage<String> _receiverReceivedInOrder1;
+  IdMessage<String> _receiverReceivedInOrder2;
+  IdMessage<String> _senderReceivedResetTimeout1;
+  IdMessage<String> _senderReceivedResetTimeout2;
 
   bool isCumulativeACKEnabled = true;
 

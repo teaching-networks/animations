@@ -9,6 +9,7 @@ import 'package:hm_animations/src/router/route_paths.dart' as paths;
 import 'package:hm_animations/src/ui/view/animation-view/default/default_animation_view_component.template.dart' as defaultAnimationComp;
 import 'package:hm_animations/src/ui/view/animation-view/detail/detail_animation_view_component.template.dart' as detailAnimationComp;
 import 'package:hm_animations/src/ui/view/group-management/group_management_component.template.dart' as groupManagementComp;
+import 'package:hm_animations/src/ui/view/settings/settings_component.template.dart' as settingsManagementComp;
 import 'package:hm_animations/src/ui/view/group_list/group_list.component.template.dart' as groupListComponent;
 import 'package:hm_animations/src/ui/view/animation_list/animation_list.component.template.dart' as animationListComponent;
 import 'package:hm_animations/src/ui/view/notfound/notfound_component.template.dart' as notFoundComp;
@@ -53,6 +54,11 @@ class Routes {
     component: groupManagementComp.GroupManagementComponentNgFactory,
   );
 
+  static final RouteDefinition _settingsManagement = new RouteDefinition(
+    routePath: paths.settingsManagement,
+    component: settingsManagementComp.SettingsComponentNgFactory,
+  );
+
   static final RouteDefinition _notFound = new RouteDefinition(
     routePath: paths.notFound,
     component: notFoundComp.NotFoundComponentNgFactory,
@@ -74,6 +80,8 @@ class Routes {
 
   RouteDefinition get animationManagement => _animationManagement;
 
+  RouteDefinition get settingsManagement => _settingsManagement;
+
   final List<RouteDefinition> all = [
     _groups,
     _group,
@@ -82,6 +90,7 @@ class Routes {
     _userManagement,
     _groupManagement,
     _animationManagement,
+    _settingsManagement,
     _notFound,
   ];
 }

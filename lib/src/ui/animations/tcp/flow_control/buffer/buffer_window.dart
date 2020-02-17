@@ -8,7 +8,6 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
 import 'package:hm_animations/src/ui/canvas/progress/bar/horizontal_progress_bar.dart';
@@ -18,14 +17,15 @@ import 'package:hm_animations/src/ui/canvas/progress/lazy_progress/lazy_progress
 import 'package:hm_animations/src/ui/canvas/shapes/bubble/bubble.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 abstract class BufferWindow extends CanvasDrawable with CanvasPausableMixin {
   final int dataSize;
   final int bufferSize;
   final int speed;
 
-  final Message dataLabel;
-  final Message bufferLabel;
+  final IdMessage<String> dataLabel;
+  final IdMessage<String> bufferLabel;
 
   /// Progress of the data bar.
   LazyProgress dataProgress;

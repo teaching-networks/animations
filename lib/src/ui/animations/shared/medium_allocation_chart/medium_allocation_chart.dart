@@ -7,12 +7,12 @@ import 'dart:html';
 
 import 'dart:math';
 
-import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/ui/animations/shared/medium_allocation_chart/change_marker.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_drawable.dart';
 import 'package:hm_animations/src/ui/canvas/util/color.dart';
 import 'package:hm_animations/src/ui/canvas/util/colors.dart';
 import 'package:hm_animations/src/ui/canvas/canvas_pausable.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 import 'package:meta/meta.dart';
 
 /// Chart visualizing a mediums allocation in time.
@@ -30,10 +30,10 @@ class MediumAllocationChart extends CanvasDrawable with CanvasPausableMixin {
   final String id;
 
   /// Label of the value bar.
-  final Message valueBarLabel;
+  final IdMessage<String> valueBarLabel;
 
   /// Label of the status bar.
-  final Message statusBarLabel;
+  final IdMessage<String> statusBarLabel;
 
   /// State changes over time.
   List<ChangeMarker<Color>> _stateChanges = List<ChangeMarker<Color>>();

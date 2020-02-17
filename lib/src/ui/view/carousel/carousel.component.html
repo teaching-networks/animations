@@ -1,0 +1,17 @@
+<div class="carousel">
+    <div class="carousel-navigation prev">
+        <material-button icon raised class="whitened-button" (trigger)="prev()">
+            <material-icon icon="keyboard_arrow_left"></material-icon>
+        </material-button>
+    </div>
+    <ul>
+        <li *ngFor="let item of items; let i = index">
+            <carousel-item-component [item]="item" [componentFactory]="itemComponentFactory" [index]="i"></carousel-item-component>
+        </li>
+    </ul>
+    <div class="carousel-navigation next">
+        <material-button icon raised class="whitened-button" (trigger)="next()">
+            <material-icon icon="keyboard_arrow_right"></material-icon>
+        </material-button>
+    </div>
+</div>

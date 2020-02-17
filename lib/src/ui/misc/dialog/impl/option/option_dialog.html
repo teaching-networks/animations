@@ -1,0 +1,23 @@
+<material-dialog info class="dialog-base info-dialog">
+
+    <div header>
+        <material-button icon (trigger)="close()">
+            <material-icon icon="close"></material-icon>
+        </material-button>
+
+        <h1>{{ instance.data.title }}</h1>
+    </div>
+
+    <p>
+        {{ instance.data.message }}
+    </p>
+
+    <material-list class="option-list">
+        <material-list-item *ngFor="let option of instance.data.options"
+                            class="option-item"
+                            (trigger)="onOptionSelected(option)">
+            {{ option.toString() }}
+        </material-list-item>
+    </material-list>
+
+</material-dialog>

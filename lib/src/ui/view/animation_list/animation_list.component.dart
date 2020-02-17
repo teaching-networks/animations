@@ -19,10 +19,15 @@ import 'package:hm_animations/src/services/group_service/group_service.dart';
 import 'package:hm_animations/src/services/group_service/model/group.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/services/settings_service/settings_service.dart';
 import 'package:hm_animations/src/ui/animations/animation_descriptor.dart';
 import 'package:hm_animations/src/ui/animations/animation_property_keys.dart';
 import 'package:hm_animations/src/ui/misc/directives/restricted_directive.dart';
+import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.dart';
+import 'package:hm_animations/src/ui/view/carousel/carousel.component.dart';
+import 'package:hm_animations/src/ui/view/settings/settings_component.dart';
 import 'package:hm_animations/src/util/name_util.dart';
+import 'package:hm_animations/src/ui/view/animation_list/carousel/animation_carousel_item_visualizer.component.template.dart' as $template;
 
 /// Component listing all available animations.
 @Component(
@@ -40,7 +45,8 @@ import 'package:hm_animations/src/util/name_util.dart';
     MaterialToggleComponent,
     MaterialSpinnerComponent,
     MaterialIconComponent,
-    MaterialButtonComponent
+    MaterialButtonComponent,
+    CarouselComponent,
   ],
   pipes: [
     I18nPipe,
@@ -61,6 +67,9 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
 
   /// Get authentication information from this service.
   final AuthenticationService _authService;
+
+  /// Service to get settings from.
+  final SettingsService _settingsService;
 
   /// State of the component.
   _CompState state = _CompState.LOADING;
@@ -88,6 +97,9 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   /// Lookup for animations.
   Map<int, Animation> _animationLookup;
 
+  /// Whether the carousel should be shown.
+  bool showCarousel = false;
+
   /// Create component.
   AnimationListComponent(
     this._cd,
@@ -95,14 +107,15 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
     this._groupService,
     this._animationService,
     this._authService,
+    this._settingsService,
   );
 
   @override
   void ngOnInit() {
     _languageLoadedListener = (_) {
-      _cd.markForCheck();
-
       _loadAnimationProperties();
+      _updateAnimationCarouselItems();
+      _cd.markForCheck();
     };
     _i18n.addLanguageLoadedListener(_languageLoadedListener);
     _loadAnimationProperties();
@@ -112,6 +125,18 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
       _cd.markForCheck();
     });
     _isLoggedIn = _authService.isLoggedIn;
+
+    _settingsService.read<bool>("carousel.enabled").then((v) {
+      bool show = SettingsComponent.defaultSettings["carousel.enabled"];
+      if (v != null) {
+        show = v.value;
+      }
+
+      if (show != showCarousel) {
+        showCarousel = show;
+        _cd.markForCheck();
+      }
+    });
   }
 
   @override
@@ -195,11 +220,24 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
 
       await _loadAnimations();
 
+      _updateAnimationCarouselItems();
+
       state = _CompState.SUCCESS;
     } catch (e) {
       state = _CompState.ERROR;
     } finally {
       _cd.markForCheck();
+    }
+  }
+
+  void _updateAnimationCarouselItems() {
+    if (animationDescriptors != null) {
+//      animationCarouselItems = animationDescriptorsToShow.map((desc) => AnimationCarouselItem(
+//            desc.previewImagePath,
+//            getAnimationName(desc),
+//            getAnimationDescription(desc),
+//            animationUrl(desc),
+//          ));
     }
   }
 
@@ -288,6 +326,10 @@ class AnimationListComponent implements OnInit, OnDestroy, OnActivate {
   _CompState get errorState => _CompState.ERROR;
 
   _CompState get successState => _CompState.SUCCESS;
+
+  /// Get the component factory of the animation carousel item.
+  ComponentFactory<AnimationCarouselItemVisualizerComponent> get itemComponentFactory =>
+      $template.AnimationCarouselItemVisualizerComponentNgFactory;
 }
 
 /// State of the component.

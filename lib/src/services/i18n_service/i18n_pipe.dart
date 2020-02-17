@@ -5,6 +5,7 @@
 
 import 'package:angular/angular.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /**
  * I18n pipe used for easy access to the translation service.
@@ -25,5 +26,5 @@ class I18nPipe extends PipeTransform {
   /**
    * Transform method is called by the pipe.
    */
-  Message transform(String key) => _i18n.get(key);
+  IdMessage<String> transform(String key) => _i18n.get(key);
 }

@@ -9,7 +9,12 @@ import 'package:hm_animations/src/services/i18n_service/i18n_pipe.dart';
 import 'package:hm_animations/src/services/i18n_service/i18n_service.dart';
 import 'package:hm_animations/src/services/user_service/model/user.dart';
 import 'package:hm_animations/src/services/user_service/user_service.dart';
+import 'package:hm_animations/src/ui/misc/dialog/dialog_service.dart';
+import 'package:hm_animations/src/ui/misc/dialog/impl/info/info_dialog_data.dart';
+import 'package:hm_animations/src/ui/misc/dialog/impl/option/option_dialog_data.dart';
 import 'package:hm_animations/src/ui/view/management/content/management_component_content.dart';
+import 'package:hm_animations/src/util/options/save_options.dart';
+import 'package:hm_animations/src/util/str/message.dart';
 
 /// Component shows content form for editing/creating users.
 @Component(
@@ -35,19 +40,26 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
   /// Service managing users.
   final UserService _userService;
 
+  /// Service displaying dialogs.
+  final DialogService _dialogService;
+
+  /// Original user which may be modified.
+  User _originalUser;
+
   /// User to currently display.
   User _user;
 
   /// Listener emitting events when the language has been changed.
   LanguageLoadedListener _languageChangedListener;
 
-  Message _passwordNotChangedLabel;
+  IdMessage<String> _passwordNotChangedLabel;
 
   /// Create component.
   UserManagementContentComponent(
     this._cd,
     this._i18n,
     this._userService,
+    this._dialogService,
   );
 
   @override
@@ -79,6 +91,17 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
         return false;
       }
 
+      String promptUsername = await _dialogService.prompt(_i18n.get("user-management.delete.prompt").toString()).result();
+      if (promptUsername == null) {
+        return false;
+      } else if (promptUsername != user.name) {
+        await _dialogService.info(InfoDialogData(
+          title: _i18n.get("user-management.error-message").toString(),
+          message: _i18n.get("user-management.delete.error").toString(),
+        ));
+        return false;
+      }
+
       return await _userService.deleteUser(user.id);
     } else {
       return true;
@@ -89,11 +112,24 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
   Future<User> onSave() async {
     if (user.id == null) {
       // User does not yet exist in database -> Create.
-      return await _userService.createUser(User(
+      final newUser = await _userService.createUser(User(
         -1,
         _user.name,
         _user.password,
       ));
+
+      if (newUser == null) {
+        return null;
+      }
+
+      _originalUser = newUser;
+      _user = User(
+        newUser.id,
+        newUser.name,
+        newUser.password,
+      );
+
+      return newUser;
     } else {
       if (user.password != null && user.password.isEmpty) {
         user.password = null;
@@ -103,6 +139,13 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
       bool success = await _userService.updateUser(user);
 
       if (success) {
+        _originalUser = user;
+        _user = User(
+          user.id,
+          user.name,
+          user.password,
+        );
+
         return user;
       } else {
         return null;
@@ -111,8 +154,38 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
   }
 
   @override
-  void setEntity(User entity) {
-    _user = entity;
+  Future<SaveOption> checkIfUnsaved() async {
+    if (!isModified) {
+      return SaveOption.LOSE;
+    }
+
+    final option = await _dialogService
+        .option(OptionDialogData(
+          title: _i18n.get("user-management.unsaved-changes"),
+          message: _i18n.get("user-management.unsaved-changes.msg"),
+          options: [
+            LabeledOption(_i18n.get("user-management.unsaved-changes.save"), SaveOption.SAVE),
+            LabeledOption(_i18n.get("user-management.unsaved-changes.lose"), SaveOption.LOSE),
+            LabeledOption(_i18n.get("user-management.unsaved-changes.keep-editing"), SaveOption.CANCEL),
+          ],
+        ))
+        .result();
+
+    if (option == null) {
+      return SaveOption.CANCEL;
+    } else {
+      return option.value;
+    }
+  }
+
+  @override
+  Future<void> setEntity(User entity) async {
+    _originalUser = entity;
+    _user = User(
+      entity.id,
+      entity.name,
+      entity.password,
+    );
 
     _cd.markForCheck();
   }
@@ -125,4 +198,10 @@ class UserManagementContentComponent implements ManagementComponentContent<User>
 
   /// Label of the password field.
   String get passwordLabel => isEditing ? _passwordNotChangedLabel.toString() : "";
+
+  /// Whether the current user has been modified.
+  bool get isModified =>
+      _user != null &&
+      _originalUser != null &&
+      (!isEditing || _originalUser.id != _user.id || _originalUser.name != _user.name || _originalUser.password != _user.password);
 }
